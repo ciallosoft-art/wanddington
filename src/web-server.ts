@@ -30,6 +30,7 @@ import { refineSkill } from "./web/skill-refine.js";
 import { seedFromProtocol, extractAndStoreKg, queryNeighbourhood, kgStats } from "./web/knowledge-graph.js";
 import { applyNegativeFilter } from "./web/negative-filter.js";
 import { getPhenotypeProfile } from "./web/phenotype-mapper.js";
+import { rankGenes } from "./web/gene-ranker.js";
 
 function readFrontendTemplate(appRoot: string): string {
 	const distPath = resolve(appRoot, "dist", "web", "index.html");
@@ -493,6 +494,27 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 		try {
 			const profile = await getPhenotypeProfile(gene);
 			res.end(JSON.stringify(profile));
+		} catch (err) {
+			res.writeHead(500);
+			res.end(JSON.stringify({ error: (err as Error).message }));
+		}
+		return;
+	}
+
+	// POST /api/gene-select — G1 GeneRanker
+	if (path === "/api/gene-select" && method === "POST") {
+		const body = await readBody(req) as {
+			dataset?: string;
+			exclude_genes?: string[];
+			n?: number;
+		};
+		try {
+			const ranked = await rankGenes({
+				dataset:       body.dataset,
+				exclude_genes: body.exclude_genes,
+				n:             body.n,
+			});
+			res.end(JSON.stringify(ranked));
 		} catch (err) {
 			res.writeHead(500);
 			res.end(JSON.stringify({ error: (err as Error).message }));

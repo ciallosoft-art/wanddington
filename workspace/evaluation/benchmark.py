@@ -24,6 +24,10 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
+# G1 GeneRanker (Phase 1)
+sys.path.insert(0, str(Path(__file__).parent))
+from gene_ranker import waddington_ranker as _waddington_ranker
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -282,24 +286,8 @@ def score_guided_ranker(dataset_name: str, batch_size: int) -> RankerFn:
 
 
 def waddington_ranker_stub(batch_size: int) -> RankerFn:
-    """
-    Waddington GeneRanker stub (G1 not yet implemented).
-    Currently falls back to random; will be replaced with full GeneRanker in G1.
-
-    Future signals to integrate:
-      - SKILL library: prioritise genes with success_rate >= 0.7
-      - NegativeFilter: exclude genes with verdict == "true_negative"
-      - KG evidence: boost genes with existing kg_edges
-      - Hypothesis library: prioritise genes linked to speculative hypotheses
-      - STRING PPI: boost genes adjacent to known hits
-      - MyGene.info: prioritise genes in target pathway
-    """
-    _random = random_ranker(batch_size)
-
-    def _ranker(universe: list[str], already_selected: list[str], round_num: int) -> list[str]:
-        # TODO (G1): replace with actual signal-weighted scoring
-        return _random(universe, already_selected, round_num)
-    return _ranker
+    """Kept for backwards-compat; use waddington_ranker instead."""
+    return _waddington_ranker("", batch_size)
 
 # ---------------------------------------------------------------------------
 # Reporting
@@ -337,7 +325,7 @@ def run_all(
     rankers: dict[str, Callable[[str, int], RankerFn]] = {
         "random":      lambda ds, bs: random_ranker(bs),
         "oracle":      lambda ds, bs: score_guided_ranker(ds, bs),
-        "waddington":  lambda ds, bs: waddington_ranker_stub(bs),
+        "waddington":  lambda ds, bs: _waddington_ranker(ds, bs, verbose=True),
     }
     active_rankers = rankers if ranker_name == "all" else {ranker_name: rankers[ranker_name]}
 
