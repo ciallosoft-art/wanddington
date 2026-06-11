@@ -31,6 +31,7 @@ import { seedFromProtocol, extractAndStoreKg, queryNeighbourhood, kgStats } from
 import { applyNegativeFilter } from "./web/negative-filter.js";
 import { getPhenotypeProfile } from "./web/phenotype-mapper.js";
 import { rankGenes } from "./web/gene-ranker.js";
+import { planExperiments } from "./web/experiment-planner.js";
 
 function readFrontendTemplate(appRoot: string): string {
 	const distPath = resolve(appRoot, "dist", "web", "index.html");
@@ -494,6 +495,36 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 		try {
 			const profile = await getPhenotypeProfile(gene);
 			res.end(JSON.stringify(profile));
+		} catch (err) {
+			res.writeHead(500);
+			res.end(JSON.stringify({ error: (err as Error).message }));
+		}
+		return;
+	}
+
+	// POST /api/experiment-plan — G2 ExperimentPlanner
+	if (path === "/api/experiment-plan" && method === "POST") {
+		const body = await readBody(req) as {
+			dataset?: string;
+			total_budget?: number;
+			batch_size?: number;
+			rounds?: number;
+			explore_ratio?: number;
+		};
+		if (!body.total_budget || body.total_budget < 1) {
+			res.writeHead(400);
+			res.end(JSON.stringify({ error: "total_budget is required and must be >= 1" }));
+			return;
+		}
+		try {
+			const plan = await planExperiments({
+				dataset:       body.dataset,
+				total_budget:  body.total_budget,
+				batch_size:    body.batch_size,
+				rounds:        body.rounds,
+				explore_ratio: body.explore_ratio,
+			});
+			res.end(JSON.stringify(plan));
 		} catch (err) {
 			res.writeHead(500);
 			res.end(JSON.stringify({ error: (err as Error).message }));
