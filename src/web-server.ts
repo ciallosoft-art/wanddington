@@ -29,6 +29,7 @@ import { crystalliseSkill, listSkills, findMatchingSkill, formatSkillContext } f
 import { refineSkill } from "./web/skill-refine.js";
 import { seedFromProtocol, extractAndStoreKg, queryNeighbourhood, kgStats } from "./web/knowledge-graph.js";
 import { applyNegativeFilter } from "./web/negative-filter.js";
+import { getPhenotypeProfile } from "./web/phenotype-mapper.js";
 
 function readFrontendTemplate(appRoot: string): string {
 	const distPath = resolve(appRoot, "dist", "web", "index.html");
@@ -482,6 +483,20 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 		}
 		const result = applyNegativeFilter(body.gene, body.metrics, body.rfs, body.failure ?? null);
 		res.end(JSON.stringify(result));
+		return;
+	}
+
+	// GET /api/gene/:gene/phenotypes — G4 PhenotypeMapper
+	const mPhenotype = path.match(/^\/api\/gene\/([^/]+)\/phenotypes$/);
+	if (mPhenotype && method === "GET") {
+		const gene = decodeURIComponent(mPhenotype[1]!).toUpperCase();
+		try {
+			const profile = await getPhenotypeProfile(gene);
+			res.end(JSON.stringify(profile));
+		} catch (err) {
+			res.writeHead(500);
+			res.end(JSON.stringify({ error: (err as Error).message }));
+		}
 		return;
 	}
 
