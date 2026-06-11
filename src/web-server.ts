@@ -13,6 +13,7 @@ import { ensureSupportedNodeVersion } from "./system/node-version.js";
 import { resolveAllExecutables } from "./system/executables.js";
 import { openDb, dbListConvs, dbCreateConv, dbUpdateConv, dbDeleteConv, dbUpsertMsg,
          dbListExperiments, dbUpsertExperiment, dbDeleteExperiment, dbUpdateExperimentRFS,
+         dbUpdateExperimentFilterVerdict,
          dbUpsertSummary, dbListSummaries,
          dbIndexFts, dbFtsSearch, dbUpsertEmbedding, dbLoadEmbeddings } from "./web/db.js";
 import { extractExperiment, buildContextPrefix } from "./web/extract.js";
@@ -27,6 +28,7 @@ import { classifyFailure } from "./web/failure.js";
 import { crystalliseSkill, listSkills, findMatchingSkill, formatSkillContext } from "./web/skills.js";
 import { refineSkill } from "./web/skill-refine.js";
 import { seedFromProtocol, extractAndStoreKg, queryNeighbourhood, kgStats } from "./web/knowledge-graph.js";
+import { applyNegativeFilter } from "./web/negative-filter.js";
 
 function readFrontendTemplate(appRoot: string): string {
 	const distPath = resolve(appRoot, "dist", "web", "index.html");
@@ -141,6 +143,7 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 			notes:   null,
 			rfs_json: null,
 			failure_json: null,
+			filter_verdict_json: null,
 		});
 		res.writeHead(201);
 		res.end(JSON.stringify({ ok: true, experiment: exp }));
@@ -167,6 +170,7 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 				notes:   null,
 				rfs_json: null,
 				failure_json: null,
+				filter_verdict_json: null,
 			});
 		}
 
@@ -209,6 +213,20 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 
 			computeRFS(spec, ourMetrics, { convMsgs: conv.msgs }).then(rfsResult => {
 				dbUpdateExperimentRFS(experiment.id, JSON.stringify(rfsResult));
+
+				// G3: NegativeFilter — runs after RFS so all signals are available
+				if (experiment.gene) {
+					try {
+						const filterResult = applyNegativeFilter(
+							experiment.gene,
+							ourMetrics,
+							rfsResult,
+							failure ?? undefined,
+						);
+						dbUpdateExperimentFilterVerdict(experiment.id, JSON.stringify(filterResult));
+					} catch { /* filter is best-effort */ }
+				}
+
 				if (experiment.dataset && experiment.model) {
 					try {
 						updateLeaderboard(
@@ -446,6 +464,24 @@ async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<voi
 	// GET /api/graph/stats — node and edge counts
 	if (path === "/api/graph/stats" && method === "GET") {
 		res.end(JSON.stringify(kgStats()));
+		return;
+	}
+
+	// POST /api/negative-filter — classify a single experiment result (G3)
+	if (path === "/api/negative-filter" && method === "POST") {
+		const body = await readBody(req) as {
+			gene?: string;
+			metrics?: Record<string, number>;
+			rfs?: import("./web/rfs.js").RFSResult;
+			failure?: import("./web/failure.js").FailureRecord;
+		};
+		if (!body.gene || !body.metrics || !body.rfs) {
+			res.writeHead(400);
+			res.end(JSON.stringify({ error: "gene, metrics and rfs are required" }));
+			return;
+		}
+		const result = applyNegativeFilter(body.gene, body.metrics, body.rfs, body.failure ?? null);
+		res.end(JSON.stringify(result));
 		return;
 	}
 
