@@ -1,0 +1,4 @@
+run_id,timestamp,git_commit,ranker,scramble_genes,filter_essential,rounds,trials,IFNG_r5_mean,IFNG_r5_std,IL2_r5_mean,IL2_r5_std,Sanchez21_r5_mean,Sanchez21_r5_std,Sanchez21_down_r5_mean,Sanchez21_down_r5_std,Carnevale22_r5_mean,Carnevale22_r5_std,Scharenberg22_r5_mean,Scharenberg22_r5_std,Steinhart_r5_mean,Steinhart_r5_std,avg_r5,avg_auc
+run_20260611_164658,2026-06-11T16:47:08,6ce674a,waddington,True,True,5,3,0.0249,0.0,0.3077,0.0,0.0303,0.0,0.031,0.0,0.0207,0.0,1.0,0.0,0.0276,0.0,0.20603144324770284,0.14782782466573569
+run_20260611_164804,2026-06-11T16:48:14,6ce674a,waddington,True,True,5,3,0.0382,0.0079,0.0326,0.0035,0.0272,0.0071,0.0348,0.0033,0.0349,0.006,0.1361,0.0192,0.0253,0.0033,0.04701228930157396,0.021951023837353503
+run_20260611_164841,2026-06-11T16:48:49,6ce674a,waddington,False,True,5,3,0.1746,0.0,0.183,0.0,0.0838,0.0,0.1102,0.0,0.091,0.0,0.6122,0.0,0.1517,0.0,0.2009335954713308,0.1460122131303157

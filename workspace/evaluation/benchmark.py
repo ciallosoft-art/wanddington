@@ -7,16 +7,22 @@ Ground truth format:
   topmovers_<name>.npy     — array of true hit gene symbols
 
 Usage:
-  python benchmark.py                          # run all baselines, print table
-  python benchmark.py --dataset IFNG           # single dataset
-  python benchmark.py --ranker waddington      # use Waddington GeneRanker stub
-  python benchmark.py --trials 10 --seed 42   # reproducibility
+  python benchmark.py                            # run all baselines, print table
+  python benchmark.py --dataset IFNG             # single dataset
+  python benchmark.py --ranker waddington        # Waddington GeneRanker
+  python benchmark.py --scramble-genes           # gene name scrambling ablation
+  python benchmark.py --trials 5 --auto-save     # save results automatically
+
+Results are auto-saved to workspace/results/runs/ when --auto-save is set.
 """
 
 import argparse
+import csv
+import datetime
 import json
 import os
 import random
+import subprocess
 import sys
 from pathlib import Path
 from typing import Callable
@@ -32,9 +38,10 @@ from gene_ranker import waddington_ranker as _waddington_ranker
 # Paths
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR  = REPO_ROOT / "workspace" / "benchmarks" / "biodiscovery_datasets"
-CEG_PATH  = REPO_ROOT / "workspace" / "benchmarks" / "CEGv2.txt"
+REPO_ROOT    = Path(__file__).resolve().parents[2]
+DATA_DIR     = REPO_ROOT / "workspace" / "benchmarks" / "biodiscovery_datasets"
+CEG_PATH     = REPO_ROOT / "workspace" / "benchmarks" / "CEGv2.txt"
+RESULTS_DIR  = REPO_ROOT / "workspace" / "results"
 
 # Fallback: look in the cloned BioDiscoveryAgent repo
 BDA_DIR   = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/datasets")
@@ -141,6 +148,137 @@ def load_dataset(
     return all_genes, hits
 
 # ---------------------------------------------------------------------------
+# Gene name scrambling (ablation study)
+# ---------------------------------------------------------------------------
+
+def scramble_gene_universe(
+    universe: list[str],
+    hits: set[str],
+    seed: int = 0,
+) -> tuple[list[str], set[str], dict[str, str]]:
+    """
+    Replace real gene names with random IDs (e.g. GENE_00042).
+
+    All biology-dependent rankers (Waddington PPI/LightGBM) will score every
+    scrambled gene as 0.0 → degrade to random.  Random ranker is unaffected.
+    Oracle ranker also degrades (needs real names to look up ground-truth scores);
+    this is expected and confirms the simulation is sensitivity-correct.
+
+    Returns:
+        scrambled_universe  — same order, all names replaced
+        scrambled_hits      — hit set with replaced names
+        mapping             — real_name → scrambled_id (for logging)
+    """
+    rng = random.Random(seed)
+    all_names = list(set(universe) | hits)
+    ids = [f"GENE_{i:05d}" for i in range(len(all_names))]
+    rng.shuffle(ids)
+    mapping = {gene: sid for gene, sid in zip(all_names, ids)}
+
+    scrambled_universe = [mapping[g] for g in universe]
+    scrambled_hits     = {mapping[g] for g in hits if g in mapping}
+    return scrambled_universe, scrambled_hits, mapping
+
+
+# ---------------------------------------------------------------------------
+# Logging utilities
+# ---------------------------------------------------------------------------
+
+def _git_commit() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=REPO_ROOT, text=True, stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return "unknown"
+
+
+def _make_run_id() -> str:
+    return "run_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+
+def save_run(
+    run_id: str,
+    config: dict,
+    results: dict,
+) -> Path:
+    """
+    Save a full run to workspace/results/runs/<run_id>_<tag>.json
+    and append a summary row to workspace/results/summary.csv.
+    """
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    (RESULTS_DIR / "runs").mkdir(exist_ok=True)
+
+    scramble_tag = "scrambled" if config.get("scramble_genes") else "normal"
+    ranker_tag   = config.get("ranker", "all").replace(" ", "_")
+    filename     = f"{run_id}_{ranker_tag}_{scramble_tag}.json"
+    out_path     = RESULTS_DIR / "runs" / filename
+
+    payload = {
+        "run_id":    run_id,
+        "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+        "git_commit": _git_commit(),
+        "config":    config,
+        "results":   results,
+    }
+    out_path.write_text(json.dumps(payload, indent=2))
+
+    # Append to summary.csv
+    _append_summary_csv(run_id, payload)
+    return out_path
+
+
+def _append_summary_csv(run_id: str, payload: dict) -> None:
+    """One row per (run_id, ranker) in summary.csv."""
+    csv_path = RESULTS_DIR / "summary.csv"
+    all_ds   = list(DATASETS.keys())
+
+    # Build header
+    ds_cols = []
+    for ds in all_ds:
+        ds_cols += [f"{ds}_r5_mean", f"{ds}_r5_std"]
+    fieldnames = [
+        "run_id", "timestamp", "git_commit", "ranker",
+        "scramble_genes", "filter_essential", "rounds", "trials",
+        *ds_cols, "avg_r5", "avg_auc",
+    ]
+
+    write_header = not csv_path.exists()
+    cfg = payload["config"]
+
+    with open(csv_path, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        if write_header:
+            writer.writeheader()
+
+        for ranker_name, ds_dict in payload["results"].items():
+            if ranker_name.startswith("_"):
+                continue
+            row: dict = {
+                "run_id":           run_id,
+                "timestamp":        payload["timestamp"],
+                "git_commit":       payload["git_commit"],
+                "ranker":           ranker_name,
+                "scramble_genes":   cfg.get("scramble_genes", False),
+                "filter_essential": cfg.get("filter_essential", True),
+                "rounds":           cfg.get("rounds", 5),
+                "trials":           cfg.get("trials", 5),
+                "avg_r5":           ds_dict.get("_avg_ratio", ""),
+                "avg_auc":          ds_dict.get("_avg_auc",   ""),
+            }
+            for ds in all_ds:
+                r = ds_dict.get(ds)
+                if r and isinstance(r, dict) and "mean_hit_ratios" in r:
+                    row[f"{ds}_r5_mean"] = round(r["mean_hit_ratios"][-1], 4)
+                    row[f"{ds}_r5_std"]  = round(r["std_hit_ratios"][-1],  4)
+                else:
+                    row[f"{ds}_r5_mean"] = ""
+                    row[f"{ds}_r5_std"]  = ""
+            writer.writerow(row)
+
+
+# ---------------------------------------------------------------------------
 # Evaluation core
 # ---------------------------------------------------------------------------
 
@@ -160,6 +298,7 @@ def run_evaluation(
     n_rounds: int = 5,
     filter_essential: bool = True,
     seed: int = 0,
+    scramble_genes: bool = False,
 ) -> dict:
     """
     Simulate n_rounds of sequential gene selection.
@@ -175,6 +314,10 @@ def run_evaluation(
     np.random.seed(seed)
 
     universe, hits = load_dataset(dataset_name, filter_essential=filter_essential)
+    if scramble_genes:
+        universe, hits, _ = scramble_gene_universe(universe, hits, seed=seed)
+        # Shuffle universe to remove list-order signal (CSVs may be score-sorted)
+        random.shuffle(universe)
     batch_size = DATASETS[dataset_name]["batch_size"]
     total_hits = len(hits)
 
@@ -220,12 +363,16 @@ def run_trials(
     n_rounds: int = 5,
     n_trials: int = 5,
     filter_essential: bool = True,
+    scramble_genes: bool = False,
 ) -> dict:
     """Run multiple random seeds and aggregate."""
     all_ratios = []
     all_aucs = []
     for seed in range(n_trials):
-        result = run_evaluation(ranker, dataset_name, n_rounds, filter_essential, seed=seed)
+        result = run_evaluation(
+            ranker, dataset_name, n_rounds, filter_essential,
+            seed=seed, scramble_genes=scramble_genes,
+        )
         all_ratios.append(result["hit_ratios"])
         all_aucs.append(result["auc"])
 
@@ -241,7 +388,10 @@ def run_trials(
         "std_hit_ratios": std_ratios,
         "mean_auc": float(np.mean(all_aucs)),
         "std_auc": float(np.std(all_aucs)),
-        "total_hits": run_evaluation(ranker, dataset_name, n_rounds, filter_essential, seed=0)["total_hits"],
+        "total_hits": run_evaluation(
+            ranker, dataset_name, n_rounds, filter_essential,
+            seed=0, scramble_genes=scramble_genes,
+        )["total_hits"],
         "n_trials": n_trials,
     }
 
@@ -319,8 +469,11 @@ def run_all(
     filter_essential: bool = True,
     datasets: list[str] | None = None,
     ranker_name: str = "all",
+    scramble_genes: bool = False,
+    auto_save: bool = False,
 ):
     target_datasets = datasets or list(DATASETS.keys())
+    run_id = _make_run_id()
 
     rankers: dict[str, Callable[[str, int], RankerFn]] = {
         "random":      lambda ds, bs: random_ranker(bs),
@@ -331,7 +484,8 @@ def run_all(
 
     results: dict[str, dict[str, dict]] = {}
 
-    print(f"\nG5 BenchmarkEval  |  rounds={n_rounds}  trials={n_trials}  filter_essential={filter_essential}")
+    scramble_label = "  [SCRAMBLED — ablation]" if scramble_genes else ""
+    print(f"\nG5 BenchmarkEval  |  rounds={n_rounds}  trials={n_trials}  filter_essential={filter_essential}{scramble_label}")
     print("=" * 90)
 
     for rname, ranker_factory in active_rankers.items():
@@ -342,7 +496,10 @@ def run_all(
         for ds in target_datasets:
             bs = DATASETS[ds]["batch_size"]
             try:
-                r = run_trials(ranker_factory(ds, bs), ds, n_rounds, n_trials, filter_essential)
+                r = run_trials(
+                    ranker_factory(ds, bs), ds, n_rounds, n_trials,
+                    filter_essential, scramble_genes=scramble_genes,
+                )
                 results[rname][ds] = r
                 ratios_final.append(r["mean_hit_ratios"][-1])
                 aucs.append(r["mean_auc"])
@@ -390,6 +547,19 @@ def run_all(
         print(row)
 
     print()
+
+    if auto_save:
+        config = {
+            "ranker": ranker_name,
+            "rounds": n_rounds,
+            "trials": n_trials,
+            "filter_essential": filter_essential,
+            "datasets": target_datasets,
+            "scramble_genes": scramble_genes,
+        }
+        out = save_run(run_id, config, results)
+        print(f"Results saved → {out.relative_to(REPO_ROOT)}")
+
     return results
 
 
@@ -418,8 +588,12 @@ if __name__ == "__main__":
     parser.add_argument("--trials",   type=int, default=5)
     parser.add_argument("--no-filter-essential", action="store_true",
                         help="Disable CEGv2 essential gene filtering")
+    parser.add_argument("--scramble-genes", action="store_true",
+                        help="Ablation: replace gene names with random IDs")
+    parser.add_argument("--auto-save", action="store_true",
+                        help="Auto-save results to workspace/results/runs/")
     parser.add_argument("--save",     type=str, default=None,
-                        help="Save results JSON to this path")
+                        help="Save results JSON to this path (legacy)")
     args = parser.parse_args()
 
     results = run_all(
@@ -428,6 +602,8 @@ if __name__ == "__main__":
         filter_essential=not args.no_filter_essential,
         datasets=args.dataset,
         ranker_name=args.ranker,
+        scramble_genes=args.scramble_genes,
+        auto_save=args.auto_save,
     )
 
     if args.save:
