@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
 """
-G1 GeneRanker — Phase 1 (rule-based biological anchor expansion).
+G1 GeneRanker — Phase 1 + Phase 2.
 
-Ranks candidate genes using STRING PPI expansion from context-relevant
-anchor genes. Results are cached to disk so the benchmark runs fast.
+Phase 1 (rule-based): STRING PPI expansion from biological anchor genes.
+Phase 2 (LightGBM):   Loaded from workspace/models/lgbm_{dataset}.pkl if available.
+  - Features: g1_ppi_score, hub_score_norm, is_essential
+  - Trained via bootstrap_lgbm.py on BioDiscoveryAgent benchmark data
+  - Automatically activates when model file exists for the dataset
 
 Integration:
   from gene_ranker import waddington_ranker
   ranker = waddington_ranker("IFNG", batch_size=128)
   batch  = ranker(universe, already_selected, round_num)
-
-Phase 2 will replace this with a LightGBM ranker trained on quality-filtered
-experiment history from the Waddington DB.
 """
 
 import json
+import pickle
 import random
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 RankerFn = Callable[[list[str], list[str], int], list[str]]
 
-CACHE_DIR = Path(__file__).parent / "_ppi_cache"
+CACHE_DIR  = Path(__file__).parent / "_ppi_cache"
+MODEL_DIR  = Path(__file__).resolve().parents[2] / "workspace" / "models"
+CEG_PATH   = Path(__file__).resolve().parents[2] / "workspace" / "benchmarks" / "CEGv2.txt"
+BDA_CEG    = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
+
 STRING_BASE = "https://string-db.org/api/json"
 DEFAULT_SPECIES = 9606  # Homo sapiens
 STRING_LIMIT = 200
@@ -146,7 +151,72 @@ def build_anchor_scores(anchor_genes: list[str], verbose: bool = False) -> dict[
 
 
 # ---------------------------------------------------------------------------
-# G1 GeneRanker
+# Phase 2 — LightGBM helpers
+# ---------------------------------------------------------------------------
+
+def _load_essential_genes() -> set[str]:
+    ceg = CEG_PATH if CEG_PATH.exists() else BDA_CEG
+    if not ceg.exists():
+        return set()
+    try:
+        import pandas as pd
+        df = pd.read_csv(ceg, sep="\t")
+        return set(df["GENE"].dropna().str.strip().str.upper())
+    except Exception:
+        return set()
+
+
+def _compute_hub_scores() -> dict[str, float]:
+    """Inverted PPI cache → normalised hub score per gene."""
+    counts: dict[str, int] = {}
+    for f in CACHE_DIR.glob("*.json"):
+        for g in json.loads(f.read_text()):
+            counts[g] = counts.get(g, 0) + 1
+    if not counts:
+        return {}
+    mx = max(counts.values())
+    return {g: round(c / mx, 4) for g, c in counts.items()}
+
+
+def _load_lgbm_model(dataset_name: str):
+    """Load a per-dataset LightGBM model if available, else return None."""
+    model_path = MODEL_DIR / f"lgbm_{dataset_name}.pkl"
+    if not model_path.exists():
+        return None
+    try:
+        with open(model_path, "rb") as f:
+            return pickle.load(f)
+    except Exception:
+        return None
+
+
+FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "is_essential"]
+
+
+def _lgbm_scores(
+    genes: list[str],
+    model,
+    anchor_scores: dict[str, float],
+    hub_scores: dict[str, float],
+    essential: set[str],
+) -> dict[str, float]:
+    """Run LightGBM model over a gene list; returns {gene: prob}."""
+    import pandas as pd
+    rows = [
+        {
+            "g1_ppi_score":  anchor_scores.get(g, 0.0),
+            "hub_score_norm": hub_scores.get(g, 0.0),
+            "is_essential":  float(g in essential),
+        }
+        for g in genes
+    ]
+    X = pd.DataFrame(rows, columns=FEATURE_COLS)
+    probs = model.predict_proba(X)[:, 1]
+    return dict(zip(genes, probs.tolist()))
+
+
+# ---------------------------------------------------------------------------
+# G1 GeneRanker (Phase 1 + optional Phase 2)
 # ---------------------------------------------------------------------------
 
 def waddington_ranker(
@@ -155,16 +225,13 @@ def waddington_ranker(
     verbose: bool = False,
 ) -> RankerFn:
     """
-    G1 GeneRanker Phase 1.
+    G1 GeneRanker.
 
-    Builds a static relevance score for every gene in the universe using
-    STRING PPI expansion from biological anchor genes.
+    Phase 1 (always active): STRING PPI expansion from biological anchor genes.
+    Phase 2 (auto-activates): If workspace/models/lgbm_{dataset}.pkl exists,
+      uses LightGBM probabilities to rerank — trained via bootstrap_lgbm.py.
 
-    Ranking is stable across rounds — the first round selects the globally
-    best candidates; later rounds continue from where it left off.
-
-    Phase 2 (LightGBM): after ≥20 quality-verified experiments, train a
-    ranker on DB-stored (gene, RFS_features → hit_label) pairs.
+    Ranking is stable across rounds.
     """
     anchors = DATASET_ANCHORS.get(dataset_name)
     if not anchors:
@@ -176,14 +243,32 @@ def waddington_ranker(
         print(f"  [G1] Building anchor scores for {dataset_name}: {anchors}")
     anchor_scores = build_anchor_scores(anchors, verbose=verbose)
 
+    # Phase 2: try to load LightGBM model
+    lgbm_model = _load_lgbm_model(dataset_name)
+    if lgbm_model is not None:
+        if verbose:
+            print(f"  [G1 P2] LightGBM model loaded for {dataset_name}")
+        hub_scores = _compute_hub_scores()
+        essential  = _load_essential_genes()
+
     def _ranker(universe: list[str], already_selected: list[str], round_num: int) -> list[str]:
         already = set(already_selected)
         pool = [g for g in universe if g not in already]
-        # Score by PPI proximity to anchors; ties broken randomly for exploration
-        scored = [(g, anchor_scores.get(g, 0.0)) for g in pool]
-        scored.sort(key=lambda x: (-x[1], random.random()))
+
+        if lgbm_model is not None:
+            # Phase 2: use LightGBM probabilities
+            probs = _lgbm_scores(pool, lgbm_model, anchor_scores, hub_scores, essential)
+            scored = [(g, probs[g]) for g in pool]
+        else:
+            # Phase 1: PPI anchor score
+            scored = [(g, anchor_scores.get(g, 0.0)) for g in pool]
+
+        scored.sort(key=lambda x: -x[1])
         return [g for g, _ in scored[:batch_size]]
 
+    phase = "P2(LightGBM)" if lgbm_model is not None else "P1(PPI)"
+    if verbose:
+        print(f"  [G1 {phase}] Ranker ready for {dataset_name}")
     return _ranker
 
 
