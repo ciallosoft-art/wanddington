@@ -24,8 +24,9 @@ from typing import Callable, Optional
 
 RankerFn = Callable[[list[str], list[str], int], list[str]]
 
-CACHE_DIR  = Path(__file__).parent / "_ppi_cache"
-MODEL_DIR  = Path(__file__).resolve().parents[2] / "workspace" / "models"
+CACHE_DIR        = Path(__file__).parent / "_ppi_cache"
+ARCHS4_CACHE_DIR = Path(__file__).parent / "_archs4_cache"
+MODEL_DIR        = Path(__file__).resolve().parents[2] / "workspace" / "models"
 CEG_PATH   = Path(__file__).resolve().parents[2] / "workspace" / "benchmarks" / "CEGv2.txt"
 BDA_CEG    = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
 
@@ -151,6 +152,57 @@ def build_anchor_scores(anchor_genes: list[str], verbose: bool = False) -> dict[
 
 
 # ---------------------------------------------------------------------------
+# ARCHS4 co-expression (Feature 4)
+# ---------------------------------------------------------------------------
+
+def get_archs4_coexpr(gene: str, top_n: int = 200, verbose: bool = False) -> dict[str, float]:
+    """
+    ARCHS4 co-expression for one gene (top_n most correlated genes).
+    Returns {correlated_gene: pearson_correlation}. Results cached to disk.
+    """
+    cached = ARCHS4_CACHE_DIR / f"{gene.upper()}.json"
+    if cached.exists():
+        return json.loads(cached.read_text())
+
+    if verbose:
+        print(f"    [ARCHS4] fetching co-expression for {gene.upper()}", flush=True)
+
+    try:
+        import gget  # type: ignore
+        df = gget.archs4(gene.upper(), gene_count=top_n, species="human",
+                         which="correlation", verbose=False)
+        result: dict[str, float] = {}
+        if df is not None and len(df) > 0:
+            for _, row in df.iterrows():
+                sym = str(row.get("gene_symbol", "")).strip().upper()
+                cor = float(row.get("pearson_correlation", 0.0))
+                if sym:
+                    result[sym] = round(cor, 4)
+        ARCHS4_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cached.write_text(json.dumps(result))
+        return result
+    except Exception as e:
+        if verbose:
+            print(f"    [ARCHS4] error for {gene}: {e}", flush=True)
+        return {}
+
+
+def build_archs4_scores(anchor_genes: list[str], verbose: bool = False) -> dict[str, float]:
+    """
+    Co-expression signal anchored to target-phenotype genes.
+    Returns {gene: max_pearson_coexpr_with_any_anchor}.
+    """
+    all_scores: dict[str, float] = {}
+    for anchor in anchor_genes:
+        a = anchor.upper()
+        coexpr = get_archs4_coexpr(a, verbose=verbose)
+        for gene, score in coexpr.items():
+            if score > all_scores.get(gene, 0.0):
+                all_scores[gene] = score
+    return all_scores
+
+
+# ---------------------------------------------------------------------------
 # Phase 2 — LightGBM helpers
 # ---------------------------------------------------------------------------
 
@@ -194,7 +246,7 @@ def _load_lgbm_model(dataset_name: str):
         return None
 
 
-FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "is_essential"]
+FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "is_essential", "archs4_coexpr"]
 
 
 def _lgbm_scores(
@@ -203,18 +255,38 @@ def _lgbm_scores(
     anchor_scores: dict[str, float],
     hub_scores: dict[str, float],
     essential: set[str],
+    archs4_scores: Optional[dict[str, float]] = None,
 ) -> dict[str, float]:
     """Run LightGBM model over a gene list; returns {gene: prob}."""
     import pandas as pd
-    rows = [
-        {
-            "g1_ppi_score":  anchor_scores.get(g, 0.0),
-            "hub_score_norm": hub_scores.get(g, 0.0),
-            "is_essential":  float(g in essential),
-        }
-        for g in genes
-    ]
-    X = pd.DataFrame(rows, columns=FEATURE_COLS)
+    _a4 = archs4_scores or {}
+    n_feat = getattr(model, "n_features_in_", len(FEATURE_COLS))
+    use_archs4 = (n_feat == len(FEATURE_COLS))
+
+    if use_archs4:
+        rows = [
+            {
+                "g1_ppi_score":   anchor_scores.get(g, 0.0),
+                "hub_score_norm": hub_scores.get(g, 0.0),
+                "is_essential":   float(g in essential),
+                "archs4_coexpr":  _a4.get(g, 0.0),
+            }
+            for g in genes
+        ]
+        X = pd.DataFrame(rows, columns=FEATURE_COLS)
+    else:
+        # Backwards-compat: 3-feature models trained before this change
+        cols3 = FEATURE_COLS[:3]
+        rows = [
+            {
+                "g1_ppi_score":   anchor_scores.get(g, 0.0),
+                "hub_score_norm": hub_scores.get(g, 0.0),
+                "is_essential":   float(g in essential),
+            }
+            for g in genes
+        ]
+        X = pd.DataFrame(rows, columns=cols3)
+
     probs = model.predict_proba(X)[:, 1]
     return dict(zip(genes, probs.tolist()))
 
@@ -248,29 +320,39 @@ def waddington_ranker(
     anchor_scores = build_anchor_scores(anchors, verbose=verbose)
 
     # Phase 2: try to load LightGBM model
-    lgbm_model = _load_lgbm_model(dataset_name)
+    lgbm_model   = _load_lgbm_model(dataset_name)
+    hub_scores:   dict[str, float] = {}
+    essential:    set[str] = set()
+    archs4_scores: dict[str, float] = {}
+
     if lgbm_model is not None:
         if verbose:
             print(f"  [G1 P2] LightGBM model loaded for {dataset_name}")
         hub_scores = _compute_hub_scores()
         essential  = _load_essential_genes()
+        # ARCHS4 only if model was trained with 4 features
+        n_feat = getattr(lgbm_model, "n_features_in_", 3)
+        if n_feat == 4:
+            if verbose:
+                print(f"  [G1 P2] Building ARCHS4 co-expression scores for {dataset_name}")
+            archs4_scores = build_archs4_scores(anchors, verbose=verbose)
 
     def _ranker(universe: list[str], already_selected: list[str], round_num: int) -> list[str]:
         already = set(already_selected)
         pool = [g for g in universe if g not in already]
 
         if lgbm_model is not None:
-            # Phase 2: use LightGBM probabilities
-            probs = _lgbm_scores(pool, lgbm_model, anchor_scores, hub_scores, essential)
+            probs  = _lgbm_scores(pool, lgbm_model, anchor_scores,
+                                   hub_scores, essential, archs4_scores or None)
             scored = [(g, probs[g]) for g in pool]
         else:
-            # Phase 1: PPI anchor score
             scored = [(g, anchor_scores.get(g, 0.0)) for g in pool]
 
         scored.sort(key=lambda x: -x[1])
         return [g for g, _ in scored[:batch_size]]
 
-    phase = "P2(LightGBM)" if lgbm_model is not None else "P1(PPI)"
+    phase = "P2(LightGBM+ARCHS4)" if (lgbm_model is not None and archs4_scores) \
+        else "P2(LightGBM)" if lgbm_model is not None else "P1(PPI)"
     if verbose:
         print(f"  [G1 {phase}] Ranker ready for {dataset_name}")
     return _ranker
