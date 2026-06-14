@@ -439,6 +439,69 @@ def waddington_ranker_stub(batch_size: int) -> RankerFn:
     """Kept for backwards-compat; use waddington_ranker instead."""
     return _waddington_ranker("", batch_size)
 
+
+def coreset_ranker(dataset_name: str, batch_size: int) -> RankerFn:
+    """
+    GeneDisco-style k-Center Coreset ranker.
+
+    Uses (g1_ppi_score, hub_score_norm) as a 2-D feature vector, then at each
+    round greedily picks the gene that is furthest (L2) from the already-selected
+    set.  This maximises coverage of the PPI-network feature space without any
+    dataset-specific biological anchors or LightGBM supervision, providing an
+    honest A-arm algorithmic baseline.
+
+    Unlike Waddington it does NOT know which genes are biologically relevant to
+    the target phenotype; it only knows the global PPI network structure.
+    """
+    from gene_ranker import build_anchor_scores, compute_hub_scores_from_cache, DATASET_ANCHORS
+
+    anchor_genes = DATASET_ANCHORS.get(dataset_name, [])
+    ppi_scores   = build_anchor_scores(anchor_genes, verbose=False) if anchor_genes else {}
+    hub_scores   = compute_hub_scores_from_cache()                  # global, dataset-agnostic
+
+    def _feat(gene: str) -> np.ndarray:
+        return np.array([ppi_scores.get(gene, 0.0), hub_scores.get(gene, 0.0)], dtype=float)
+
+    def _ranker(universe: list[str], already_selected: list[str], round_num: int) -> list[str]:
+        pool = [g for g in universe if g not in set(already_selected)]
+        if not pool:
+            return []
+
+        pool_feats = np.array([_feat(g) for g in pool])  # (N, 2)
+
+        if not already_selected:
+            # Round 1: pick the gene with the highest PPI score as seed, then
+            # run k-center greedily from there
+            seed_idx = int(np.argmax(pool_feats[:, 0]))
+        else:
+            # Seed = gene in pool furthest from existing selection centroid
+            sel_feats  = np.array([_feat(g) for g in already_selected])
+            centroid   = sel_feats.mean(axis=0)
+            seed_idx   = int(np.argmax(np.linalg.norm(pool_feats - centroid, axis=1)))
+
+        selected_indices: list[int] = [seed_idx]
+        selected_feats               = [pool_feats[seed_idx]]
+
+        # k-center: greedy furthest-point sampling
+        while len(selected_indices) < min(batch_size, len(pool)):
+            sel_arr  = np.array(selected_feats)           # (k, 2)
+            # Distance of each pool gene to its nearest already-chosen gene
+            dists    = np.min(
+                np.linalg.norm(pool_feats[:, None, :] - sel_arr[None, :, :], axis=2),
+                axis=1,
+            )
+            # Mask already chosen
+            for idx in selected_indices:
+                dists[idx] = -1.0
+            next_idx = int(np.argmax(dists))
+            selected_indices.append(next_idx)
+            selected_feats.append(pool_feats[next_idx])
+
+        return [pool[i] for i in selected_indices]
+
+    return _ranker
+
+
 # ---------------------------------------------------------------------------
 # Reporting
 # ---------------------------------------------------------------------------
@@ -478,6 +541,7 @@ def run_all(
     rankers: dict[str, Callable[[str, int], RankerFn]] = {
         "random":      lambda ds, bs: random_ranker(bs),
         "oracle":      lambda ds, bs: score_guided_ranker(ds, bs),
+        "coreset":     lambda ds, bs: coreset_ranker(ds, bs),
         "waddington":  lambda ds, bs: _waddington_ranker(ds, bs, verbose=True),
     }
     active_rankers = rankers if ranker_name == "all" else {ranker_name: rankers[ranker_name]}
@@ -582,7 +646,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="G5 BenchmarkEval")
     parser.add_argument("--dataset",  nargs="+", choices=list(DATASETS), default=None,
                         help="Datasets to evaluate (default: all)")
-    parser.add_argument("--ranker",   choices=["all", "random", "oracle", "waddington"],
+    parser.add_argument("--ranker",   choices=["all", "random", "oracle", "coreset", "waddington"],
                         default="all")
     parser.add_argument("--rounds",   type=int, default=5)
     parser.add_argument("--trials",   type=int, default=5)

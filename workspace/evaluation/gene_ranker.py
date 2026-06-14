@@ -178,6 +178,10 @@ def _compute_hub_scores() -> dict[str, float]:
     return {g: round(c / mx, 4) for g, c in counts.items()}
 
 
+# Public alias used by coreset_ranker in benchmark.py
+compute_hub_scores_from_cache = _compute_hub_scores
+
+
 def _load_lgbm_model(dataset_name: str):
     """Load a per-dataset LightGBM model if available, else return None."""
     model_path = MODEL_DIR / f"lgbm_{dataset_name}.pkl"
