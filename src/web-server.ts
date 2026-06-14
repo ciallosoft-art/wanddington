@@ -32,6 +32,7 @@ import { applyNegativeFilter } from "./web/negative-filter.js";
 import { getPhenotypeProfile } from "./web/phenotype-mapper.js";
 import { rankGenes } from "./web/gene-ranker.js";
 import { planExperiments } from "./web/experiment-planner.js";
+import { handleSuggestGenes } from "./web/suggest-genes.js";
 
 function readFrontendTemplate(appRoot: string): string {
 	const distPath = resolve(appRoot, "dist", "web", "index.html");
@@ -738,8 +739,29 @@ export async function launchWebServer(options: PiRuntimeOptions, port = 3000): P
 			try {
 				const cmd = JSON.parse(raw) as Record<string, unknown>;
 				if (cmd.type === "prompt" && typeof cmd.message === "string") {
-					const enriched = injectContext(cmd.message);
-					if (enriched !== cmd.message) {
+					const msg = cmd.message;
+
+					// /suggest-genes: compute plan and inject as context for Pi to discuss
+					if (/^\/suggest-genes(\s|$)/i.test(msg)) {
+						handleSuggestGenes(msg).then(plan => {
+							const prefix =
+								`[Waddington G1+G2 computed the following experiment plan]\n\n${plan}\n\n` +
+								`[User original command: ${msg}]\n\n`;
+							const enriched = prefix +
+								"Please acknowledge the experiment plan above, briefly summarize the strategy for each round, and ask if the user wants to adjust any parameters.";
+							if (pi.stdin && !pi.stdin.destroyed) {
+								pi.stdin.write(JSON.stringify({ ...cmd, message: enriched }) + "\n");
+							}
+						}).catch(() => {
+							if (pi.stdin && !pi.stdin.destroyed) {
+								pi.stdin.write(forwarded + "\n");
+							}
+						});
+						return; // don't fall through to synchronous write below
+					}
+
+					const enriched = injectContext(msg);
+					if (enriched !== msg) {
 						forwarded = JSON.stringify({ ...cmd, message: enriched });
 					}
 				}

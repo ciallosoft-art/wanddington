@@ -1,16 +1,16 @@
 import { execFile } from "node:child_process";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { getWaddingtonHome } from "../config/paths.js";
 import { dbListExperiments } from "./db.js";
 import { findMatchingSkill } from "./skills.js";
 import { queryNeighbourhood } from "./knowledge-graph.js";
 
 const execFileAsync = promisify(execFile);
 
-const RANKER_SCRIPT = resolve(
-  getWaddingtonHome(), "..", "workspace", "evaluation", "gene_ranker.py",
-);
+// dist/web/gene-ranker.js → ../../ → project root → workspace/evaluation/gene_ranker.py
+const _moduleDir = dirname(fileURLToPath(import.meta.url));
+const RANKER_SCRIPT = resolve(_moduleDir, "..", "..", "workspace", "evaluation", "gene_ranker.py");
 
 // ---------------------------------------------------------------------------
 // Types

@@ -64,6 +64,14 @@ function printHelp(): void {
 		const pad = " ".repeat(Math.max(1, 32 - u.length));
 		console.log(`  ${SAGE}${u}${RESET}${pad}${ASH}${d}${RESET}`);
 	});
+
+	printSection("Gene Selection (G1+G2)");
+	[
+		["suggest-genes <DS> --budget N", "Plan multi-round gene selection experiment"],
+	].forEach(([u, d]) => {
+		const pad = " ".repeat(Math.max(1, 32 - u.length));
+		console.log(`  ${SAGE}${u}${RESET}${pad}${ASH}${d}${RESET}`);
+	});
 }
 
 function loadPackageVersion(appRoot: string): { version?: string } {
@@ -88,6 +96,20 @@ export async function main(): Promise<void> {
 
 	ensureWaddingtonHome(home);
 	syncBundledAssets(appRoot, agentDir);
+
+	// suggest-genes has its own arg parser — intercept before parseArgs sees unknown flags
+	const rawArgv = process.argv.slice(2).filter(a => a !== "--");
+	if (rawArgv[0] === "suggest-genes" || rawArgv[0] === "/suggest-genes") {
+		// DB must be open before G1/G2 can query experiments / hypotheses
+		const { openDb } = await import("./web/db.js");
+		const { resolve: res } = await import("node:path");
+		openDb(res(agentDir, "..", "web.db"));
+
+		const { handleSuggestGenes } = await import("./web/suggest-genes.js");
+		const plan = await handleSuggestGenes(rawArgv.join(" "));
+		console.log(plan);
+		return;
+	}
 
 	const { values, positionals } = parseArgs({
 		args: process.argv.slice(2),
