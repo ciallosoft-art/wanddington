@@ -42,7 +42,10 @@ MODEL_DIR  = REPO_ROOT / "workspace" / "models"
 DATA_DIR   = REPO_ROOT / "workspace" / "evaluation"
 
 sys.path.insert(0, str(Path(__file__).parent))
-from gene_ranker import DATASET_ANCHORS, build_anchor_scores, build_archs4_scores
+from gene_ranker import (
+    DATASET_ANCHORS, build_anchor_scores, build_archs4_scores,
+    compute_ppi_sum_from_cache,
+)
 
 # ---------------------------------------------------------------------------
 # Feature computation
@@ -54,11 +57,7 @@ def load_essential_genes() -> set[str]:
 
 
 def compute_hub_scores() -> dict[str, float]:
-    """
-    Inverted PPI: for each gene, count how many anchor-gene PPI lists mention it.
-    Normalised to [0,1] by max count.
-    Genes that appear in many anchor neighborhoods = highly connected hubs.
-    """
+    """Count-based PPI hub: how many anchor PPI lists mention each gene."""
     counts: dict[str, int] = {}
     for f in CACHE_DIR.glob("*.json"):
         for g in json.loads(f.read_text()):
@@ -90,8 +89,8 @@ def build_features(
     genes: list[str],
     g1_scores: dict[str, float],
     hub_scores: dict[str, float],
-    essential: set[str],
-    archs4_scores: dict[str, float] | None = None,
+    archs4_scores: dict[str, float],
+    ppi_sum_scores: dict[str, float],
 ) -> pd.DataFrame:
     rows = []
     for gene in genes:
@@ -99,8 +98,8 @@ def build_features(
             "gene":           gene,
             "g1_ppi_score":   g1_scores.get(gene, 0.0),
             "hub_score_norm": hub_scores.get(gene, 0.0),
-            "is_essential":   int(gene in essential),
-            "archs4_coexpr":  archs4_scores.get(gene, 0.0) if archs4_scores else 0.0,
+            "archs4_coexpr":  archs4_scores.get(gene, 0.0),
+            "ppi_score_sum":  ppi_sum_scores.get(gene, 0.0),
         }
         rows.append(row)
     return pd.DataFrame(rows)
@@ -154,7 +153,7 @@ LGBM_PARAMS = {
     "n_jobs":           -1,
 }
 
-FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "is_essential", "archs4_coexpr"]
+FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "archs4_coexpr", "ppi_score_sum"]
 
 
 def train_model(df_feat: pd.DataFrame) -> lgb.LGBMClassifier:
@@ -199,7 +198,7 @@ def evaluate_model(
 def cross_dataset_eval(
     all_data: dict[str, pd.DataFrame],
     hub_scores: dict[str, float],
-    essential: set[str],
+    ppi_sum: dict[str, float],
 ) -> dict:
     """Leave-one-dataset-out evaluation."""
     results = {}
@@ -210,7 +209,7 @@ def cross_dataset_eval(
                 continue
             g1 = compute_g1_scores_for_dataset(ds)
             a4 = compute_archs4_scores_for_dataset(ds)
-            feats = build_features(df["gene"].tolist(), g1, hub_scores, essential, a4)
+            feats = build_features(df["gene"].tolist(), g1, hub_scores, a4, ppi_sum)
             feats["label"] = df["label"].values
             train_frames.append(feats)
 
@@ -220,7 +219,7 @@ def cross_dataset_eval(
         test_df_raw = all_data[test_ds]
         g1_test = compute_g1_scores_for_dataset(test_ds)
         a4_test = compute_archs4_scores_for_dataset(test_ds)
-        test_feats = build_features(test_df_raw["gene"].tolist(), g1_test, hub_scores, essential, a4_test)
+        test_feats = build_features(test_df_raw["gene"].tolist(), g1_test, hub_scores, a4_test, ppi_sum)
         test_feats["label"] = test_df_raw["label"].values
         bs = BATCH_SIZES[test_ds]
         results[test_ds] = evaluate_model(model, test_feats, test_ds, bs)
@@ -241,6 +240,10 @@ def run(datasets_to_train: list[str] | None = None, eval_only: bool = False):
     hub_scores = compute_hub_scores()
     print(f"  Hub scores: {len(hub_scores)} genes scored")
 
+    print("Computing PPI sum scores from cache...")
+    ppi_sum = compute_ppi_sum_from_cache()
+    print(f"  PPI sum scores: {len(ppi_sum)} genes scored")
+
     # Load all datasets
     print("\nLoading datasets...")
     all_data: dict[str, pd.DataFrame] = {}
@@ -249,13 +252,13 @@ def run(datasets_to_train: list[str] | None = None, eval_only: bool = False):
         all_data[ds] = df
         print(f"  {ds}: {len(df)} genes, {df['label'].sum()} hits ({100*df['label'].mean():.1f}%)")
 
-    # Build features per dataset (includes ARCHS4 co-expression)
-    print("\nBuilding features (ARCHS4 queries will be cached after first run)...")
+    # Build features per dataset
+    print("\nBuilding features (ARCHS4 from cache, ppi_sum from cache)...")
     feature_frames: dict[str, pd.DataFrame] = {}
     for ds, df in all_data.items():
         g1    = compute_g1_scores_for_dataset(ds)
         a4    = compute_archs4_scores_for_dataset(ds)
-        feats = build_features(df["gene"].tolist(), g1, hub_scores, essential, a4)
+        feats = build_features(df["gene"].tolist(), g1, hub_scores, a4, ppi_sum)
         feats["label"]   = df["label"].values
         feats["dataset"] = ds
         feature_frames[ds] = feats
@@ -307,7 +310,7 @@ def run(datasets_to_train: list[str] | None = None, eval_only: bool = False):
     # Leave-one-dataset-out generalization
     if len(all_data) >= 3:
         print("\nLeave-one-dataset-out AUC (generalization check):")
-        loo_results = cross_dataset_eval(all_data, hub_scores, essential)
+        loo_results = cross_dataset_eval(all_data, hub_scores, ppi_sum)
         for ds, r in loo_results.items():
             hr5 = r["hit_ratios"][-1] if r["hit_ratios"] else float("nan")
             print(f"  {ds:20s}  AUC-ROC={r['auc_roc']:.3f}  hit_ratio@R5={hr5:.3f}")

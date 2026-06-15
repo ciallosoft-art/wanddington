@@ -219,7 +219,7 @@ def _load_essential_genes() -> set[str]:
 
 
 def _compute_hub_scores() -> dict[str, float]:
-    """Inverted PPI cache → normalised hub score per gene."""
+    """Inverted PPI cache → normalised hub score per gene (count-based)."""
     counts: dict[str, int] = {}
     for f in CACHE_DIR.glob("*.json"):
         for g in json.loads(f.read_text()):
@@ -230,8 +230,26 @@ def _compute_hub_scores() -> dict[str, float]:
     return {g: round(c / mx, 4) for g, c in counts.items()}
 
 
-# Public alias used by coreset_ranker in benchmark.py
+def _compute_ppi_sum_scores() -> dict[str, float]:
+    """
+    Weighted PPI hub: sum of STRING combined_scores across all anchor connections.
+    Complements hub_score_norm (count) and g1_ppi_score (max) by capturing
+    total interaction strength with the anchor network.
+    """
+    totals: dict[str, float] = {}
+    for f in CACHE_DIR.glob("*.json"):
+        d = json.loads(f.read_text())
+        for gene, score in d.items():
+            totals[gene] = totals.get(gene, 0.0) + score
+    if not totals:
+        return {}
+    mx = max(totals.values())
+    return {g: round(s / mx, 4) for g, s in totals.items()}
+
+
+# Public aliases used by coreset_ranker and external scripts
 compute_hub_scores_from_cache = _compute_hub_scores
+compute_ppi_sum_from_cache    = _compute_ppi_sum_scores
 
 
 def _load_lgbm_model(dataset_name: str):
@@ -246,7 +264,11 @@ def _load_lgbm_model(dataset_name: str):
         return None
 
 
-FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "is_essential", "archs4_coexpr"]
+# Current feature set (4 features, is_essential removed — importance was 0)
+FEATURE_COLS = ["g1_ppi_score", "hub_score_norm", "archs4_coexpr", "ppi_score_sum"]
+
+# Legacy 3-feature columns (models trained before ARCHS4/ppi_sum expansion)
+_FEATURE_COLS_3 = ["g1_ppi_score", "hub_score_norm", "is_essential"]
 
 
 def _lgbm_scores(
@@ -254,38 +276,30 @@ def _lgbm_scores(
     model,
     anchor_scores: dict[str, float],
     hub_scores: dict[str, float],
-    essential: set[str],
     archs4_scores: Optional[dict[str, float]] = None,
+    ppi_sum_scores: Optional[dict[str, float]] = None,
+    essential: Optional[set[str]] = None,
 ) -> dict[str, float]:
     """Run LightGBM model over a gene list; returns {gene: prob}."""
     import pandas as pd
-    _a4 = archs4_scores or {}
+    _a4  = archs4_scores  or {}
+    _ps  = ppi_sum_scores or {}
     n_feat = getattr(model, "n_features_in_", len(FEATURE_COLS))
-    use_archs4 = (n_feat == len(FEATURE_COLS))
 
-    if use_archs4:
-        rows = [
-            {
-                "g1_ppi_score":   anchor_scores.get(g, 0.0),
-                "hub_score_norm": hub_scores.get(g, 0.0),
-                "is_essential":   float(g in essential),
-                "archs4_coexpr":  _a4.get(g, 0.0),
-            }
-            for g in genes
-        ]
-        X = pd.DataFrame(rows, columns=FEATURE_COLS)
+    if n_feat == 3:
+        # Legacy 3-feature models (g1_ppi_score, hub_score_norm, is_essential)
+        _ess = essential or set()
+        rows = [{"g1_ppi_score": anchor_scores.get(g, 0.0),
+                 "hub_score_norm": hub_scores.get(g, 0.0),
+                 "is_essential": float(g in _ess)} for g in genes]
+        X = pd.DataFrame(rows, columns=_FEATURE_COLS_3)
     else:
-        # Backwards-compat: 3-feature models trained before this change
-        cols3 = FEATURE_COLS[:3]
-        rows = [
-            {
-                "g1_ppi_score":   anchor_scores.get(g, 0.0),
-                "hub_score_norm": hub_scores.get(g, 0.0),
-                "is_essential":   float(g in essential),
-            }
-            for g in genes
-        ]
-        X = pd.DataFrame(rows, columns=cols3)
+        # Current 4-feature models
+        rows = [{"g1_ppi_score":   anchor_scores.get(g, 0.0),
+                 "hub_score_norm": hub_scores.get(g, 0.0),
+                 "archs4_coexpr":  _a4.get(g, 0.0),
+                 "ppi_score_sum":  _ps.get(g, 0.0)} for g in genes]
+        X = pd.DataFrame(rows, columns=FEATURE_COLS)
 
     probs = model.predict_proba(X)[:, 1]
     return dict(zip(genes, probs.tolist()))
@@ -325,25 +339,32 @@ def waddington_ranker(
     essential:    set[str] = set()
     archs4_scores: dict[str, float] = {}
 
+    hub_scores:    dict[str, float] = {}
+    archs4_scores: dict[str, float] = {}
+    ppi_sum_scores: dict[str, float] = {}
+    essential:     set[str] = set()
+
     if lgbm_model is not None:
+        n_feat = getattr(lgbm_model, "n_features_in_", len(FEATURE_COLS))
         if verbose:
-            print(f"  [G1 P2] LightGBM model loaded for {dataset_name}")
+            print(f"  [G1 P2] LightGBM model loaded for {dataset_name} ({n_feat} features)")
         hub_scores = _compute_hub_scores()
-        essential  = _load_essential_genes()
-        # ARCHS4 only if model was trained with 4 features
-        n_feat = getattr(lgbm_model, "n_features_in_", 3)
-        if n_feat == 4:
+        if n_feat == 3:
+            essential = _load_essential_genes()
+        else:
             if verbose:
                 print(f"  [G1 P2] Building ARCHS4 co-expression scores for {dataset_name}")
-            archs4_scores = build_archs4_scores(anchors, verbose=verbose)
+            archs4_scores  = build_archs4_scores(anchors, verbose=verbose)
+            ppi_sum_scores = _compute_ppi_sum_scores()
 
     def _ranker(universe: list[str], already_selected: list[str], round_num: int) -> list[str]:
         already = set(already_selected)
         pool = [g for g in universe if g not in already]
 
         if lgbm_model is not None:
-            probs  = _lgbm_scores(pool, lgbm_model, anchor_scores,
-                                   hub_scores, essential, archs4_scores or None)
+            probs  = _lgbm_scores(pool, lgbm_model, anchor_scores, hub_scores,
+                                   archs4_scores or None, ppi_sum_scores or None,
+                                   essential or None)
             scored = [(g, probs[g]) for g in pool]
         else:
             scored = [(g, anchor_scores.get(g, 0.0)) for g in pool]
@@ -351,7 +372,8 @@ def waddington_ranker(
         scored.sort(key=lambda x: -x[1])
         return [g for g, _ in scored[:batch_size]]
 
-    phase = "P2(LightGBM+ARCHS4)" if (lgbm_model is not None and archs4_scores) \
+    n_feat_loaded = getattr(lgbm_model, "n_features_in_", 0) if lgbm_model else 0
+    phase = f"P2(LightGBM+ARCHS4+ppi_sum)" if n_feat_loaded == 4 \
         else "P2(LightGBM)" if lgbm_model is not None else "P1(PPI)"
     if verbose:
         print(f"  [G1 {phase}] Ranker ready for {dataset_name}")
