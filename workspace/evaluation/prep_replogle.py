@@ -19,9 +19,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-H5AD_PATH = Path("/home/duanyu/scouter-repro/scouter_misc/data/Data_GEARS"
-                 "/replogle_k562_essential/perturb_processed.h5ad")
-BDA_DIR   = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/datasets")
+H5AD_PATH = Path(__file__).resolve().parents[2] / \
+    "workspace/data/raw_h5ad/replogle_k562_essential/perturb_processed.h5ad"
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+BDA_DIR   = _REPO_ROOT / "workspace/data/bda_benchmark"
 CEG_PATH  = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
 OUT_NAME  = "Replogle_K562_essential"
 HIT_PERCENTILE = 90  # top 10% by L2 = hit

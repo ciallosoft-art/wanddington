@@ -77,3 +77,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Large h5ad source files (358MB each, not tracked in git)
+workspace/data/raw_h5ad/replogle_k562_gwps/
