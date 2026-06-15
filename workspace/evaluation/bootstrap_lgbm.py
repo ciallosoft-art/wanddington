@@ -110,18 +110,20 @@ def build_features(
 # ---------------------------------------------------------------------------
 
 DATASETS = {
-    "IFNG":          ("ground_truth_IFNG.csv",                    "topmovers_IFNG.npy"),
-    "IL2":           ("ground_truth_IL2.csv",                     "topmovers_IL2.npy"),
-    "Sanchez21":     ("ground_truth_Sanchez21.csv",               "topmovers_Sanchez21.npy"),
-    "Sanchez21_down":("ground_truth_Sanchez21_down.csv",          "topmovers_Sanchez21_down.npy"),
-    "Carnevale22":   ("ground_truth_Carnevale22_Adenosine.csv",   "topmovers_Carnevale22_Adenosine.npy"),
-    "Scharenberg22": ("ground_truth_Scharenberg22.csv",           "topmovers_Scharenberg22.npy"),
-    "Steinhart":     ("ground_truth_Steinhart_crispra_GD2_D22.csv", "topmovers_Steinhart_crispra_GD2_D22.npy"),
+    "IFNG":                   ("ground_truth_IFNG.csv",                      "topmovers_IFNG.npy"),
+    "IL2":                    ("ground_truth_IL2.csv",                       "topmovers_IL2.npy"),
+    "Sanchez21":              ("ground_truth_Sanchez21.csv",                 "topmovers_Sanchez21.npy"),
+    "Sanchez21_down":         ("ground_truth_Sanchez21_down.csv",            "topmovers_Sanchez21_down.npy"),
+    "Carnevale22":            ("ground_truth_Carnevale22_Adenosine.csv",     "topmovers_Carnevale22_Adenosine.npy"),
+    "Scharenberg22":          ("ground_truth_Scharenberg22.csv",             "topmovers_Scharenberg22.npy"),
+    "Steinhart":              ("ground_truth_Steinhart_crispra_GD2_D22.csv", "topmovers_Steinhart_crispra_GD2_D22.npy"),
+    "Replogle_K562_essential":("ground_truth_Replogle_K562_essential.csv",   "topmovers_Replogle_K562_essential.npy"),
 }
 
 BATCH_SIZES = {
     "IFNG": 128, "IL2": 128, "Sanchez21": 128, "Sanchez21_down": 128,
     "Carnevale22": 128, "Scharenberg22": 32, "Steinhart": 128,
+    "Replogle_K562_essential": 32,
 }
 
 
@@ -201,15 +203,16 @@ def cross_dataset_eval(
     ppi_sum: dict[str, float],
 ) -> dict:
     """Leave-one-dataset-out evaluation."""
+    # g1_scores are pre-fetched by caller; hub/ppi_sum already include all anchors
+    g1_all = {ds: compute_g1_scores_for_dataset(ds) for ds in all_data}
     results = {}
     for test_ds in all_data:
         train_frames = []
         for ds, df in all_data.items():
             if ds == test_ds:
                 continue
-            g1 = compute_g1_scores_for_dataset(ds)
             a4 = compute_archs4_scores_for_dataset(ds)
-            feats = build_features(df["gene"].tolist(), g1, hub_scores, a4, ppi_sum)
+            feats = build_features(df["gene"].tolist(), g1_all[ds], hub_scores, a4, ppi_sum)
             feats["label"] = df["label"].values
             train_frames.append(feats)
 
@@ -217,9 +220,8 @@ def cross_dataset_eval(
         model = train_model(train_df)
 
         test_df_raw = all_data[test_ds]
-        g1_test = compute_g1_scores_for_dataset(test_ds)
         a4_test = compute_archs4_scores_for_dataset(test_ds)
-        test_feats = build_features(test_df_raw["gene"].tolist(), g1_test, hub_scores, a4_test, ppi_sum)
+        test_feats = build_features(test_df_raw["gene"].tolist(), g1_all[test_ds], hub_scores, a4_test, ppi_sum)
         test_feats["label"] = test_df_raw["label"].values
         bs = BATCH_SIZES[test_ds]
         results[test_ds] = evaluate_model(model, test_feats, test_ds, bs)
@@ -236,14 +238,6 @@ def run(datasets_to_train: list[str] | None = None, eval_only: bool = False):
     essential = load_essential_genes()
     print(f"  CEGv2: {len(essential)} essential genes")
 
-    print("Computing hub scores from PPI cache...")
-    hub_scores = compute_hub_scores()
-    print(f"  Hub scores: {len(hub_scores)} genes scored")
-
-    print("Computing PPI sum scores from cache...")
-    ppi_sum = compute_ppi_sum_from_cache()
-    print(f"  PPI sum scores: {len(ppi_sum)} genes scored")
-
     # Load all datasets
     print("\nLoading datasets...")
     all_data: dict[str, pd.DataFrame] = {}
@@ -252,13 +246,28 @@ def run(datasets_to_train: list[str] | None = None, eval_only: bool = False):
         all_data[ds] = df
         print(f"  {ds}: {len(df)} genes, {df['label'].sum()} hits ({100*df['label'].mean():.1f}%)")
 
+    # Pre-fetch all g1 (PPI) scores first — this populates _ppi_cache for ALL datasets.
+    # hub_scores and ppi_sum must be computed AFTER this loop so they reflect
+    # the complete cache (including any newly added dataset anchors).
+    print("\nPre-fetching STRING PPI for all dataset anchors...")
+    g1_all: dict[str, dict[str, float]] = {}
+    for ds in all_data:
+        g1_all[ds] = compute_g1_scores_for_dataset(ds)
+
+    print("Computing hub scores from PPI cache (post-fetch)...")
+    hub_scores = compute_hub_scores()
+    print(f"  Hub scores: {len(hub_scores)} genes scored")
+
+    print("Computing PPI sum scores from cache (post-fetch)...")
+    ppi_sum = compute_ppi_sum_from_cache()
+    print(f"  PPI sum scores: {len(ppi_sum)} genes scored")
+
     # Build features per dataset
     print("\nBuilding features (ARCHS4 from cache, ppi_sum from cache)...")
     feature_frames: dict[str, pd.DataFrame] = {}
     for ds, df in all_data.items():
-        g1    = compute_g1_scores_for_dataset(ds)
         a4    = compute_archs4_scores_for_dataset(ds)
-        feats = build_features(df["gene"].tolist(), g1, hub_scores, a4, ppi_sum)
+        feats = build_features(df["gene"].tolist(), g1_all[ds], hub_scores, a4, ppi_sum)
         feats["label"]   = df["label"].values
         feats["dataset"] = ds
         feature_frames[ds] = feats

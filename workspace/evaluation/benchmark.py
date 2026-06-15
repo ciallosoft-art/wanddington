@@ -109,6 +109,12 @@ DATASETS: dict[str, dict] = {
         "batch_size": 128,
         "description": "CRISPRa GD2 expression (Steinhart et al.)",
     },
+    "Replogle_K562_essential": {
+        "csv": "ground_truth_Replogle_K562_essential.csv",
+        "npy": "topmovers_Replogle_K562_essential.npy",
+        "batch_size": 32,
+        "description": "K562 CRISPRi essential-gene Perturb-seq (Replogle et al. 2022)",
+    },
 }
 
 # ---------------------------------------------------------------------------

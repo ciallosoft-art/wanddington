@@ -88,6 +88,14 @@ DATASET_ANCHORS: dict[str, list[str]] = {
         "UGCG", "SMPD1",                                 # ceramide/glycolipid metabolism
         "AXIN2", "BATF",                                 # top hits from screen
     ],
+    "Replogle_K562_essential": [
+        "SF3B1", "PRPF8",                                # core spliceosome (hits: SFPQ, SNRPE, RBM25)
+        "MED1", "MED12",                                 # Mediator complex (hits: MED4, MED9, MED21)
+        "CDK9", "BRD4",                                  # P-TEFb/elongation (hits: PAF1, RTF1 complex)
+        "TAL1", "SPI1",                                  # hematopoietic TFs (hit: GATA1 in K562)
+        "PSMD1", "PSMD3",                                # 19S proteasome (hits: PSMD2, PSMC4)
+        "HSPA8",                                         # cytoplasmic chaperone (hit: HSPA5 ER)
+    ],
 }
 
 # ---------------------------------------------------------------------------
