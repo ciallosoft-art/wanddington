@@ -35,7 +35,7 @@ from sklearn.model_selection import StratifiedKFold
 # ---------------------------------------------------------------------------
 
 REPO_ROOT  = Path(__file__).resolve().parents[2]
-BDA_DIR    = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/datasets")
+BDA_DIR    = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
 BDA_CEG    = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
 CACHE_DIR  = Path(__file__).parent / "_ppi_cache"
 MODEL_DIR  = REPO_ROOT / "workspace" / "models"
@@ -118,12 +118,13 @@ DATASETS = {
     "Scharenberg22":          ("ground_truth_Scharenberg22.csv",             "topmovers_Scharenberg22.npy"),
     "Steinhart":              ("ground_truth_Steinhart_crispra_GD2_D22.csv", "topmovers_Steinhart_crispra_GD2_D22.npy"),
     "Replogle_K562_essential":("ground_truth_Replogle_K562_essential.csv",   "topmovers_Replogle_K562_essential.npy"),
+    "Replogle_K562_gwps":     ("ground_truth_Replogle_K562_gwps.csv",        "topmovers_Replogle_K562_gwps.npy"),
 }
 
 BATCH_SIZES = {
     "IFNG": 128, "IL2": 128, "Sanchez21": 128, "Sanchez21_down": 128,
     "Carnevale22": 128, "Scharenberg22": 32, "Steinhart": 128,
-    "Replogle_K562_essential": 32,
+    "Replogle_K562_essential": 32, "Replogle_K562_gwps": 128,
 }
 
 

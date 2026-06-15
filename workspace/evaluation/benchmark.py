@@ -43,16 +43,16 @@ DATA_DIR     = REPO_ROOT / "workspace" / "benchmarks" / "biodiscovery_datasets"
 CEG_PATH     = REPO_ROOT / "workspace" / "benchmarks" / "CEGv2.txt"
 RESULTS_DIR  = REPO_ROOT / "workspace" / "results"
 
-# Fallback: look in the cloned BioDiscoveryAgent repo
-BDA_DIR   = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/datasets")
+# Primary: symlink under workspace/data/bda_benchmark
+BDA_DIR   = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
 BDA_CEG   = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
 
 def _resolve_data_dir() -> Path:
-    if DATA_DIR.exists():
-        return DATA_DIR
     if BDA_DIR.exists():
         return BDA_DIR
-    raise FileNotFoundError(f"Dataset directory not found: {DATA_DIR} or {BDA_DIR}")
+    if DATA_DIR.exists():
+        return DATA_DIR
+    raise FileNotFoundError(f"Dataset directory not found: {BDA_DIR} or {DATA_DIR}")
 
 def _resolve_ceg_path() -> Path:
     if CEG_PATH.exists():
@@ -114,6 +114,12 @@ DATASETS: dict[str, dict] = {
         "npy": "topmovers_Replogle_K562_essential.npy",
         "batch_size": 32,
         "description": "K562 CRISPRi essential-gene Perturb-seq (Replogle et al. 2022)",
+    },
+    "Replogle_K562_gwps": {
+        "csv": "ground_truth_Replogle_K562_gwps.csv",
+        "npy": "topmovers_Replogle_K562_gwps.npy",
+        "batch_size": 128,
+        "description": "K562 genome-wide CRISPRi Perturb-seq (Replogle et al. 2022, 9193 genes)",
     },
 }
 

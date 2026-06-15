@@ -96,6 +96,15 @@ DATASET_ANCHORS: dict[str, list[str]] = {
         "PSMD1", "PSMD3",                                # 19S proteasome (hits: PSMD2, PSMC4)
         "HSPA8",                                         # cytoplasmic chaperone (hit: HSPA5 ER)
     ],
+    "Replogle_K562_gwps": [
+        "MED19", "MED10", "MED17",                       # Mediator core (top 1/2/5 AD hits)
+        "TAF1", "TAF2",                                  # TFIID general transcription (#3/7 hits)
+        "KDM1A",                                         # LSD1 histone demethylase (#6 hit)
+        "MAX",                                           # MYC/MAX network (K562 dependency)
+        "WDR82",                                         # SETD1 complex / H3K4me3
+        "SSRP1",                                         # FACT chromatin remodeling complex
+        "CDK9",                                          # P-TEFb elongation (shared signal)
+    ],
 }
 
 # ---------------------------------------------------------------------------
