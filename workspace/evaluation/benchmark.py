@@ -32,7 +32,7 @@ import pandas as pd
 
 # G1 GeneRanker (Phase 1)
 sys.path.insert(0, str(Path(__file__).parent))
-from gene_ranker import waddington_ranker as _waddington_ranker
+from gene_ranker import waddington_ranker as _waddington_ranker, SequentialWaddingtonRanker
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -408,6 +408,184 @@ def run_trials(
     }
 
 # ---------------------------------------------------------------------------
+# Sequential simulation (10.2)
+# ---------------------------------------------------------------------------
+
+def run_sequential_evaluation(
+    ranker: "SequentialWaddingtonRanker",
+    dataset_name: str,
+    n_rounds: int = 5,
+    filter_essential: bool = True,
+    seed: int = 0,
+) -> dict:
+    """
+    One trial of the true sequential simulation.
+    After each round the oracle reveals hits; ranker.reveal() updates scores.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+
+    universe, hits = load_dataset(dataset_name, filter_essential=filter_essential)
+    batch_size = DATASETS[dataset_name]["batch_size"]
+    total_hits = len(hits)
+    if total_hits == 0:
+        raise ValueError(f"No hits in {dataset_name} after filtering")
+
+    selected: list[str] = []
+    hit_ratios: list[float] = []
+    hits_found: list[int] = []
+
+    for rnd in range(1, n_rounds + 1):
+        remaining = [g for g in universe if g not in set(selected)]
+        if not remaining:
+            break
+
+        batch = ranker(remaining, selected, rnd)
+        batch = list(dict.fromkeys(g for g in batch if g in set(remaining)))[:batch_size]
+
+        # Oracle reveal
+        new_hits = [g for g in batch if g in hits]
+        ranker.reveal(new_hits)
+
+        selected.extend(batch)
+        n_hits = len(set(selected) & hits)
+        hit_ratios.append(n_hits / total_hits)
+        hits_found.append(n_hits)
+
+    auc = float(np.trapezoid(hit_ratios, dx=1.0 / max(len(hit_ratios), 1))
+               if hasattr(np, "trapezoid") else
+               float(np.trapz(hit_ratios, dx=1.0 / max(len(hit_ratios), 1))))
+
+    return {
+        "hit_ratios": hit_ratios,
+        "hits_found": hits_found,
+        "total_hits": total_hits,
+        "auc": auc,
+        "batch_size": batch_size,
+        "n_rounds":   len(hit_ratios),
+    }
+
+
+def run_sequential_trials(
+    ranker: "SequentialWaddingtonRanker",
+    dataset_name: str,
+    n_rounds: int = 5,
+    n_trials: int = 3,
+    filter_essential: bool = True,
+) -> dict:
+    """Multiple seeds; ranker.reset() is called between trials."""
+    all_ratios, all_aucs = [], []
+    last_result = None
+    for seed in range(n_trials):
+        ranker.reset()
+        last_result = run_sequential_evaluation(
+            ranker, dataset_name, n_rounds, filter_essential, seed
+        )
+        all_ratios.append(last_result["hit_ratios"])
+        all_aucs.append(last_result["auc"])
+
+    max_len = max(len(r) for r in all_ratios)
+    padded = [r + [r[-1]] * (max_len - len(r)) for r in all_ratios]
+    return {
+        "mean_hit_ratios": np.mean(padded, axis=0).tolist(),
+        "std_hit_ratios":  np.std(padded,  axis=0).tolist(),
+        "mean_auc":   float(np.mean(all_aucs)),
+        "std_auc":    float(np.std(all_aucs)),
+        "total_hits": last_result["total_hits"],
+        "n_trials":   n_trials,
+    }
+
+
+def run_sequential_comparison(
+    n_rounds: int = 5,
+    n_trials: int = 3,
+    filter_essential: bool = True,
+    datasets: list[str] | None = None,
+) -> dict:
+    """
+    Compare static ranking vs sequential oracle-feedback simulation.
+
+    Static:     one fixed ranking, 5 rounds, no feedback.
+    Sequential: after each round, revealed hits become dynamic PPI anchors
+                that boost their network neighbors in subsequent rounds.
+    """
+    target_datasets = datasets or list(DATASETS.keys())
+
+    print(f"\nSequential Simulation Benchmark (10.2)")
+    print("=" * 90)
+    print(f"  Static vs Sequential | rounds={n_rounds} | trials={n_trials}")
+    print()
+
+    # Pre-create ALL rankers BEFORE any evaluation so that reveal() calls for
+    # dataset N do not contaminate hub_score normalization for dataset N+1.
+    # (reveal() writes new PPI files to _ppi_cache, changing the hub count max.)
+    print("  Initialising rankers...", flush=True)
+    static_rankers: dict[str, object] = {}
+    seq_rankers:    dict[str, "SequentialWaddingtonRanker"] = {}
+    for ds in target_datasets:
+        bs = DATASETS[ds]["batch_size"]
+        static_rankers[ds] = _waddington_ranker(ds, bs, verbose=False)
+        try:
+            seq_rankers[ds] = SequentialWaddingtonRanker(ds, bs, verbose=False)
+        except ValueError as e:
+            print(f"  WARNING: sequential/{ds} skipped at init: {e}")
+    print()
+
+    results: dict[str, dict] = {"static": {}, "sequential": {}}
+    static_finals, seq_finals = [], []
+
+    for ds in target_datasets:
+        bs = DATASETS[ds]["batch_size"]
+
+        # Static waddington (existing approach)
+        static_r = run_trials(
+            static_rankers[ds], ds, n_rounds, n_trials, filter_essential,
+        )
+        results["static"][ds] = static_r
+
+        # Sequential waddington (oracle feedback)
+        if ds not in seq_rankers:
+            results["sequential"][ds] = None
+            continue
+        try:
+            seq_r = run_sequential_trials(seq_rankers[ds], ds, n_rounds, n_trials, filter_essential)
+            results["sequential"][ds] = seq_r
+        except Exception as e:
+            print(f"  WARNING: sequential/{ds} failed: {e}")
+            results["sequential"][ds] = None
+            continue
+
+        sc = [round(x, 3) for x in static_r["mean_hit_ratios"]]
+        sq = [round(x, 3) for x in seq_r["mean_hit_ratios"]]
+        delta_r5 = sq[-1] - sc[-1]
+        pct = 100 * delta_r5 / max(sc[-1], 1e-9)
+        sign = "+" if delta_r5 >= 0 else ""
+
+        static_finals.append(sc[-1])
+        seq_finals.append(sq[-1])
+
+        hdr = "  ".join(f"R{i+1}" for i in range(n_rounds))
+        print(f"  {ds}")
+        print(f"    Rounds:    {hdr}")
+        print(f"    Static:    " + "  ".join(f"{v:.3f}" for v in sc))
+        print(f"    Seq:       " + "  ".join(f"{v:.3f}" for v in sq))
+        print(f"    Δ@R5:      {sign}{delta_r5:.3f} ({sign}{pct:.1f}%)")
+        print()
+
+    # Summary
+    if static_finals and seq_finals:
+        s_avg = float(np.mean(static_finals))
+        q_avg = float(np.mean(seq_finals))
+        d_avg = q_avg - s_avg
+        sign  = "+" if d_avg >= 0 else ""
+        print(f"  {'─'*60}")
+        print(f"  {len(target_datasets)}DS avg  Static={s_avg:.3f}  Sequential={q_avg:.3f}  "
+              f"Δ={sign}{d_avg:.3f} ({sign}{100*d_avg/max(s_avg,1e-9):.1f}%)")
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Built-in rankers
 # ---------------------------------------------------------------------------
 
@@ -670,17 +848,26 @@ if __name__ == "__main__":
                         help="Auto-save results to workspace/results/runs/")
     parser.add_argument("--save",     type=str, default=None,
                         help="Save results JSON to this path (legacy)")
+    parser.add_argument("--sequential", action="store_true",
+                        help="10.2: Sequential simulation — oracle reveals hits between rounds")
     args = parser.parse_args()
 
-    results = run_all(
-        n_rounds=args.rounds,
-        n_trials=args.trials,
-        filter_essential=not args.no_filter_essential,
-        datasets=args.dataset,
-        ranker_name=args.ranker,
-        scramble_genes=args.scramble_genes,
-        auto_save=args.auto_save,
-    )
-
-    if args.save:
-        save_results(results, Path(args.save))
+    if args.sequential:
+        run_sequential_comparison(
+            n_rounds=args.rounds,
+            n_trials=args.trials,
+            filter_essential=not args.no_filter_essential,
+            datasets=args.dataset,
+        )
+    else:
+        results = run_all(
+            n_rounds=args.rounds,
+            n_trials=args.trials,
+            filter_essential=not args.no_filter_essential,
+            datasets=args.dataset,
+            ranker_name=args.ranker,
+            scramble_genes=args.scramble_genes,
+            auto_save=args.auto_save,
+        )
+        if args.save:
+            save_results(results, Path(args.save))
