@@ -24,6 +24,7 @@ from arms.random_arm import RandomArm
 from arms.static_ranker_arm import StaticRankerArm
 from arms.coreset_arm import CoresetArm
 from arms.online_adaptive_arm import OnlineAdaptiveArm
+from arms.llm_reasoning_arm import LLMReasoningArm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -44,6 +45,9 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(CoresetArm(dataset_name, bs, seed=42))
         elif name == "online_adaptive":
             arms.append(OnlineAdaptiveArm(dataset_name, bs))
+        elif name == "llm_reasoning":
+            print(f"    [LLMReasoning] Building StaticRanker fallback + loading task for {dataset_name}...")
+            arms.append(LLMReasoningArm(dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
@@ -172,7 +176,7 @@ def _result_to_dict(r: RunResult) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="V8 sequential oracle evaluation")
     parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS)
-    parser.add_argument("--arms", nargs="+", default=["random", "coreset", "static_ranker", "online_adaptive"])
+    parser.add_argument("--arms", nargs="+", default=["random", "coreset", "static_ranker", "online_adaptive", "llm_reasoning"])
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--seeds", type=int, default=3)
     args = parser.parse_args()
