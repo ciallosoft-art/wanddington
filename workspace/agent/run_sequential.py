@@ -27,6 +27,7 @@ from arms.online_adaptive_arm import OnlineAdaptiveArm
 from arms.llm_reasoning_arm import LLMReasoningArm
 from arms.waddington_arm import WaddingtonArm
 from arms.waddington_v2_arm import WaddingtonV2Arm
+from arms.waddington_v3_arm import WaddingtonV3Arm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -56,6 +57,9 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         elif name == "waddington_v2":
             print(f"    [WaddingtonV2] Building C-arm v2 (weighted ensemble) for {dataset_name}...")
             arms.append(WaddingtonV2Arm(dataset_name, bs))
+        elif name == "waddington_v3":
+            print(f"    [WaddingtonV3] Building C-arm v3 (EMA adaptive weights) for {dataset_name}...")
+            arms.append(WaddingtonV3Arm(dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
@@ -184,7 +188,7 @@ def _result_to_dict(r: RunResult) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="V8 sequential oracle evaluation")
     parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS)
-    parser.add_argument("--arms", nargs="+", default=["random", "coreset", "static_ranker", "online_adaptive", "llm_reasoning", "waddington", "waddington_v2"])
+    parser.add_argument("--arms", nargs="+", default=["random", "coreset", "static_ranker", "online_adaptive", "llm_reasoning", "waddington", "waddington_v2", "waddington_v3"])
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--seeds", type=int, default=3)
     args = parser.parse_args()
