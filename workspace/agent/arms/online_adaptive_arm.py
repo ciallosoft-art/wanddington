@@ -84,6 +84,7 @@ class OnlineAdaptiveArm(BaseArm):
         self._ranking: list[str] = []
         self._revealed_records: list[dict] = []  # {gene, label, features...}
         self._model: lgb.LGBMClassifier | None = None
+        self._scores: dict[str, float] = {}  # gene → current ML probability
 
         # Build initial LOO ranking (Round 0 prior)
         self._rebuild_ranking()
@@ -92,6 +93,7 @@ class OnlineAdaptiveArm(BaseArm):
         self._ranking = []
         self._revealed_records = []
         self._model = None
+        self._scores = {}
         self._rebuild_ranking()
 
     def _train_model(self, extra_records: list[dict]) -> lgb.LGBMClassifier:
@@ -130,6 +132,11 @@ class OnlineAdaptiveArm(BaseArm):
         )[:, 1]
         order = np.argsort(-scores)
         self._ranking = [self._genes[i] for i in order]
+        self._scores = {self._genes[i]: float(scores[i]) for i in range(len(self._genes))}
+
+    def all_scores(self) -> dict[str, float]:
+        """Return current ML confidence scores for all genes (gene → probability)."""
+        return dict(self._scores)
 
     def select(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         remaining = [g for g in self._ranking if g not in self._selected]

@@ -94,10 +94,17 @@ class LLMReasoningArm(BaseArm):
     actual gene pool; unmatched slots fall back to StaticRanker order.
     """
 
-    def __init__(self, dataset_name: str, batch_size: int, seed: int = 42) -> None:
+    def __init__(
+        self,
+        dataset_name: str,
+        batch_size: int,
+        seed: int = 42,
+        memory_entries: list[dict] | None = None,
+    ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
         self._rng = np.random.default_rng(seed)
+        self._memory: list[dict] = memory_entries or []
 
         df = pd.read_csv(TRAINING_DATA_CSV)
         df["gene"] = df["gene"].str.strip().str.upper()
@@ -135,9 +142,26 @@ class LLMReasoningArm(BaseArm):
         self._round_nonhits = []
         self._rng = np.random.default_rng(self._seed)
 
+    def _build_memory_section(self) -> str:
+        if not self._memory:
+            return ""
+        lines = [f"\nCROSS-EXPERIMENT MEMORY ({len(self._memory)} past experiments):"]
+        for i, m in enumerate(self._memory[:4], 1):
+            lines.append(
+                f"\n[{i}] Dataset: {m['dataset']} | Task: {m['task']}\n"
+                f"    Best strategy: {m.get('best_strategy','?')} "
+                f"(top arm: {m.get('best_arm','?')})\n"
+                f"    Key gene families: {', '.join(m.get('top_hit_families',[])[:3])}\n"
+                f"    Insight: {m.get('strategy_insight','')}"
+            )
+        lines.append("\nApply these patterns to the current task.")
+        return "\n".join(lines)
+
     def _build_prompt(self, round_idx: int) -> str:
         task_text = self._task.get("Task", self.dataset_name)
         measurement = self._task.get("Measurement", "")
+
+        memory_section = self._build_memory_section()
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -166,7 +190,7 @@ class LLMReasoningArm(BaseArm):
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-
+{memory_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
 Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
