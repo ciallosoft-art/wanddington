@@ -135,6 +135,23 @@ class OnlineAdaptiveArm(BaseArm):
         remaining = [g for g in self._ranking if g not in self._selected]
         return remaining[: self.batch_size]
 
+    def ranked_candidates(self, n: int, exclude: set[str]) -> list[tuple[str, float]]:
+        """Return top-n unselected genes with their current ML confidence scores."""
+        if self._model is None:
+            return []
+        scores = self._model.predict_proba(
+            self._test_frame[self._available_feats].values
+        )[:, 1]
+        order = np.argsort(-scores)
+        result: list[tuple[str, float]] = []
+        for i in order:
+            if len(result) >= n:
+                break
+            g = self._genes[i]
+            if g not in exclude:
+                result.append((g, float(scores[i])))
+        return result
+
     def update(self, round_idx: int, revealed_new: dict[str, bool]) -> None:
         super().update(round_idx, revealed_new)
 
