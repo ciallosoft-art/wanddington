@@ -22,6 +22,7 @@ sys.path.insert(0, str(REPO_ROOT / "workspace" / "agent"))
 from oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
 from arms.random_arm import RandomArm
 from arms.static_ranker_arm import StaticRankerArm
+from arms.coreset_arm import CoresetArm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -38,6 +39,8 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         elif name == "static_ranker":
             print(f"    [StaticRanker] Building LOO ranking for {dataset_name}...")
             arms.append(StaticRankerArm(dataset_name, bs))
+        elif name == "coreset":
+            arms.append(CoresetArm(dataset_name, bs, seed=42))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
@@ -166,7 +169,7 @@ def _result_to_dict(r: RunResult) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="V8 sequential oracle evaluation")
     parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS)
-    parser.add_argument("--arms", nargs="+", default=["random", "static_ranker"])
+    parser.add_argument("--arms", nargs="+", default=["random", "coreset", "static_ranker"])
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--seeds", type=int, default=3)
     args = parser.parse_args()
