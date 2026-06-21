@@ -100,11 +100,13 @@ class LLMReasoningArm(BaseArm):
         batch_size: int,
         seed: int = 42,
         memory_entries: list[dict] | None = None,
+        temperature: float = LLM_TEMPERATURE,
     ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
         self._rng = np.random.default_rng(seed)
         self._memory: list[dict] = memory_entries or []
+        self._temperature = temperature
 
         df = pd.read_csv(TRAINING_DATA_CSV)
         df["gene"] = df["gene"].str.strip().str.upper()
@@ -209,7 +211,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         response = self._client.messages.create(
             model=LLM_MODEL,
             max_tokens=LLM_MAX_TOKENS,
-            temperature=LLM_TEMPERATURE,
+            temperature=self._temperature,
             messages=[{"role": "user", "content": prompt}],
         )
         text = response.content[0].text.strip()
