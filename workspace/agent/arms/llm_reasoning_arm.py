@@ -219,7 +219,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         if getattr(self, "_inter_call_sleep", 0) > 0:
             time.sleep(self._inter_call_sleep)
 
-        wait = 60
+        wait = 10
         for attempt in range(8):
             try:
                 response = self._client.messages.create(
@@ -229,12 +229,13 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                     messages=[{"role": "user", "content": prompt}],
                 )
                 break
-            except anthropic.RateLimitError:
+            except (anthropic.RateLimitError, anthropic.InternalServerError) as e:
                 if attempt == 7:
                     raise
-                print(f"    [LLM] Rate limit hit (attempt {attempt+1}/8), waiting {wait}s...")
+                err_type = "Rate limit" if isinstance(e, anthropic.RateLimitError) else "Server error (500)"
+                print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
                 time.sleep(wait)
-                wait = min(wait * 2, 600)
+                wait = min(wait * 2, 120)
         text = response.content[0].text.strip()
 
         # Try JSON array parse
