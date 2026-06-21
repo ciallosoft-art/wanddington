@@ -103,6 +103,8 @@ class LLMReasoningArm(BaseArm):
         memory_entries: list[dict] | None = None,
         temperature: float = LLM_TEMPERATURE,
         model: str = LLM_MODEL,
+        training_csv: Path | None = None,
+        extra_feature_cols: list[str] | None = None,
     ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
@@ -111,9 +113,11 @@ class LLMReasoningArm(BaseArm):
         self._temperature = temperature
         self._model = model
 
-        df = pd.read_csv(TRAINING_DATA_CSV)
+        csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
+        df = pd.read_csv(csv_path)
         df["gene"] = df["gene"].str.strip().str.upper()
-        self._all_feats = [c for c in FEATURE_COLS if c in df.columns]
+        all_feats = FEATURE_COLS + (extra_feature_cols or [])
+        self._all_feats = [c for c in all_feats if c in df.columns]
 
         # Gene pool for this dataset
         test_df = df[df["dataset"] == dataset_name].reset_index(drop=True)

@@ -66,11 +66,19 @@ class OnlineAdaptiveArm(BaseArm):
     ranking by incorporating in-experiment feedback.
     """
 
-    def __init__(self, dataset_name: str, batch_size: int) -> None:
+    def __init__(
+        self,
+        dataset_name: str,
+        batch_size: int,
+        training_csv: Path | None = None,
+        extra_feature_cols: list[str] | None = None,
+    ) -> None:
         super().__init__("online_adaptive", dataset_name, batch_size)
-        df = pd.read_csv(TRAINING_DATA_CSV)
+        csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
+        df = pd.read_csv(csv_path)
         df["gene"] = df["gene"].str.strip().str.upper()
-        self._available_feats = [c for c in FEATURE_COLS if c in df.columns]
+        all_feats = FEATURE_COLS + (extra_feature_cols or [])
+        self._available_feats = [c for c in all_feats if c in df.columns]
 
         # LOO train split: all datasets except this one
         self._loo_train: pd.DataFrame = df[df["dataset"] != dataset_name].copy()
