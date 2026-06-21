@@ -67,7 +67,7 @@ HARDCODED_TASKS: dict[str, dict[str, str]] = {
 
 LLM_MODEL = "claude-haiku-4-5-20251001"
 LLM_TEMPERATURE = 0.5
-LLM_MAX_TOKENS = 1200
+LLM_MAX_TOKENS = 1500
 
 
 def _load_auth_token() -> str:
@@ -101,12 +101,14 @@ class LLMReasoningArm(BaseArm):
         seed: int = 42,
         memory_entries: list[dict] | None = None,
         temperature: float = LLM_TEMPERATURE,
+        model: str = LLM_MODEL,
     ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
         self._rng = np.random.default_rng(seed)
         self._memory: list[dict] = memory_entries or []
         self._temperature = temperature
+        self._model = model
 
         df = pd.read_csv(TRAINING_DATA_CSV)
         df["gene"] = df["gene"].str.strip().str.upper()
@@ -209,7 +211,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
     def _call_llm(self, prompt: str) -> list[str]:
         response = self._client.messages.create(
-            model=LLM_MODEL,
+            model=self._model,
             max_tokens=LLM_MAX_TOKENS,
             temperature=self._temperature,
             messages=[{"role": "user", "content": prompt}],
