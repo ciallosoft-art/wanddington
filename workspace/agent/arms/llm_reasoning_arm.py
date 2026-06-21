@@ -211,8 +211,12 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         return prompt
 
     def _call_llm(self, prompt: str) -> list[str]:
+        # Proactive inter-call sleep to stay within rate limits for larger models
+        if getattr(self, "_inter_call_sleep", 0) > 0:
+            time.sleep(self._inter_call_sleep)
+
         wait = 60
-        for attempt in range(6):
+        for attempt in range(8):
             try:
                 response = self._client.messages.create(
                     model=self._model,
@@ -222,11 +226,11 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                 )
                 break
             except anthropic.RateLimitError:
-                if attempt == 5:
+                if attempt == 7:
                     raise
-                print(f"    [LLM] Rate limit hit, waiting {wait}s...")
+                print(f"    [LLM] Rate limit hit (attempt {attempt+1}/8), waiting {wait}s...")
                 time.sleep(wait)
-                wait = min(wait * 2, 300)
+                wait = min(wait * 2, 600)
         text = response.content[0].text.strip()
 
         # Try JSON array parse

@@ -87,6 +87,8 @@ class WaddingtonV9Arm(BaseArm):
             temperature=LLM_TEMPERATURE,
             model=LLM_MODEL,
         )
+        # Sonnet has tighter rate limits; sleep between calls to avoid 429s
+        self._llm._inter_call_sleep = 15
 
     def _on_reset(self) -> None:
         self._online.reset()
