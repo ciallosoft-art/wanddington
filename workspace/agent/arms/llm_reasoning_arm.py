@@ -250,6 +250,88 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                 extra.append(g)
         return extra
 
+    def _build_shortlist_prompt(
+        self, round_idx: int, shortlist: list[tuple[str, float]]
+    ) -> str:
+        """Prompt variant that shows an ML candidate shortlist."""
+        task_text = self._task.get("Task", self.dataset_name)
+        measurement = self._task.get("Measurement", "")
+        memory_section = self._build_memory_section()
+
+        history_lines = []
+        for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
+            hit_str = ", ".join(hits[:20]) + ("..." if len(hits) > 20 else "")
+            nonhit_str = ", ".join(nonhits[:10]) + f"... ({len(nonhits)} total)"
+            history_lines.append(
+                f"Round {r+1} — Hits ({len(hits)}): {hit_str or 'none'} | "
+                f"Non-hits sample: {nonhit_str}"
+            )
+        history_section = ""
+        if history_lines:
+            history_section = "\n\nEXPERIMENTAL FEEDBACK:\n" + "\n".join(history_lines)
+            all_hits = [g for rnd in self._round_hits for g in rnd]
+            if all_hits:
+                history_section += (
+                    f"\n\nCumulative hits so far: {', '.join(all_hits[:30])}"
+                    "\nUse the hit pattern to infer pathways and prioritize next candidates."
+                )
+
+        already_selected = list(self._selected)
+        already_note = ""
+        if already_selected:
+            already_note = (
+                f"\n\nALREADY SELECTED (do NOT repeat): "
+                f"{', '.join(already_selected[:50])}{'...' if len(already_selected) > 50 else ''}"
+            )
+
+        cand_lines = [f"  {g} (ML confidence: {s:.3f})" for g, s in shortlist[:80]]
+        if len(shortlist) > 80:
+            cand_lines.append(f"  ... ({len(shortlist) - 80} more candidates)")
+        shortlist_section = "\n\nML-RANKED CANDIDATE POOL:\n" + "\n".join(cand_lines)
+
+        return f"""You are a CRISPR screen expert selecting genes for a perturbation experiment.
+
+TASK: {task_text}
+MEASUREMENT: {measurement}
+{memory_section}
+You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
+{shortlist_section}
+
+INSTRUCTIONS:
+Select exactly {self.batch_size} genes for this round.
+- Prefer genes from the ML candidate pool above (they are pre-filtered by the model).
+- You MAY also suggest genes NOT in the pool if you have strong biological justification.
+- Use standard HGNC gene symbols. Do not repeat already-selected genes.
+
+Return ONLY a JSON array of {self.batch_size} gene symbols. No explanation.
+Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
+
+    def select_with_shortlist(
+        self, round_idx: int, shortlist: list[tuple[str, float]]
+    ) -> list[str]:
+        """Select batch_size genes from an ML shortlist (two-stage strategy)."""
+        prompt = self._build_shortlist_prompt(round_idx, shortlist)
+        llm_genes = self._call_llm(prompt)
+        matched = self._match_to_pool(llm_genes)
+
+        n_needed = self.batch_size - len(matched)
+        if n_needed > 0:
+            # Fill from ML shortlist in ranked order
+            shortlist_set = set(matched)
+            for g, _ in shortlist:
+                if n_needed <= 0:
+                    break
+                if g not in self._selected and g not in shortlist_set:
+                    matched.append(g)
+                    shortlist_set.add(g)
+                    n_needed -= 1
+        if len(matched) < self.batch_size:
+            # Final fallback: StaticRanker
+            fallback = self._fill_from_static(matched, self.batch_size - len(matched))
+            matched = matched + fallback
+
+        return matched[: self.batch_size]
+
     def select(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         prompt = self._build_prompt(round_idx)
         llm_genes = self._call_llm(prompt)
