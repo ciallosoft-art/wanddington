@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -210,12 +211,22 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         return prompt
 
     def _call_llm(self, prompt: str) -> list[str]:
-        response = self._client.messages.create(
-            model=self._model,
-            max_tokens=LLM_MAX_TOKENS,
-            temperature=self._temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        wait = 60
+        for attempt in range(6):
+            try:
+                response = self._client.messages.create(
+                    model=self._model,
+                    max_tokens=LLM_MAX_TOKENS,
+                    temperature=self._temperature,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                break
+            except anthropic.RateLimitError:
+                if attempt == 5:
+                    raise
+                print(f"    [LLM] Rate limit hit, waiting {wait}s...")
+                time.sleep(wait)
+                wait = min(wait * 2, 300)
         text = response.content[0].text.strip()
 
         # Try JSON array parse
