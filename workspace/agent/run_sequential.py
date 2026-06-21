@@ -32,6 +32,7 @@ from arms.waddington_v4_arm import WaddingtonV4Arm
 from arms.waddington_v5_arm import WaddingtonV5Arm
 from arms.waddington_v6_arm import WaddingtonV6Arm
 from arms.waddington_v7_arm import WaddingtonV7Arm
+from arms.waddington_v8_arm import WaddingtonV8Arm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -76,6 +77,9 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         elif name == "waddington_v7":
             print(f"    [WaddingtonV7] Building C-arm v7 (3-bucket routing + two-stage) for {dataset_name}...")
             arms.append(WaddingtonV7Arm(dataset_name, bs))
+        elif name == "waddington_v8":
+            print(f"    [WaddingtonV8] Building C-arm v8 (two-stage shortlist=384, full display) for {dataset_name}...")
+            arms.append(WaddingtonV8Arm(dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms

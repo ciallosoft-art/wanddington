@@ -284,9 +284,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                 f"{', '.join(already_selected[:50])}{'...' if len(already_selected) > 50 else ''}"
             )
 
-        cand_lines = [f"  {g} (ML confidence: {s:.3f})" for g, s in shortlist[:80]]
-        if len(shortlist) > 80:
-            cand_lines.append(f"  ... ({len(shortlist) - 80} more candidates)")
+        cand_lines = [f"  {g} (ML confidence: {s:.3f})" for g, s in shortlist]
         shortlist_section = "\n\nML-RANKED CANDIDATE POOL:\n" + "\n".join(cand_lines)
 
         return f"""You are a CRISPR screen expert selecting genes for a perturbation experiment.
