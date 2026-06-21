@@ -28,6 +28,7 @@ from arms.llm_reasoning_arm import LLMReasoningArm
 from arms.waddington_arm import WaddingtonArm
 from arms.waddington_v2_arm import WaddingtonV2Arm
 from arms.waddington_v3_arm import WaddingtonV3Arm
+from arms.waddington_v4_arm import WaddingtonV4Arm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -60,6 +61,9 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         elif name == "waddington_v3":
             print(f"    [WaddingtonV3] Building C-arm v3 (EMA adaptive weights) for {dataset_name}...")
             arms.append(WaddingtonV3Arm(dataset_name, bs))
+        elif name == "waddington_v4":
+            print(f"    [WaddingtonV4] Building C-arm v4 (static routing) for {dataset_name}...")
+            arms.append(WaddingtonV4Arm(dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
