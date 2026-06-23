@@ -39,6 +39,7 @@ from arms.waddington_v11_arm import WaddingtonV11Arm
 from arms.waddington_v12_arm import WaddingtonV12Arm
 from arms.waddington_v13_arm import WaddingtonV13Arm
 from arms.waddington_v14_arm import WaddingtonV14Arm
+from arms.waddington_v15_arm import WaddingtonV15Arm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -104,6 +105,9 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         elif name == "waddington_v14":
             print(f"    [WaddingtonV14] Building C-arm v14 (per-dataset optimal features: v1/v2/v3) for {dataset_name}...")
             arms.append(WaddingtonV14Arm(dataset_name, bs))
+        elif name == "waddington_v15":
+            print(f"    [WaddingtonV15] Building C-arm v15 (uncertainty-aware dynamic weights) for {dataset_name}...")
+            arms.append(WaddingtonV15Arm(dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms

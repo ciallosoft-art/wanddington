@@ -352,6 +352,113 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
         return matched[: self.batch_size]
 
+    def _build_confidence_prompt(self, round_idx: int) -> str:
+        """Like _build_prompt but also requests an overall confidence score."""
+        task_text = self._task.get("Task", self.dataset_name)
+        measurement = self._task.get("Measurement", "")
+        memory_section = self._build_memory_section()
+
+        history_lines = []
+        for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
+            hit_str = ", ".join(hits[:20]) + ("..." if len(hits) > 20 else "")
+            nonhit_sample = nonhits[:10]
+            nonhit_str = ", ".join(nonhit_sample) + f"... ({len(nonhits)} total)"
+            history_lines.append(
+                f"Round {r+1} — Hits ({len(hits)}): {hit_str or 'none'} | "
+                f"Non-hits sample: {nonhit_str}"
+            )
+
+        history_section = ""
+        if history_lines:
+            history_section = "\n\nEXPERIMENTAL FEEDBACK FROM PREVIOUS ROUNDS:\n" + "\n".join(history_lines)
+            all_hits = [g for rnd in self._round_hits for g in rnd]
+            if all_hits:
+                history_section += f"\n\nCumulative hits found so far: {', '.join(all_hits[:30])}"
+                history_section += "\nUse the pattern of hits to infer which biological pathways or gene families to prioritize next."
+
+        already_selected = list(self._selected)
+        already_note = ""
+        if already_selected:
+            already_note = f"\n\nALREADY SELECTED (do NOT repeat): {', '.join(already_selected[:50])}{'...' if len(already_selected) > 50 else ''}"
+
+        return f"""You are a CRISPR screen expert selecting genes for a perturbation experiment.
+
+TASK: {task_text}
+MEASUREMENT: {measurement}
+{memory_section}
+You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
+
+Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
+
+Rules:
+- Use standard HGNC gene symbols (e.g., TP53, EGFR, BRCA1)
+- Do not repeat previously selected genes
+- Choose genes most likely to affect the measured phenotype
+- Prioritize biological relevance over coverage
+
+Return ONLY a JSON object with two fields:
+- "genes": an array of exactly {self.batch_size} gene symbols
+- "confidence": your overall confidence (0.0-1.0) that these selections are biologically relevant
+
+Example: {{"genes": ["TP53", "EGFR", "BRCA1", "MYC"], "confidence": 0.75}}
+No explanation, no markdown."""
+
+    def select_with_confidence(
+        self, round_idx: int, revealed: dict[str, bool]
+    ) -> tuple[list[str], float]:
+        """Select genes and return (matched_genes, llm_confidence_0_to_1)."""
+        if getattr(self, "_inter_call_sleep", 0) > 0:
+            time.sleep(self._inter_call_sleep)
+
+        prompt = self._build_confidence_prompt(round_idx)
+        wait = 10
+        response = None
+        for attempt in range(8):
+            try:
+                response = self._client.messages.create(
+                    model=self._model,
+                    max_tokens=LLM_MAX_TOKENS,
+                    temperature=self._temperature,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                break
+            except (anthropic.RateLimitError, anthropic.InternalServerError) as e:
+                if attempt == 7:
+                    raise
+                err_type = "Rate limit" if isinstance(e, anthropic.RateLimitError) else "Server error (500)"
+                print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
+                time.sleep(wait)
+                wait = min(wait * 2, 120)
+
+        text = response.content[0].text.strip()
+        llm_genes: list[str] = []
+        llm_conf: float = 0.5
+
+        try:
+            obj = json.loads(text)
+            if isinstance(obj, dict) and "genes" in obj:
+                llm_genes = [str(g).strip().upper() for g in obj["genes"] if g]
+                raw_conf = obj.get("confidence", 0.5)
+                llm_conf = float(max(0.0, min(1.0, float(raw_conf))))
+            elif isinstance(obj, list):
+                llm_genes = [str(g).strip().upper() for g in obj if g]
+                llm_conf = 0.5
+        except (json.JSONDecodeError, ValueError, TypeError):
+            raw = re.findall(r'\b[A-Z][A-Z0-9\-]{1,9}\b', text)
+            llm_genes = [g.upper() for g in raw]
+            conf_match = re.search(r'"confidence"\s*:\s*([0-9.]+)', text)
+            if conf_match:
+                try:
+                    llm_conf = max(0.0, min(1.0, float(conf_match.group(1))))
+                except ValueError:
+                    pass
+
+        matched = self._match_to_pool(llm_genes)
+        n_needed = self.batch_size - len(matched)
+        if n_needed > 0:
+            matched = matched + self._fill_from_static(matched, n_needed)
+        return matched[: self.batch_size], llm_conf
+
     def select(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         prompt = self._build_prompt(round_idx)
         llm_genes = self._call_llm(prompt)
