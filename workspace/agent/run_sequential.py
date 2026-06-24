@@ -42,6 +42,8 @@ from arms.waddington_v14_arm import WaddingtonV14Arm
 from arms.waddington_v15_arm import WaddingtonV15Arm
 from arms.waddington_v14_no_memory_arm import WaddingtonV14NoMemoryArm
 from arms.waddington_v14_no_llm_arm import WaddingtonV14NoLLMArm
+from arms.waddington_v14_no_ml_arm import WaddingtonV14NoMLArm
+from arms.waddington_v14_shuffled_names_arm import WaddingtonV14ShuffledNamesArm
 from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -116,6 +118,12 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         elif name == "waddington_v14_no_llm":
             print(f"    [WaddingtonV14-NoLLM] Building C-LLM ablation for {dataset_name}...")
             arms.append(WaddingtonV14NoLLMArm(dataset_name, bs))
+        elif name == "waddington_v14_no_ml":
+            print(f"    [WaddingtonV14-NoML] Building C-ML ablation for {dataset_name}...")
+            arms.append(WaddingtonV14NoMLArm(dataset_name, bs))
+        elif name == "waddington_v14_shuffled_names":
+            print(f"    [WaddingtonV14-ShuffledNames] Building shuffled-names ablation for {dataset_name}...")
+            arms.append(WaddingtonV14ShuffledNamesArm(dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
