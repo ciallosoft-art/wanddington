@@ -229,10 +229,15 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                     messages=[{"role": "user", "content": prompt}],
                 )
                 break
-            except (anthropic.RateLimitError, anthropic.InternalServerError) as e:
+            except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.OverloadedError) as e:
                 if attempt == 7:
                     raise
-                err_type = "Rate limit" if isinstance(e, anthropic.RateLimitError) else "Server error (500)"
+                if isinstance(e, anthropic.RateLimitError):
+                    err_type = "Rate limit"
+                elif isinstance(e, anthropic.OverloadedError):
+                    err_type = "Overloaded (529)"
+                else:
+                    err_type = "Server error (500)"
                 print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
                 time.sleep(wait)
                 wait = min(wait * 2, 120)
@@ -422,10 +427,15 @@ No explanation, no markdown."""
                     messages=[{"role": "user", "content": prompt}],
                 )
                 break
-            except (anthropic.RateLimitError, anthropic.InternalServerError) as e:
+            except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.OverloadedError) as e:
                 if attempt == 7:
                     raise
-                err_type = "Rate limit" if isinstance(e, anthropic.RateLimitError) else "Server error (500)"
+                if isinstance(e, anthropic.RateLimitError):
+                    err_type = "Rate limit"
+                elif isinstance(e, anthropic.OverloadedError):
+                    err_type = "Overloaded (529)"
+                else:
+                    err_type = "Server error (500)"
                 print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
                 time.sleep(wait)
                 wait = min(wait * 2, 120)
