@@ -1,21 +1,21 @@
 """
-WaddingtonV7Arm — C-arm v7: three-bucket routing.
+WaddingtonV12Arm — C-arm v12: fix Steinhart routing.
 
-Extends V17 (WaddingtonV6) with a third routing bucket for medium-pool
-high-hit-rate datasets (Replogle_gwps), where ML pre-filtering followed
-by LLM selection from the shortlist outperforms the free-pick ensemble:
+V22 found Steinhart regressing (-0.030 vs V19) because:
+- n=18144 > 15000 but hit_rate=0.80% < 2%
+- Routing fell to baseline (w_ml=0.60, w_llm=0.40)
+- LLM (40% weight) doesn't know GD2 CRISPRa biology → noise
 
-  n_genes > 15000 & hit_rate 2-7%    → ml_heavy  (0.80/0.20 ensemble)
-  3000 < n_genes ≤ 15000, hr > 8%   → two_stage (ML top-512 → LLM pick)
-  everything else                    → baseline  (0.60/0.40 ensemble)
+Fix: extend ml_heavy to ALL n>15000 datasets, regardless of hit_rate.
 
-Dataset assignments:
-  ml_heavy  : IFNG, IL2, Sanchez21, Sanchez21_down, Carnevale22
-  two_stage : Replogle_gwps
-  baseline  : Scharenberg22, Steinhart, Replogle_essential
+Routing (changed from V11):
+  n_genes > 15000                     → ml_heavy  (0.80/0.20)   ← Steinhart+gwps
+  3000 < n_genes ≤ 15000, hr > 8%    → two_stage (ML top-384 → LLM pick)
+  everything else                     → baseline  (0.60/0.40)
 
-All LLM calls use temperature=0 (from V17) and cross-experiment memory.
-Expected: Replogle_gwps recovers from V17=0.254 toward V12=0.290; avg ~0.240.
+Feature selection (same as V11):
+  Replogle_K562_essential → v1 (no DepMap)
+  all other 8 datasets    → v2 (+ DepMap 3 features)
 """
 
 from __future__ import annotations
@@ -24,17 +24,22 @@ from pathlib import Path
 
 import pandas as pd
 
-from .base import BaseArm
-from .online_adaptive_arm import OnlineAdaptiveArm
-from .llm_reasoning_arm import LLMReasoningArm
-from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
+from ..base import BaseArm
+from ..online_adaptive_arm import OnlineAdaptiveArm
+from ..llm_reasoning_arm import LLMReasoningArm
+from ..waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
-MEMORY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
+REPO_ROOT         = Path(__file__).resolve().parents[3]
+TRAINING_DATA_V1  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+TRAINING_DATA_V2  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data_v2.csv"
+MEMORY_PATH       = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
 
-LLM_TEMPERATURE  = 0.0
-SHORTLIST_SIZE   = 512   # ML top-K candidates shown to LLM in two-stage
+DEPMAP_EXTRA_FEATS = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm"]
+DEPMAP_EXCLUDED    = {"Replogle_K562_essential"}
+
+LLM_TEMPERATURE = 0.0
+LLM_MODEL       = "claude-haiku-4-5-20251001"
+SHORTLIST_SIZE  = 384
 
 W_ML_LARGE    = 0.80
 W_LLM_LARGE   = 0.20
@@ -43,7 +48,8 @@ W_LLM_DEFAULT = 0.40
 
 
 def _get_dataset_stats(dataset_name: str) -> tuple[int, int]:
-    df = pd.read_csv(TRAINING_DATA_CSV)
+    csv = TRAINING_DATA_V1 if dataset_name in DEPMAP_EXCLUDED else TRAINING_DATA_V2
+    df = pd.read_csv(csv)
     df["gene"] = df["gene"].str.strip().str.upper()
     sub = df[df["dataset"] == dataset_name]
     return len(sub), int(sub["label"].sum())
@@ -51,15 +57,15 @@ def _get_dataset_stats(dataset_name: str) -> tuple[int, int]:
 
 def _classify(n_genes: int, n_hits: int) -> str:
     hit_rate = n_hits / max(n_genes, 1)
-    if n_genes > 15000 and 0.02 < hit_rate < 0.07:
+    if n_genes > 15000:
         return "ml_heavy"
     if 3000 < n_genes <= 15000 and hit_rate > 0.08:
         return "two_stage"
     return "baseline"
 
 
-class WaddingtonV7Arm(BaseArm):
-    """Three-bucket routing: ml_heavy / two_stage / baseline, all temp=0."""
+class WaddingtonV12Arm(BaseArm):
+    """Three-bucket routing with ml_heavy extended to all large-pool datasets."""
 
     def __init__(
         self,
@@ -67,7 +73,11 @@ class WaddingtonV7Arm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v7", dataset_name, batch_size)
+        super().__init__("waddington_v12", dataset_name, batch_size)
+
+        use_depmap = dataset_name not in DEPMAP_EXCLUDED
+        training_csv = TRAINING_DATA_V2 if use_depmap else TRAINING_DATA_V1
+        extra_feats = DEPMAP_EXTRA_FEATS if use_depmap else []
 
         n_genes, n_hits = _get_dataset_stats(dataset_name)
         self._route = _classify(n_genes, n_hits)
@@ -76,7 +86,11 @@ class WaddingtonV7Arm(BaseArm):
         else:
             self._w_ml, self._w_llm = W_ML_DEFAULT, W_LLM_DEFAULT
 
-        self._online = OnlineAdaptiveArm(dataset_name, batch_size)
+        self._online = OnlineAdaptiveArm(
+            dataset_name, batch_size,
+            training_csv=training_csv,
+            extra_feature_cols=extra_feats,
+        )
 
         task = _load_task(dataset_name)
         raw_memory = _load_memory(memory_path, exclude_dataset=dataset_name)
@@ -85,6 +99,9 @@ class WaddingtonV7Arm(BaseArm):
             dataset_name, batch_size,
             memory_entries=memory,
             temperature=LLM_TEMPERATURE,
+            model=LLM_MODEL,
+            training_csv=training_csv,
+            extra_feature_cols=extra_feats,
         )
 
     def _on_reset(self) -> None:

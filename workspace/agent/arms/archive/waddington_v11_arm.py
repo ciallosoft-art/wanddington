@@ -25,10 +25,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from .base import BaseArm
-from .online_adaptive_arm import OnlineAdaptiveArm
-from .llm_reasoning_arm import LLMReasoningArm
-from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
+from ..base import BaseArm
+from ..online_adaptive_arm import OnlineAdaptiveArm
+from ..llm_reasoning_arm import LLMReasoningArm
+from ..waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 
 REPO_ROOT         = Path(__file__).resolve().parents[3]
 TRAINING_DATA_V1  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"

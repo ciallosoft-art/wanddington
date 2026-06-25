@@ -1,22 +1,20 @@
 """
-WaddingtonV5Arm — C-arm v5: two-bucket routing.
+WaddingtonV6Arm — C-arm v6: two-bucket routing + LLM temperature=0.
 
-Simplifies V15 (WaddingtonV4)'s four-bucket routing to two buckets based on
-the finding that w_llm > 0.5 eliminates ML's ability to filter LLM's bad picks:
+Identical to WaddingtonV5 (V16) except LLM uses temperature=0.0 (greedy
+decoding) instead of 0.5, eliminating ±0.020 per-dataset variance from
+LLM stochasticity observed across V13/V15/V16 for identical routing weights.
 
-  large genome-wide screen (n_genes > 15000, hit_rate 2-7%)
-      → ML-heavy (0.80, 0.20)
+With temperature=0:
+  - Same prompt → same output every time
+  - 3 seeds still run (ML online learning varies by revealed sequence order,
+    but LLM picks are identical across seeds)
+  - Cross-run comparison becomes reliable: noise from routing/weighting
+    changes is no longer confounded with LLM sampling randomness
 
-  everything else
-      → V13 baseline (0.60, 0.40)
-
-Routing assignments (9 BDA datasets):
-  ML-heavy  (0.80/0.20): IFNG, IL2, Sanchez21, Sanchez21_down, Carnevale22
-  Baseline  (0.60/0.40): Scharenberg22, Steinhart, Replogle_essential, Replogle_gwps
-
-Expected: avg hit@R5 ≈ 0.241 (V13=0.232, V15=0.234).
-Recovers V13 records: Steinhart ~0.163, Replogle_essential ~0.582.
-Keeps V15 ML gains: IL2 ~0.313, Sanchez21 ~0.080.
+Routing (same as WaddingtonV5):
+  n_genes > 15000 & hit_rate 2-7%  →  (0.80, 0.20)  ML-heavy
+  everything else                  →  (0.60, 0.40)  V13 baseline
 """
 
 from __future__ import annotations
@@ -25,18 +23,20 @@ from pathlib import Path
 
 import pandas as pd
 
-from .base import BaseArm
-from .online_adaptive_arm import OnlineAdaptiveArm
-from .llm_reasoning_arm import LLMReasoningArm
-from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
+from ..base import BaseArm
+from ..online_adaptive_arm import OnlineAdaptiveArm
+from ..llm_reasoning_arm import LLMReasoningArm
+from ..waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
 MEMORY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
 
-W_ML_LARGE   = 0.80   # large genome-wide screens: ML dominates
-W_LLM_LARGE  = 0.20
-W_ML_DEFAULT = 0.60   # V13 baseline: ML still filters LLM bad picks
+LLM_TEMPERATURE = 0.0   # deterministic output
+
+W_ML_LARGE    = 0.80
+W_LLM_LARGE   = 0.20
+W_ML_DEFAULT  = 0.60
 W_LLM_DEFAULT = 0.40
 
 
@@ -54,11 +54,8 @@ def _route_weights(n_genes: int, n_hits: int) -> tuple[float, float]:
     return W_ML_DEFAULT, W_LLM_DEFAULT
 
 
-class WaddingtonV5Arm(BaseArm):
-    """
-    C-arm v5: dual-signal weighted ensemble (identical to V13/V14/V15) with
-    two-bucket static routing. Weights are fixed at init — no online learning.
-    """
+class WaddingtonV6Arm(BaseArm):
+    """V16 two-bucket routing + LLM temperature=0 for stable, noise-free picks."""
 
     def __init__(
         self,
@@ -66,7 +63,7 @@ class WaddingtonV5Arm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v5", dataset_name, batch_size)
+        super().__init__("waddington_v6", dataset_name, batch_size)
 
         n_genes, n_hits = _get_dataset_stats(dataset_name)
         self._w_ml, self._w_llm = _route_weights(n_genes, n_hits)
@@ -76,7 +73,11 @@ class WaddingtonV5Arm(BaseArm):
         task = _load_task(dataset_name)
         raw_memory = _load_memory(memory_path, exclude_dataset=dataset_name)
         memory = _rank_memory_by_relevance(raw_memory, task)[:4]
-        self._llm = LLMReasoningArm(dataset_name, batch_size, memory_entries=memory)
+        self._llm = LLMReasoningArm(
+            dataset_name, batch_size,
+            memory_entries=memory,
+            temperature=LLM_TEMPERATURE,
+        )
 
     def _on_reset(self) -> None:
         self._online.reset()

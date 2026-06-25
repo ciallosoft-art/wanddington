@@ -1,20 +1,21 @@
 """
-WaddingtonV9Arm — C-arm v9: three-bucket routing + Sonnet LLM.
+WaddingtonV10Arm — C-arm v10: DepMap-enriched ML features.
 
-Identical to WaddingtonV8Arm (V19) in routing logic, weights, memory,
-temperature, and shortlist strategy. Single change: LLM model upgraded
-from claude-haiku-4-5-20251001 to claude-sonnet-4-6 for stronger
-biological reasoning ability.
+Identical to WaddingtonV8Arm (V19) in routing, weights, LLM settings,
+and shortlist strategy. Single change: LOO LightGBM trained on 12 features
+instead of 9, with 3 new DepMap-derived features:
 
-Routing (same as V8/V19):
-  n_genes > 15000 & hit_rate 2-7%    → ml_heavy  (0.80/0.20 ensemble)
-  3000 < n_genes ≤ 15000, hr > 8%   → two_stage (ML top-384 → LLM pick)
-  everything else                    → baseline  (0.60/0.40 ensemble)
+  depmap_frac_ess   — fraction of 1178 cell lines with Chronos ≤ -0.5
+  depmap_mean_norm  — normalized mean Chronos score (0=not essential, 1=pan-essential)
+  depmap_min_norm   — normalized min Chronos score across all cell lines
 
-Expected gains (vs V19 Haiku):
-  baseline: Steinhart, Scharenberg22, Replogle_essential — largest gains
-  two_stage: Replogle_gwps — moderate gains from better shortlist reasoning
-  ml_heavy: IFNG, IL2, etc. — smaller gains (LLM weight=0.20 only)
+LOO AUC improvement (new vs old features):
+  Replogle_gwps:   0.652 → 0.751 (+0.099)
+  Scharenberg22:   0.712 → 0.792 (+0.080)
+  IL2:             0.733 → 0.790 (+0.057)
+  Sanchez21:       0.564 → 0.599 (+0.035)
+  IFNG:            0.629 → 0.651 (+0.022)
+  Replogle_essential: 0.658 → 0.622 (-0.036, pan-essentiality ≠ K562-specific)
 """
 
 from __future__ import annotations
@@ -23,17 +24,19 @@ from pathlib import Path
 
 import pandas as pd
 
-from .base import BaseArm
-from .online_adaptive_arm import OnlineAdaptiveArm
-from .llm_reasoning_arm import LLMReasoningArm
-from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
+from ..base import BaseArm
+from ..online_adaptive_arm import OnlineAdaptiveArm
+from ..llm_reasoning_arm import LLMReasoningArm
+from ..waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
-MEMORY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
+TRAINING_DATA_V2  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data_v2.csv"
+MEMORY_PATH       = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
 
-LLM_MODEL       = "claude-sonnet-4-6"
+DEPMAP_EXTRA_FEATS = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm"]
+
 LLM_TEMPERATURE = 0.0
+LLM_MODEL       = "claude-haiku-4-5-20251001"
 SHORTLIST_SIZE  = 384
 
 W_ML_LARGE    = 0.80
@@ -43,7 +46,7 @@ W_LLM_DEFAULT = 0.40
 
 
 def _get_dataset_stats(dataset_name: str) -> tuple[int, int]:
-    df = pd.read_csv(TRAINING_DATA_CSV)
+    df = pd.read_csv(TRAINING_DATA_V2)
     df["gene"] = df["gene"].str.strip().str.upper()
     sub = df[df["dataset"] == dataset_name]
     return len(sub), int(sub["label"].sum())
@@ -58,8 +61,8 @@ def _classify(n_genes: int, n_hits: int) -> str:
     return "baseline"
 
 
-class WaddingtonV9Arm(BaseArm):
-    """Three-bucket routing with Sonnet LLM; all else identical to V8."""
+class WaddingtonV10Arm(BaseArm):
+    """Three-bucket routing with DepMap-enriched ML features; LLM unchanged."""
 
     def __init__(
         self,
@@ -67,7 +70,7 @@ class WaddingtonV9Arm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v9", dataset_name, batch_size)
+        super().__init__("waddington_v10", dataset_name, batch_size)
 
         n_genes, n_hits = _get_dataset_stats(dataset_name)
         self._route = _classify(n_genes, n_hits)
@@ -76,7 +79,11 @@ class WaddingtonV9Arm(BaseArm):
         else:
             self._w_ml, self._w_llm = W_ML_DEFAULT, W_LLM_DEFAULT
 
-        self._online = OnlineAdaptiveArm(dataset_name, batch_size)
+        self._online = OnlineAdaptiveArm(
+            dataset_name, batch_size,
+            training_csv=TRAINING_DATA_V2,
+            extra_feature_cols=DEPMAP_EXTRA_FEATS,
+        )
 
         task = _load_task(dataset_name)
         raw_memory = _load_memory(memory_path, exclude_dataset=dataset_name)
@@ -86,9 +93,9 @@ class WaddingtonV9Arm(BaseArm):
             memory_entries=memory,
             temperature=LLM_TEMPERATURE,
             model=LLM_MODEL,
+            training_csv=TRAINING_DATA_V2,
+            extra_feature_cols=DEPMAP_EXTRA_FEATS,
         )
-        # Sonnet has tighter rate limits; sleep between calls to avoid 429s
-        self._llm._inter_call_sleep = 15
 
     def _on_reset(self) -> None:
         self._online.reset()

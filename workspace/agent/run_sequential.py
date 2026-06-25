@@ -1,12 +1,33 @@
 #!/usr/bin/env python3
 """
-V8 entry point: sequential oracle evaluation of all arms on all BDA datasets.
+Sequential oracle evaluation — paper experiment runner.
+
+Runs one or more arms across all BDA benchmark datasets for N seeds
+and reports hit_ratio@R5 per dataset plus averages.
 
 Usage:
-    conda run -n waddington-bio python3 run_sequential.py
-    conda run -n waddington-bio python3 run_sequential.py --datasets IFNG IL2
-    conda run -n waddington-bio python3 run_sequential.py --arms random static_ranker
-    conda run -n waddington-bio python3 run_sequential.py --rounds 5 --seeds 3
+    conda run -n waddington-bio python3 run_sequential.py \\
+        --arms waddington_v14 llm_reasoning coreset \\
+        --seeds 5
+
+Arm names
+---------
+  random                  Random selection baseline
+  coreset                 Coreset diversity-maximising (A arm)
+  static_ranker           LOO LightGBM static prior
+  online_adaptive         PerTurboAgent-style online ML
+  llm_reasoning           Pure LLM reasoning (B arm)
+  waddington_v14          Waddington (C arm, paper final)
+
+Ablation arms:
+  waddington_v14_no_memory    C minus cross-experiment memory
+  waddington_v14_no_llm       C minus LLM (online ML only)
+  waddington_v14_no_ml        C minus online retraining (static LOO + LLM)
+  waddington_v14_shuffled_names  C with anonymous gene identifiers
+
+Development arms (archived, not needed for paper results):
+  waddington, waddington_v2 … waddington_v13, waddington_v15
+  → see workspace/agent/arms/archive/
 """
 
 from __future__ import annotations
@@ -20,33 +41,48 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "workspace" / "agent"))
 
 from oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
+from sequential_runner import RunResult, SequentialRunner
+
+# ── Paper arms ──────────────────────────────────────────────────────────────
 from arms.random_arm import RandomArm
 from arms.static_ranker_arm import StaticRankerArm
 from arms.coreset_arm import CoresetArm
 from arms.online_adaptive_arm import OnlineAdaptiveArm
 from arms.llm_reasoning_arm import LLMReasoningArm
-from arms.waddington_arm import WaddingtonArm
-from arms.waddington_v2_arm import WaddingtonV2Arm
-from arms.waddington_v3_arm import WaddingtonV3Arm
-from arms.waddington_v4_arm import WaddingtonV4Arm
-from arms.waddington_v5_arm import WaddingtonV5Arm
-from arms.waddington_v6_arm import WaddingtonV6Arm
-from arms.waddington_v7_arm import WaddingtonV7Arm
-from arms.waddington_v8_arm import WaddingtonV8Arm
-from arms.waddington_v9_arm import WaddingtonV9Arm
-from arms.waddington_v10_arm import WaddingtonV10Arm
-from arms.waddington_v11_arm import WaddingtonV11Arm
-from arms.waddington_v12_arm import WaddingtonV12Arm
-from arms.waddington_v13_arm import WaddingtonV13Arm
 from arms.waddington_v14_arm import WaddingtonV14Arm
-from arms.waddington_v15_arm import WaddingtonV15Arm
+
+# ── Ablation arms ────────────────────────────────────────────────────────────
 from arms.waddington_v14_no_memory_arm import WaddingtonV14NoMemoryArm
 from arms.waddington_v14_no_llm_arm import WaddingtonV14NoLLMArm
 from arms.waddington_v14_no_ml_arm import WaddingtonV14NoMLArm
 from arms.waddington_v14_shuffled_names_arm import WaddingtonV14ShuffledNamesArm
-from sequential_runner import RunResult, SequentialRunner
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
+
+# Arms available via --arms flag
+_PAPER_ARMS = {
+    "random", "coreset", "static_ranker", "online_adaptive",
+    "llm_reasoning", "waddington_v14",
+    "waddington_v14_no_memory", "waddington_v14_no_llm",
+    "waddington_v14_no_ml", "waddington_v14_shuffled_names",
+}
+
+_ARCHIVE_ARMS = {
+    "waddington", "waddington_v2", "waddington_v3", "waddington_v4",
+    "waddington_v5", "waddington_v6", "waddington_v7", "waddington_v8",
+    "waddington_v9", "waddington_v10", "waddington_v11", "waddington_v12",
+    "waddington_v13", "waddington_v15",
+}
+
+
+def _load_archive_arm(name: str, dataset_name: str, bs: int):
+    """Lazy-load a development-history arm from the archive directory."""
+    import importlib
+    mod = importlib.import_module(f"arms.archive.{name}_arm")
+    cls_name = "".join(p.capitalize() for p in name.split("_")) + "Arm"
+    # e.g. "waddington_v2" → "WaddingtonV2Arm"
+    cls = getattr(mod, cls_name)
+    return cls(dataset_name, bs)
 
 
 def make_arms(dataset_name: str, arm_names: list[str]) -> list:
@@ -58,72 +94,26 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
         if name == "random":
             arms.append(RandomArm(dataset_name, bs, pool, seed=42))
         elif name == "static_ranker":
-            print(f"    [StaticRanker] Building LOO ranking for {dataset_name}...")
             arms.append(StaticRankerArm(dataset_name, bs))
         elif name == "coreset":
             arms.append(CoresetArm(dataset_name, bs, seed=42))
         elif name == "online_adaptive":
             arms.append(OnlineAdaptiveArm(dataset_name, bs))
         elif name == "llm_reasoning":
-            print(f"    [LLMReasoning] Building StaticRanker fallback + loading task for {dataset_name}...")
             arms.append(LLMReasoningArm(dataset_name, bs))
-        elif name == "waddington":
-            print(f"    [Waddington] Building C-arm (ML + memory + LLM) for {dataset_name}...")
-            arms.append(WaddingtonArm(dataset_name, bs))
-        elif name == "waddington_v2":
-            print(f"    [WaddingtonV2] Building C-arm v2 (weighted ensemble) for {dataset_name}...")
-            arms.append(WaddingtonV2Arm(dataset_name, bs))
-        elif name == "waddington_v3":
-            print(f"    [WaddingtonV3] Building C-arm v3 (EMA adaptive weights) for {dataset_name}...")
-            arms.append(WaddingtonV3Arm(dataset_name, bs))
-        elif name == "waddington_v4":
-            print(f"    [WaddingtonV4] Building C-arm v4 (static routing) for {dataset_name}...")
-            arms.append(WaddingtonV4Arm(dataset_name, bs))
-        elif name == "waddington_v5":
-            print(f"    [WaddingtonV5] Building C-arm v5 (two-bucket routing) for {dataset_name}...")
-            arms.append(WaddingtonV5Arm(dataset_name, bs))
-        elif name == "waddington_v6":
-            print(f"    [WaddingtonV6] Building C-arm v6 (routing + temp=0) for {dataset_name}...")
-            arms.append(WaddingtonV6Arm(dataset_name, bs))
-        elif name == "waddington_v7":
-            print(f"    [WaddingtonV7] Building C-arm v7 (3-bucket routing + two-stage) for {dataset_name}...")
-            arms.append(WaddingtonV7Arm(dataset_name, bs))
-        elif name == "waddington_v8":
-            print(f"    [WaddingtonV8] Building C-arm v8 (two-stage shortlist=384, full display) for {dataset_name}...")
-            arms.append(WaddingtonV8Arm(dataset_name, bs))
-        elif name == "waddington_v9":
-            print(f"    [WaddingtonV9] Building C-arm v9 (Sonnet LLM + three-bucket routing) for {dataset_name}...")
-            arms.append(WaddingtonV9Arm(dataset_name, bs))
-        elif name == "waddington_v10":
-            print(f"    [WaddingtonV10] Building C-arm v10 (DepMap features) for {dataset_name}...")
-            arms.append(WaddingtonV10Arm(dataset_name, bs))
-        elif name == "waddington_v11":
-            print(f"    [WaddingtonV11] Building C-arm v11 (selective DepMap: essential→v1) for {dataset_name}...")
-            arms.append(WaddingtonV11Arm(dataset_name, bs))
-        elif name == "waddington_v12":
-            print(f"    [WaddingtonV12] Building C-arm v12 (ml_heavy for all n>15000) for {dataset_name}...")
-            arms.append(WaddingtonV12Arm(dataset_name, bs))
-        elif name == "waddington_v13":
-            print(f"    [WaddingtonV13] Building C-arm v13 (DepMap excluded: essential+Steinhart) for {dataset_name}...")
-            arms.append(WaddingtonV13Arm(dataset_name, bs))
         elif name == "waddington_v14":
-            print(f"    [WaddingtonV14] Building C-arm v14 (per-dataset optimal features: v1/v2/v3) for {dataset_name}...")
             arms.append(WaddingtonV14Arm(dataset_name, bs))
-        elif name == "waddington_v15":
-            print(f"    [WaddingtonV15] Building C-arm v15 (uncertainty-aware dynamic weights) for {dataset_name}...")
-            arms.append(WaddingtonV15Arm(dataset_name, bs))
         elif name == "waddington_v14_no_memory":
-            print(f"    [WaddingtonV14-NoMemory] Building C-memory ablation for {dataset_name}...")
             arms.append(WaddingtonV14NoMemoryArm(dataset_name, bs))
         elif name == "waddington_v14_no_llm":
-            print(f"    [WaddingtonV14-NoLLM] Building C-LLM ablation for {dataset_name}...")
             arms.append(WaddingtonV14NoLLMArm(dataset_name, bs))
         elif name == "waddington_v14_no_ml":
-            print(f"    [WaddingtonV14-NoML] Building C-ML ablation for {dataset_name}...")
             arms.append(WaddingtonV14NoMLArm(dataset_name, bs))
         elif name == "waddington_v14_shuffled_names":
-            print(f"    [WaddingtonV14-ShuffledNames] Building shuffled-names ablation for {dataset_name}...")
             arms.append(WaddingtonV14ShuffledNamesArm(dataset_name, bs))
+        elif name in _ARCHIVE_ARMS:
+            print(f"    [archive] Loading {name} from arms/archive/ ...")
+            arms.append(_load_archive_arm(name, dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
@@ -132,7 +122,7 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
 def print_result(r: RunResult) -> None:
     ratios = "  ".join(f"R{i+1}={v:.3f}" for i, v in enumerate(r.hit_ratio_per_round))
     print(
-        f"  {r.arm_name:20s}  {ratios}  "
+        f"  {r.arm_name:30s}  {ratios}  "
         f"AUC_norm={r.auc_normalized:.3f}  hits={r.cumulative_hits[-1]}/{r.total_hits}"
     )
 
@@ -142,6 +132,7 @@ def run_all(
     arm_names: list[str],
     n_rounds: int,
     n_seeds: int,
+    out_path: Path | None = None,
 ) -> dict:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     all_results: dict[str, dict[str, list]] = {}
@@ -170,7 +161,6 @@ def run_all(
             if not seed_results:
                 continue
 
-            # Average across seeds
             avg_result = _average_results(seed_results)
             ds_results[arm_name] = seed_results
             print_result(avg_result)
@@ -184,24 +174,23 @@ def run_all(
     print(f"\n{'='*60}")
     print("SUMMARY  (hit_ratio @ final round, avg across seeds)")
     print(f"{'='*60}")
-    header = f"{'Dataset':22s}" + "".join(f"  {a:>18s}" for a in arm_names)
+    header = f"{'Dataset':28s}" + "".join(f"  {a:>22s}" for a in arm_names)
     print(header)
     for ds in datasets:
-        row = f"{ds:22s}"
+        row = f"{ds:28s}"
         for arm_name in arm_names:
             if arm_name in all_results.get(ds, {}):
                 seed_results = all_results[ds][arm_name]
                 avg_ratio = sum(r["hit_ratio_per_round"][-1] for r in seed_results) / len(seed_results)
-                row += f"  {avg_ratio:>18.3f}"
+                row += f"  {avg_ratio:>22.3f}"
             else:
-                row += f"  {'N/A':>18s}"
+                row += f"  {'N/A':>22s}"
         print(row)
 
-    # Save results JSON
-    out_path = RESULTS_DIR / "v8_results.json"
-    with open(out_path, "w") as f:
+    save_path = out_path or (RESULTS_DIR / "results.json")
+    with open(save_path, "w") as f:
         json.dump(all_results, f, indent=2)
-    print(f"\nResults saved to {out_path}")
+    print(f"\nResults saved to {save_path}")
 
     return all_results
 
@@ -250,14 +239,28 @@ def _result_to_dict(r: RunResult) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="V8 sequential oracle evaluation")
-    parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS)
-    parser.add_argument("--arms", nargs="+", default=["random", "coreset", "static_ranker", "online_adaptive", "llm_reasoning", "waddington", "waddington_v2", "waddington_v3"])
-    parser.add_argument("--rounds", type=int, default=5)
-    parser.add_argument("--seeds", type=int, default=3)
+    parser = argparse.ArgumentParser(
+        description="Sequential oracle evaluation for paper experiments.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="\n".join([
+            "Paper arms:  " + "  ".join(sorted(_PAPER_ARMS)),
+            "Archive arms (dev history): " + "  ".join(sorted(_ARCHIVE_ARMS)),
+        ]),
+    )
+    parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS,
+                        help="Datasets to evaluate (default: all 9)")
+    parser.add_argument("--arms", nargs="+",
+                        default=["coreset", "llm_reasoning", "waddington_v14"],
+                        help="Arms to run")
+    parser.add_argument("--rounds", type=int, default=5,
+                        help="Number of selection rounds (default: 5)")
+    parser.add_argument("--seeds", type=int, default=5,
+                        help="Number of random seeds (default: 5)")
+    parser.add_argument("--out", type=Path, default=None,
+                        help="Output JSON path (default: workspace/results/sequential/results.json)")
     args = parser.parse_args()
 
-    run_all(args.datasets, args.arms, args.rounds, args.seeds)
+    run_all(args.datasets, args.arms, args.rounds, args.seeds, args.out)
 
 
 if __name__ == "__main__":
