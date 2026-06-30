@@ -1,5 +1,5 @@
 """
-WaddingtonV14ShuffledNamesArm — Ablation: shuffled gene names.
+WaddingtonCShuffledNamesArm — Ablation: shuffled gene names.
 
 Same architecture as V14 (online ML + LLM + routing), but ALL gene names
 passed to the LLM are replaced with anonymous identifiers (GENE_00001, ...).
@@ -26,7 +26,7 @@ from .base import BaseArm
 from .llm_reasoning_arm import LLMReasoningArm, LLM_MAX_TOKENS
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
-from .waddington_v14_arm import (
+from .waddington_c_arm import (
     _get_feature_config,
     _get_dataset_stats,
     _classify,
@@ -223,7 +223,7 @@ Example: ["GENE_00042", "GENE_00137"]"""
         return [self._f2r.get(g, g) for g in result_anon]
 
 
-class WaddingtonV14ShuffledNamesArm(BaseArm):
+class WaddingtonCShuffledNamesArm(BaseArm):
     """C-arm with anonymous gene names passed to LLM. Tests LLM gene-name semantics."""
 
     def __init__(
@@ -232,7 +232,7 @@ class WaddingtonV14ShuffledNamesArm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v14_shuffled_names", dataset_name, batch_size)
+        super().__init__("waddington_c_shuffled_names", dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
         n_genes, n_hits = _get_dataset_stats(dataset_name)

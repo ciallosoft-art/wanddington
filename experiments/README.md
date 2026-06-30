@@ -91,12 +91,12 @@ workspace/agent/
     ├── online_adaptive_arm.py ← PerTurboAgent-style online ML
     ├── llm_reasoning_arm.py  ← B arm: pure LLM reasoning
     ├── waddington_arm.py     ← memory utilities (shared by C arm)
-    ├── waddington_v14_arm.py ← C arm: Waddington (paper final)
+    ├── waddington_c_arm.py ← C arm: Waddington (paper final)
     │
-    ├── waddington_v14_no_memory_arm.py   ← ablation: C − memory
-    ├── waddington_v14_no_llm_arm.py      ← ablation: C − LLM
-    ├── waddington_v14_no_ml_arm.py       ← ablation: C − ML (retrain)
-    ├── waddington_v14_shuffled_names_arm.py ← ablation: shuffled gene names
+    ├── waddington_c_no_memory_arm.py   ← ablation: C − memory
+    ├── waddington_c_no_llm_arm.py      ← ablation: C − LLM
+    ├── waddington_c_no_ml_arm.py       ← ablation: C − ML (retrain)
+    ├── waddington_c_shuffled_names_arm.py ← ablation: shuffled gene names
     │
     └── archive/            ← development-history arms (not needed for paper)
         └── waddington_v{2..13,15}_arm.py
@@ -124,24 +124,24 @@ workspace/results/sequential/
 | LOO-LightGBM | `static_ranker` | Cross-experiment LightGBM prior, static |
 | OnlineAdaptive | `online_adaptive` | PerTurboAgent: LOO prior + in-experiment retraining |
 | LLM Reasoning (B) | `llm_reasoning` | Claude Haiku with LOO-ML fallback |
-| **Waddington (C)** | `waddington_v14` | **Online ML + LLM + DepMap routing (paper method)** |
-| C − memory | `waddington_v14_no_memory` | Ablation: no cross-experiment memory |
-| C − LLM | `waddington_v14_no_llm` | Ablation: online ML only |
-| C − ML | `waddington_v14_no_ml` | Ablation: static LOO prior + LLM |
-| Shuffled names | `waddington_v14_shuffled_names` | Ablation: anonymous gene identifiers |
+| **Waddington (C)** | `waddington_c` | **Online ML + LLM + DepMap routing (paper method)** |
+| C − memory | `waddington_c_no_memory` | Ablation: no cross-experiment memory |
+| C − LLM | `waddington_c_no_llm` | Ablation: online ML only |
+| C − ML | `waddington_c_no_ml` | Ablation: static LOO prior + LLM |
+| Shuffled names | `waddington_c_shuffled_names` | Ablation: anonymous gene identifiers |
 
 ## Custom runs
 
 ```bash
 # Single dataset, 3 seeds
 conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
-    --arms waddington_v14 llm_reasoning \
+    --arms waddington_c llm_reasoning \
     --datasets IFNG \
     --seeds 3
 
 # Quick smoke test (1 dataset, 1 seed)
 conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
-    --arms waddington_v14 \
+    --arms waddington_c \
     --datasets Scharenberg22 \
     --seeds 1
 ```

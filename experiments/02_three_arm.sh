@@ -8,7 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "=== Experiment 02: Three-arm comparison (A vs B vs C) ==="
-echo "Arms: coreset  llm_reasoning  waddington_v14"
+echo "Arms: coreset  llm_reasoning  waddington_c"
 echo "Seeds: 5  |  Rounds: 5  |  Datasets: all 9"
 echo
 
@@ -19,7 +19,7 @@ python3 experiments/setup_auth.py --check || {
 }
 
 conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
-    --arms coreset llm_reasoning waddington_v14 \
+    --arms coreset llm_reasoning waddington_c \
     --seeds 5 \
     --rounds 5 \
     --out workspace/results/sequential/three_arm.json

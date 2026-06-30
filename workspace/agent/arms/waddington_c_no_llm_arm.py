@@ -1,5 +1,5 @@
 """
-WaddingtonV14NoLLMArm — Ablation: C − LLM.
+WaddingtonCNoLLMArm — Ablation: C − LLM.
 
 Identical feature routing to V14 (v1/v2/v3 DepMap), but LLM is removed:
   - weighted route: pure ML ranking (no LLM votes)
@@ -14,7 +14,7 @@ from pathlib import Path
 
 from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
-from .waddington_v14_arm import (
+from .waddington_c_arm import (
     _get_feature_config,
     _get_dataset_stats,
     _classify,
@@ -22,7 +22,7 @@ from .waddington_v14_arm import (
 )
 
 
-class WaddingtonV14NoLLMArm(BaseArm):
+class WaddingtonCNoLLMArm(BaseArm):
     """C − LLM ablation: online adaptive ML only, same DepMap feature routing as V14."""
 
     def __init__(
@@ -31,7 +31,7 @@ class WaddingtonV14NoLLMArm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v14_no_llm", dataset_name, batch_size)
+        super().__init__("waddington_c_no_llm", dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
         n_genes, n_hits = _get_dataset_stats(dataset_name)

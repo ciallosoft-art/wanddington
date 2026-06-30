@@ -7,7 +7,7 @@ and reports hit_ratio@R5 per dataset plus averages.
 
 Usage:
     conda run -n waddington-bio python3 run_sequential.py \\
-        --arms waddington_v14 llm_reasoning coreset \\
+        --arms waddington_c llm_reasoning coreset \\
         --seeds 5
 
 Arm names
@@ -17,13 +17,13 @@ Arm names
   static_ranker           LOO LightGBM static prior
   online_adaptive         PerTurboAgent-style online ML
   llm_reasoning           Pure LLM reasoning (B arm)
-  waddington_v14          Waddington (C arm, paper final)
+  waddington_c            Waddington (C arm, paper final)
 
 Ablation arms:
-  waddington_v14_no_memory    C minus cross-experiment memory
-  waddington_v14_no_llm       C minus LLM (online ML only)
-  waddington_v14_no_ml        C minus online retraining (static LOO + LLM)
-  waddington_v14_shuffled_names  C with anonymous gene identifiers
+  waddington_c_no_memory      C minus cross-experiment memory
+  waddington_c_no_llm         C minus LLM (online ML only)
+  waddington_c_no_ml          C minus online retraining (static LOO + LLM)
+  waddington_c_shuffled_names C with anonymous gene identifiers
 
 Development arms (archived, not needed for paper results):
   waddington, waddington_v2 … waddington_v13, waddington_v15
@@ -49,22 +49,22 @@ from arms.static_ranker_arm import StaticRankerArm
 from arms.coreset_arm import CoresetArm
 from arms.online_adaptive_arm import OnlineAdaptiveArm
 from arms.llm_reasoning_arm import LLMReasoningArm
-from arms.waddington_v14_arm import WaddingtonV14Arm
+from arms.waddington_c_arm import WaddingtonCArm
 
 # ── Ablation arms ────────────────────────────────────────────────────────────
-from arms.waddington_v14_no_memory_arm import WaddingtonV14NoMemoryArm
-from arms.waddington_v14_no_llm_arm import WaddingtonV14NoLLMArm
-from arms.waddington_v14_no_ml_arm import WaddingtonV14NoMLArm
-from arms.waddington_v14_shuffled_names_arm import WaddingtonV14ShuffledNamesArm
+from arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
+from arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
+from arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
+from arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 
 # Arms available via --arms flag
 _PAPER_ARMS = {
     "random", "coreset", "static_ranker", "online_adaptive",
-    "llm_reasoning", "waddington_v14",
-    "waddington_v14_no_memory", "waddington_v14_no_llm",
-    "waddington_v14_no_ml", "waddington_v14_shuffled_names",
+    "llm_reasoning", "waddington_c",
+    "waddington_c_no_memory", "waddington_c_no_llm",
+    "waddington_c_no_ml", "waddington_c_shuffled_names",
 }
 
 _ARCHIVE_ARMS = {
@@ -101,16 +101,16 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(OnlineAdaptiveArm(dataset_name, bs))
         elif name == "llm_reasoning":
             arms.append(LLMReasoningArm(dataset_name, bs))
-        elif name == "waddington_v14":
-            arms.append(WaddingtonV14Arm(dataset_name, bs))
-        elif name == "waddington_v14_no_memory":
-            arms.append(WaddingtonV14NoMemoryArm(dataset_name, bs))
-        elif name == "waddington_v14_no_llm":
-            arms.append(WaddingtonV14NoLLMArm(dataset_name, bs))
-        elif name == "waddington_v14_no_ml":
-            arms.append(WaddingtonV14NoMLArm(dataset_name, bs))
-        elif name == "waddington_v14_shuffled_names":
-            arms.append(WaddingtonV14ShuffledNamesArm(dataset_name, bs))
+        elif name == "waddington_c":
+            arms.append(WaddingtonCArm(dataset_name, bs))
+        elif name == "waddington_c_no_memory":
+            arms.append(WaddingtonCNoMemoryArm(dataset_name, bs))
+        elif name == "waddington_c_no_llm":
+            arms.append(WaddingtonCNoLLMArm(dataset_name, bs))
+        elif name == "waddington_c_no_ml":
+            arms.append(WaddingtonCNoMLArm(dataset_name, bs))
+        elif name == "waddington_c_shuffled_names":
+            arms.append(WaddingtonCShuffledNamesArm(dataset_name, bs))
         elif name in _ARCHIVE_ARMS:
             print(f"    [archive] Loading {name} from arms/archive/ ...")
             arms.append(_load_archive_arm(name, dataset_name, bs))
@@ -250,7 +250,7 @@ def main() -> None:
     parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS,
                         help="Datasets to evaluate (default: all 9)")
     parser.add_argument("--arms", nargs="+",
-                        default=["coreset", "llm_reasoning", "waddington_v14"],
+                        default=["coreset", "llm_reasoning", "waddington_c"],
                         help="Arms to run")
     parser.add_argument("--rounds", type=int, default=5,
                         help="Number of selection rounds (default: 5)")

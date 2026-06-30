@@ -1,7 +1,7 @@
 """
-WaddingtonV14NoMemoryArm — Ablation: C − memory.
+WaddingtonCNoMemoryArm — Ablation: C − memory.
 
-Identical to WaddingtonV14Arm except cross-experiment memory is disabled
+Identical to WaddingtonCArm except cross-experiment memory is disabled
 (memory_entries=[] passed to LLMReasoningArm). Used to quantify how much
 the cross-experiment memory module contributes to C-arm performance.
 """
@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .waddington_v14_arm import (
-    WaddingtonV14Arm,
+from .waddington_c_arm import (
+    WaddingtonCArm,
     _get_feature_config,
     _get_dataset_stats,
     _classify,
@@ -25,7 +25,7 @@ from .waddington_arm import _load_task
 from .base import BaseArm
 
 
-class WaddingtonV14NoMemoryArm(WaddingtonV14Arm):
+class WaddingtonCNoMemoryArm(WaddingtonCArm):
     """C − memory ablation: same as V14 but with no cross-experiment memory."""
 
     def __init__(
@@ -35,7 +35,7 @@ class WaddingtonV14NoMemoryArm(WaddingtonV14Arm):
         memory_path: Path = MEMORY_PATH,
     ) -> None:
         # Call BaseArm directly to set arm name, then rebuild without memory
-        BaseArm.__init__(self, "waddington_v14_no_memory", dataset_name, batch_size)
+        BaseArm.__init__(self, "waddington_c_no_memory", dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
         n_genes, n_hits = _get_dataset_stats(dataset_name)

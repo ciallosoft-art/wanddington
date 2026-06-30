@@ -1,5 +1,5 @@
 """
-WaddingtonV14NoMLArm — Ablation: C − ML (online retraining).
+WaddingtonCNoMLArm — Ablation: C − ML (online retraining).
 
 Same DepMap feature routing and LLM as V14, but the ML component
 never retrains on revealed in-experiment data. Round 0 LOO prior
@@ -19,7 +19,7 @@ from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import LLMReasoningArm
 from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
-from .waddington_v14_arm import (
+from .waddington_c_arm import (
     _get_feature_config,
     _get_dataset_stats,
     _classify,
@@ -40,7 +40,7 @@ class _FrozenOnlineArm(OnlineAdaptiveArm):
         BaseArm.update(self, round_idx, revealed_new)
 
 
-class WaddingtonV14NoMLArm(BaseArm):
+class WaddingtonCNoMLArm(BaseArm):
     """C − ML ablation: static LOO prior + LLM, no online retraining."""
 
     def __init__(
@@ -49,7 +49,7 @@ class WaddingtonV14NoMLArm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v14_no_ml", dataset_name, batch_size)
+        super().__init__("waddington_c_no_ml", dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
         n_genes, n_hits = _get_dataset_stats(dataset_name)

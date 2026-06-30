@@ -1,5 +1,5 @@
 """
-WaddingtonV14Arm — C-arm v14: per-dataset optimal feature version.
+WaddingtonCArm — C-arm v14: per-dataset optimal feature version.
 
 Adds K562-specific DepMap feature (depmap_K562_norm from ACH-000551)
 for datasets where it improves LOO AUC. Three-tier feature routing:
@@ -85,7 +85,7 @@ def _classify(n_genes: int, n_hits: int) -> str:
     return "baseline"
 
 
-class WaddingtonV14Arm(BaseArm):
+class WaddingtonCArm(BaseArm):
     """Three-tier DepMap feature routing for per-dataset optimal ML signal."""
 
     def __init__(
@@ -94,7 +94,7 @@ class WaddingtonV14Arm(BaseArm):
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
     ) -> None:
-        super().__init__("waddington_v14", dataset_name, batch_size)
+        super().__init__("waddington_c", dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
 
