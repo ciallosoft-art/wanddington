@@ -18,6 +18,10 @@ from .waddington_c_arm import (
     LLM_TEMPERATURE,
     LLM_MODEL,
     MEMORY_PATH,
+    W_ML_LARGE,
+    W_LLM_LARGE,
+    W_ML_DEFAULT,
+    W_LLM_DEFAULT,
 )
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import LLMReasoningArm
@@ -42,9 +46,9 @@ class WaddingtonCNoMemoryArm(WaddingtonCArm):
         self._route = _classify(n_genes, n_hits)
 
         if self._route == "ml_heavy":
-            self._w_ml, self._w_llm = 0.80, 0.20
+            self._w_ml, self._w_llm = W_ML_LARGE, W_LLM_LARGE
         else:
-            self._w_ml, self._w_llm = 0.60, 0.40
+            self._w_ml, self._w_llm = W_ML_DEFAULT, W_LLM_DEFAULT
 
         self._online = OnlineAdaptiveArm(
             dataset_name, batch_size,

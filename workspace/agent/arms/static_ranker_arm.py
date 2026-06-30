@@ -52,7 +52,7 @@ class StaticRankerArm(BaseArm):
     """
 
     def __init__(self, dataset_name: str, batch_size: int) -> None:
-        super().__init__("static_ranker_v7", dataset_name, batch_size)
+        super().__init__("static_ranker", dataset_name, batch_size)
         self._ranking: list[str] = self._build_ranking(dataset_name)
         self._pointer: int = 0
 
