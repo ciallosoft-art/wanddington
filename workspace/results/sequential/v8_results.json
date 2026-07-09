@@ -1,847 +1,307 @@
 {
-  "IFNG": {
-    "waddington": [
+  "Replogle_K562_gwps": {
+    "waddington_v14": [
       {
-        "dataset": "IFNG",
-        "arm_name": "waddington",
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14",
         "batch_size": 128,
         "n_rounds": 5,
-        "total_hits": 802,
-        "n_genes": 17785,
+        "total_hits": 924,
+        "n_genes": 9193,
         "hits_per_round": [
-          47,
-          21,
-          25,
-          21,
-          11
-        ],
-        "cumulative_hits": [
-          47,
-          68,
-          93,
-          114,
-          125
-        ],
-        "hit_ratio_per_round": [
-          0.0586,
-          0.0848,
-          0.116,
-          0.1421,
-          0.1559
-        ],
-        "auc_normalized": 0.2328
-      },
-      {
-        "dataset": "IFNG",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 802,
-        "n_genes": 17785,
-        "hits_per_round": [
-          50,
-          22,
-          28,
-          15,
-          17
-        ],
-        "cumulative_hits": [
-          50,
-          72,
-          100,
-          115,
-          132
-        ],
-        "hit_ratio_per_round": [
-          0.0623,
-          0.0898,
-          0.1247,
-          0.1434,
-          0.1646
-        ],
-        "auc_normalized": 0.2443
-      },
-      {
-        "dataset": "IFNG",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 802,
-        "n_genes": 17785,
-        "hits_per_round": [
-          48,
-          29,
-          19,
-          14,
-          18
-        ],
-        "cumulative_hits": [
-          48,
-          77,
-          96,
-          110,
-          128
-        ],
-        "hit_ratio_per_round": [
-          0.0599,
-          0.096,
-          0.1197,
-          0.1372,
-          0.1596
-        ],
-        "auc_normalized": 0.2391
-      }
-    ]
-  },
-  "IL2": {
-    "waddington": [
-      {
-        "dataset": "IL2",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 481,
-        "n_genes": 18273,
-        "hits_per_round": [
-          41,
-          34,
-          25,
-          22,
-          16
-        ],
-        "cumulative_hits": [
-          41,
-          75,
-          100,
-          122,
-          138
-        ],
-        "hit_ratio_per_round": [
-          0.0852,
-          0.1559,
-          0.2079,
-          0.2536,
-          0.2869
-        ],
-        "auc_normalized": 0.2751
-      },
-      {
-        "dataset": "IL2",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 481,
-        "n_genes": 18273,
-        "hits_per_round": [
-          40,
-          24,
-          32,
-          29,
-          19
-        ],
-        "cumulative_hits": [
-          40,
-          64,
-          96,
-          125,
-          144
-        ],
-        "hit_ratio_per_round": [
-          0.0832,
-          0.1331,
-          0.1996,
-          0.2599,
-          0.2994
-        ],
-        "auc_normalized": 0.2711
-      },
-      {
-        "dataset": "IL2",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 481,
-        "n_genes": 18273,
-        "hits_per_round": [
-          42,
-          35,
-          31,
-          18,
-          13
-        ],
-        "cumulative_hits": [
-          42,
-          77,
-          108,
-          126,
-          139
-        ],
-        "hit_ratio_per_round": [
-          0.0873,
-          0.1601,
-          0.2245,
-          0.262,
-          0.289
-        ],
-        "auc_normalized": 0.2844
-      }
-    ]
-  },
-  "Sanchez21": {
-    "waddington": [
-      {
-        "dataset": "Sanchez21",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 859,
-        "n_genes": 17807,
-        "hits_per_round": [
-          13,
-          14,
-          13,
-          15,
-          10
-        ],
-        "cumulative_hits": [
-          13,
-          27,
-          40,
-          55,
-          65
-        ],
-        "hit_ratio_per_round": [
-          0.0151,
-          0.0314,
-          0.0466,
-          0.064,
-          0.0757
-        ],
-        "auc_normalized": 0.1042
-      },
-      {
-        "dataset": "Sanchez21",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 859,
-        "n_genes": 17807,
-        "hits_per_round": [
-          15,
-          9,
-          10,
-          14,
-          13
-        ],
-        "cumulative_hits": [
-          15,
-          24,
-          34,
-          48,
-          61
-        ],
-        "hit_ratio_per_round": [
-          0.0175,
-          0.0279,
-          0.0396,
-          0.0559,
-          0.071
-        ],
-        "auc_normalized": 0.0948
-      },
-      {
-        "dataset": "Sanchez21",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 859,
-        "n_genes": 17807,
-        "hits_per_round": [
-          15,
-          9,
-          13,
-          8,
-          11
-        ],
-        "cumulative_hits": [
-          15,
-          24,
-          37,
-          45,
-          56
-        ],
-        "hit_ratio_per_round": [
-          0.0175,
-          0.0279,
-          0.0431,
-          0.0524,
-          0.0652
-        ],
-        "auc_normalized": 0.0922
-      }
-    ]
-  },
-  "Sanchez21_down": {
-    "waddington": [
-      {
-        "dataset": "Sanchez21_down",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 871,
-        "n_genes": 17807,
-        "hits_per_round": [
-          9,
-          13,
-          18,
-          18,
-          16
-        ],
-        "cumulative_hits": [
-          9,
-          22,
-          40,
-          58,
-          74
-        ],
-        "hit_ratio_per_round": [
-          0.0103,
-          0.0253,
-          0.0459,
-          0.0666,
-          0.085
-        ],
-        "auc_normalized": 0.1057
-      },
-      {
-        "dataset": "Sanchez21_down",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 871,
-        "n_genes": 17807,
-        "hits_per_round": [
-          10,
-          18,
-          16,
-          15,
-          14
-        ],
-        "cumulative_hits": [
-          10,
-          28,
-          44,
-          59,
-          73
-        ],
-        "hit_ratio_per_round": [
-          0.0115,
-          0.0321,
-          0.0505,
-          0.0677,
-          0.0838
-        ],
-        "auc_normalized": 0.1115
-      },
-      {
-        "dataset": "Sanchez21_down",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 871,
-        "n_genes": 17807,
-        "hits_per_round": [
-          14,
-          21,
-          11,
-          12,
-          12
-        ],
-        "cumulative_hits": [
-          14,
-          35,
-          46,
-          58,
-          70
-        ],
-        "hit_ratio_per_round": [
-          0.0161,
-          0.0402,
-          0.0528,
-          0.0666,
-          0.0804
-        ],
-        "auc_normalized": 0.1161
-      }
-    ]
-  },
-  "Carnevale22": {
-    "waddington": [
-      {
-        "dataset": "Carnevale22",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 868,
-        "n_genes": 18224,
-        "hits_per_round": [
-          16,
-          5,
-          8,
-          9,
-          6
-        ],
-        "cumulative_hits": [
-          16,
-          21,
-          29,
-          38,
+          84,
+          69,
+          65,
+          51,
           44
         ],
-        "hit_ratio_per_round": [
-          0.0184,
-          0.0242,
-          0.0334,
-          0.0438,
-          0.0507
+        "cumulative_hits": [
+          84,
+          153,
+          218,
+          269,
+          313
         ],
-        "auc_normalized": 0.0771
+        "hit_ratio_per_round": [
+          0.0909,
+          0.1656,
+          0.2359,
+          0.2911,
+          0.3387
+        ],
+        "auc_normalized": 0.5401
       },
-      {
-        "dataset": "Carnevale22",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 868,
-        "n_genes": 18224,
-        "hits_per_round": [
-          15,
-          9,
-          8,
-          6,
-          5
-        ],
-        "cumulative_hits": [
-          15,
-          24,
-          32,
-          38,
-          43
-        ],
-        "hit_ratio_per_round": [
-          0.0173,
-          0.0276,
-          0.0369,
-          0.0438,
-          0.0495
-        ],
-        "auc_normalized": 0.0792
-      },
-      {
-        "dataset": "Carnevale22",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 868,
-        "n_genes": 18224,
-        "hits_per_round": [
-          19,
-          11,
-          9,
-          7,
-          3
-        ],
-        "cumulative_hits": [
-          19,
-          30,
-          39,
-          46,
-          49
-        ],
-        "hit_ratio_per_round": [
-          0.0219,
-          0.0346,
-          0.0449,
-          0.053,
-          0.0565
-        ],
-        "auc_normalized": 0.0953
-      }
-    ]
-  },
-  "Scharenberg22": {
-    "waddington": [
-      {
-        "dataset": "Scharenberg22",
-        "arm_name": "waddington",
-        "batch_size": 32,
-        "n_rounds": 5,
-        "total_hits": 49,
-        "n_genes": 1029,
-        "hits_per_round": [
-          8,
-          5,
-          3,
-          4,
-          1
-        ],
-        "cumulative_hits": [
-          8,
-          13,
-          16,
-          20,
-          21
-        ],
-        "hit_ratio_per_round": [
-          0.1633,
-          0.2653,
-          0.3265,
-          0.4082,
-          0.4286
-        ],
-        "auc_normalized": 0.3421
-      },
-      {
-        "dataset": "Scharenberg22",
-        "arm_name": "waddington",
-        "batch_size": 32,
-        "n_rounds": 5,
-        "total_hits": 49,
-        "n_genes": 1029,
-        "hits_per_round": [
-          7,
-          6,
-          2,
-          3,
-          3
-        ],
-        "cumulative_hits": [
-          7,
-          13,
-          15,
-          18,
-          21
-        ],
-        "hit_ratio_per_round": [
-          0.1429,
-          0.2653,
-          0.3061,
-          0.3673,
-          0.4286
-        ],
-        "auc_normalized": 0.3246
-      },
-      {
-        "dataset": "Scharenberg22",
-        "arm_name": "waddington",
-        "batch_size": 32,
-        "n_rounds": 5,
-        "total_hits": 49,
-        "n_genes": 1029,
-        "hits_per_round": [
-          8,
-          5,
-          3,
-          3,
-          3
-        ],
-        "cumulative_hits": [
-          8,
-          13,
-          16,
-          19,
-          22
-        ],
-        "hit_ratio_per_round": [
-          0.1633,
-          0.2653,
-          0.3265,
-          0.3878,
-          0.449
-        ],
-        "auc_normalized": 0.3421
-      }
-    ]
-  },
-  "Steinhart": {
-    "waddington": [
-      {
-        "dataset": "Steinhart",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 145,
-        "n_genes": 18144,
-        "hits_per_round": [
-          9,
-          1,
-          2,
-          1,
-          2
-        ],
-        "cumulative_hits": [
-          9,
-          10,
-          12,
-          13,
-          15
-        ],
-        "hit_ratio_per_round": [
-          0.0621,
-          0.069,
-          0.0828,
-          0.0897,
-          0.1034
-        ],
-        "auc_normalized": 0.0833
-      },
-      {
-        "dataset": "Steinhart",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 145,
-        "n_genes": 18144,
-        "hits_per_round": [
-          7,
-          4,
-          2,
-          1,
-          3
-        ],
-        "cumulative_hits": [
-          7,
-          11,
-          13,
-          14,
-          17
-        ],
-        "hit_ratio_per_round": [
-          0.0483,
-          0.0759,
-          0.0897,
-          0.0966,
-          0.1172
-        ],
-        "auc_normalized": 0.0876
-      },
-      {
-        "dataset": "Steinhart",
-        "arm_name": "waddington",
-        "batch_size": 128,
-        "n_rounds": 5,
-        "total_hits": 145,
-        "n_genes": 18144,
-        "hits_per_round": [
-          5,
-          3,
-          4,
-          2,
-          1
-        ],
-        "cumulative_hits": [
-          5,
-          8,
-          12,
-          14,
-          15
-        ],
-        "hit_ratio_per_round": [
-          0.0345,
-          0.0552,
-          0.0828,
-          0.0966,
-          0.1034
-        ],
-        "auc_normalized": 0.0763
-      }
-    ]
-  },
-  "Replogle_K562_essential": {
-    "waddington": [
-      {
-        "dataset": "Replogle_K562_essential",
-        "arm_name": "waddington",
-        "batch_size": 32,
-        "n_rounds": 5,
-        "total_hits": 63,
-        "n_genes": 623,
-        "hits_per_round": [
-          10,
-          9,
-          6,
-          6,
-          1
-        ],
-        "cumulative_hits": [
-          10,
-          19,
-          25,
-          31,
-          32
-        ],
-        "hit_ratio_per_round": [
-          0.1587,
-          0.3016,
-          0.3968,
-          0.4921,
-          0.5079
-        ],
-        "auc_normalized": 0.412
-      },
-      {
-        "dataset": "Replogle_K562_essential",
-        "arm_name": "waddington",
-        "batch_size": 32,
-        "n_rounds": 5,
-        "total_hits": 63,
-        "n_genes": 623,
-        "hits_per_round": [
-          10,
-          9,
-          6,
-          6,
-          1
-        ],
-        "cumulative_hits": [
-          10,
-          19,
-          25,
-          31,
-          32
-        ],
-        "hit_ratio_per_round": [
-          0.1587,
-          0.3016,
-          0.3968,
-          0.4921,
-          0.5079
-        ],
-        "auc_normalized": 0.412
-      },
-      {
-        "dataset": "Replogle_K562_essential",
-        "arm_name": "waddington",
-        "batch_size": 32,
-        "n_rounds": 5,
-        "total_hits": 63,
-        "n_genes": 623,
-        "hits_per_round": [
-          11,
-          7,
-          2,
-          3,
-          7
-        ],
-        "cumulative_hits": [
-          11,
-          18,
-          20,
-          23,
-          30
-        ],
-        "hit_ratio_per_round": [
-          0.1746,
-          0.2857,
-          0.3175,
-          0.3651,
-          0.4762
-        ],
-        "auc_normalized": 0.3592
-      }
-    ]
-  },
-  "Replogle_K562_gwps": {
-    "waddington": [
       {
         "dataset": "Replogle_K562_gwps",
-        "arm_name": "waddington",
+        "arm_name": "waddington_v14",
         "batch_size": 128,
         "n_rounds": 5,
         "total_hits": 924,
         "n_genes": 9193,
         "hits_per_round": [
-          78,
-          48,
-          40,
-          48,
-          57
+          84,
+          69,
+          65,
+          51,
+          44
         ],
         "cumulative_hits": [
-          78,
-          126,
-          166,
-          214,
-          271
+          84,
+          153,
+          218,
+          269,
+          313
         ],
         "hit_ratio_per_round": [
-          0.0844,
-          0.1364,
-          0.1797,
-          0.2316,
-          0.2933
+          0.0909,
+          0.1656,
+          0.2359,
+          0.2911,
+          0.3387
         ],
-        "auc_normalized": 0.4453
+        "auc_normalized": 0.5401
       },
       {
         "dataset": "Replogle_K562_gwps",
-        "arm_name": "waddington",
+        "arm_name": "waddington_v14",
         "batch_size": 128,
         "n_rounds": 5,
         "total_hits": 924,
         "n_genes": 9193,
         "hits_per_round": [
-          90,
-          52,
+          84,
+          69,
+          65,
+          51,
+          44
+        ],
+        "cumulative_hits": [
+          84,
+          153,
+          218,
+          269,
+          313
+        ],
+        "hit_ratio_per_round": [
+          0.0909,
+          0.1656,
+          0.2359,
+          0.2911,
+          0.3387
+        ],
+        "auc_normalized": 0.5401
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          84,
+          69,
+          65,
+          51,
+          44
+        ],
+        "cumulative_hits": [
+          84,
+          153,
+          218,
+          269,
+          313
+        ],
+        "hit_ratio_per_round": [
+          0.0909,
+          0.1656,
+          0.2359,
+          0.2911,
+          0.3387
+        ],
+        "auc_normalized": 0.5401
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          84,
+          69,
+          65,
+          51,
+          44
+        ],
+        "cumulative_hits": [
+          84,
+          153,
+          218,
+          269,
+          313
+        ],
+        "hit_ratio_per_round": [
+          0.0909,
+          0.1656,
+          0.2359,
+          0.2911,
+          0.3387
+        ],
+        "auc_normalized": 0.5401
+      }
+    ],
+    "waddington_v14_shuffled_names": [
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14_shuffled_names",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          80,
+          68,
           59,
-          45,
-          26
+          57,
+          53
         ],
         "cumulative_hits": [
-          90,
-          142,
-          201,
-          246,
-          272
+          80,
+          148,
+          207,
+          264,
+          317
         ],
         "hit_ratio_per_round": [
-          0.0974,
-          0.1537,
-          0.2175,
-          0.2662,
-          0.2944
+          0.0866,
+          0.1602,
+          0.224,
+          0.2857,
+          0.3431
         ],
-        "auc_normalized": 0.4953
+        "auc_normalized": 0.5292
       },
       {
         "dataset": "Replogle_K562_gwps",
-        "arm_name": "waddington",
+        "arm_name": "waddington_v14_shuffled_names",
         "batch_size": 128,
         "n_rounds": 5,
         "total_hits": 924,
         "n_genes": 9193,
         "hits_per_round": [
-          86,
-          50,
-          33,
-          45,
-          48
+          80,
+          68,
+          59,
+          57,
+          53
         ],
         "cumulative_hits": [
-          86,
-          136,
-          169,
-          214,
-          262
+          80,
+          148,
+          207,
+          264,
+          317
         ],
         "hit_ratio_per_round": [
-          0.0931,
-          0.1472,
-          0.1829,
-          0.2316,
-          0.2835
+          0.0866,
+          0.1602,
+          0.224,
+          0.2857,
+          0.3431
         ],
-        "auc_normalized": 0.4516
+        "auc_normalized": 0.5292
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14_shuffled_names",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          80,
+          68,
+          59,
+          57,
+          53
+        ],
+        "cumulative_hits": [
+          80,
+          148,
+          207,
+          264,
+          317
+        ],
+        "hit_ratio_per_round": [
+          0.0866,
+          0.1602,
+          0.224,
+          0.2857,
+          0.3431
+        ],
+        "auc_normalized": 0.5292
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14_shuffled_names",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          80,
+          68,
+          59,
+          57,
+          53
+        ],
+        "cumulative_hits": [
+          80,
+          148,
+          207,
+          264,
+          317
+        ],
+        "hit_ratio_per_round": [
+          0.0866,
+          0.1602,
+          0.224,
+          0.2857,
+          0.3431
+        ],
+        "auc_normalized": 0.5292
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "waddington_v14_shuffled_names",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          80,
+          68,
+          59,
+          57,
+          53
+        ],
+        "cumulative_hits": [
+          80,
+          148,
+          207,
+          264,
+          317
+        ],
+        "hit_ratio_per_round": [
+          0.0866,
+          0.1602,
+          0.224,
+          0.2857,
+          0.3431
+        ],
+        "auc_normalized": 0.5292
       }
     ]
   }

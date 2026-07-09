@@ -14,11 +14,12 @@
       "llm_reasoning": 0.156
     },
     "best_arm": "online_adaptive",
-    "strategy_insight": "The hit genes are heavily enriched in T-cell receptor (TCR) signaling and NF-\u03baB pathway components, suggesting IFNG regulation is dominated by immune activation cascades rather than broad transcriptional regulators. The online_adaptive approach (0.183 hit ratio) substantially outperformed LLM reasoning (0.156), indicating that ML-based feature ranking\u2014likely leveraging PPI connectivity, expression correlation, or functional similarity\u2014was more effective than biological knowledge alone for this task. For similar cytokine production screens, prioritize genes with high network connectivity in immune signaling hubs and use adaptive algorithms that can learn from early-round feedback rather than static biological priors. The surprisingly low performance of coreset selection (0.100) suggests that diversity-based sampling may be suboptimal when hits cluster in specific pathways; instead, exploit pathway concentration through iterative refinement.",
+    "strategy_insight": "The IFNG screen reveals strong enrichment in T-cell receptor (TCR) signaling and NF-\u03baB pathway components, with hits dominated by adaptor proteins (ZAP70, LCP2, GRAP2), kinases (LCK, ITK, MAP4K1), and transcription factors (NFKB2, RELA, REL). Online adaptive selection substantially outperformed static and LLM-based approaches (0.183 vs 0.156 hit ratio), indicating that dynamic feature-based learning from early screening rounds was critical for efficiently navigating the sparse 4.5% hit landscape. For similar cytokine regulation tasks, prioritize ML-driven adaptive strategies that iteratively refine feature importance based on observed hits rather than relying on pre-computed biological knowledge alone. The TCR/NF-\u03baB pathway dominance suggests future screens should leverage known signaling cascade architectures as initial feature sets, but allow the model to discover non-obvious regulatory nodes through sequential feedback rather than static ranking.",
     "top_hit_families": [
-      "T-cell receptor signaling (ZAP70, LCK, CD247, PLCG1, VAV1, ITK)",
-      "NF-\u03baB pathway (NFKB2, RELA, RELB, REL, CHUK)",
-      "T-cell co-stimulation and adhesion (CD28, CD4, CD3D, CD3E, CD3G, CD2, PTPRC)"
+      "T-cell receptor (TCR) signaling cascade",
+      "NF-\u03baB transcription factor pathway",
+      "Protein tyrosine kinase signaling (Src-family and Syk-family kinases)",
+      "Adaptor and scaffolding proteins"
     ],
     "best_strategy": "ml",
     "key_genes": [
@@ -27,7 +28,8 @@
       "NFKB2",
       "RELA",
       "LCK"
-    ]
+    ],
+    "verified": true
   },
   {
     "dataset": "IL2",
@@ -44,22 +46,22 @@
       "llm_reasoning": 0.253
     },
     "best_arm": "online_adaptive",
-    "strategy_insight": "IL-2 production is dominated by T cell receptor (TCR) signaling and IL-2 receptor pathway components, with hits heavily enriched in early TCR signaling (ZAP70, LAT, PLCG1, VAV1), co-stimulation (CD28, CD2), and JAK-STAT signaling (JAK3, STAT5B). The online_adaptive approach (0.314 hit ratio) substantially outperformed LLM reasoning (0.253), suggesting that ML-based feature ranking of PPI connectivity and pathway centrality was more effective than biological knowledge alone for this cytokine production task. For similar screens, prioritize genes with high network connectivity in immune signaling databases and use adaptive ranking that learns from early-round hits rather than relying solely on curated biological knowledge. The surprisingly low performance of coreset selection (0.139) indicates that diversity-based sampling is less effective than connectivity-based ranking for tightly interconnected signaling pathways.",
+    "strategy_insight": "IL-2 production is dominated by T cell receptor (TCR) signaling and IL-2 receptor pathway components, with hits enriched in early TCR activation (ZAP70, LAT, PLCG1), adaptor proteins (GRB2, VAV1, GRAP2), and the IL-2 cytokine axis itself (IL2, IL2RA, IL2RB, IL2RG, JAK3, STAT5B). The online_adaptive strategy significantly outperformed LLM reasoning (0.314 vs 0.253), indicating that ML-based feature learning on actual perturbation data was more effective than static biological priors\u2014likely because it captured non-obvious regulatory dependencies and epistatic interactions specific to IL-2 production dynamics. For similar cytokine/signaling screens, prioritize adaptive ML approaches that learn from early round measurements rather than relying on canonical pathway knowledge alone, but seed the initial pool with known pathway components (TCR, JAK-STAT, PI3K-AKT nodes) to bootstrap signal. The surprisingly low performance of coreset selection (0.139) suggests that diversity-based sampling underperforms for tightly interconnected signaling networks where hub genes dominate the phenotype.",
     "top_hit_families": [
-      "TCR signaling cascade",
-      "IL-2 receptor signaling",
-      "JAK-STAT pathway",
-      "SRC family kinases and adaptors",
-      "T cell co-stimulation"
+      "T cell receptor (TCR) signaling cascade",
+      "IL-2 cytokine and receptor signaling (JAK-STAT)",
+      "Protein tyrosine kinase adaptors and scaffolds",
+      "Phospholipase C and downstream effectors"
     ],
     "best_strategy": "ml",
     "key_genes": [
       "ZAP70",
       "LAT",
-      "PLCG1",
+      "IL2RA",
       "JAK3",
       "STAT5B"
-    ]
+    ],
+    "verified": true
   },
   {
     "dataset": "Sanchez21",
@@ -76,11 +78,11 @@
       "llm_reasoning": 0.06
     },
     "best_arm": "online_adaptive",
-    "strategy_insight": "The hit genes are heavily enriched in vesicular trafficking (VPS family, SNAP29, LAMTOR1), RNA processing (DROSHA, FUS, G3BP2, AGO2), and ubiquitin-proteasome pathways (UBA5, UBE2F, UBE2H, UFC1)\u2014suggesting tau regulation occurs through protein degradation and mRNA metabolism rather than direct tau synthesis. The online_adaptive arm substantially outperformed static_ranker (0.087 vs 0.077) and dramatically exceeded LLM reasoning (0.087 vs 0.060), indicating that dynamic, data-driven feature ranking of protein-protein interactions and functional genomics scores is more effective than static biological knowledge for this task. For similar tau/neurodegeneration screens, prioritize genes with high PPI connectivity to known tau interactors and those annotated in autophagy/lysosomal and RNA granule pathways, then use adaptive ML ranking to refine selection in early rounds rather than relying on curated pathway databases. The surprisingly strong performance of connectivity-based selection suggests that tau regulation is distributed across multiple functional modules rather than concentrated in a single pathway, making adaptive learning essential for efficient hit discovery.",
+    "strategy_insight": "The hit genes are heavily enriched in vesicular trafficking (VPS family, SNAP29, LAMTOR1), RNA processing (DROSHA, FUS, G3BP2, AGO2), and ubiquitin-proteasome pathways (UBA5, UBE2F, UBE2H, UFC1)\u2014suggesting tau regulation occurs through protein degradation and mRNA metabolism rather than direct tau transcription. ML-based online adaptive selection (0.087 hit ratio) substantially outperformed LLM reasoning (0.060), indicating that learned feature patterns from high-dimensional perturbation data are more predictive than static biological knowledge for this task. For similar tau/protein-level screens, prioritize genes with known roles in autophagy, vesicular sorting, and RNA-binding protein networks, but rely on adaptive ML ranking rather than curated pathway databases. A key caveat: the 4.8% baseline hit rate is relatively high, suggesting many indirect modulators exist; future agents should combine ML feature selection with network-based prioritization to avoid false positives from pleiotropic effects.",
     "top_hit_families": [
-      "Vesicular trafficking and SNARE machinery (VPS33A, VPS41, VPS18, VPS39, VPS35, SNAP29, LAMTOR1)",
-      "RNA processing and P-body assembly (DROSHA, FUS, G3BP2, AGO2, CAPRIN1)",
-      "Ubiquitin conjugation and proteasomal degradation (UBA5, UBE2F, UBE2H, UFC1, TRIM28)"
+      "vesicular trafficking and HOPS complex (VPS33A, VPS41, VPS18, VPS39, VPS35)",
+      "RNA processing and RNA-binding proteins (DROSHA, FUS, G3BP2, AGO2, CAPRIN1)",
+      "ubiquitin conjugation and proteasomal degradation (UBA5, UBE2F, UBE2H, UFC1)"
     ],
     "best_strategy": "ml",
     "key_genes": [
@@ -89,7 +91,8 @@
       "DROSHA",
       "FUS",
       "AGO2"
-    ]
+    ],
+    "verified": true
   },
   {
     "dataset": "Sanchez21_down",
@@ -106,21 +109,22 @@
       "llm_reasoning": 0.069
     },
     "best_arm": "online_adaptive",
-    "strategy_insight": "Tau reduction is primarily achieved through genes in ubiquitin-proteasome degradation (UBE2 family, UBA3, UPF3B), vesicular trafficking (RAB11A, VPS45, TBC1D15, EXOC2), and RNA-binding proteins (ELAVL1, TIAL1, FUS) that likely regulate tau mRNA stability or translation. The online_adaptive arm substantially outperformed static and LLM-based approaches (0.101 vs 0.069 hit ratio), indicating that iterative ML refinement of feature importance\u2014rather than fixed biological priors\u2014better captures the complex, multi-pathway nature of tau regulation. For future similar tasks, prioritize adaptive machine learning strategies that can dynamically weight PPI connectivity, protein degradation pathway membership, and RNA-binding capacity rather than relying on pre-specified biological knowledge. A key caveat is that the 4.9% hit rate and dominance of connectivity-based hits suggest many true positives may be indirect regulators; validation should confirm direct tau-lowering mechanisms rather than assuming pathway membership predicts function.",
+    "strategy_insight": "The hit genes are heavily enriched in vesicular trafficking (RAB11A, VPS45, TBC1D15, EXOC2, ARL8B), ubiquitin-proteasome system (UBA3, UBE2F, UBE2D2, UBE2C, UBE2E1, UBE2J1), and RNA-binding proteins (ELAVL1, TIAL1, FUS), suggesting tau reduction occurs through enhanced protein degradation and clearance pathways rather than transcriptional suppression. The online_adaptive arm significantly outperformed static and LLM-based approaches (0.101 vs 0.069 hit_ratio), indicating that ML-driven sequential feature learning\u2014which can dynamically identify non-obvious gene interaction patterns and pathway synergies\u2014is superior to static biological reasoning for this task. For future similar screens, prioritize ML-based ranking systems that can iteratively refine feature importance based on early-round hits, and seed the model with genes annotated for protein degradation and intracellular trafficking rather than relying on curated tau-specific knowledge. The surprisingly low LLM performance (0.069) suggests that explicit biological knowledge about tau pathology may introduce confirmation bias; adaptive ML avoids this by discovering unexpected pathway combinations.",
     "top_hit_families": [
-      "ubiquitin-conjugating enzymes (UBE2 family)",
-      "vesicular trafficking and RAB GTPases",
-      "RNA-binding proteins and mRNA stability",
-      "ubiquitin-proteasome system"
+      "vesicular_trafficking_and_endosomal_sorting",
+      "ubiquitin_proteasome_system",
+      "RNA_binding_proteins",
+      "small_GTPase_signaling"
     ],
     "best_strategy": "ml",
     "key_genes": [
-      "UBE2D2",
       "RAB11A",
+      "VPS45",
+      "UBA3",
       "ELAVL1",
-      "UPF3B",
-      "VPS45"
-    ]
+      "FUS"
+    ],
+    "verified": true
   },
   {
     "dataset": "Carnevale22",
@@ -137,12 +141,13 @@
       "llm_reasoning": 0.058
     },
     "best_arm": "llm_reasoning",
-    "strategy_insight": "This screen reveals that adenosine-mediated immunosuppression is primarily counteracted by disrupting adenosine signaling (ADORA2A), purine metabolism (NT5C1B, NT5C2, ENTPD3, AMPD3, UCK1, ATIC), and cAMP/PKA regulatory pathways (PRKAR1B, AKAP12, PRKX). LLM reasoning substantially outperformed ML-based approaches (0.058 vs 0.054 hit ratio), likely because the task requires integrating mechanistic knowledge about adenosine biology and T cell signaling rather than pattern recognition from connectivity alone. For similar immunosuppression-reversal screens, prioritize genes in purine metabolism and G-protein coupled receptor signaling pathways, and leverage LLM-guided selection that can reason about pathway crosstalk and drug-target interactions. The high hit rate (4.8%) suggests this is a well-defined biological problem where mechanistic reasoning provides significant advantage over data-driven approaches.",
+    "strategy_insight": "This screen reveals that adenosine-mediated immunosuppression is primarily counteracted by disrupting adenosine signaling (ADORA2A), purine metabolism (NT5C1B, NT5C2, ENTPD3, UCK1, AMPD3), and cAMP/PKA regulatory pathways (PRKAR1B, AKAP12, PRKX). LLM reasoning substantially outperformed ML feature-based approaches (0.058 vs 0.048 hit ratio), likely because the biological mechanism\u2014blocking adenosine receptor signaling and downstream cAMP accumulation\u2014requires mechanistic domain knowledge rather than statistical pattern recognition alone. For similar immunosuppression-reversal tasks, prioritize genes in purine metabolism and G-protein coupled receptor signaling pathways, and employ LLM-guided selection that explicitly reasons about the immunosuppressive mechanism rather than relying solely on connectivity or learned features. The relatively modest performance gap between best and random (2.4x) suggests the hit space is somewhat distributed, requiring strong biological priors to efficiently navigate.",
     "top_hit_families": [
       "adenosine signaling and GPCR pathways",
-      "purine metabolism and nucleotide processing",
-      "cAMP/PKA signaling and kinase regulation",
-      "vacuolar ATPase and ion channel regulation"
+      "purine/nucleotide metabolism",
+      "cAMP/PKA signaling and scaffolding",
+      "vacuolar ATPase and ion transport",
+      "kinase signaling (MAPK, CDK)"
     ],
     "best_strategy": "llm",
     "key_genes": [
@@ -151,7 +156,8 @@
       "PRKAR1B",
       "ENTPD3",
       "ATP6V0D1"
-    ]
+    ],
+    "verified": true
   },
   {
     "dataset": "Scharenberg22",
@@ -168,22 +174,22 @@
       "llm_reasoning": 0.469
     },
     "best_arm": "llm_reasoning",
-    "strategy_insight": "Autophagy and vesicular trafficking pathways dominate the hit list, with ATG genes (ATG9A, ATG3, ATG13, ATG7), AP complexes (AP3D1, AP3B1), and Rab/SNARE machinery (RAB7A, SCFD1, VPS29) representing core lysosomal recycling machinery. LLM reasoning substantially outperformed static ranking (0.469 vs 0.449 hit_ratio), likely because it could integrate prior knowledge of autophagy-lysosome biology to prioritize genes with mechanistic relevance to choline recycling rather than relying solely on connectivity metrics. For similar endolysosomal screens, prioritize genes annotated in autophagy, membrane trafficking, and lipid metabolism ontologies early, as these biological contexts appear more predictive than network topology alone. A surprising finding is the prominence of NPC1 and LDLR\u2014cholesterol/lipid transporters\u2014suggesting choline recycling is tightly coupled to broader lipid homeostasis pathways, indicating future screens should consider cross-talk between nutrient recycling systems.",
+    "strategy_insight": "Lysosomal choline recycling is mediated primarily by autophagy machinery (ATG3, ATG7, ATG9A, ATG13, RB1CC1), lipid transport/metabolism (NPC1, LDLR, VPS29, AP3B1, AP3D1, EPT1), and ER-lysosome trafficking (CANX, SCFD1, WDR81). LLM reasoning outperformed static ML ranking (0.469 vs 0.449 hit_ratio) because biological knowledge of interconnected lysosomal pathways\u2014rather than PPI connectivity alone\u2014better prioritizes genes in multi-functional cellular processes. For similar endolysosomal screens, prioritize genes annotated with autophagy, vesicular transport, and lipid metabolism GO terms, and use LLM-guided selection to capture pathway context that pure feature ranking misses. The modest 2% performance gap and high baseline (random=0.102) suggest hybrid approaches combining LLM reasoning with ML feature confidence could further improve efficiency. Note that the 4.8% hit rate indicates substantial biological specificity, validating the screening design.",
     "top_hit_families": [
-      "autophagy machinery (ATG proteins)",
-      "adaptor protein complexes (AP1/AP3)",
-      "Rab GTPases and vesicular trafficking",
-      "lysosomal membrane proteins (NPC1, CANX)",
-      "lipid metabolism and transport"
+      "autophagy machinery (ATG family, RB1CC1)",
+      "lysosomal/endosomal transport (VPS29, AP3 complex, WDR81)",
+      "lipid metabolism and cholesterol trafficking (NPC1, LDLR, EPT1)",
+      "ER-lysosome tethering and SNARE machinery (CANX, SCFD1)"
     ],
-    "best_strategy": "hybrid",
+    "best_strategy": "llm",
     "key_genes": [
       "ATG9A",
       "NPC1",
-      "RAB7A",
-      "AP3D1",
-      "VPS29"
-    ]
+      "VPS29",
+      "AP3B1",
+      "RB1CC1"
+    ],
+    "verified": true
   },
   {
     "dataset": "Steinhart",
@@ -200,11 +206,12 @@
       "llm_reasoning": 0.152
     },
     "best_arm": "llm_reasoning",
-    "strategy_insight": "T-cell exhaustion resistance under CAR conditions is primarily driven by IL-2/STAT signaling and transcriptional regulators of T-cell differentiation and memory formation. The hit genes are heavily enriched in immune signaling (IL2RA, IL2RB, STAT5A, STAT4), T-cell lineage specification (BATF, IRF4, EOMES, KLF2), and Wnt/developmental pathways (AXIN2, GLI2), suggesting that preventing exhaustion requires active maintenance of effector and memory T-cell programs. LLM reasoning substantially outperformed statistical/ML approaches (0.152 vs 0.090 hit ratio), likely because the biological logic connecting immune signaling cascades to CAR-T persistence requires semantic understanding of pathway interdependencies rather than statistical pattern recognition alone. For similar tasks, prioritize genes in IL-2 signaling, STAT family members, and BATF/IRF4-dependent transcriptional networks; use LLM-guided selection to reason about mechanistic coherence across candidate genes. A notable caveat is the very low overall hit rate (0.8%), suggesting that exhaustion resistance may require specific combinatorial perturbations or context-dependent effects that single-gene activation cannot fully capture.",
+    "strategy_insight": "T-cell exhaustion resistance under CAR conditions is dominated by IL-2/STAT signaling, transcriptional regulators (BATF, IRF4, EOMES), and immune checkpoint modulators. LLM reasoning (0.152 hit ratio) substantially outperformed ML-only approaches (0.090), likely because the task requires integrating multi-step biological logic: understanding CAR activation \u2192 T-cell exhaustion mechanisms \u2192 resistance pathways, which benefits from semantic reasoning over pure feature correlation. For similar immunotherapy resistance screens, prioritize LLM-guided selection with domain knowledge of T-cell differentiation and cytokine signaling, but validate hits against known exhaustion markers (PD-1, TIM-3, TOX) to avoid false positives. The 0.8% hit rate and strong performance of biological reasoning suggest that exhaustion resistance genes are sparse and require mechanistic insight rather than statistical pattern-matching alone.",
     "top_hit_families": [
-      "IL-2/STAT signaling (IL2RA, IL2RB, STAT5A, STAT4)",
+      "IL-2/cytokine signaling (IL2RA, IL2RB, IL10, STAT5A, STAT4)",
       "T-cell transcriptional regulators (BATF, IRF4, EOMES, KLF2)",
-      "Wnt/developmental pathways (AXIN2, GLI2, PTEN)"
+      "Wnt/developmental signaling (AXIN2, GLI2, EDAR)",
+      "Lipid metabolism & vesicular trafficking (NPC1, AP4S1)"
     ],
     "best_strategy": "llm",
     "key_genes": [
@@ -213,7 +220,8 @@
       "IL2RA",
       "IRF4",
       "EOMES"
-    ]
+    ],
+    "verified": true
   },
   {
     "dataset": "Replogle_K562_essential",
@@ -230,21 +238,21 @@
       "llm_reasoning": 0.55
     },
     "best_arm": "llm_reasoning",
-    "strategy_insight": "Essential genes in K562 CML cells are heavily enriched in the Mediator complex (MED1, MED17, MED4, MED22, MED21, MED9, MED7), proteasome subunits (PSMD2, PSMC4, PSMC1, PSMD7), and ribosomal proteins (RPS15, RPL23A, RPL5, RPL34, RPS24, RPS27A, RPL31), reflecting the high transcriptional and translational demands of leukemic proliferation. LLM reasoning substantially outperformed static ranking (0.550 vs 0.492 hit ratio) because it could leverage biological knowledge about CML pathways, protein complex dependencies, and functional relationships rather than relying solely on statistical features. For similar tasks, prioritize LLM-guided selection that incorporates domain knowledge about disease-specific vulnerabilities and protein complex architecture, particularly when screening for essential genes in rapidly dividing cancer cells. A hybrid approach combining LLM reasoning with connectivity-based features would likely further improve performance by balancing biological insight with network topology.",
+    "strategy_insight": "Essential genes in K562 CML cells are heavily enriched for Mediator complex components (MED1, MED17, MED4, MED22, MED21, MED9, MED7) and proteasome subunits (PSMD2, PSMC4, PSMC1, PSMD7), suggesting that transcriptional regulation and protein degradation are critical for CML cell survival. LLM reasoning achieved the highest hit ratio (0.550) compared to static ranking (0.492) and adaptive methods, likely because it could integrate prior biological knowledge about functional gene modules and their interconnectedness rather than relying solely on sequence features or statistical patterns. For similar essential gene identification tasks, prioritize genes with known roles in core cellular processes (transcription, translation, proteostasis) and consider LLM-guided selection when biological pathway context is available. A surprising finding is that ribosomal proteins, despite their fundamental role in translation, do not appear among the top essential hits in this dataset, suggesting CML cells may have compensatory mechanisms or that Mediator/proteasome disruption has more acute fitness consequences.",
     "top_hit_families": [
-      "Mediator complex (transcriptional regulation)",
-      "Proteasome (protein degradation)",
-      "Ribosomal proteins (translation)",
-      "snRNPs (splicing)"
+      "Mediator_complex",
+      "Proteasome_subunits",
+      "snRNP_components"
     ],
     "best_strategy": "llm",
     "key_genes": [
       "MED1",
       "PSMD2",
+      "GATA1",
       "PSMC4",
-      "RPL5",
-      "RPS27A"
-    ]
+      "MED17"
+    ],
+    "verified": true
   },
   {
     "dataset": "Replogle_K562_gwps",
@@ -261,20 +269,21 @@
       "llm_reasoning": 0.214
     },
     "best_arm": "online_adaptive",
-    "strategy_insight": "This screen reveals that transcriptional regulation and chromatin remodeling are critical for K562 CML cell fitness, with the Mediator complex (MED10, MED19, MED17, MED26, MED16, MED21, MED29, MED31), TFIID/TAF components (TAF1, TAF2, TAF3, TAF7, TAF8, TAF11, TAF12), and histone modifiers (KDM1A, SETD1A, RBBP5, WDR5) dominating the hit list. The online_adaptive strategy significantly outperformed LLM reasoning (0.273 vs 0.214 hit ratio), indicating that ML-based feature learning from early screening rounds captures fitness-relevant biology better than static biological knowledge, likely because it dynamically identifies co-functional gene modules rather than relying on pre-existing pathway annotations. For similar leukemia fitness screens, prioritize genes with high connectivity in transcriptional machinery networks and use adaptive ML selection that learns from early-round sgRNA depletion patterns rather than relying solely on biological reasoning. A key caveat is that the 10.1% hit rate suggests substantial genetic redundancy in CML fitness determinants, so future screens should expect hits to cluster in interconnected functional modules rather than distribute across independent pathways.",
+    "strategy_insight": "K562 CML fitness is critically dependent on transcriptional and chromatin regulatory machinery, with the Mediator complex, TFIID/TAF proteins, and histone modification enzymes dominating the hit list. The online_adaptive strategy (0.273 hit_ratio) substantially outperformed LLM reasoning (0.214), indicating that ML-based feature ranking of sgRNA abundance dynamics and fitness signatures is more effective than biological knowledge alone for this task. For similar screens, prioritize adaptive selection algorithms that learn from early-round perturbation kinetics rather than static gene annotation; the 3.7\u00d7 advantage over random suggests that real-time fitness trajectory modeling captures non-obvious synthetic lethalities better than prior biological reasoning. A hybrid approach combining adaptive ML ranking with targeted validation of known essential pathways (transcription/chromatin) would likely optimize both discovery speed and biological relevance.",
     "top_hit_families": [
-      "Mediator complex subunits",
-      "TFIID/TAF transcription factors",
-      "Histone modifiers and chromatin remodelers",
-      "Transcriptional coactivators"
+      "Mediator complex (MED10, MED19, MED17, MED26, MED16, MED21, MED29, MED31)",
+      "TFIID/TAF general transcription factors (TAF1, TAF2, TAF3, TAF7, TAF8, TAF11, TAF12)",
+      "Histone modification and chromatin remodeling (KDM1A, SETD1A, SUPT16H, WDR5, RBBP5, CXXC1)",
+      "MYC pathway regulation (MAX, MLLT1)"
     ],
     "best_strategy": "ml",
     "key_genes": [
       "MED10",
       "TAF1",
       "KDM1A",
-      "WDR5",
-      "SETD1A"
-    ]
+      "MAX",
+      "WDR82"
+    ],
+    "verified": true
   }
 ]
