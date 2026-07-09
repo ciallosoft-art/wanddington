@@ -185,3 +185,26 @@ class WaddingtonCSkillsArm(WaddingtonCArm):
             use_memory=False,
             name="waddington_c_skills",
         )
+
+
+class WaddingtonCMemSkillsArm(WaddingtonCArm):
+    """Additive variant: flat cross-experiment memory AND the skill library together.
+
+    Tests whether keeping memory avoids the specificity loss seen when skills *replace* it
+    (e.g. the K562-essential regression in the Phase 1 ablation), while retaining the datasets
+    where skills helped.
+    """
+
+    def __init__(
+        self,
+        dataset_name: str,
+        batch_size: int,
+        skill_path: Path = SKILL_LIBRARY_PATH,
+    ) -> None:
+        super().__init__(
+            dataset_name,
+            batch_size,
+            skill_library=SkillLibrary.load(skill_path),
+            use_memory=True,
+            name="waddington_c_memskills",
+        )

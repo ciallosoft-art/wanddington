@@ -48,7 +48,7 @@ from .arms.static_ranker_arm import StaticRankerArm
 from .arms.coreset_arm import CoresetArm
 from .arms.online_adaptive_arm import OnlineAdaptiveArm
 from .arms.llm_reasoning_arm import LLMReasoningArm
-from .arms.waddington_c_arm import WaddingtonCArm, WaddingtonCSkillsArm
+from .arms.waddington_c_arm import WaddingtonCArm, WaddingtonCSkillsArm, WaddingtonCMemSkillsArm
 
 # ── Ablation arms ────────────────────────────────────────────────────────────
 from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
@@ -61,7 +61,7 @@ RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 # Arms available via --arms flag
 _PAPER_ARMS = {
     "random", "coreset", "static_ranker", "online_adaptive",
-    "llm_reasoning", "waddington_c", "waddington_c_skills",
+    "llm_reasoning", "waddington_c", "waddington_c_skills", "waddington_c_memskills",
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
 }
@@ -104,6 +104,8 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(WaddingtonCArm(dataset_name, bs))
         elif name == "waddington_c_skills":
             arms.append(WaddingtonCSkillsArm(dataset_name, bs))
+        elif name == "waddington_c_memskills":
+            arms.append(WaddingtonCMemSkillsArm(dataset_name, bs))
         elif name == "waddington_c_no_memory":
             arms.append(WaddingtonCNoMemoryArm(dataset_name, bs))
         elif name == "waddington_c_no_llm":
