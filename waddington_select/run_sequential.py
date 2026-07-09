@@ -37,25 +37,24 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "workspace" / "agent"))
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
-from oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
-from sequential_runner import RunResult, SequentialRunner
+from .oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
+from .sequential_runner import RunResult, SequentialRunner
 
 # ── Paper arms ──────────────────────────────────────────────────────────────
-from arms.random_arm import RandomArm
-from arms.static_ranker_arm import StaticRankerArm
-from arms.coreset_arm import CoresetArm
-from arms.online_adaptive_arm import OnlineAdaptiveArm
-from arms.llm_reasoning_arm import LLMReasoningArm
-from arms.waddington_c_arm import WaddingtonCArm
+from .arms.random_arm import RandomArm
+from .arms.static_ranker_arm import StaticRankerArm
+from .arms.coreset_arm import CoresetArm
+from .arms.online_adaptive_arm import OnlineAdaptiveArm
+from .arms.llm_reasoning_arm import LLMReasoningArm
+from .arms.waddington_c_arm import WaddingtonCArm
 
 # ── Ablation arms ────────────────────────────────────────────────────────────
-from arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
-from arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
-from arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
-from arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
+from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
+from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
+from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
+from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 
@@ -78,7 +77,7 @@ _ARCHIVE_ARMS = {
 def _load_archive_arm(name: str, dataset_name: str, bs: int):
     """Lazy-load a development-history arm from the archive directory."""
     import importlib
-    mod = importlib.import_module(f"arms.archive.{name}_arm")
+    mod = importlib.import_module(f".arms.archive.{name}_arm", package=__package__)
     cls_name = "".join(p.capitalize() for p in name.split("_")) + "Arm"
     # e.g. "waddington_v2" → "WaddingtonV2Arm"
     cls = getattr(mod, cls_name)
@@ -133,11 +132,30 @@ def run_all(
     n_rounds: int,
     n_seeds: int,
     out_path: Path | None = None,
+    resume: bool = False,
 ) -> dict:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    save_path = out_path or (RESULTS_DIR / "results.json")
+
+    # --- Resume: load existing checkpoint ---
     all_results: dict[str, dict[str, list]] = {}
+    if resume and save_path.exists():
+        with open(save_path) as f:
+            all_results = json.load(f)
+        completed = {
+            ds for ds, arms in all_results.items()
+            if all(arm in arms for arm in arm_names)
+        }
+        if completed:
+            print(f"[resume] Skipping {len(completed)} already-completed datasets: "
+                  f"{', '.join(sorted(completed))}")
+    else:
+        completed = set()
 
     for ds in datasets:
+        if ds in completed:
+            continue
+
         print(f"\n{'='*60}")
         print(f"Dataset: {ds}  (batch={BATCH_SIZES[ds]}, rounds={n_rounds})")
         print(f"{'='*60}")
@@ -170,6 +188,11 @@ def run_all(
             for arm, results in ds_results.items()
         }
 
+        # Checkpoint: save after every dataset so progress survives crashes
+        with open(save_path, "w") as f:
+            json.dump(all_results, f, indent=2)
+        print(f"  [checkpoint] {save_path}")
+
     # Summary table
     print(f"\n{'='*60}")
     print("SUMMARY  (hit_ratio @ final round, avg across seeds)")
@@ -187,11 +210,7 @@ def run_all(
                 row += f"  {'N/A':>22s}"
         print(row)
 
-    save_path = out_path or (RESULTS_DIR / "results.json")
-    with open(save_path, "w") as f:
-        json.dump(all_results, f, indent=2)
     print(f"\nResults saved to {save_path}")
-
     return all_results
 
 
@@ -258,9 +277,11 @@ def main() -> None:
                         help="Number of random seeds (default: 5)")
     parser.add_argument("--out", type=Path, default=None,
                         help="Output JSON path (default: workspace/results/sequential/results.json)")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume from existing checkpoint: skip already-completed datasets")
     args = parser.parse_args()
 
-    run_all(args.datasets, args.arms, args.rounds, args.seeds, args.out)
+    run_all(args.datasets, args.arms, args.rounds, args.seeds, args.out, args.resume)
 
 
 if __name__ == "__main__":

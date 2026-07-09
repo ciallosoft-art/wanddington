@@ -24,7 +24,7 @@ import pandas as pd
 
 from .base import BaseArm
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
 
 FEATURE_COLS = [

@@ -24,7 +24,7 @@ from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import _load_auth_token, _load_task
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 MEMORY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
 
 LLM_MODEL = "claude-haiku-4-5-20251001"

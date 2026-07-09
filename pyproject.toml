@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waddington-select"
+version = "0.1.0"
+description = "System 2: a hybrid ML + LLM + verified-memory agent for sequential CRISPR gene selection (the Waddington C-arm)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40",
+    "lightgbm>=4.0",
+    "numpy>=1.24",
+    "pandas>=2.0",
+]
+
+[project.scripts]
+# Run the sequential oracle evaluation (paper experiment runner)
+waddington-select = "waddington_select.run_sequential:main"
+
+[tool.setuptools]
+# Data (benchmarks, features, results) lives under workspace/ and is loaded at
+# runtime via REPO_ROOT-relative paths; only the Python package is installed.
+packages = [
+    "waddington_select",
+    "waddington_select.arms",
+    "waddington_select.arms.archive",
+]

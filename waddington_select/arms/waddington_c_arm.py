@@ -33,7 +33,7 @@ from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import LLMReasoningArm
 from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 
-REPO_ROOT         = Path(__file__).resolve().parents[3]
+REPO_ROOT         = Path(__file__).resolve().parents[2]
 TRAINING_DATA_V1  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
 TRAINING_DATA_V3  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data_v3.csv"
 MEMORY_PATH       = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"

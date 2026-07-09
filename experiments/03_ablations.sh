@@ -24,10 +24,11 @@ python3 experiments/setup_auth.py --check || {
 run_ablation() {
     local label="$1"; local arm="$2"; local out="$3"
     echo "--- Ablation: $label ---"
-    conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
+    conda run -n waddington-bio python3 -m waddington_select \
         --arms waddington_c "$arm" \
         --seeds 5 \
         --rounds 5 \
+        --resume \
         --out "workspace/results/sequential/$out"
     echo "  Saved: workspace/results/sequential/$out"
     echo

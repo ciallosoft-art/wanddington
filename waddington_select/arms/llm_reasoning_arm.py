@@ -26,7 +26,7 @@ import lightgbm as lgb
 
 from .base import BaseArm
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
 TASK_PROMPTS_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark" / "task_prompts"
 AUTH_JSON = Path.home() / ".feynman" / "agent" / "auth.json"
@@ -229,13 +229,21 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                     messages=[{"role": "user", "content": prompt}],
                 )
                 break
-            except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.OverloadedError) as e:
+            except (
+                anthropic.RateLimitError,
+                anthropic.InternalServerError,
+                anthropic.OverloadedError,
+                anthropic.APITimeoutError,
+                anthropic.APIConnectionError,
+            ) as e:
                 if attempt == 7:
                     raise
                 if isinstance(e, anthropic.RateLimitError):
                     err_type = "Rate limit"
                 elif isinstance(e, anthropic.OverloadedError):
                     err_type = "Overloaded (529)"
+                elif isinstance(e, (anthropic.APITimeoutError, anthropic.APIConnectionError)):
+                    err_type = "Connection/timeout"
                 else:
                     err_type = "Server error (500)"
                 print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
@@ -427,13 +435,21 @@ No explanation, no markdown."""
                     messages=[{"role": "user", "content": prompt}],
                 )
                 break
-            except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.OverloadedError) as e:
+            except (
+                anthropic.RateLimitError,
+                anthropic.InternalServerError,
+                anthropic.OverloadedError,
+                anthropic.APITimeoutError,
+                anthropic.APIConnectionError,
+            ) as e:
                 if attempt == 7:
                     raise
                 if isinstance(e, anthropic.RateLimitError):
                     err_type = "Rate limit"
                 elif isinstance(e, anthropic.OverloadedError):
                     err_type = "Overloaded (529)"
+                elif isinstance(e, (anthropic.APITimeoutError, anthropic.APIConnectionError)):
+                    err_type = "Connection/timeout"
                 else:
                     err_type = "Server error (500)"
                 print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")

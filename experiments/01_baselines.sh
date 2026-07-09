@@ -12,7 +12,7 @@ echo "Arms: random  static_ranker  online_adaptive  coreset"
 echo "Seeds: 5  |  Rounds: 5  |  Datasets: all 9"
 echo
 
-conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
+conda run -n waddington-bio python3 -m waddington_select \
     --arms random coreset static_ranker online_adaptive \
     --seeds 5 \
     --rounds 5 \

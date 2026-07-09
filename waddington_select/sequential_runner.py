@@ -14,8 +14,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from arms.base import BaseArm
-from oracle import DatasetOracle
+from .arms.base import BaseArm
+from .oracle import DatasetOracle
 
 
 @dataclass

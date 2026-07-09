@@ -79,7 +79,7 @@ Each JSON maps `dataset → arm → [seed_0_result, ..., seed_4_result]`.
 ## Code structure
 
 ```
-workspace/agent/
+waddington_select/
 ├── run_sequential.py       ← main entry point (all experiments go through here)
 ├── oracle.py               ← dataset truth-reveal interface
 ├── sequential_runner.py    ← per-arm evaluation loop
@@ -134,13 +134,13 @@ workspace/results/sequential/
 
 ```bash
 # Single dataset, 3 seeds
-conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
+conda run -n waddington-bio python3 -m waddington_select \
     --arms waddington_c llm_reasoning \
     --datasets IFNG \
     --seeds 3
 
 # Quick smoke test (1 dataset, 1 seed)
-conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
+conda run -n waddington-bio python3 -m waddington_select \
     --arms waddington_c \
     --datasets Scharenberg22 \
     --seeds 1

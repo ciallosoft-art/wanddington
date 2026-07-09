@@ -18,7 +18,7 @@ python3 experiments/setup_auth.py --check || {
     exit 1
 }
 
-conda run -n waddington-bio python3 workspace/agent/run_sequential.py \
+conda run -n waddington-bio python3 -m waddington_select \
     --arms coreset llm_reasoning waddington_c \
     --seeds 5 \
     --rounds 5 \
