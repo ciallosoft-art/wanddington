@@ -1,0 +1,165 @@
+[
+  {
+    "id": "sk_001",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When hits are enriched in signal transduction cascades (kinases, adaptors, scaffolds), prioritize untested genes in the same pathway family and in transcription factor families that integrate those signals.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_002",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When hits cluster in vesicular trafficking, endosomal sorting, or HOPS complex components, also prioritize untested genes in ubiquitin-proteasome and RNA-binding protein families, as these pathways are functionally coupled.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Sanchez21_down"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_003",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When hits are dominated by metabolic pathway components (purine metabolism, nucleotide synthesis, cAMP signaling), prioritize untested genes in GPCR and second-messenger signaling families.",
+    "evidence_datasets": [
+      "Carnevale22"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_004",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When hits include autophagy machinery or lysosomal transport, prioritize untested genes in lipid metabolism, cholesterol trafficking, and ER-lysosome tethering families.",
+    "evidence_datasets": [
+      "Scharenberg22"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_005",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When hits are enriched in transcriptional regulators and cytokine signaling, prioritize untested genes in immune checkpoint, developmental signaling, and chromatin remodeling families.",
+    "evidence_datasets": [
+      "Steinhart",
+      "IL2"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_006",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When hits cluster in Mediator complex, general transcription factors (TFIID/TAF), or histone modification enzymes, prioritize untested genes in the same transcriptional machinery families and proteasome subunits.",
+    "evidence_datasets": [
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_007",
+    "type": "selection_heuristic",
+    "trigger": {
+      "min_hit_rate": 0.04,
+      "max_hit_rate": 0.05
+    },
+    "directive": "When hit rate is moderate (4\u20135%), use online adaptive (ML-based) selection to exploit emerging patterns; this strategy outperforms fixed heuristics in mid-complexity phenotypes.",
+    "evidence_datasets": [
+      "IFNG",
+      "Sanchez21",
+      "Sanchez21_down",
+      "Carnevale22",
+      "Scharenberg22"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_008",
+    "type": "selection_heuristic",
+    "trigger": {
+      "min_hit_rate": 0.008,
+      "max_hit_rate": 0.03
+    },
+    "directive": "When hit rate is very low (<3%) or phenotype involves complex immune regulation (e.g., T-cell exhaustion, CAR-T fitness), use LLM reasoning to integrate domain knowledge and multi-hop pathway logic.",
+    "evidence_datasets": [
+      "IL2",
+      "Steinhart"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_009",
+    "type": "selection_heuristic",
+    "trigger": {
+      "min_hit_rate": 0.09,
+      "max_n_genes": 1000
+    },
+    "directive": "When screening a small, curated gene set with high hit rate (>9%), use LLM reasoning to identify mechanistic links and prioritize genes with pleiotropic roles in essential cellular processes.",
+    "evidence_datasets": [
+      "Replogle_K562_essential"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_010",
+    "type": "calibration",
+    "trigger": {
+      "min_hit_rate": 0.04
+    },
+    "directive": "When a phenotype involves multi-step cellular processes (trafficking, transcription, metabolism), trust LLM reasoning confidence scores more heavily than raw ML scores, as LLM captures pathway coherence.",
+    "evidence_datasets": [
+      "Carnevale22",
+      "Scharenberg22",
+      "Steinhart"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_011",
+    "type": "calibration",
+    "trigger": {
+      "max_hit_rate": 0.05,
+      "requires_revealed_hits": true
+    },
+    "directive": "When early hits reveal a dominant pathway family, increase confidence in genes sharing functional annotations (complex membership, kinase subfamily, transcription factor family) with those hits.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2",
+      "Sanchez21"
+    ],
+    "verified": true
+  },
+  {
+    "id": "sk_012",
+    "type": "selection_heuristic",
+    "trigger": {
+      "min_n_genes": 9000
+    },
+    "directive": "When screening large genome-scale libraries (>9000 genes), use online adaptive ML in early rounds to rapidly narrow the search space, then switch to LLM reasoning once pathway patterns emerge.",
+    "evidence_datasets": [
+      "Replogle_K562_gwps",
+      "IL2",
+      "IFNG"
+    ],
+    "verified": true
+  }
+]

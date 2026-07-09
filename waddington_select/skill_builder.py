@@ -27,12 +27,41 @@ import re
 from pathlib import Path
 
 from .oracle import ALL_DATASETS
-from .memory_builder import MEMORY_PATH, _parse_llm_json
+from .memory_builder import MEMORY_PATH
 from .skills import SKILL_LIBRARY_PATH
 from .llm_client import LLMClient
 
 MAX_VERIFY_RETRIES = 2
 LLM_MODEL = "claude-haiku-4-5-20251001"
+
+
+def _parse_skill_array(text: str) -> list[dict]:
+    """Extract the JSON array of candidate skills from an LLM response.
+
+    Tolerant of markdown fences and leading/trailing prose. Returns [] on failure so the
+    distiller loop can retry rather than crash.
+    """
+    t = text.strip()
+    if t.startswith("```"):
+        t = re.sub(r"^```[a-zA-Z]*\n?", "", t)
+        t = re.sub(r"\n?```$", "", t).strip()
+    try:
+        v = json.loads(t)
+        if isinstance(v, list):
+            return v
+        if isinstance(v, dict) and isinstance(v.get("skills"), list):
+            return v["skills"]
+    except json.JSONDecodeError:
+        pass
+    m = re.search(r"\[.*\]", t, re.DOTALL)
+    if m:
+        try:
+            v = json.loads(m.group())
+            if isinstance(v, list):
+                return v
+        except json.JSONDecodeError:
+            pass
+    return []
 
 _ALLOWED_TRIGGER_KEYS = {
     "min_round", "max_round", "min_n_genes", "max_n_genes",
@@ -162,8 +191,7 @@ def build_skills(n_skills: int = 12) -> list[dict]:
         if prior_issues:
             prompt += "\n\nThe previous batch had rejected skills. Avoid: " + "; ".join(prior_issues[:6])
         text = client.complete(prompt, temperature=0.3, max_tokens=2000)
-        parsed = _parse_llm_json(text)
-        candidates = parsed if isinstance(parsed, list) else parsed.get("skills", [])
+        candidates = _parse_skill_array(text)
         if candidates:
             break
 
