@@ -7,10 +7,16 @@ phenotype, which genes should I perturb next?" — the C-arm's ranking with no o
 
 It is what feynman invokes from chat (see repo AGENTS.md).
 
+Two modes:
+- Cold start: no feedback → the C-arm's first-round recommendation.
+- Feedback-driven: pass the results of what you already tested with --tested-hits / --tested-misses.
+  Those labels retrain the online ML model and are fed to the LLM as experimental history, so the
+  next recommendation adapts (true sequential selection, one feedback round).
+
 Usage:
     conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG
     conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG --n 20 \
-        --exclude ZAP70 LCK
+        --tested-hits ZAP70 LCK PLCG1 --tested-misses ACTB GAPDH TUBB
     # run the LLM component on codex instead of Claude:
     WADDINGTON_LLM_BACKEND=pi python3 -m waddington_select.suggest --dataset IFNG
 
@@ -27,23 +33,54 @@ from .oracle import ALL_DATASETS, BATCH_SIZES
 from .arms.waddington_c_arm import WaddingtonCArm, WaddingtonCSkillsArm
 
 
+def _norm(genes: list[str] | None) -> list[str]:
+    return [g.strip().upper() for g in (genes or []) if g.strip()]
+
+
 def suggest(
     dataset: str,
     n: int | None = None,
     exclude: list[str] | None = None,
     use_skills: bool = False,
-) -> list[str]:
-    """Return the C-arm's recommended first batch of genes to perturb for `dataset`."""
+    tested_hits: list[str] | None = None,
+    tested_misses: list[str] | None = None,
+) -> tuple[list[str], dict]:
+    """Recommend the next batch of genes to perturb for `dataset`.
+
+    Returns (recommended_genes, info) where info reports how feedback was incorporated and which
+    supplied gene symbols were not recognised in this phenotype's pool.
+    """
     if dataset not in ALL_DATASETS:
-        raise SystemExit(
-            f"Unknown dataset '{dataset}'. Available: {', '.join(ALL_DATASETS)}"
-        )
+        raise SystemExit(f"Unknown dataset '{dataset}'. Available: {', '.join(ALL_DATASETS)}")
+
     batch_size = n or BATCH_SIZES[dataset]
     arm = (WaddingtonCSkillsArm if use_skills else WaddingtonCArm)(dataset, batch_size)
-    if exclude:
-        # Treat already-tested genes as selected so they are not recommended again.
-        arm._selected.update(g.strip().upper() for g in exclude)
-    return arm.select(round_idx=0, revealed={})
+    pool: set[str] = arm._llm._gene_set  # canonical gene pool for this phenotype
+
+    hits = _norm(tested_hits)
+    misses = _norm(tested_misses)
+    excluded = _norm(exclude)
+    unknown = sorted({g for g in hits + misses + excluded if g not in pool})
+
+    round_idx = 0
+    revealed = {g: True for g in hits if g in pool}
+    revealed.update({g: False for g in misses if g in pool})
+    if revealed:
+        # One feedback round: retrain ML + feed LLM history, then recommend the next round.
+        arm.update(round_idx=0, revealed_new=revealed)
+        round_idx = 1
+    if excluded:
+        arm._selected.update(g for g in excluded if g in pool)
+
+    genes = arm.select(round_idx=round_idx, revealed={})
+    info = {
+        "round": round_idx + 1,
+        "n_feedback": len(revealed),
+        "n_hits": sum(revealed.values()),
+        "unknown_genes": unknown,
+        "route": getattr(arm, "_route", "?"),
+    }
+    return genes, info
 
 
 def main() -> None:
@@ -54,16 +91,30 @@ def main() -> None:
                         help="Benchmark phenotype to recommend genes for")
     parser.add_argument("--n", type=int, default=None,
                         help="How many genes to recommend (default: dataset batch size)")
+    parser.add_argument("--tested-hits", nargs="*", default=None,
+                        help="Already-tested genes that WERE hits (used as positive feedback)")
+    parser.add_argument("--tested-misses", nargs="*", default=None,
+                        help="Already-tested genes that were NOT hits (negative feedback)")
     parser.add_argument("--exclude", nargs="*", default=None,
-                        help="Genes already tested — excluded from recommendations")
+                        help="Genes to exclude from recommendations (outcome unknown/irrelevant)")
     parser.add_argument("--skills", action="store_true",
                         help="Use the skill library instead of flat cross-experiment memory")
     args = parser.parse_args()
 
-    genes = suggest(args.dataset, args.n, args.exclude, use_skills=args.skills)
+    genes, info = suggest(
+        args.dataset, args.n, args.exclude, use_skills=args.skills,
+        tested_hits=args.tested_hits, tested_misses=args.tested_misses,
+    )
+
+    if info["unknown_genes"]:
+        print(f"\n[warn] not in '{args.dataset}' gene pool, ignored: "
+              f"{', '.join(info['unknown_genes'])}")
+    if info["n_feedback"]:
+        print(f"\nIncorporated {info['n_feedback']} tested genes "
+              f"({info['n_hits']} hits) as feedback → recommending round {info['round']}.")
 
     print(f"\nRecommended genes to perturb next for '{args.dataset}' "
-          f"({len(genes)} genes, C-arm{' + skills' if args.skills else ''}):\n")
+          f"({len(genes)} genes, C-arm{' + skills' if args.skills else ''}, route={info['route']}):\n")
     for i, g in enumerate(genes, 1):
         print(f"  {i:3d}. {g}")
     print()

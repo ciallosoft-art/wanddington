@@ -10,16 +10,23 @@ Everything runs in the `waddington-bio` conda env, from the repo root.
 ## Primary action — recommend genes to perturb
 
 ```bash
-conda run -n waddington-bio python3 -m waddington_select.suggest --dataset <PHENOTYPE> [--n N] [--exclude GENE ...] [--skills]
+conda run -n waddington-bio python3 -m waddington_select.suggest --dataset <PHENOTYPE> \
+    [--n N] [--tested-hits GENE ...] [--tested-misses GENE ...] [--exclude GENE ...] [--skills]
 ```
 
 - `--dataset` must be one of the nine supported phenotypes (see below).
 - `--n` = how many genes to recommend (default = the screen's batch size).
-- `--exclude` = genes the experimenter has already tested (won't be recommended again).
+- **`--tested-hits`** = genes already tested that WERE hits; **`--tested-misses`** = genes tested
+  that were NOT hits. These are experimental feedback: they retrain the online ML model and are
+  fed to the LLM as history, so the next recommendation adapts (true sequential selection). Use
+  them whenever the experimenter reports results from a prior round.
+- `--exclude` = genes to leave out of recommendations when the outcome is unknown/irrelevant.
 - `--skills` = use the evolving skill library instead of flat cross-experiment memory.
 
-The command prints a ranked list of gene symbols. Relay them, and briefly explain the phenotype
-context if useful. This is a *forward* recommendation (no ground-truth oracle involved).
+The command prints a ranked list of gene symbols (and notes any supplied genes not in this
+phenotype's pool). With no `--tested-*`, it gives the cold-start first-round recommendation; with
+feedback, it gives the adapted next round. Relay the genes and briefly explain the phenotype
+context. This is a *forward* recommendation (no ground-truth oracle involved).
 
 **Supported phenotypes** (`--dataset` values): `IFNG`, `IL2`, `Sanchez21`, `Sanchez21_down`,
 `Carnevale22`, `Scharenberg22`, `Steinhart`, `Replogle_K562_essential`, `Replogle_K562_gwps`.
