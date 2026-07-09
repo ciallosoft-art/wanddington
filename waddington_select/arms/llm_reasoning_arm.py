@@ -19,12 +19,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
-import anthropic
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
 
 from .base import BaseArm
+from ..skills import SkillLibrary, load_dataset_hits
+from ..llm_client import LLMClient
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
@@ -105,11 +106,19 @@ class LLMReasoningArm(BaseArm):
         model: str = LLM_MODEL,
         training_csv: Path | None = None,
         extra_feature_cols: list[str] | None = None,
+        skill_library: SkillLibrary | None = None,
+        dataset_hit_rate: float = 0.0,
     ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
         self._rng = np.random.default_rng(seed)
         self._memory: list[dict] = memory_entries or []
+        # Evolving skill library (Phase 1: trigger-conditioned retrieval, no evolution).
+        self._skill_library = skill_library
+        self._dataset_hit_rate = dataset_hit_rate
+        self._block_genes: set[str] = (
+            load_dataset_hits(dataset_name) if skill_library is not None else set()
+        )
         self._temperature = temperature
         self._model = model
 
@@ -142,9 +151,13 @@ class LLMReasoningArm(BaseArm):
         self._round_hits: list[list[str]] = []    # hits per round
         self._round_nonhits: list[list[str]] = [] # non-hits per round
 
-        # Anthropic client
-        token = _load_auth_token()
-        self._client = anthropic.Anthropic(auth_token=token)
+        # Provider-agnostic LLM client (default: anthropic; opt-in pi/codex via
+        # WADDINGTON_LLM_BACKEND=pi, reusing feynman's provider routing + OAuth).
+        self._llm = LLMClient(
+            model=self._model,
+            temperature=self._temperature,
+            max_tokens=LLM_MAX_TOKENS,
+        )
 
     def _on_reset(self) -> None:
         self._round_hits = []
@@ -166,11 +179,31 @@ class LLMReasoningArm(BaseArm):
         lines.append("\nApply these patterns to the current task.")
         return "\n".join(lines)
 
+    def _build_skill_section(self, round_idx: int) -> str:
+        """Retrieve and render the skills whose triggers fire in the current round state."""
+        if self._skill_library is None or len(self._skill_library) == 0:
+            return ""
+        n_revealed_hits = sum(len(h) for h in self._round_hits)
+        state = {
+            "round": round_idx + 1,
+            "n_genes": len(self._genes),
+            "hit_rate": self._dataset_hit_rate,
+            "n_revealed_hits": n_revealed_hits,
+        }
+        firing = self._skill_library.retrieve(
+            state,
+            exclude_dataset=self.dataset_name,
+            block_genes=self._block_genes,
+            k=4,
+        )
+        return SkillLibrary.render(firing)
+
     def _build_prompt(self, round_idx: int) -> str:
         task_text = self._task.get("Task", self.dataset_name)
         measurement = self._task.get("Measurement", "")
 
         memory_section = self._build_memory_section()
+        skill_section = self._build_skill_section(round_idx)
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -199,7 +232,7 @@ class LLMReasoningArm(BaseArm):
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}
+{memory_section}{skill_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
 Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
@@ -219,37 +252,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         if getattr(self, "_inter_call_sleep", 0) > 0:
             time.sleep(self._inter_call_sleep)
 
-        wait = 10
-        for attempt in range(8):
-            try:
-                response = self._client.messages.create(
-                    model=self._model,
-                    max_tokens=LLM_MAX_TOKENS,
-                    temperature=self._temperature,
-                    messages=[{"role": "user", "content": prompt}],
-                )
-                break
-            except (
-                anthropic.RateLimitError,
-                anthropic.InternalServerError,
-                anthropic.OverloadedError,
-                anthropic.APITimeoutError,
-                anthropic.APIConnectionError,
-            ) as e:
-                if attempt == 7:
-                    raise
-                if isinstance(e, anthropic.RateLimitError):
-                    err_type = "Rate limit"
-                elif isinstance(e, anthropic.OverloadedError):
-                    err_type = "Overloaded (529)"
-                elif isinstance(e, (anthropic.APITimeoutError, anthropic.APIConnectionError)):
-                    err_type = "Connection/timeout"
-                else:
-                    err_type = "Server error (500)"
-                print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
-                time.sleep(wait)
-                wait = min(wait * 2, 120)
-        text = response.content[0].text.strip()
+        text = self._llm.complete(prompt)
 
         # Try JSON array parse
         try:
@@ -292,6 +295,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         task_text = self._task.get("Task", self.dataset_name)
         measurement = self._task.get("Measurement", "")
         memory_section = self._build_memory_section()
+        skill_section = self._build_skill_section(round_idx)
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -326,7 +330,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}
+{memory_section}{skill_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 {shortlist_section}
 
@@ -370,6 +374,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         task_text = self._task.get("Task", self.dataset_name)
         measurement = self._task.get("Measurement", "")
         memory_section = self._build_memory_section()
+        skill_section = self._build_skill_section(round_idx)
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -398,7 +403,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}
+{memory_section}{skill_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
 Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
@@ -424,39 +429,7 @@ No explanation, no markdown."""
             time.sleep(self._inter_call_sleep)
 
         prompt = self._build_confidence_prompt(round_idx)
-        wait = 10
-        response = None
-        for attempt in range(8):
-            try:
-                response = self._client.messages.create(
-                    model=self._model,
-                    max_tokens=LLM_MAX_TOKENS,
-                    temperature=self._temperature,
-                    messages=[{"role": "user", "content": prompt}],
-                )
-                break
-            except (
-                anthropic.RateLimitError,
-                anthropic.InternalServerError,
-                anthropic.OverloadedError,
-                anthropic.APITimeoutError,
-                anthropic.APIConnectionError,
-            ) as e:
-                if attempt == 7:
-                    raise
-                if isinstance(e, anthropic.RateLimitError):
-                    err_type = "Rate limit"
-                elif isinstance(e, anthropic.OverloadedError):
-                    err_type = "Overloaded (529)"
-                elif isinstance(e, (anthropic.APITimeoutError, anthropic.APIConnectionError)):
-                    err_type = "Connection/timeout"
-                else:
-                    err_type = "Server error (500)"
-                print(f"    [LLM] {err_type} (attempt {attempt+1}/8), waiting {wait}s...")
-                time.sleep(wait)
-                wait = min(wait * 2, 120)
-
-        text = response.content[0].text.strip()
+        text = self._llm.complete(prompt)
         llm_genes: list[str] = []
         llm_conf: float = 0.5
 

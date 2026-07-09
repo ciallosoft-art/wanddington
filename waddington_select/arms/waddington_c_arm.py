@@ -32,6 +32,7 @@ from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import LLMReasoningArm
 from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
+from ..skills import SkillLibrary, SKILL_LIBRARY_PATH
 
 REPO_ROOT         = Path(__file__).resolve().parents[2]
 TRAINING_DATA_V1  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
@@ -93,8 +94,11 @@ class WaddingtonCArm(BaseArm):
         dataset_name: str,
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
+        skill_library: "SkillLibrary | None" = None,
+        use_memory: bool = True,
+        name: str = "waddington_c",
     ) -> None:
-        super().__init__("waddington_c", dataset_name, batch_size)
+        super().__init__(name, dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
 
@@ -112,8 +116,11 @@ class WaddingtonCArm(BaseArm):
         )
 
         task = _load_task(dataset_name)
-        raw_memory = _load_memory(memory_path, exclude_dataset=dataset_name)
-        memory = _rank_memory_by_relevance(raw_memory, task)[:4]
+        if use_memory:
+            raw_memory = _load_memory(memory_path, exclude_dataset=dataset_name)
+            memory = _rank_memory_by_relevance(raw_memory, task)[:4]
+        else:
+            memory = []
         self._llm = LLMReasoningArm(
             dataset_name, batch_size,
             memory_entries=memory,
@@ -121,6 +128,8 @@ class WaddingtonCArm(BaseArm):
             model=LLM_MODEL,
             training_csv=training_csv,
             extra_feature_cols=extra_feats,
+            skill_library=skill_library,
+            dataset_hit_rate=n_hits / max(n_genes, 1),
         )
 
     def _on_reset(self) -> None:
@@ -153,3 +162,26 @@ class WaddingtonCArm(BaseArm):
         self._online.update(round_idx, revealed_new)
         self._llm.update(round_idx, revealed_new)
         super().update(round_idx, revealed_new)
+
+
+class WaddingtonCSkillsArm(WaddingtonCArm):
+    """C-arm variant that replaces the flat cross-experiment memory with the
+    trigger-conditioned skill library (Phase 1).
+
+    For the ablation: waddington_c (flat top-4 memory) vs waddington_c_skills
+    (verified skill library, injected only when a skill's trigger fires).
+    """
+
+    def __init__(
+        self,
+        dataset_name: str,
+        batch_size: int,
+        skill_path: Path = SKILL_LIBRARY_PATH,
+    ) -> None:
+        super().__init__(
+            dataset_name,
+            batch_size,
+            skill_library=SkillLibrary.load(skill_path),
+            use_memory=False,
+            name="waddington_c_skills",
+        )

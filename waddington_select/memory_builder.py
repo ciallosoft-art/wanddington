@@ -29,12 +29,13 @@ import re
 import sys
 from pathlib import Path
 
-import anthropic
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 from .oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
-from .arms.llm_reasoning_arm import _load_task, _load_auth_token
+from .arms.llm_reasoning_arm import _load_task
+from .llm_client import LLMClient
+
+LLM_MODEL = "claude-haiku-4-5-20251001"
 
 MEMORY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
 
@@ -115,7 +116,7 @@ def _expected_strategy(best_arm: str) -> str:
 def _verify_entry(
     entry: dict,
     top_hits: list[str],
-    client: anthropic.Anthropic,
+    client: LLMClient,
 ) -> tuple[bool, list[str]]:
     """Two-phase admission gate (DeLM §3.2).
 
@@ -151,13 +152,7 @@ def _verify_entry(
         strategy_insight=entry.get("strategy_insight", ""),
     )
     try:
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=200,
-            temperature=0.0,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text.strip()
+        text = client.complete(prompt, temperature=0.0, max_tokens=200)
         m = re.search(r'\{.*\}', text, re.DOTALL)
         result = json.loads(m.group()) if m else {}
         if not result.get("valid", True):
@@ -230,7 +225,7 @@ def _parse_llm_json(text: str) -> dict:
         return {}
 
 
-def generate_memory_entry(dataset_name: str, client: anthropic.Anthropic) -> dict:
+def generate_memory_entry(dataset_name: str, client: LLMClient) -> dict:
     task = _load_task(dataset_name)
     oracle = DatasetOracle(dataset_name)
     perf = KNOWN_PERFORMANCE.get(dataset_name, {})
@@ -250,13 +245,8 @@ def generate_memory_entry(dataset_name: str, client: anthropic.Anthropic) -> dic
         prompt = _build_generation_prompt(
             dataset_name, task, oracle, perf_str, best_arm, top_hits, prior_issues
         )
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=600,
-            temperature=0.3,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        parsed = _parse_llm_json(response.content[0].text.strip())
+        text = client.complete(prompt, temperature=0.3, max_tokens=600)
+        parsed = _parse_llm_json(text)
 
         entry = {
             "dataset": dataset_name,
@@ -285,8 +275,7 @@ def generate_memory_entry(dataset_name: str, client: anthropic.Anthropic) -> dic
 
 
 def build_memory(datasets: list[str]) -> list[dict]:
-    token = _load_auth_token()
-    client = anthropic.Anthropic(auth_token=token)
+    client = LLMClient(model=LLM_MODEL, temperature=0.3, max_tokens=600)
 
     entries: list[dict] = []
     for ds in datasets:
