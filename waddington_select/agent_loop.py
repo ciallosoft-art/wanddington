@@ -130,6 +130,7 @@ def run_campaign(dataset: str, rounds: int = 5, batch_size: int | None = None,
 
         # Commit: clean the batch (dedupe, drop already-tested), backfill from ML if short.
         batch = [g for g in dict.fromkeys(batch) if g not in tested]
+        llm_proposed = len(batch)
         if len(batch) < batch_size:
             ml = tools.ml_rank(dataset, n=batch_size * 4, tested_hits=hits,
                                tested_misses=misses, exclude=list(tested))
@@ -139,6 +140,7 @@ def run_campaign(dataset: str, rounds: int = 5, batch_size: int | None = None,
                 if c["gene"] not in tested and c["gene"] not in batch:
                     batch.append(c["gene"])
         batch = batch[:batch_size]
+        backfilled = max(0, len(batch) - llm_proposed)
 
         outcome = reveal_fn(batch)
         round_hits = [g for g, is_hit in outcome.items() if is_hit]
@@ -148,11 +150,16 @@ def run_campaign(dataset: str, rounds: int = 5, batch_size: int | None = None,
         ratio = len(hits) / oracle.total_hits if oracle.total_hits else 0.0
         trajectory.append({"round": r + 1, "tested": len(batch), "hits": len(round_hits),
                            "cumulative": len(hits), "hit_ratio": round(ratio, 4),
-                           "steps": len(action_log)})
+                           "steps": len(action_log),
+                           "actions": [a["action"] for a in action_log],
+                           "llm_proposed": llm_proposed, "backfilled": backfilled})
         if verbose:
-            print(f"  Round {r + 1}: {len(action_log)} action(s) → tested {len(batch)}, "
-                  f"{len(round_hits)} hits [{', '.join(round_hits[:8])}]  "
+            print(f"  Round {r + 1}: actions={[a['action'] for a in action_log]} "
+                  f"| batch {len(batch)} (LLM {llm_proposed} + ML backfill {backfilled}) "
+                  f"→ {len(round_hits)} hits [{', '.join(round_hits[:8])}] "
                   f"| cumulative {len(hits)}/{oracle.total_hits} ({ratio:.1%})")
+            for a in action_log:
+                print(f"       · {a['action']}: {a['summary'][:160]}")
 
     return {"dataset": dataset, "rounds": rounds, "batch_size": batch_size,
             "cumulative_hits": len(hits), "total_hits": oracle.total_hits,
