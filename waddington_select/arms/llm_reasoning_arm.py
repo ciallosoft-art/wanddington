@@ -183,12 +183,13 @@ class LLMReasoningArm(BaseArm):
         """Retrieve and render the skills whose triggers fire in the current round state."""
         if self._skill_library is None or len(self._skill_library) == 0:
             return ""
-        n_revealed_hits = sum(len(h) for h in self._round_hits)
+        revealed_hits = {g for rnd in self._round_hits for g in rnd}
         state = {
             "round": round_idx + 1,
             "n_genes": len(self._genes),
             "hit_rate": self._dataset_hit_rate,
-            "n_revealed_hits": n_revealed_hits,
+            "n_revealed_hits": len(revealed_hits),
+            "revealed_hits": revealed_hits,
         }
         firing = self._skill_library.retrieve(
             state,

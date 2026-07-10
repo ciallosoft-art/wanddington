@@ -5,10 +5,20 @@
     "trigger": {
       "requires_revealed_hits": true
     },
-    "directive": "When hits are enriched in signal transduction cascades (kinases, adaptors, scaffolds), prioritize untested genes in the same pathway family and in transcription factor families that integrate those signals.",
+    "directive": "When hits include T-cell receptor signaling or early TCR activation components, prioritize untested genes in adaptor proteins, protein tyrosine kinases, and NF-\u03baB pathway members, as TCR-proximal signaling cascades show consistent enrichment across immune phenotypes.",
     "evidence_datasets": [
       "IFNG",
       "IL2"
+    ],
+    "marker_genes": [
+      "ZAP70",
+      "LAT",
+      "LCK",
+      "PLCG1",
+      "VAV1",
+      "GRAP2",
+      "LCP2",
+      "ITK"
     ],
     "verified": true
   },
@@ -18,10 +28,20 @@
     "trigger": {
       "requires_revealed_hits": true
     },
-    "directive": "When hits cluster in vesicular trafficking, endosomal sorting, or HOPS complex components, also prioritize untested genes in ubiquitin-proteasome and RNA-binding protein families, as these pathways are functionally coupled.",
+    "directive": "When hits include vesicular trafficking or endosomal sorting components, prioritize untested genes in the ubiquitin-proteasome system and RNA-binding protein families, as these three pathways co-enrich in cellular homeostasis and protein quality control phenotypes.",
     "evidence_datasets": [
       "Sanchez21",
       "Sanchez21_down"
+    ],
+    "marker_genes": [
+      "VPS33A",
+      "VPS41",
+      "RAB11A",
+      "UBA5",
+      "UBE2F",
+      "DROSHA",
+      "FUS",
+      "AGO2"
     ],
     "verified": true
   },
@@ -31,9 +51,19 @@
     "trigger": {
       "requires_revealed_hits": true
     },
-    "directive": "When hits are dominated by metabolic pathway components (purine metabolism, nucleotide synthesis, cAMP signaling), prioritize untested genes in GPCR and second-messenger signaling families.",
+    "directive": "When hits include autophagy machinery or lysosomal transport components, prioritize untested genes in lipid metabolism, cholesterol trafficking, and ER-lysosome membrane contact pathways, as these coordinate in lysosomal homeostasis and recycling phenotypes.",
     "evidence_datasets": [
-      "Carnevale22"
+      "Scharenberg22"
+    ],
+    "marker_genes": [
+      "ATG3",
+      "ATG7",
+      "ATG9A",
+      "RB1CC1",
+      "NPC1",
+      "LDLR",
+      "VPS29",
+      "AP3B1"
     ],
     "verified": true
   },
@@ -43,9 +73,18 @@
     "trigger": {
       "requires_revealed_hits": true
     },
-    "directive": "When hits include autophagy machinery or lysosomal transport, prioritize untested genes in lipid metabolism, cholesterol trafficking, and ER-lysosome tethering families.",
+    "directive": "When hits include adenosine signaling or GPCR pathway components, prioritize untested genes in purine/nucleotide metabolism and cAMP/PKA signaling scaffolds, as these pathways coordinate immunosuppressive signal transduction.",
     "evidence_datasets": [
-      "Scharenberg22"
+      "Carnevale22"
+    ],
+    "marker_genes": [
+      "ADORA2A",
+      "NT5C1B",
+      "NT5C2",
+      "ENTPD3",
+      "AMPD3",
+      "PRKACA",
+      "GNAS"
     ],
     "verified": true
   },
@@ -55,10 +94,20 @@
     "trigger": {
       "requires_revealed_hits": true
     },
-    "directive": "When hits are enriched in transcriptional regulators and cytokine signaling, prioritize untested genes in immune checkpoint, developmental signaling, and chromatin remodeling families.",
+    "directive": "When hits include Mediator complex or general transcription factor (TFIID/TAF) components, prioritize untested genes in histone modification, chromatin remodeling, and transcriptional co-activator families, as these form an integrated transcriptional regulatory module.",
     "evidence_datasets": [
-      "Steinhart",
-      "IL2"
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [
+      "MED1",
+      "MED17",
+      "TAF1",
+      "TAF2",
+      "TAF7",
+      "KDM1A",
+      "SETD1A",
+      "WDR5"
     ],
     "verified": true
   },
@@ -68,27 +117,42 @@
     "trigger": {
       "requires_revealed_hits": true
     },
-    "directive": "When hits cluster in Mediator complex, general transcription factors (TFIID/TAF), or histone modification enzymes, prioritize untested genes in the same transcriptional machinery families and proteasome subunits.",
+    "directive": "When hits include proteasome subunits or core proteasomal degradation machinery, prioritize untested genes in ubiquitin conjugation, E2/E3 ligase families, and deubiquitinase complexes, as protein degradation is a coordinated multi-step process.",
     "evidence_datasets": [
       "Replogle_K562_essential",
-      "Replogle_K562_gwps"
+      "Sanchez21"
+    ],
+    "marker_genes": [
+      "PSMD2",
+      "PSMC4",
+      "PSMC1",
+      "UBA5",
+      "UBE2F",
+      "UBE2H",
+      "UFC1"
     ],
     "verified": true
   },
   {
     "id": "sk_007",
-    "type": "selection_heuristic",
+    "type": "pathway_prior",
     "trigger": {
-      "min_hit_rate": 0.04,
-      "max_hit_rate": 0.05
+      "requires_revealed_hits": true
     },
-    "directive": "When hit rate is moderate (4\u20135%), use online adaptive (ML-based) selection to exploit emerging patterns; this strategy outperforms fixed heuristics in mid-complexity phenotypes.",
+    "directive": "When hits include IL-2 receptor signaling or STAT pathway components, prioritize untested genes in T-cell transcriptional regulators and immune checkpoint modulators, as these coordinate T-cell activation and differentiation states.",
     "evidence_datasets": [
-      "IFNG",
-      "Sanchez21",
-      "Sanchez21_down",
-      "Carnevale22",
-      "Scharenberg22"
+      "IL2",
+      "Steinhart"
+    ],
+    "marker_genes": [
+      "IL2RA",
+      "IL2RB",
+      "STAT5A",
+      "STAT4",
+      "JAK1",
+      "JAK3",
+      "BATF",
+      "IRF4"
     ],
     "verified": true
   },
@@ -96,69 +160,82 @@
     "id": "sk_008",
     "type": "selection_heuristic",
     "trigger": {
-      "min_hit_rate": 0.008,
-      "max_hit_rate": 0.03
+      "min_hit_rate": 0.04,
+      "max_hit_rate": 0.05
     },
-    "directive": "When hit rate is very low (<3%) or phenotype involves complex immune regulation (e.g., T-cell exhaustion, CAR-T fitness), use LLM reasoning to integrate domain knowledge and multi-hop pathway logic.",
+    "directive": "When overall hit rate falls in the 4\u20135% range (moderate signal density), employ online adaptive machine learning strategies to iteratively refine gene prioritization, as this regime shows consistent ML advantage over single-pass reasoning.",
     "evidence_datasets": [
+      "IFNG",
       "IL2",
-      "Steinhart"
+      "Sanchez21",
+      "Sanchez21_down",
+      "Carnevale22",
+      "Scharenberg22"
     ],
+    "marker_genes": [],
     "verified": true
   },
   {
     "id": "sk_009",
     "type": "selection_heuristic",
     "trigger": {
-      "min_hit_rate": 0.09,
-      "max_n_genes": 1000
+      "min_hit_rate": 0.008,
+      "max_hit_rate": 0.03
     },
-    "directive": "When screening a small, curated gene set with high hit rate (>9%), use LLM reasoning to identify mechanistic links and prioritize genes with pleiotropic roles in essential cellular processes.",
+    "directive": "When overall hit rate is very low (<3%), employ LLM-based reasoning strategies that leverage domain knowledge and pathway semantics, as sparse signal favors interpretable hypothesis-driven selection over statistical learning.",
     "evidence_datasets": [
-      "Replogle_K562_essential"
+      "Steinhart"
     ],
+    "marker_genes": [],
     "verified": true
   },
   {
     "id": "sk_010",
-    "type": "calibration",
+    "type": "selection_heuristic",
     "trigger": {
-      "min_hit_rate": 0.04
+      "min_hit_rate": 0.09,
+      "max_n_genes": 1000
     },
-    "directive": "When a phenotype involves multi-step cellular processes (trafficking, transcription, metabolism), trust LLM reasoning confidence scores more heavily than raw ML scores, as LLM captures pathway coherence.",
+    "directive": "When screening a small, curated gene set (\u22641000 genes) with high hit density (\u22659%), use LLM reasoning to maximize signal extraction from limited search space, as domain knowledge becomes more valuable when the candidate pool is pre-filtered.",
     "evidence_datasets": [
-      "Carnevale22",
-      "Scharenberg22",
-      "Steinhart"
+      "Replogle_K562_essential",
+      "Scharenberg22"
     ],
+    "marker_genes": [],
     "verified": true
   },
   {
     "id": "sk_011",
     "type": "calibration",
     "trigger": {
-      "max_hit_rate": 0.05,
-      "requires_revealed_hits": true
+      "min_n_genes": 9000
     },
-    "directive": "When early hits reveal a dominant pathway family, increase confidence in genes sharing functional annotations (complex membership, kinase subfamily, transcription factor family) with those hits.",
+    "directive": "When screening large gene sets (>9000 genes), weight online adaptive ML strategies more heavily than single-pass LLM reasoning in early rounds, as statistical learning scales better with search space size and hit density.",
     "evidence_datasets": [
-      "IFNG",
       "IL2",
-      "Sanchez21"
+      "Replogle_K562_gwps"
     ],
+    "marker_genes": [],
     "verified": true
   },
   {
     "id": "sk_012",
-    "type": "selection_heuristic",
+    "type": "pathway_prior",
     "trigger": {
-      "min_n_genes": 9000
+      "requires_revealed_hits": true
     },
-    "directive": "When screening large genome-scale libraries (>9000 genes), use online adaptive ML in early rounds to rapidly narrow the search space, then switch to LLM reasoning once pathway patterns emerge.",
+    "directive": "When hits span multiple functional modules (e.g., signaling + transcription + chromatin), prioritize untested genes that bridge or coordinate between those modules, as phenotypes often require multi-layer regulatory integration rather than single-pathway dominance.",
     "evidence_datasets": [
-      "Replogle_K562_gwps",
-      "IL2",
-      "IFNG"
+      "Steinhart",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [
+      "BATF",
+      "IRF4",
+      "MED1",
+      "TAF1",
+      "STAT5A",
+      "KDM1A"
     ],
     "verified": true
   }

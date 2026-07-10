@@ -103,13 +103,19 @@ Produce up to {n_skills} skills. Rules for good skills:
     pathway_prior      — how revealed hits imply which untested genes to prioritise
     selection_heuristic— round-level policy (exploration, ML-vs-LLM trust, batch allocation)
     calibration        — how to weight a signal (e.g. LLM confidence) based on observed reliability
+- For every pathway_prior, add "marker_genes": 5-10 CANONICAL, well-known member genes of the
+  pathway/complex the rule is about (e.g. autophagy → ATG5, ATG7, BECN1, MAP1LC3B, SQSTM1). These
+  are used only to decide *when* the skill fires (the rule fires only if the experiment's revealed
+  hits actually include one of them) — they are never shown to the agent, so they may be specific
+  gene symbols. Other skill types use "marker_genes": [].
 
 Return ONLY a JSON array; each element:
 {{
   "type": "...",
   "trigger": {{...}},
   "directive": "one or two sentences, a clear when-then rule with no specific gene names",
-  "evidence_datasets": ["...", "..."]
+  "evidence_datasets": ["...", "..."],
+  "marker_genes": ["GENE1", "GENE2", "..."]
 }}"""
 
 
@@ -150,6 +156,9 @@ def _mechanical_ok(skill: dict) -> list[str]:
     bad_keys = set(skill.get("trigger", {})) - _ALLOWED_TRIGGER_KEYS
     if bad_keys:
         issues.append(f"unknown trigger keys {sorted(bad_keys)}")
+    # A pathway_prior must carry marker genes so it can fire discriminatively.
+    if skill.get("type") == "pathway_prior" and len(skill.get("marker_genes", [])) < 3:
+        issues.append("pathway_prior needs >=3 marker_genes for a discriminative trigger")
     return issues
 
 
@@ -205,6 +214,7 @@ def build_skills(n_skills: int = 12) -> list[dict]:
             "trigger": cand.get("trigger", {}),
             "directive": cand.get("directive", "").strip(),
             "evidence_datasets": cand.get("evidence_datasets", []),
+            "marker_genes": [g.strip().upper() for g in cand.get("marker_genes", []) if g.strip()],
             "verified": valid,
         }
         skills.append(skill)

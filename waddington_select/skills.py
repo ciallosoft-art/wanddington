@@ -31,6 +31,10 @@ Skill schema
   },
   "directive": "…natural-language when-then rule (structure over identity)…",
   "evidence_datasets": ["IFNG", "IL2"],   # source experiments — used for the LOO leakage guard
+  "marker_genes": ["ZAP70", "LCK", …],    # canonical pathway genes; a pathway_prior fires only
+                                          # when the observed hits include one (discriminative
+                                          # trigger). Used internally only — never shown in the
+                                          # prompt, so it is not a leakage vector. [] for others.
   "verified": true
 }
 """
@@ -85,6 +89,7 @@ class SkillLibrary:
         """
         block_genes = block_genes or set()
         firing: list[dict] = []
+        revealed_hits = {g.upper() for g in state.get("revealed_hits", ())}
         for sk in self._skills:
             if not sk.get("verified", False):
                 continue
@@ -92,8 +97,14 @@ class SkillLibrary:
                 continue  # leakage guard 1: skill sourced from the held-out dataset
             if self._directive_leaks(sk, block_genes):
                 continue  # leakage guard 2: directive names a held-out hit gene
-            if self._fires(sk.get("trigger", {}), state):
-                firing.append(sk)
+            if not self._fires(sk.get("trigger", {}), state):
+                continue
+            # Discriminative gate: a skill with marker genes fires only when the observed hits
+            # actually include one of them (i.e. the phenotype really touches this pathway).
+            markers = {g.upper() for g in sk.get("marker_genes", [])}
+            if markers and revealed_hits.isdisjoint(markers):
+                continue
+            firing.append(sk)
 
         firing.sort(
             key=lambda s: (
