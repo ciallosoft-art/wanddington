@@ -1,20 +1,15 @@
 """
-tools.py — Pure-compute actions the feynman gene-selection agent calls (via its bash tool).
+tools.py — Pure-compute actions for the gene-selection agent.
 
-The agent's *reasoning* is the LLM (feynman's brain, provider-switchable); its *actions* that touch
-data are these tools. Each subcommand prints a single JSON object to stdout so the agent can parse
-it. No tool calls the LLM — the intelligence/planning lives in the agent loop.
+The agent's *reasoning* is the LLM; its *actions that touch data* are these functions. Each returns
+a plain dict. They are callable natively (by the Python agent loop, agent_loop.py) and also exposed
+as a CLI (`python -m waddington_select.tools <cmd> ...`) that prints the same dict as JSON — handy
+for a feynman/pi-driven agent that shells out. No function calls the LLM.
 
-Subcommands:
   ml_rank   ML (online LightGBM) top candidate genes, given feedback so far.
   enrich    Pathway/GO enrichment of a gene set (Enrichr) — turns revealed hits into pathways.
-  reveal    "Run the experiment": return hit/no-hit for a batch. Benchmark uses the ground-truth
-            oracle; in real deployment this is replaced by the scientist entering wet-lab results.
-
-Usage:
-  python -m waddington_select.tools ml_rank --dataset IFNG --n 30 --tested-hits ZAP70 --tested-misses ACTB
-  python -m waddington_select.tools enrich  --genes ZAP70 LCK PLCG1 --top 10
-  python -m waddington_select.tools reveal  --dataset IFNG --genes ZAP70 LCK ACTB
+  reveal    "Run the experiment": hit/no-hit for a batch. Benchmark = ground-truth oracle;
+            real deployment = the scientist entering wet-lab results.
 """
 
 from __future__ import annotations
@@ -22,114 +17,98 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from .oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
 from .arms.online_adaptive_arm import OnlineAdaptiveArm
 from .arms.waddington_c_arm import _get_feature_config
 
 
-def _emit(obj: dict) -> None:
-    json.dump(obj, sys.stdout, indent=2)
-    sys.stdout.write("\n")
-
-
 def _norm(genes) -> list[str]:
     return [g.strip().upper() for g in (genes or []) if g.strip()]
 
 
-# ── ml_rank ──────────────────────────────────────────────────────────────────
+# ── pure functions (callable natively) ───────────────────────────────────────
 
-def cmd_ml_rank(args) -> None:
-    training_csv, extra = _get_feature_config(args.dataset)
-    n = args.n or BATCH_SIZES[args.dataset]
-    arm = OnlineAdaptiveArm(args.dataset, n, training_csv=training_csv, extra_feature_cols=extra)
-
-    hits = _norm(args.tested_hits)
-    misses = _norm(args.tested_misses)
+def ml_rank(dataset: str, n: int | None = None, tested_hits=None,
+            tested_misses=None, exclude=None) -> dict:
+    training_csv, extra = _get_feature_config(dataset)
+    n = n or BATCH_SIZES[dataset]
+    arm = OnlineAdaptiveArm(dataset, n, training_csv=training_csv, extra_feature_cols=extra)
+    hits, misses = _norm(tested_hits), _norm(tested_misses)
     revealed = {g: True for g in hits}
     revealed.update({g: False for g in misses})
-    retrained = False
-    if revealed:
+    retrained = bool(revealed)
+    if retrained:
         arm.update(0, revealed)
-        retrained = True
-
-    exclude = set(hits) | set(misses) | set(_norm(args.exclude))
-    ranked = arm.ranked_candidates(n, exclude=exclude)
-    _emit({
-        "tool": "ml_rank",
-        "dataset": args.dataset,
-        "retrained_on_feedback": retrained,
+    excl = set(hits) | set(misses) | set(_norm(exclude))
+    ranked = arm.ranked_candidates(n, exclude=excl)
+    return {
+        "tool": "ml_rank", "dataset": dataset, "retrained_on_feedback": retrained,
         "candidates": [{"gene": g, "score": round(float(s), 4)} for g, s in ranked],
-    })
+    }
 
 
-# ── enrich ───────────────────────────────────────────────────────────────────
-
-def cmd_enrich(args) -> None:
-    from pathlib import Path
-    genes = _norm(args.genes)
+def enrich(genes, top: int = 10) -> dict:
+    genes = _norm(genes)
     result = {"tool": "enrich", "n_genes": len(genes), "terms": []}
     if not genes:
         result["error"] = "no genes provided"
-        _emit(result)
-        return
+        return result
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "workspace" / "evaluation"))
         from go_enrichment import enrich_genes
         raw = enrich_genes(genes)  # list of {rank, term, pval, z_score, combined_score, genes}
         result["terms"] = [
-            {
-                "term": row["term"],
-                "pval": round(float(row["pval"]), 6),
-                "combined_score": round(float(row["combined_score"]), 2),
-                "overlap_genes": row.get("genes", []),
-            }
-            for row in raw[: args.top]
+            {"term": row["term"], "pval": round(float(row["pval"]), 6),
+             "combined_score": round(float(row["combined_score"]), 2),
+             "overlap_genes": row.get("genes", [])}
+            for row in raw[:top]
         ]
-    except Exception as e:  # network / API hiccup — degrade gracefully
+    except Exception as e:
         result["error"] = f"enrichment unavailable: {type(e).__name__}: {e}"
-    _emit(result)
+    return result
 
 
-# ── reveal (oracle / wet-lab stand-in) ───────────────────────────────────────
-
-def cmd_reveal(args) -> None:
-    genes = _norm(args.genes)
-    oracle = DatasetOracle(args.dataset)
-    revealed = oracle.reveal(genes)
+def reveal(dataset: str, genes) -> dict:
+    genes = _norm(genes)
+    revealed = DatasetOracle(dataset).reveal(genes)
     hits = [g for g, is_hit in revealed.items() if is_hit]
-    _emit({
-        "tool": "reveal",
-        "dataset": args.dataset,
-        "tested": len(genes),
-        "n_hits": len(hits),
-        "hits": hits,
-        "reveal": revealed,
+    return {
+        "tool": "reveal", "dataset": dataset, "tested": len(genes),
+        "n_hits": len(hits), "hits": hits, "reveal": revealed,
         "note": "ground-truth oracle (benchmark). In deployment, replace with real wet-lab results.",
-    })
+    }
+
+
+# ── CLI wrappers ─────────────────────────────────────────────────────────────
+
+def _emit(obj: dict) -> None:
+    json.dump(obj, sys.stdout, indent=2)
+    sys.stdout.write("\n")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Gene-selection agent tools (pure compute).")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p = sub.add_parser("ml_rank", help="ML top candidate genes given feedback")
+    p = sub.add_parser("ml_rank")
     p.add_argument("--dataset", required=True, choices=ALL_DATASETS)
     p.add_argument("--n", type=int, default=None)
     p.add_argument("--tested-hits", nargs="*", default=None)
     p.add_argument("--tested-misses", nargs="*", default=None)
     p.add_argument("--exclude", nargs="*", default=None)
-    p.set_defaults(func=cmd_ml_rank)
+    p.set_defaults(func=lambda a: _emit(ml_rank(a.dataset, a.n, a.tested_hits, a.tested_misses, a.exclude)))
 
-    p = sub.add_parser("enrich", help="Pathway/GO enrichment of a gene set")
+    p = sub.add_parser("enrich")
     p.add_argument("--genes", nargs="+", required=True)
     p.add_argument("--top", type=int, default=10)
-    p.set_defaults(func=cmd_enrich)
+    p.set_defaults(func=lambda a: _emit(enrich(a.genes, a.top)))
 
-    p = sub.add_parser("reveal", help="Return hit/no-hit for a batch (benchmark oracle)")
+    p = sub.add_parser("reveal")
     p.add_argument("--dataset", required=True, choices=ALL_DATASETS)
     p.add_argument("--genes", nargs="+", required=True)
-    p.set_defaults(func=cmd_reveal)
+    p.set_defaults(func=lambda a: _emit(reveal(a.dataset, a.genes)))
 
     args = parser.parse_args()
     args.func(args)
