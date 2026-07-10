@@ -42,6 +42,20 @@ AUTH_JSON = Path.home() / ".feynman" / "agent" / "auth.json"
 DEFAULT_BACKEND = os.environ.get("WADDINGTON_LLM_BACKEND", "anthropic")
 DEFAULT_PI_CMD = os.environ.get("WADDINGTON_PI_CMD", "feynman --prompt")
 
+# `feynman --prompt` runs a full agent (it can write files / run code), not a pure completion,
+# and its CLI does not expose tool exclusion. Run it in a throwaway cwd so it can never pollute
+# the caller's repository. NOTE: this contains file writes but does not stop the agent from taking
+# actions — the anthropic backend remains the clean, benchmark-grade path.
+_PI_CWD: str | None = None
+
+
+def _pi_cwd() -> str:
+    global _PI_CWD
+    if _PI_CWD is None:
+        import tempfile
+        _PI_CWD = tempfile.mkdtemp(prefix="waddington-pi-")
+    return _PI_CWD
+
 # Retry schedule (mirrors the arm's previous backoff).
 _MAX_ATTEMPTS = 8
 _BASE_WAIT = 10
@@ -143,7 +157,8 @@ class LLMClient:
             cmd = cmd + [prompt]
             stdin_data = None
 
-        run_kwargs: dict = {"capture_output": True, "text": True, "timeout": 300}
+        run_kwargs: dict = {"capture_output": True, "text": True, "timeout": 300,
+                            "cwd": _pi_cwd()}
         if stdin_data is not None:
             run_kwargs["input"] = stdin_data
         else:
