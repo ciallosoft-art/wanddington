@@ -96,6 +96,7 @@ class WaddingtonCArm(BaseArm):
         memory_path: Path = MEMORY_PATH,
         skill_library: "SkillLibrary | None" = None,
         use_memory: bool = True,
+        use_enrichment: bool = False,
         name: str = "waddington_c",
     ) -> None:
         super().__init__(name, dataset_name, batch_size)
@@ -130,6 +131,7 @@ class WaddingtonCArm(BaseArm):
             extra_feature_cols=extra_feats,
             skill_library=skill_library,
             dataset_hit_rate=n_hits / max(n_genes, 1),
+            use_enrichment=use_enrichment,
         )
 
     def _on_reset(self) -> None:
@@ -207,4 +209,23 @@ class WaddingtonCMemSkillsArm(WaddingtonCArm):
             skill_library=SkillLibrary.load(skill_path),
             use_memory=True,
             name="waddington_c_memskills",
+        )
+
+
+class WaddingtonCEnrichArm(WaddingtonCArm):
+    """Enrichment-augmented hybrid: the full C-arm (memory + ML+LLM fusion) PLUS runtime Enrichr
+    enrichment of the hits revealed so far, injected into the LLM prompt each round.
+
+    Transplants the tool-using agent's one winning ingredient (runtime enrichment, which beat the
+    pipeline on Scharenberg22) into the strong pipeline, without giving up its ML fusion on the
+    strong-ML datasets where the free agent lost.
+    """
+
+    def __init__(self, dataset_name: str, batch_size: int) -> None:
+        super().__init__(
+            dataset_name,
+            batch_size,
+            use_memory=True,
+            use_enrichment=True,
+            name="waddington_c_enrich",
         )

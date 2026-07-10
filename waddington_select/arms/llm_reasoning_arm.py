@@ -108,6 +108,7 @@ class LLMReasoningArm(BaseArm):
         extra_feature_cols: list[str] | None = None,
         skill_library: SkillLibrary | None = None,
         dataset_hit_rate: float = 0.0,
+        use_enrichment: bool = False,
     ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
@@ -119,6 +120,10 @@ class LLMReasoningArm(BaseArm):
         self._block_genes: set[str] = (
             load_dataset_hits(dataset_name) if skill_library is not None else set()
         )
+        # Runtime enrichment: inject Enrichr pathways of the hits found so far (the C-arm's
+        # enrichment-augmented "hybrid" — transplants the agent's winning ingredient).
+        self._use_enrichment = use_enrichment
+        self._enrich_cache: dict = {}
         self._temperature = temperature
         self._model = model
 
@@ -199,12 +204,33 @@ class LLMReasoningArm(BaseArm):
         )
         return SkillLibrary.render(firing)
 
+    def _build_enrichment_section(self, round_idx: int) -> str:
+        """Enrichr pathways of the hits revealed so far (runtime, this experiment's own hits)."""
+        if not self._use_enrichment:
+            return ""
+        hits = [g for rnd in self._round_hits for g in rnd]
+        if len(hits) < 3:
+            return ""
+        key = frozenset(hits)
+        if key not in self._enrich_cache:
+            from ..tools import enrich  # lazy import to avoid a circular import at module load
+            self._enrich_cache[key] = enrich(hits, top=6)
+        terms = self._enrich_cache[key].get("terms", [])
+        if not terms:
+            return ""
+        lines = ["\nACTIVE PATHWAYS (enrichment of the hits found so far):"]
+        for t in terms[:6]:
+            lines.append(f"  - {t['term']} (hit genes: {', '.join(t.get('overlap_genes', [])[:5])})")
+        lines.append("Prioritise untested genes in these active pathways.")
+        return "\n".join(lines)
+
     def _build_prompt(self, round_idx: int) -> str:
         task_text = self._task.get("Task", self.dataset_name)
         measurement = self._task.get("Measurement", "")
 
         memory_section = self._build_memory_section()
         skill_section = self._build_skill_section(round_idx)
+        enrichment_section = self._build_enrichment_section(round_idx)
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -233,7 +259,7 @@ class LLMReasoningArm(BaseArm):
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}{skill_section}
+{memory_section}{skill_section}{enrichment_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
 Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
@@ -297,6 +323,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         measurement = self._task.get("Measurement", "")
         memory_section = self._build_memory_section()
         skill_section = self._build_skill_section(round_idx)
+        enrichment_section = self._build_enrichment_section(round_idx)
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -331,7 +358,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}{skill_section}
+{memory_section}{skill_section}{enrichment_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 {shortlist_section}
 
@@ -376,6 +403,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         measurement = self._task.get("Measurement", "")
         memory_section = self._build_memory_section()
         skill_section = self._build_skill_section(round_idx)
+        enrichment_section = self._build_enrichment_section(round_idx)
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
@@ -404,7 +432,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}{skill_section}
+{memory_section}{skill_section}{enrichment_section}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
 Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
