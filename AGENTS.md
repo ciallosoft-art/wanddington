@@ -33,6 +33,21 @@ context. This is a *forward* recommendation (no ground-truth oracle involved).
 A brand-new phenotype is not yet supported (its ML features must be precomputed first) — say so
 rather than guessing.
 
+## Show how a whole sequential experiment would go — `simulate`
+
+When a user wants to *see* how System 2 would drive a multi-round CRISPR campaign for one of the
+phenotypes (a demo of "what using this on my experiment looks like"), run:
+
+```bash
+conda run -n waddington-bio python3 -m waddington_select.simulate --dataset <PHENOTYPE> [--rounds 5] [--skills]
+```
+
+It replays a full sequential campaign round by round — each round the C-arm recommends a batch, the
+benchmark's ground-truth oracle stands in for the wet-lab result, and the next round adapts. It
+prints per-round hits, cumulative discovery, and what it would test next. Relay the trajectory and
+the final hit ratio. (For a real experiment with the user's own results instead of the oracle,
+use `suggest` with `--tested-hits/--tested-misses` iteratively.)
+
 ## Choosing the LLM provider
 
 The gene-selection agent's own reasoning model defaults to Claude. To run it on another provider
