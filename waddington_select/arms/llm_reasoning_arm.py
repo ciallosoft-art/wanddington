@@ -43,6 +43,10 @@ LGBM_PARAMS = {
     "n_estimators": 300, "num_leaves": 31, "verbose": -1, "n_jobs": -1, "random_state": 42,
 }
 
+# Enrichment confidence gate: inject a pathway only if significant AND coherent (>=N hits in it).
+_ENRICH_GATE_PVAL = 1e-3
+_ENRICH_GATE_MIN_OVERLAP = 2
+
 # Dataset → task prompt file (None = hardcoded description)
 TASK_PROMPT_FILES: dict[str, Optional[str]] = {
     "IFNG": "IFNG.json",
@@ -205,7 +209,12 @@ class LLMReasoningArm(BaseArm):
         return SkillLibrary.render(firing)
 
     def _build_enrichment_section(self, round_idx: int) -> str:
-        """Enrichr pathways of the hits revealed so far (runtime, this experiment's own hits)."""
+        """Enrichr pathways of the hits revealed so far (runtime, this experiment's own hits).
+
+        Confidence-gated: a pathway is injected only if it is both significant (p < 1e-3) and
+        coherent (>=2 revealed hits fall in it). Suppresses the noisy/diffuse enrichment that
+        distracted the LLM on genome-wide / weak-signal phenotypes, keeping only strong signals.
+        """
         if not self._use_enrichment:
             return ""
         hits = [g for rnd in self._round_hits for g in rnd]
@@ -214,12 +223,15 @@ class LLMReasoningArm(BaseArm):
         key = frozenset(hits)
         if key not in self._enrich_cache:
             from ..tools import enrich  # lazy import to avoid a circular import at module load
-            self._enrich_cache[key] = enrich(hits, top=6)
+            self._enrich_cache[key] = enrich(hits, top=12)
         terms = self._enrich_cache[key].get("terms", [])
-        if not terms:
-            return ""
-        lines = ["\nACTIVE PATHWAYS (enrichment of the hits found so far):"]
-        for t in terms[:6]:
+        strong = [t for t in terms
+                  if t.get("pval", 1.0) < _ENRICH_GATE_PVAL
+                  and len(t.get("overlap_genes", [])) >= _ENRICH_GATE_MIN_OVERLAP]
+        if not strong:
+            return ""  # no confident, coherent pathway → inject nothing (avoid noise)
+        lines = ["\nACTIVE PATHWAYS (significant enrichment of the hits found so far):"]
+        for t in strong[:5]:
             lines.append(f"  - {t['term']} (hit genes: {', '.join(t.get('overlap_genes', [])[:5])})")
         lines.append("Prioritise untested genes in these active pathways.")
         return "\n".join(lines)
