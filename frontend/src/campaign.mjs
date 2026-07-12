@@ -8,40 +8,74 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { suggestGenes, revealBatch, REPO_ROOT } from "./brain.mjs";
+import { suggestGenes, revealBatch, ingestResults, REPO_ROOT } from "./brain.mjs";
 
 const DEFAULT_ROUNDS = 5;
 
-/** Begin a campaign: cold-start recommendation for round 1, awaiting commit. */
-export async function startCampaign(state, { dataset, rounds, batchSize }) {
+/**
+ * Begin a campaign: cold-start recommendation for round 1, awaiting commit.
+ * mode: "oracle" (benchmark truth plays the wet lab) | "upload" (scientist provides each round's readout).
+ */
+export async function startCampaign(state, { dataset, rounds, batchSize, mode }) {
   const r = await suggestGenes({ dataset, n: batchSize || undefined });
   state.campaign = {
     active: true,
+    mode: mode === "upload" ? "upload" : "oracle",
     dataset,
     batchSize: batchSize || null,
     round: 1,
     maxRounds: rounds && rounds > 0 ? rounds : DEFAULT_ROUNDS,
+    stage: "proposed",
     pending: r.genes,
     testedHits: [],
     testedMisses: [],
     history: [],
     startedAt: new Date().toISOString(),
   };
-  return { kind: "campaign", stage: "proposed", dataset, round: 1, maxRounds: state.campaign.maxRounds, genes: r.genes };
+  return {
+    kind: "campaign", stage: "proposed", mode: state.campaign.mode,
+    dataset, round: 1, maxRounds: state.campaign.maxRounds, genes: r.genes,
+  };
 }
 
-/** Commit the pending batch: reveal the phenotype, then propose the next round (or finish). */
+/**
+ * Commit the pending batch.
+ * - oracle mode: reveal via the hidden ground truth now, then advance.
+ * - upload mode: do NOT reveal — wait for the scientist to provide this round's screen readout.
+ */
 export async function commitRound(state) {
   const c = state.campaign;
+  if (c.mode === "upload") {
+    c.stage = "awaiting_results";
+    return {
+      kind: "campaign", stage: "awaiting_results", mode: "upload",
+      dataset: c.dataset, round: c.round, genes: c.pending,
+    };
+  }
   const reveal = await revealBatch({ dataset: c.dataset, genes: c.pending });
-  const hitSet = new Set(reveal.hits);
+  return advance(state, reveal.hits, reveal.totalHits);
+}
+
+/** Upload mode: the scientist provides this round's readout file → derive hits → advance. */
+export async function submitResults(state, { path, content, name, scoreCol, topRatio } = {}) {
+  const c = state.campaign;
+  const r = await ingestResults({ genes: c.pending, path, content, name, scoreCol, topRatio });
+  const res = await advance(state, r.hits, r.totalHits);
+  res.ingestMethod = r.method;
+  res.unknown = r.unknown;
+  return res;
+}
+
+/** Record a round's outcome (hits known), then propose the next round or finish. Shared by both modes. */
+async function advance(state, revealedHits, total) {
+  const c = state.campaign;
+  const hitSet = new Set(revealedHits);
   const roundHits = c.pending.filter((g) => hitSet.has(g));
   const roundMisses = c.pending.filter((g) => !hitSet.has(g));
 
   c.testedHits.push(...roundHits);
   c.testedMisses.push(...roundMisses);
   const cumulative = c.testedHits.length;
-  const total = reveal.totalHits;
   c.totalHits = total; // stash so a later `stop` can still report cumulative/total
   const ratio = total ? cumulative / total : 0;
   c.history.push({ round: c.round, tested: c.pending.length, hits: roundHits, cumulative, ratio });
@@ -49,6 +83,7 @@ export async function commitRound(state) {
   const revealedRound = c.round;
   if (c.round < c.maxRounds) {
     c.round += 1;
+    c.stage = "proposed";
     const next = await suggestGenes({
       dataset: c.dataset,
       n: c.batchSize || undefined,
@@ -57,7 +92,7 @@ export async function commitRound(state) {
     });
     c.pending = next.genes;
     return {
-      kind: "campaign", stage: "revealed", done: false,
+      kind: "campaign", stage: "revealed", done: false, mode: c.mode,
       dataset: c.dataset, round: revealedRound, roundHits, cumulative, total, ratio,
       nextRound: c.round, next: next.genes,
     };

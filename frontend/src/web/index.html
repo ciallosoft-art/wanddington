@@ -74,10 +74,24 @@
         if (r.stage === "await") { addBot(el("bubble", esc(r.text))); return; }
         const b = el("bubble");
         const chips = (list) => { const g = el("genes"); for (const x of list) g.appendChild(el("gene", esc(x))); return g; };
+        if (r.stage === "awaiting_results") {
+          if (r.text) { b.appendChild(el(null, esc(r.text))); }
+          else {
+            b.appendChild(el(null, `<b>Round ${r.round} committed</b> · ${r.genes.length} genes tested. Upload this round's screen readout to reveal hits:`));
+            const up = document.createElement("input");
+            up.type = "file"; up.accept = ".csv,.txt,.tsv";
+            up.onchange = () => uploadResults(up);
+            b.appendChild(up);
+            b.appendChild(el("meta", "MAGeCK gene_summary or Gene,Score CSV — or type “stop” to end"));
+          }
+          addBot(b); return;
+        }
         if (r.stage === "proposed") {
           b.appendChild(el(null, `<b>Experiment · ${esc(r.dataset)}</b> — Round ${r.round}/${r.maxRounds}. Proposed batch (${r.genes.length}):`));
           b.appendChild(chips(r.genes));
-          b.appendChild(el("meta", "type “commit” to test this batch (reveal phenotype), or “stop” to end"));
+          b.appendChild(el("meta", r.mode === "upload"
+            ? "type “commit” to lock in this batch (you'll upload results next), or “stop”"
+            : "type “commit” to test this batch (reveal phenotype), or “stop” to end"));
         } else if (r.stage === "revealed") {
           b.appendChild(el(null, `<b>Round ${r.round} results:</b> ${r.roundHits.length} hits — ${esc(r.roundHits.join(", ") || "(none)")}`));
           b.appendChild(el("meta", `cumulative ${r.cumulative}/${r.total} (${(r.ratio * 100).toFixed(1)}%)`));
@@ -99,16 +113,13 @@
       }
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const text = q.value.trim();
-      if (!text) return;
-      addYou(text); q.value = ""; send.disabled = true;
+    async function postMessage({ message = "", file = null }) {
+      send.disabled = true;
       const thinking = el("bubble", "…"); addBot(thinking);
       try {
         const res = await fetch("/api/message", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ message: text, state }),
+          body: JSON.stringify({ message, file, state }),
         });
         const r = await res.json();
         thinking.parentElement.remove();
@@ -119,7 +130,26 @@
       } finally {
         send.disabled = false; q.focus();
       }
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = q.value.trim();
+      if (!text) return;
+      addYou(text); q.value = "";
+      postMessage({ message: text });
     });
+
+    function uploadResults(input) {
+      const f = input.files && input.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        addYou(`📎 uploaded ${f.name} (${(f.size / 1024).toFixed(1)} KB)`);
+        postMessage({ file: { name: f.name, content: String(reader.result) } });
+      };
+      reader.readAsText(f);
+    }
   </script>
 </body>
 </html>

@@ -7,8 +7,10 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
 
 const execFileAsync = promisify(execFile);
 
@@ -68,6 +70,32 @@ export async function revealBatch({ dataset, genes }) {
   if (s === -1 || e === -1) throw new Error("reveal produced no JSON");
   const r = JSON.parse(stdout.slice(s, e + 1));
   return { hits: r.hits || [], reveal: r.reveal || {}, nHits: r.n_hits ?? (r.hits?.length || 0), totalHits: r.total_hits };
+}
+
+/**
+ * "Real experiment" reveal: derive hits for a tested batch from the scientist's uploaded screen
+ * readout (MAGeCK gene_summary / Gene,Score CSV / labelled table). Pass either a file `path` or raw
+ * `content` (+ `name` for the extension hint). Returns { hits, misses, totalHits }.
+ */
+export async function ingestResults({ genes, path, content, name, scoreCol, topRatio }) {
+  if (!genes?.length) throw new Error("ingestResults: empty batch");
+  let filePath = path;
+  if (!filePath) {
+    if (content == null) throw new Error("ingestResults: need a file path or content");
+    const ext = (name && extname(name)) || ".txt"; // .csv → comma, else tab (per ingest.py)
+    const dir = mkdtempSync(join(tmpdir(), "wadd-results-"));
+    filePath = join(dir, `upload${ext}`);
+    writeFileSync(filePath, content);
+  }
+  const args = ["-m", "waddington_select.ingest", "--file", filePath, "--genes", ...genes, "--json"];
+  if (scoreCol) args.push("--score-col", scoreCol);
+  if (topRatio) args.push("--top-ratio", String(topRatio));
+  const { stdout } = await run(args);
+  const s = stdout.indexOf("{");
+  const e = stdout.lastIndexOf("}");
+  if (s === -1 || e === -1) throw new Error(`ingest failed: ${stdout.slice(0, 200)}`);
+  const r = JSON.parse(stdout.slice(s, e + 1));
+  return { hits: r.hits || [], misses: r.misses || [], totalHits: r.total_hits, unknown: r.unknown_genes || [], method: r.method };
 }
 
 /**

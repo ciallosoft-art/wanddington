@@ -32,13 +32,14 @@ export async function launchWebServer({ port = 3000, modelSpec } = {}) {
         return;
       }
       if (req.method === "POST" && req.url === "/api/message") {
-        const { message, state } = JSON.parse((await readBody(req)) || "{}");
+        const { message, state, file } = JSON.parse((await readBody(req)) || "{}");
         const st = {
           dataset: state?.dataset ?? null,
           hits: state?.hits ?? [],
           misses: state?.misses ?? [],
+          campaign: state?.campaign ?? null,
         };
-        const result = await respond(String(message || ""), st, spec);
+        const result = await respond(String(message || ""), st, spec, file?.content != null ? { file } : {});
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify(result));
         return;

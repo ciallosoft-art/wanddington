@@ -18,6 +18,12 @@ function render(result) {
   }
   if (result.kind === "campaign") {
     if (result.stage === "await") { console.log(`\n${result.text}\n`); return; }
+    if (result.stage === "awaiting_results") {
+      if (result.text) { console.log(`\n${result.text}\n`); return; }
+      console.log(`\n[Round ${result.round} committed · ${result.genes.length} genes tested]`);
+      console.log("→ paste the path to your screen results file (MAGeCK gene_summary or Gene,Score CSV), or `stop`.\n");
+      return;
+    }
     if (result.stage === "proposed") {
       console.log(`\n[Experiment · ${result.dataset}] Round ${result.round}/${result.maxRounds} — proposed batch (${result.genes.length} genes):`);
       console.log("  " + result.genes.join(", "));

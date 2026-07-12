@@ -25,6 +25,7 @@ Respond with ONE JSON object, nothing else:
   "new_misses": [<gene symbols the scientist reports were NON-hits in this message>],
   "n": <batch size / how many genes per round, or null for default>,
   "rounds": <number of rounds for an experiment/simulate, or null>,
+  "mode": "oracle" | "upload",
   "reply": <a short natural-language reply to show the scientist; REQUIRED for action="chat",
             optional otherwise>
 }
@@ -34,6 +35,9 @@ Guidance:
 - "run/start a (simulated) experiment / let's do a screen / I want to actually run it round by round"
   → action="experiment" (an INTERACTIVE campaign: propose a batch, the scientist commits, the
   phenotype is revealed, repeat). This is the default when they want to *do* an experiment.
+- "mode": for action="experiment", set "upload" when the scientist will supply their OWN screen
+  results each round (phrases: "my own data / real experiment / I'll upload results / my screen
+  file / MAGeCK"); otherwise "oracle" (default — the benchmark truth stands in for the wet lab).
 - "show me how it would go / auto-demo / just simulate it end-to-end" → action="simulate" (non-interactive).
 - If the phenotype is ambiguous or unsupported, use action="chat" and ask which supported phenotype
   they mean (list a few). Never guess a dataset that isn't in the list.
@@ -83,6 +87,7 @@ export async function routeIntent(message, state, modelSpec = DEFAULT_CHAT_MODEL
     new_misses: Array.isArray(parsed.new_misses) ? parsed.new_misses.map((g) => String(g).toUpperCase()) : [],
     n: Number.isInteger(parsed.n) ? parsed.n : null,
     rounds: Number.isInteger(parsed.rounds) ? parsed.rounds : null,
+    mode: parsed.mode === "upload" ? "upload" : "oracle",
     reply: parsed.reply || null,
   };
 }

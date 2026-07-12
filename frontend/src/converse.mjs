@@ -6,7 +6,11 @@
 import { routeIntent } from "./intent.mjs";
 import { complete } from "./llm/complete.mjs";
 import { suggestGenes, simulateCampaign, DATASETS } from "./brain.mjs";
-import { startCampaign, commitRound, finish, campaignCommand } from "./campaign.mjs";
+import { startCampaign, commitRound, submitResults, finish, campaignCommand } from "./campaign.mjs";
+
+function looksLikePath(s) {
+  return /\.(csv|txt|tsv)$/i.test(s) || s.startsWith("/") || s.startsWith("~") || s.startsWith("./");
+}
 
 function mergeUnique(existing, incoming) {
   const set = new Set(existing || []);
@@ -39,15 +43,33 @@ function defaultAsk() {
  *   { kind:"simulate", text, dataset, state }
  *   { kind:"suggest", dataset, genes, info, narration, feedback:{hits,misses}, state }
  */
-export async function respond(message, state, modelSpec) {
-  // Active experiment campaign: deterministic commit/stop (no LLM needed).
+export async function respond(message, state, modelSpec, opts = {}) {
+  // Active experiment campaign: deterministic control (no LLM needed).
   if (state.campaign?.active) {
+    const c = state.campaign;
+    // Upload mode: awaiting the scientist's screen readout for the committed batch.
+    if (c.stage === "awaiting_results") {
+      if (campaignCommand(message) === "stop") return { ...finish(state), state };
+      if (opts.file?.content != null) {
+        return { ...(await submitResults(state, { content: opts.file.content, name: opts.file.name, scoreCol: opts.scoreCol, topRatio: opts.topRatio })), state };
+      }
+      const path = (opts.path || message || "").trim();
+      if (path && looksLikePath(path)) {
+        return { ...(await submitResults(state, { path, scoreCol: opts.scoreCol, topRatio: opts.topRatio })), state };
+      }
+      return {
+        kind: "campaign", stage: "awaiting_results", dataset: c.dataset, round: c.round, genes: c.pending,
+        text: "Provide this round's screen readout to reveal hits — upload a file (Web) or paste a file path (MAGeCK gene_summary or Gene,Score CSV). Or type `stop` to end.",
+        state,
+      };
+    }
+    // Proposed batch: awaiting commit.
     const cmd = campaignCommand(message);
     if (cmd === "commit") return { ...(await commitRound(state)), state };
     if (cmd === "stop") return { ...finish(state), state };
     return {
-      kind: "campaign", stage: "await", dataset: state.campaign.dataset,
-      text: `Type \`commit\` to test round ${state.campaign.round}'s batch, or \`stop\` to end.`,
+      kind: "campaign", stage: "await", dataset: c.dataset,
+      text: `Type \`commit\` to test round ${c.round}'s batch, or \`stop\` to end.`,
       state,
     };
   }
@@ -64,7 +86,7 @@ export async function respond(message, state, modelSpec) {
 
   if (intent.action === "experiment") {
     const started = await startCampaign(state, {
-      dataset: state.dataset, rounds: intent.rounds, batchSize: intent.n,
+      dataset: state.dataset, rounds: intent.rounds, batchSize: intent.n, mode: intent.mode,
     });
     return { ...started, state };
   }
