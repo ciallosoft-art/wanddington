@@ -1,7 +1,8 @@
-// setup.mjs — provider authorization, reusing feynman's shared token store (~/.feynman/agent/auth.json).
+// setup.mjs — provider authorization.
 //
-// Auth goes through pi-coding-agent's AuthStorage (OAuth login + auto-refresh), so the entry shares
-// credentials with feynman: authorize codex / claude / gemini once, here or there.
+// Auth goes through pi-coding-agent's AuthStorage (OAuth login + auto-refresh). The store path is
+// resolved in complete.mjs (DEFAULT_AUTH_PATH): $WADDINGTON_AUTH_PATH, else feynman's shared store
+// if present (authorize once for both), else a standalone ~/.waddington store created on login.
 
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";

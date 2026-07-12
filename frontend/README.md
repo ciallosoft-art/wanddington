@@ -40,3 +40,5 @@ We deliberately removed tools: the free tool-using agent lost to this pipeline (
 
 - `--model provider/model` (or `WADDINGTON_CHAT_MODEL`) — conversation model (default: an authorized Claude Haiku).
 - `WADDINGTON_PY` — how to invoke Python (default `conda run -n waddington-bio python3`).
+- `WADDINGTON_AUTH_PATH` — OAuth/API token store. Default: `~/.feynman/agent/auth.json` if it exists
+  (reuse feynman's tokens), else a standalone `~/.waddington/agent/auth.json` created on first login.

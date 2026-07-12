@@ -1,0 +1,18 @@
+# Conda environment for the Waddington gene-selection brain (the Python half).
+#
+#   conda env create -f environment.yml     # creates `waddington-bio` + installs waddington_select
+#   conda activate waddington-bio
+#
+# The Node frontend is separate: `cd frontend && npm install` (see frontend/README.md).
+name: waddington-bio
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - lightgbm>=4.0        # compiled — install from conda-forge
+  - numpy>=1.24
+  - pandas>=2.0
+  - pip
+  - pip:
+      - anthropic>=0.40
+      - -e .             # installs the waddington_select package (editable), per pyproject.toml

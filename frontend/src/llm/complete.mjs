@@ -6,17 +6,29 @@
 // `tools` field — so the model can only talk, never act. Gene selection is done by the deterministic
 // Python C-arm pipeline (see ../brain.mjs), not by the LLM wielding tools.
 //
-// Auth reuses feynman's existing token store (~/.feynman/agent/auth.json) via pi-coding-agent's
-// AuthStorage, which refreshes expired OAuth tokens with locking — so the recurring "token expired"
-// pain of the old raw-token path is gone.
+// Auth goes through pi-coding-agent's AuthStorage, which refreshes expired OAuth tokens with locking
+// — so the recurring "token expired" pain of the old raw-token path is gone.
+//
+// Store path resolution (portable across machines):
+//   1. $WADDINGTON_AUTH_PATH if set (explicit override)
+//   2. ~/.feynman/agent/auth.json if it exists  → reuse feynman's tokens when feynman is installed
+//   3. ~/.waddington/agent/auth.json            → standalone store (created on first login)
 
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 
 import { AuthStorage, ModelRegistry } from "@earendil-works/pi-coding-agent";
 import { completeSimple } from "@earendil-works/pi-ai/compat";
 
-export const DEFAULT_AUTH_PATH = join(homedir(), ".feynman", "agent", "auth.json");
+function resolveAuthPath() {
+  if (process.env.WADDINGTON_AUTH_PATH) return process.env.WADDINGTON_AUTH_PATH;
+  const feynman = join(homedir(), ".feynman", "agent", "auth.json");
+  if (existsSync(feynman)) return feynman;
+  return join(homedir(), ".waddington", "agent", "auth.json");
+}
+
+export const DEFAULT_AUTH_PATH = resolveAuthPath();
 
 let _registry = null;
 

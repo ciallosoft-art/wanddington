@@ -55,12 +55,19 @@ the architecture progression are in [`docs/results_tables.tex`](docs/results_tab
 ## Layout
 
 ```
-waddington_select/        # the agent package
-├── run_sequential.py     #   experiment runner (python -m waddington_select)
+waddington_select/        # the agent package (the "brain", Python)
+├── run_sequential.py     #   BENCHMARK: experiment runner (python -m waddington_select)
+├── agent_benchmark.py    #   BENCHMARK: tool-using agent vs pipeline (documented negative result)
 ├── sequential_runner.py  #   the 5-round oracle loop
 ├── oracle.py             #   BDA benchmark oracle + dataset registry
+├── suggest.py            #   DEPLOY: forward recommendation (no oracle; --json for the frontend)
+├── simulate.py           #   DEPLOY: narrated oracle-driven demo campaign
 ├── memory_builder.py     #   cross-experiment memory w/ DeLM verified admission
 └── arms/                 #   selection arms (C-arm, baselines, ablations, archive/ = dev history)
+
+frontend/                 # the conversational entry (CLI + Web, Node) — see frontend/README.md
+├── bin/waddington.js     #   `node bin/waddington.js` → auth → CLI/Web → chat
+└── src/                  #   tool-less pi-ai bridge + intent routing; drives suggest/simulate
 
 workspace/
 ├── evaluation/           # feature pipeline + LOO LightGBM training data
@@ -74,18 +81,55 @@ experiments/              # reproduction scripts (01_baselines / 02_three_arm / 
 
 ---
 
-## Running
+## Setup (fresh clone)
 
-Requires the `waddington-bio` conda env (lightgbm, anthropic, numpy, pandas) and, for any LLM
-arm, an Anthropic token (`python experiments/setup_auth.py --token …`).
+Two halves: a Python **brain** and a Node **frontend**. All runtime data (features, PPI/ARCHS4
+caches, task prompts, memory, models) is committed, so a clone only needs the two toolchains.
 
 ```bash
-# Reproduce the full benchmark
+# 1. Brain — creates the `waddington-bio` conda env and installs the package
+conda env create -f environment.yml
+conda activate waddington-bio
+
+# 2. Frontend — Node 20–24
+cd frontend && npm install && cd ..
+
+# 3. Sanity checks
+conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG --n 5   # brain
+node frontend/bin/waddington.js --help                                                  # frontend
+```
+
+No API key needs to be pre-configured: on first launch the frontend prompts you to authorize a
+provider (Claude / Codex / Gemini) via OAuth — exactly like pi/feynman — or set an API-key env var.
+
+## Conversational entry (scientists)
+
+The primary way to *use* the agent — natural-language chat that drives the C-arm pipeline:
+
+```bash
+cd frontend && node bin/waddington.js      # authorize → pick Terminal (CLI) or Web UI → chat
+```
+
+See [`frontend/README.md`](frontend/README.md). Or drive the brain directly:
+
+```bash
+# forward recommendation (real experiment; feed back results to adapt the next round)
+conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG \
+    --tested-hits STAT1 JAK2 --tested-misses ACTB GAPDH
+# narrated demo campaign (oracle plays the wet lab)
+conda run -n waddington-bio python3 -m waddington_select.simulate --dataset IFNG --rounds 5
+```
+
+## Reproduce the benchmark
+
+The benchmark is kept separate from deployment and frozen on `claude-haiku` for reproducibility.
+
+```bash
 bash experiments/01_baselines.sh     # no API needed
 bash experiments/02_three_arm.sh     # A / B / C
 bash experiments/03_ablations.sh     # four ablations
 
-# Or run the package directly (from repo root)
+# Or run the runner directly (from repo root)
 conda run -n waddington-bio python3 -m waddington_select \
     --arms coreset llm_reasoning waddington_c --seeds 5 --rounds 5
 
@@ -96,6 +140,21 @@ conda run -n waddington-bio python3 -m waddington_select.memory_builder
 Arm names: `random`, `coreset`, `static_ranker`, `online_adaptive`, `llm_reasoning`,
 `waddington_c`, and the ablations `waddington_c_no_memory` / `_no_llm` / `_no_ml` /
 `_shuffled_names`.
+
+## Configuration
+
+Environment variables (all optional; sensible defaults):
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `WADDINGTON_AUTH_PATH` | `~/.feynman/agent/auth.json` if it exists, else `~/.waddington/agent/auth.json` | OAuth/API token store used by the frontend |
+| `WADDINGTON_PY` | `conda run -n waddington-bio python3` | How the frontend invokes the Python brain |
+| `WADDINGTON_CHAT_MODEL` | an authorized `anthropic/claude-haiku-4-5` | Conversation model (`provider/model`) |
+| `WADDINGTON_LLM_BACKEND` | `anthropic` | The C-arm's own LLM backend: `anthropic` (benchmark) / `pi` (tool-less bridge, any provider) / `mock` |
+| `WADDINGTON_PI_MODEL` | — | With `WADDINGTON_LLM_BACKEND=pi`: the provider/model the C-arm reasons on |
+
+The benchmark path (`run_sequential.py`, direct `anthropic` backend, `claude-haiku`) is intentionally
+**not** switched by these — deployment can use any provider; reproduction stays fixed.
 
 ---
 
