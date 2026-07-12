@@ -89,3 +89,6 @@ workspace/evaluation/_reactome_cache/
 workspace/evaluation/_reveal_ppi_cache/
 workspace/data/_universal_cache/
 workspace/data/depmap/
+
+# Interactive experiment campaign traces (user/run artifacts, not repo data)
+workspace/results/campaigns/

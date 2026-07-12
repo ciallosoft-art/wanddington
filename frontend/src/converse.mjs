@@ -6,6 +6,7 @@
 import { routeIntent } from "./intent.mjs";
 import { complete } from "./llm/complete.mjs";
 import { suggestGenes, simulateCampaign, DATASETS } from "./brain.mjs";
+import { startCampaign, commitRound, finish, campaignCommand } from "./campaign.mjs";
 
 function mergeUnique(existing, incoming) {
   const set = new Set(existing || []);
@@ -39,6 +40,18 @@ function defaultAsk() {
  *   { kind:"suggest", dataset, genes, info, narration, feedback:{hits,misses}, state }
  */
 export async function respond(message, state, modelSpec) {
+  // Active experiment campaign: deterministic commit/stop (no LLM needed).
+  if (state.campaign?.active) {
+    const cmd = campaignCommand(message);
+    if (cmd === "commit") return { ...(await commitRound(state)), state };
+    if (cmd === "stop") return { ...finish(state), state };
+    return {
+      kind: "campaign", stage: "await", dataset: state.campaign.dataset,
+      text: `Type \`commit\` to test round ${state.campaign.round}'s batch, or \`stop\` to end.`,
+      state,
+    };
+  }
+
   const intent = await routeIntent(message, state, modelSpec);
 
   if (intent.dataset && DATASETS.includes(intent.dataset)) state.dataset = intent.dataset;
@@ -47,6 +60,13 @@ export async function respond(message, state, modelSpec) {
 
   if (intent.action === "chat" || !state.dataset) {
     return { kind: "chat", text: intent.reply || defaultAsk(), state };
+  }
+
+  if (intent.action === "experiment") {
+    const started = await startCampaign(state, {
+      dataset: state.dataset, rounds: intent.rounds, batchSize: intent.n,
+    });
+    return { ...started, state };
   }
 
   if (intent.action === "simulate") {

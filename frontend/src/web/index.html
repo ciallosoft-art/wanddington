@@ -70,6 +70,28 @@
         b.appendChild(g);
         b.appendChild(el("meta", `round ${r.info?.round ?? 1} · ${r.genes.length} genes · route ${esc(r.info?.route||"?")} · report hits to adapt`));
         addBot(b);
+      } else if (r.kind === "campaign") {
+        if (r.stage === "await") { addBot(el("bubble", esc(r.text))); return; }
+        const b = el("bubble");
+        const chips = (list) => { const g = el("genes"); for (const x of list) g.appendChild(el("gene", esc(x))); return g; };
+        if (r.stage === "proposed") {
+          b.appendChild(el(null, `<b>Experiment · ${esc(r.dataset)}</b> — Round ${r.round}/${r.maxRounds}. Proposed batch (${r.genes.length}):`));
+          b.appendChild(chips(r.genes));
+          b.appendChild(el("meta", "type “commit” to test this batch (reveal phenotype), or “stop” to end"));
+        } else if (r.stage === "revealed") {
+          b.appendChild(el(null, `<b>Round ${r.round} results:</b> ${r.roundHits.length} hits — ${esc(r.roundHits.join(", ") || "(none)")}`));
+          b.appendChild(el("meta", `cumulative ${r.cumulative}/${r.total} (${(r.ratio * 100).toFixed(1)}%)`));
+          b.appendChild(el(null, `<b>Round ${r.nextRound}</b> proposed batch (${r.next.length}):`));
+          b.appendChild(chips(r.next));
+          b.appendChild(el("meta", "“commit” to continue, or “stop” to end"));
+        } else if (r.stage === "done") {
+          b.appendChild(el(null, `<b>Experiment complete · ${esc(r.dataset)}</b> — cumulative ${r.cumulative}/${r.total} (${(r.ratio * 100).toFixed(1)}%) over ${r.history.length} rounds`));
+          const pre = document.createElement("pre");
+          pre.textContent = r.history.map(h => `round ${h.round}: +${h.hits.length} → ${h.cumulative} (${(h.ratio * 100).toFixed(1)}%)`).join("\n");
+          b.appendChild(pre);
+          if (r.tracePath) b.appendChild(el("meta", "trace saved: " + esc(r.tracePath)));
+        }
+        addBot(b);
       } else if (r.kind === "simulate") {
         const b = el("bubble"); const pre = document.createElement("pre"); pre.textContent = r.text; b.appendChild(pre); addBot(b);
       } else {

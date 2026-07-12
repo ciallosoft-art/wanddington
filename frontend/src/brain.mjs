@@ -54,6 +54,23 @@ export async function suggestGenes({ dataset, n, testedHits, testedMisses, exclu
 }
 
 /**
+ * "Run the experiment": reveal hit/no-hit for a committed batch (the hidden oracle plays the wet lab).
+ * Returns { hits: string[], reveal: {gene:bool}, nHits, totalHits }.
+ */
+export async function revealBatch({ dataset, genes }) {
+  if (!DATASETS.includes(dataset)) {
+    throw new Error(`unknown phenotype "${dataset}". Supported: ${DATASETS.join(", ")}`);
+  }
+  if (!genes?.length) throw new Error("revealBatch: empty batch");
+  const { stdout } = await run(["-m", "waddington_select.tools", "reveal", "--dataset", dataset, "--genes", ...genes]);
+  const s = stdout.indexOf("{");
+  const e = stdout.lastIndexOf("}");
+  if (s === -1 || e === -1) throw new Error("reveal produced no JSON");
+  const r = JSON.parse(stdout.slice(s, e + 1));
+  return { hits: r.hits || [], reveal: r.reveal || {}, nHits: r.n_hits ?? (r.hits?.length || 0), totalHits: r.total_hits };
+}
+
+/**
  * Run a narrated oracle-driven demo campaign (for "show me how it would go"). Returns raw text.
  */
 export async function simulateCampaign({ dataset, rounds = 5 }) {

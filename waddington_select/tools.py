@@ -72,11 +72,13 @@ def enrich(genes, top: int = 10) -> dict:
 
 def reveal(dataset: str, genes) -> dict:
     genes = _norm(genes)
-    revealed = DatasetOracle(dataset).reveal(genes)
+    oracle = DatasetOracle(dataset)
+    revealed = oracle.reveal(genes)
     hits = [g for g, is_hit in revealed.items() if is_hit]
     return {
         "tool": "reveal", "dataset": dataset, "tested": len(genes),
         "n_hits": len(hits), "hits": hits, "reveal": revealed,
+        "total_hits": oracle.total_hits,  # dataset-wide hit count, for cumulative hit_ratio
         "note": "ground-truth oracle (benchmark). In deployment, replace with real wet-lab results.",
     }
 

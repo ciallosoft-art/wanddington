@@ -16,6 +16,34 @@ function render(result) {
     console.log(`\n${result.text}\n`);
     return;
   }
+  if (result.kind === "campaign") {
+    if (result.stage === "await") { console.log(`\n${result.text}\n`); return; }
+    if (result.stage === "proposed") {
+      console.log(`\n[Experiment · ${result.dataset}] Round ${result.round}/${result.maxRounds} — proposed batch (${result.genes.length} genes):`);
+      console.log("  " + result.genes.join(", "));
+      console.log("\n→ type `commit` to test this batch (reveal the phenotype), or `stop` to end.\n");
+      return;
+    }
+    if (result.stage === "revealed") {
+      console.log(`\n[Round ${result.round} results] ${result.roundHits.length} hits: ${result.roundHits.join(", ") || "(none)"}`);
+      console.log(`  cumulative ${result.cumulative}/${result.total} hits (${(result.ratio * 100).toFixed(1)}%)`);
+      console.log(`\n[Round ${result.nextRound}] proposed batch (${result.next.length} genes):`);
+      console.log("  " + result.next.join(", "));
+      console.log("\n→ `commit` to continue, or `stop` to end.\n");
+      return;
+    }
+    if (result.stage === "done") {
+      console.log(`\n[Experiment complete · ${result.dataset}]`);
+      if (result.roundHits?.length) console.log(`  final-round hits: ${result.roundHits.join(", ")}`);
+      console.log(`  cumulative ${result.cumulative}/${result.total} hits (${(result.ratio * 100).toFixed(1)}%) over ${result.history.length} rounds`);
+      for (const h of result.history) {
+        console.log(`    round ${h.round}: +${h.hits.length} → ${h.cumulative} (${(h.ratio * 100).toFixed(1)}%)`);
+      }
+      if (result.tracePath) console.log(`  trace saved: ${result.tracePath}`);
+      console.log();
+      return;
+    }
+  }
   if (result.kind === "simulate") {
     console.log(`\nDemo campaign on "${result.dataset}":\n`);
     console.log(result.text);

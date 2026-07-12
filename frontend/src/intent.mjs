@@ -19,19 +19,22 @@ Supported phenotypes (dataset ids): ${DATASETS.join(", ")}.
 
 Respond with ONE JSON object, nothing else:
 {
-  "action": "suggest" | "simulate" | "chat",
+  "action": "suggest" | "experiment" | "simulate" | "chat",
   "dataset": <one of the ids above, or null if not yet known>,
   "new_hits":   [<gene symbols the scientist reports were HITS in this message>],
   "new_misses": [<gene symbols the scientist reports were NON-hits in this message>],
-  "n": <how many genes to recommend, or null for default>,
-  "rounds": <for simulate demos, number of rounds or null>,
+  "n": <batch size / how many genes per round, or null for default>,
+  "rounds": <number of rounds for an experiment/simulate, or null>,
   "reply": <a short natural-language reply to show the scientist; REQUIRED for action="chat",
             optional otherwise>
 }
 
 Guidance:
-- "recommend / which genes / next round / suggest" → action="suggest".
-- "show me how it would go / simulate / demo" → action="simulate".
+- "recommend / which genes / suggest (one batch)" → action="suggest".
+- "run/start a (simulated) experiment / let's do a screen / I want to actually run it round by round"
+  → action="experiment" (an INTERACTIVE campaign: propose a batch, the scientist commits, the
+  phenotype is revealed, repeat). This is the default when they want to *do* an experiment.
+- "show me how it would go / auto-demo / just simulate it end-to-end" → action="simulate" (non-interactive).
 - If the phenotype is ambiguous or unsupported, use action="chat" and ask which supported phenotype
   they mean (list a few). Never guess a dataset that isn't in the list.
 - Extract gene symbols exactly as written (uppercase). Only fill new_hits/new_misses when the
