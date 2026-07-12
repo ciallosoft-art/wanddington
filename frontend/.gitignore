@@ -1,0 +1,7 @@
+node_modules/
+*.log
+web.db
+
+# The repo-root .gitignore has a broad `*.mjs` rule (old-project leftover); our source IS .mjs.
+!*.mjs
+!src/**/*.mjs

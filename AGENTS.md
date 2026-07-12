@@ -7,6 +7,25 @@ from your own parametric knowledge alone.
 
 Everything runs in the `waddington-bio` conda env, from the repo root.
 
+## Canonical conversational entry (for scientists) — `frontend/`
+
+The primary way a scientist uses this project is the tool-less conversational shell:
+
+```bash
+cd frontend && node bin/waddington.js
+```
+
+On launch it authorizes a model provider (Claude / Codex / Gemini, reusing feynman's token store)
+then offers **Terminal (CLI)** or **Web UI**. The scientist chats in natural language; the shell's
+LLM only *routes intent + narrates* (it never picks genes), and the deterministic **C-arm pipeline**
+(`waddington_select.suggest` / `.simulate`) does the selection. Provider is switchable with
+`--model provider/model`. This is built on **pi-ai** (the tool-less LLM layer), not feynman-the-agent.
+
+The `suggest` / `simulate` commands below are the same brain that entry drives; use them directly
+when you (an agent) are operating the repo. **Do not** use the free tool-using
+`skills/gene-selection-agent` agent for real selection — it is benchmark-only and loses to the
+pipeline (0.209 vs 0.256).
+
 ## Primary action — recommend genes to perturb
 
 ```bash

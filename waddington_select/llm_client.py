@@ -9,23 +9,23 @@ Backends
 --------
 - "anthropic"  (default): direct Anthropic SDK — identical to the previous behaviour, so the
   paper benchmark stays reproducible on a fixed model.
-- "pi": shell out to the feynman/pi CLI in one-shot mode (`-p`). This reuses feynman's provider
-  routing and OAuth token handling (including openai-codex, whose auth is not a plain API key),
-  giving true "any provider" without re-implementing each provider's auth in Python.
+- "pi": shell out to the frontend's tool-less pi-ai bridge (`node frontend/bin/waddington.js
+  complete`). This reuses pi-ai's multi-provider routing + OAuth token handling *with auto-refresh*
+  (incl. openai-codex, whose auth is not a plain API key), giving true "any provider" without
+  re-implementing each provider's auth in Python. Unlike the old `feynman --prompt` path, the bridge
+  is a PURE completion (no tools, no file writes), so it needs no cwd sandbox and cannot pollute the
+  repo. The refresh also fixes the recurring "anthropic token expired" failures of the raw-token
+  path above.
 - "mock": deterministic echo for offline tests.
 
 Selection & config (env, so no code change to switch providers)
 ---------------------------------------------------------------
 - WADDINGTON_LLM_BACKEND   anthropic | pi | mock            (default: anthropic)
-- WADDINGTON_PI_CMD        pi one-shot command              (default: "feynman --prompt")
-                           if it contains "{prompt}" the prompt is substituted there; otherwise
-                           the prompt is appended as the final argument.
-- WADDINGTON_PI_MODEL      optional "provider/model" passed to pi via --model
-- WADDINGTON_PI_STDIN      "1" to pass the prompt on stdin instead of as an argument
-
-NOTE: the exact feynman one-shot invocation must be validated with a live token before the "pi"
-backend is used for real runs; it is configurable above precisely so it can be tuned without
-editing code.
+- WADDINGTON_PI_CMD        completion command               (default: "node <repo>/frontend/bin/waddington.js complete")
+                           if it contains "{prompt}" the prompt is substituted there; otherwise the
+                           prompt is passed on stdin (WADDINGTON_PI_STDIN defaults to "1").
+- WADDINGTON_PI_MODEL      optional "provider/model" passed to the bridge via --model
+- WADDINGTON_PI_STDIN      "1" (default) to pass the prompt on stdin; "0" to append it as an argument
 """
 
 from __future__ import annotations
@@ -37,24 +37,14 @@ import subprocess
 import time
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 AUTH_JSON = Path.home() / ".feynman" / "agent" / "auth.json"
+FRONTEND_BIN = REPO_ROOT / "frontend" / "bin" / "waddington.js"
 
 DEFAULT_BACKEND = os.environ.get("WADDINGTON_LLM_BACKEND", "anthropic")
-DEFAULT_PI_CMD = os.environ.get("WADDINGTON_PI_CMD", "feynman --prompt")
-
-# `feynman --prompt` runs a full agent (it can write files / run code), not a pure completion,
-# and its CLI does not expose tool exclusion. Run it in a throwaway cwd so it can never pollute
-# the caller's repository. NOTE: this contains file writes but does not stop the agent from taking
-# actions — the anthropic backend remains the clean, benchmark-grade path.
-_PI_CWD: str | None = None
-
-
-def _pi_cwd() -> str:
-    global _PI_CWD
-    if _PI_CWD is None:
-        import tempfile
-        _PI_CWD = tempfile.mkdtemp(prefix="waddington-pi-")
-    return _PI_CWD
+# The "pi" backend now calls the frontend's tool-less pi-ai bridge (a pure completion), not the old
+# `feynman --prompt` full agent. The bridge writes nothing, so no cwd sandbox is needed.
+DEFAULT_PI_CMD = os.environ.get("WADDINGTON_PI_CMD", f"node {FRONTEND_BIN} complete")
 
 # Retry schedule (mirrors the arm's previous backoff).
 _MAX_ATTEMPTS = 8
@@ -146,7 +136,8 @@ class LLMClient:
         pi_model = os.environ.get("WADDINGTON_PI_MODEL")
         if pi_model:
             cmd += ["--model", pi_model]
-        use_stdin = os.environ.get("WADDINGTON_PI_STDIN") == "1"
+        # The bridge reads the prompt from stdin by default (safe for large prompts, no ARG_MAX limit).
+        use_stdin = os.environ.get("WADDINGTON_PI_STDIN", "1") == "1"
 
         if "{prompt}" in DEFAULT_PI_CMD:
             cmd = [c.replace("{prompt}", prompt) for c in cmd]
@@ -154,15 +145,13 @@ class LLMClient:
         elif use_stdin:
             stdin_data = prompt
         else:
-            cmd = cmd + [prompt]
+            cmd = cmd + ["--prompt", prompt]
             stdin_data = None
 
-        run_kwargs: dict = {"capture_output": True, "text": True, "timeout": 300,
-                            "cwd": _pi_cwd()}
+        run_kwargs: dict = {"capture_output": True, "text": True, "timeout": 300}
         if stdin_data is not None:
             run_kwargs["input"] = stdin_data
         else:
-            # Never inherit the parent's stdin — feynman would block waiting on the TTY.
             run_kwargs["stdin"] = subprocess.DEVNULL
         try:
             proc = subprocess.run(cmd, **run_kwargs)

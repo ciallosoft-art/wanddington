@@ -28,6 +28,7 @@ run on that gene pool first (follow-up work).
 from __future__ import annotations
 
 import argparse
+import json
 
 from .oracle import ALL_DATASETS, BATCH_SIZES
 from .arms.waddington_c_arm import WaddingtonCArm, WaddingtonCSkillsArm
@@ -99,12 +100,19 @@ def main() -> None:
                         help="Genes to exclude from recommendations (outcome unknown/irrelevant)")
     parser.add_argument("--skills", action="store_true",
                         help="Use the skill library instead of flat cross-experiment memory")
+    parser.add_argument("--json", action="store_true",
+                        help="Emit a single JSON object {dataset, genes, info} instead of human text "
+                             "(machine contract for the conversational frontend)")
     args = parser.parse_args()
 
     genes, info = suggest(
         args.dataset, args.n, args.exclude, use_skills=args.skills,
         tested_hits=args.tested_hits, tested_misses=args.tested_misses,
     )
+
+    if args.json:
+        print(json.dumps({"dataset": args.dataset, "genes": genes, "info": info}))
+        return
 
     if info["unknown_genes"]:
         print(f"\n[warn] not in '{args.dataset}' gene pool, ignored: "

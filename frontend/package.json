@@ -1,0 +1,18 @@
+{
+  "name": "waddington-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Conversational entry (CLI + Web) for the Waddington C-arm gene-selection pipeline. Tool-less pi-ai shell over the Python brain.",
+  "bin": {
+    "waddington": "bin/waddington.js"
+  },
+  "scripts": {
+    "start": "node bin/waddington.js"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.2.0",
+    "@earendil-works/pi-ai": "^0.80.0",
+    "@earendil-works/pi-coding-agent": "^0.80.0"
+  }
+}

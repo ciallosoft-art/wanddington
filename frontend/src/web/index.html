@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Waddington — gene selection</title>
+  <style>
+    :root { --bg:#0f1216; --panel:#171b21; --ink:#e6e9ee; --muted:#8b97a6; --sage:#a7c080; --line:#242a32; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
+    header { padding:14px 20px; border-bottom:1px solid var(--line); }
+    header h1 { margin:0; font-size:16px; font-weight:600; }
+    header p { margin:2px 0 0; color:var(--muted); font-size:12px; }
+    #log { max-width:820px; margin:0 auto; padding:20px; }
+    .msg { margin:0 0 14px; }
+    .msg .who { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:3px; }
+    .msg.you .bubble { background:#1d2530; }
+    .msg.bot .bubble { background:var(--panel); }
+    .bubble { padding:10px 14px; border-radius:10px; white-space:pre-wrap; word-wrap:break-word; }
+    .genes { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
+    .gene { background:#20303a; color:var(--sage); border:1px solid #2c3d45; border-radius:6px; padding:2px 8px; font:12px ui-monospace,monospace; }
+    .meta { color:var(--muted); font-size:12px; margin-top:6px; }
+    pre { overflow-x:auto; background:#10151b; padding:10px; border-radius:8px; }
+    form { position:sticky; bottom:0; background:var(--bg); border-top:1px solid var(--line); padding:12px 20px; }
+    .row { max-width:820px; margin:0 auto; display:flex; gap:8px; }
+    input { flex:1; background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:10px 12px; font-size:15px; }
+    button { background:var(--sage); color:#12331a; border:0; border-radius:8px; padding:0 18px; font-weight:600; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:default; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Waddington — conversational gene selection</h1>
+    <p>Tool-less shell over the C-arm pipeline. Name a phenotype; report results to adapt the next round.</p>
+  </header>
+  <div id="log"></div>
+  <form id="f">
+    <div class="row">
+      <input id="q" autocomplete="off" placeholder="e.g. Recommend genes for an IFNG screen" autofocus />
+      <button id="send" type="submit">Send</button>
+    </div>
+  </form>
+
+  <script>
+    const log = document.getElementById("log");
+    const form = document.getElementById("f");
+    const q = document.getElementById("q");
+    const send = document.getElementById("send");
+    let state = { dataset: null, hits: [], misses: [] };
+
+    function el(cls, html) { const d = document.createElement("div"); d.className = cls; if (html != null) d.innerHTML = html; return d; }
+    function esc(s) { return String(s).replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c])); }
+
+    function addYou(text) {
+      const m = el("msg you"); m.appendChild(el("who", "you"));
+      m.appendChild(el("bubble", esc(text))); log.appendChild(m); scroll();
+    }
+    function addBot(node) {
+      const m = el("msg bot"); m.appendChild(el("who", "waddington"));
+      m.appendChild(node); log.appendChild(m); scroll();
+    }
+    function scroll() { window.scrollTo(0, document.body.scrollHeight); }
+
+    function renderResult(r) {
+      if (r.kind === "suggest") {
+        const b = el("bubble");
+        b.appendChild(el(null, r.narration ? esc(r.narration) : ("Recommended batch for " + esc(r.dataset) + ".")));
+        const g = el("genes");
+        for (const gene of r.genes) g.appendChild(el("gene", esc(gene)));
+        b.appendChild(g);
+        b.appendChild(el("meta", `round ${r.info?.round ?? 1} · ${r.genes.length} genes · route ${esc(r.info?.route||"?")} · report hits to adapt`));
+        addBot(b);
+      } else if (r.kind === "simulate") {
+        const b = el("bubble"); const pre = document.createElement("pre"); pre.textContent = r.text; b.appendChild(pre); addBot(b);
+      } else {
+        addBot(el("bubble", esc(r.text || "…")));
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = q.value.trim();
+      if (!text) return;
+      addYou(text); q.value = ""; send.disabled = true;
+      const thinking = el("bubble", "…"); addBot(thinking);
+      try {
+        const res = await fetch("/api/message", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: text, state }),
+        });
+        const r = await res.json();
+        thinking.parentElement.remove();
+        if (r.state) state = r.state;
+        renderResult(r);
+      } catch (err) {
+        thinking.textContent = "[error] " + err.message;
+      } finally {
+        send.disabled = false; q.focus();
+      }
+    });
+  </script>
+</body>
+</html>
