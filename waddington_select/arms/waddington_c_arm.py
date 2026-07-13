@@ -6,7 +6,13 @@ for datasets where it improves LOO AUC. Three-tier feature routing:
 
   DEPMAP_EXCLUDED  → v1 (9 features, no DepMap)
     essential: pan-DepMap hurts (K562 curated set), v1 still best (0.658)
-    Steinhart: DepMap disrupts online learning for GD2 biology
+    Steinhart: every DepMap feature comes from a KNOCKOUT screen, and Steinhart is the one
+               gain-of-function (CRISPRa) screen — it asks which genes make CAR-T cells resist
+               exhaustion when OVER-EXPRESSED. A gene that is dispensable when deleted can be
+               potent when over-expressed (IRF4, one of its top hits, is essential in only 6% of
+               DepMap lines), so a knockout-derived prior is actively misleading here.
+               (An earlier comment blamed "GD2 biology" — that was wrong: Steinhart does not
+               measure GD2 expression at all; GD2 is just the CAR's target antigen.)
 
   K562_EXCLUDED    → v2 (12 features, pan-cancer DepMap only)
     gwps:          K562 feature redundant with pan-cancer (0.751→0.744)
@@ -44,7 +50,9 @@ MEMORY_PATH       = REPO_ROOT / "workspace" / "results" / "sequential" / "experi
 DEPMAP_PAN_FEATS   = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm"]
 DEPMAP_K562_FEATS  = DEPMAP_PAN_FEATS + ["depmap_K562_norm"]
 
-# v1 (no DepMap): online learning disrupted by DepMap for these datasets
+# v1 (no DepMap). Both exclusions were found empirically, but both have a reason:
+#   Steinhart  — CRISPRa (gain-of-function); DepMap is knockout-derived, so the prior misleads.
+#   essential  — a curated essentiality screen; a pan-cancer essentiality prior nearly restates the label.
 DEPMAP_EXCLUDED = {"Replogle_K562_essential", "Steinhart"}
 
 # v2 mode (pan-cancer only, no K562): K562 feature hurts or is redundant
