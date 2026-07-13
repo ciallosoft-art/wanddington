@@ -38,6 +38,12 @@ def _norm(genes: list[str] | None) -> list[str]:
     return [g.strip().upper() for g in (genes or []) if g.strip()]
 
 
+def _anchor_genes(dataset: str) -> list[str]:
+    """Seed genes of a registered user phenotype (empty for the benchmark datasets)."""
+    from .phenotype import load_registry
+    return _norm((load_registry().get(dataset) or {}).get("anchors"))
+
+
 def suggest(
     dataset: str,
     n: int | None = None,
@@ -61,6 +67,13 @@ def suggest(
     hits = _norm(tested_hits)
     misses = _norm(tested_misses)
     excluded = _norm(exclude)
+
+    # A registered phenotype's anchor genes are the scientist's own seed biology: they score top by
+    # construction (an anchor's PPI/co-expression similarity to itself is maximal), and recommending
+    # them back would be circular — the scientist already knows them. Never propose them.
+    anchors = _anchor_genes(dataset)
+    if anchors:
+        excluded = sorted(set(excluded) | set(anchors))
     unknown = sorted({g for g in hits + misses + excluded if g not in pool})
 
     round_idx = 0

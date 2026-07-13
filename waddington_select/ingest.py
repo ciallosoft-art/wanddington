@@ -52,6 +52,23 @@ def _pick(cols: list[str], candidates: list[str]) -> str | None:
     return None
 
 
+def _read_table(path: str) -> pd.DataFrame:
+    """Read a screen file (.csv → comma; .txt/.tsv/MAGeCK gene_summary → tab) and add _GENE."""
+    if path.endswith(".csv"):
+        df = pd.read_csv(path)
+    else:
+        df = pd.read_csv(path, sep="\t")
+    id_col = _pick(list(df.columns), ID_CANDIDATES) or df.columns[0]
+    df["_GENE"] = df[id_col].astype(str).str.strip().str.upper()
+    return df
+
+
+def read_gene_pool(path: str) -> list[str]:
+    """Every gene in a screen/library file — the candidate pool for a new phenotype."""
+    df = _read_table(path)
+    return sorted({g for g in df["_GENE"].tolist() if g and g != "NAN"})
+
+
 def derive_hits(
     path: str,
     genes,
@@ -62,13 +79,7 @@ def derive_hits(
     threshold: float | None = None,
 ) -> dict:
     """Parse a screen readout file and label the tested `genes` as hit / non-hit."""
-    if path.endswith(".csv"):
-        df = pd.read_csv(path)
-    else:  # .txt / .tsv / MAGeCK gene_summary
-        df = pd.read_csv(path, sep="\t")
-
-    id_col = _pick(list(df.columns), ID_CANDIDATES) or df.columns[0]
-    df["_GENE"] = df[id_col].astype(str).str.strip().str.upper()
+    df = _read_table(path)
 
     # 1) explicit hit/label column wins
     hit_col = _pick(list(df.columns), HIT_CANDIDATES)

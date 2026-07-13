@@ -26,6 +26,8 @@ import lightgbm as lgb
 from .base import BaseArm
 from ..skills import SkillLibrary, load_dataset_hits
 from ..llm_client import LLMClient
+from ..features import load_training_frame
+from ..phenotype import task_prompt as _user_task_prompt
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
@@ -88,7 +90,12 @@ def _load_task(dataset_name: str) -> dict[str, str]:
         path = TASK_PROMPTS_DIR / prompt_file
         with open(path) as f:
             return json.load(f)
-    return HARDCODED_TASKS.get(dataset_name, {"Task": dataset_name, "Measurement": "gene fitness"})
+    if dataset_name in HARDCODED_TASKS:
+        return HARDCODED_TASKS[dataset_name]
+    user = _user_task_prompt(dataset_name)  # a registered new phenotype describes itself
+    if user:
+        return user
+    return {"Task": dataset_name, "Measurement": "gene fitness"}
 
 
 class LLMReasoningArm(BaseArm):
@@ -132,7 +139,7 @@ class LLMReasoningArm(BaseArm):
         self._model = model
 
         csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
-        df = pd.read_csv(csv_path)
+        df = load_training_frame(csv_path, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
         self._all_feats = [c for c in all_feats if c in df.columns]

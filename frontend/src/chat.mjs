@@ -4,11 +4,11 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 
 import { DEFAULT_CHAT_MODEL } from "./intent.mjs";
-import { respond, DATASETS } from "./converse.mjs";
+import { respond, getDatasets } from "./converse.mjs";
 
-const BANNER = `Waddington — conversational gene selection (tool-less, C-arm pipeline).
+const banner = (datasets) => `Waddington — conversational gene selection (tool-less, C-arm pipeline).
 Tell me a phenotype and I'll recommend genes to perturb; report results and I'll adapt.
-Supported phenotypes: ${DATASETS.join(", ")}.
+Supported phenotypes: ${datasets.join(", ")}.
 Type "exit" to quit.\n`;
 
 function render(result) {
@@ -72,7 +72,7 @@ function render(result) {
 }
 
 export async function runChat({ modelSpec = DEFAULT_CHAT_MODEL } = {}) {
-  console.log(BANNER);
+  console.log(banner(await getDatasets()));
   const state = { dataset: null, hits: [], misses: [] };
   const rl = createInterface({ input: stdin, output: stdout });
   try {

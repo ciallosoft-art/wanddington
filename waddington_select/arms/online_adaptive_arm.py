@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 
 from .base import BaseArm
+from ..features import load_training_frame
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
@@ -75,7 +76,7 @@ class OnlineAdaptiveArm(BaseArm):
     ) -> None:
         super().__init__("online_adaptive", dataset_name, batch_size)
         csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
-        df = pd.read_csv(csv_path)
+        df = load_training_frame(csv_path, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
         self._available_feats = [c for c in all_feats if c in df.columns]

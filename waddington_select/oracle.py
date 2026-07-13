@@ -29,6 +29,16 @@ BATCH_SIZES: dict[str, int] = {
     "Replogle_K562_gwps": 128,
 }
 
+BENCHMARK_DATASETS = list(BATCH_SIZES.keys())
+
+# Phenotypes the scientist registered from their own screen (see phenotype.py). They are rankable
+# (suggest / upload campaigns) but have NO ground truth, so the oracle refuses to serve them.
+from .phenotype import load_registry as _load_registry  # noqa: E402
+
+BATCH_SIZES.update(
+    {name: int(cfg.get("batch_size", 32)) for name, cfg in _load_registry().items()}
+)
+
 ALL_DATASETS = list(BATCH_SIZES.keys())
 
 
@@ -42,6 +52,12 @@ class DatasetOracle:
     def __init__(self, dataset_name: str) -> None:
         if dataset_name not in BATCH_SIZES:
             raise ValueError(f"Unknown dataset: {dataset_name}. Valid: {list(BATCH_SIZES)}")
+        if dataset_name not in BENCHMARK_DATASETS:
+            raise ValueError(
+                f"'{dataset_name}' is a registered phenotype with no ground truth, so it has no "
+                f"oracle. Use the upload path instead (provide your own screen readout): "
+                f"python -m waddington_select.ingest, or the frontend's upload experiment mode."
+            )
         self.dataset_name = dataset_name
         self.batch_size = BATCH_SIZES[dataset_name]
         self._load()

@@ -33,6 +33,8 @@ from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import LLMReasoningArm
 from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 from ..skills import SkillLibrary, SKILL_LIBRARY_PATH
+from ..features import load_training_frame
+from ..phenotype import load_registry
 
 REPO_ROOT         = Path(__file__).resolve().parents[2]
 TRAINING_DATA_V1  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
@@ -71,10 +73,17 @@ def _get_feature_config(dataset_name: str) -> tuple[Path, list[str]]:
 
 def _get_dataset_stats(dataset_name: str) -> tuple[int, int]:
     csv, _ = _get_feature_config(dataset_name)
-    df = pd.read_csv(csv)
+    df = load_training_frame(csv, dataset_name)
     df["gene"] = df["gene"].str.strip().str.upper()
     sub = df[df["dataset"] == dataset_name]
-    return len(sub), int(sub["label"].sum())
+    n_genes, n_hits = len(sub), int(sub["label"].sum())
+    if n_hits == 0:
+        # A newly-registered phenotype has no labels yet. Use the scientist's expected hit rate to
+        # route if they gave one; otherwise a hit rate of 0 routes to the safe `baseline` fusion.
+        rate = (load_registry().get(dataset_name) or {}).get("expected_hit_rate")
+        if rate:
+            n_hits = int(n_genes * float(rate))
+    return n_genes, n_hits
 
 
 def _classify(n_genes: int, n_hits: int) -> str:

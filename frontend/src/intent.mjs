@@ -6,11 +6,11 @@
 // "remove the tools" finding (the free tool-using agent lost to the pipeline, 0.209 vs 0.256).
 
 import { complete } from "./llm/complete.mjs";
-import { DATASETS } from "./brain.mjs";
+import { getDatasets } from "./brain.mjs";
 
 export const DEFAULT_CHAT_MODEL = process.env.WADDINGTON_CHAT_MODEL || "anthropic/claude-haiku-4-5";
 
-const SYSTEM = `You are the intake router for a CRISPR gene-selection assistant.
+const SYSTEM = (DATASETS) => `You are the intake router for a CRISPR gene-selection assistant.
 The gene selection itself is done by a separate deterministic model — your ONLY job is to read the
 scientist's message plus the running session state and emit a single JSON object describing the
 action. Do not list or invent genes yourself.
@@ -75,7 +75,8 @@ export async function routeIntent(message, state, modelSpec = DEFAULT_CHAT_MODEL
     known_misses: state.misses ?? [],
   });
   const prompt = `Session state so far: ${stateStr}\n\nScientist's message: """${message}"""\n\nEmit the JSON action.`;
-  const raw = await complete({ spec: modelSpec, systemPrompt: SYSTEM, prompt, temperature: 0, maxTokens: 500 });
+  const datasets = await getDatasets(); // includes any phenotype the scientist registered
+  const raw = await complete({ spec: modelSpec, systemPrompt: SYSTEM(datasets), prompt, temperature: 0, maxTokens: 500 });
   const parsed = parseJson(raw);
   if (!parsed || typeof parsed !== "object") {
     return { action: "chat", dataset: state.dataset ?? null, new_hits: [], new_misses: [], reply: raw };

@@ -5,7 +5,7 @@
 
 import { routeIntent } from "./intent.mjs";
 import { complete } from "./llm/complete.mjs";
-import { suggestGenes, simulateCampaign, DATASETS } from "./brain.mjs";
+import { suggestGenes, simulateCampaign, getDatasets } from "./brain.mjs";
 import { startCampaign, commitRound, submitResults, finish, campaignCommand } from "./campaign.mjs";
 
 function looksLikePath(s) {
@@ -30,8 +30,9 @@ async function narrateBatch(dataset, genes, modelSpec) {
   }
 }
 
-function defaultAsk() {
-  return `Which supported phenotype are you screening? Options: ${DATASETS.join(", ")}.`;
+async function defaultAsk() {
+  const ds = await getDatasets();
+  return `Which supported phenotype are you screening? Options: ${ds.join(", ")}.`;
 }
 
 /**
@@ -76,12 +77,13 @@ export async function respond(message, state, modelSpec, opts = {}) {
 
   const intent = await routeIntent(message, state, modelSpec);
 
-  if (intent.dataset && DATASETS.includes(intent.dataset)) state.dataset = intent.dataset;
+  const known = await getDatasets();
+  if (intent.dataset && known.includes(intent.dataset)) state.dataset = intent.dataset;
   state.hits = mergeUnique(state.hits, intent.new_hits);
   state.misses = mergeUnique(state.misses, intent.new_misses);
 
   if (intent.action === "chat" || !state.dataset) {
-    return { kind: "chat", text: intent.reply || defaultAsk(), state };
+    return { kind: "chat", text: intent.reply || (await defaultAsk()), state };
   }
 
   if (intent.action === "experiment") {
@@ -114,4 +116,4 @@ export async function respond(message, state, modelSpec, opts = {}) {
   };
 }
 
-export { DATASETS };
+export { getDatasets };

@@ -9,9 +9,10 @@ import { authorizedProviders, promptAuthorize, runSetup, pickDefaultChatModel } 
 import { runChat } from "./chat.mjs";
 import { complete } from "./llm/complete.mjs";
 import { launchWebServer } from "./web-server.mjs";
-import { DATASETS } from "./brain.mjs";
+import { getDatasets } from "./brain.mjs";
 
-function printHelp() {
+async function printHelp() {
+  const DATASETS = await getDatasets();
   console.log(`Waddington — conversational gene selection (tool-less pi-ai shell over the C-arm pipeline).
 
 Usage:

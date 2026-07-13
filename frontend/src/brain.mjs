@@ -21,10 +21,45 @@ export const REPO_ROOT = resolve(HERE, "..", ".."); // frontend/src → frontend
 // activated env). Default assumes conda is on PATH.
 const PY_CMD = (process.env.WADDINGTON_PY || "conda run -n waddington-bio python3").split(/\s+/);
 
-export const DATASETS = [
+// The 9 benchmark phenotypes — a fallback if the Python side can't be reached.
+export const BENCHMARK_DATASETS = [
   "IFNG", "IL2", "Sanchez21", "Sanchez21_down", "Carnevale22",
   "Scharenberg22", "Steinhart", "Replogle_K562_essential", "Replogle_K562_gwps",
 ];
+
+// Every rankable phenotype = the benchmarks PLUS any the scientist registered from their own screen
+// (see waddington_select/phenotype.py). Loaded once, lazily.
+let _datasets = null;
+
+export async function getDatasets() {
+  if (_datasets) return _datasets;
+  try {
+    const { stdout } = await run(["-m", "waddington_select.phenotype", "datasets", "--json"]);
+    const s = stdout.indexOf("[");
+    const e = stdout.lastIndexOf("]");
+    _datasets = JSON.parse(stdout.slice(s, e + 1));
+  } catch {
+    _datasets = [...BENCHMARK_DATASETS];
+  }
+  return _datasets;
+}
+
+/** Onboard a new phenotype: build its ML features from the scientist's screen/library file. */
+export async function registerPhenotype({ name, genesFile, anchors, task, measurement, batchSize, expectedHitRate }) {
+  const args = [
+    "-m", "waddington_select.phenotype", "register", "--name", name,
+    "--genes-file", genesFile, "--anchors", ...anchors,
+    "--task", task, "--measurement", measurement, "--json",
+  ];
+  if (batchSize) args.push("--batch", String(batchSize));
+  if (expectedHitRate) args.push("--expected-hit-rate", String(expectedHitRate));
+  const { stdout } = await run(args, { timeoutMs: 900_000 });
+  const s = stdout.indexOf("{");
+  const e = stdout.lastIndexOf("}");
+  if (s === -1) throw new Error(`register failed: ${stdout.slice(0, 200)}`);
+  _datasets = null; // invalidate the cache — the new phenotype is now rankable
+  return JSON.parse(stdout.slice(s, e + 1));
+}
 
 function run(moduleArgs, { timeoutMs = 300_000 } = {}) {
   const [cmd, ...base] = PY_CMD;
@@ -32,6 +67,10 @@ function run(moduleArgs, { timeoutMs = 300_000 } = {}) {
     cwd: REPO_ROOT,
     maxBuffer: 32 * 1024 * 1024,
     timeout: timeoutMs,
+    // Deployment default: run the C-arm's own LLM through the tool-less pi bridge, which refreshes
+    // OAuth tokens. (The raw-token `anthropic` backend expires and 401s.) The benchmark is unaffected:
+    // run_sequential is invoked directly, not through here, and stays on the frozen direct backend.
+    env: { ...process.env, WADDINGTON_LLM_BACKEND: process.env.WADDINGTON_LLM_BACKEND || "pi" },
   });
 }
 
@@ -40,8 +79,9 @@ function run(moduleArgs, { timeoutMs = 300_000 } = {}) {
  * Returns { dataset, genes: string[], info: {...} }.
  */
 export async function suggestGenes({ dataset, n, testedHits, testedMisses, exclude }) {
-  if (!DATASETS.includes(dataset)) {
-    throw new Error(`unknown phenotype "${dataset}". Supported: ${DATASETS.join(", ")}`);
+  const known = await getDatasets();
+  if (!known.includes(dataset)) {
+    throw new Error(`unknown phenotype "${dataset}". Supported: ${known.join(", ")}`);
   }
   const args = ["-m", "waddington_select.suggest", "--dataset", dataset, "--json"];
   if (n) args.push("--n", String(n));
@@ -60,8 +100,9 @@ export async function suggestGenes({ dataset, n, testedHits, testedMisses, exclu
  * Returns { hits: string[], reveal: {gene:bool}, nHits, totalHits }.
  */
 export async function revealBatch({ dataset, genes }) {
-  if (!DATASETS.includes(dataset)) {
-    throw new Error(`unknown phenotype "${dataset}". Supported: ${DATASETS.join(", ")}`);
+  const known = await getDatasets();
+  if (!known.includes(dataset)) {
+    throw new Error(`unknown phenotype "${dataset}". Supported: ${known.join(", ")}`);
   }
   if (!genes?.length) throw new Error("revealBatch: empty batch");
   const { stdout } = await run(["-m", "waddington_select.tools", "reveal", "--dataset", dataset, "--genes", ...genes]);
@@ -102,8 +143,9 @@ export async function ingestResults({ genes, path, content, name, scoreCol, topR
  * Run a narrated oracle-driven demo campaign (for "show me how it would go"). Returns raw text.
  */
 export async function simulateCampaign({ dataset, rounds = 5 }) {
-  if (!DATASETS.includes(dataset)) {
-    throw new Error(`unknown phenotype "${dataset}". Supported: ${DATASETS.join(", ")}`);
+  const known = await getDatasets();
+  if (!known.includes(dataset)) {
+    throw new Error(`unknown phenotype "${dataset}". Supported: ${known.join(", ")}`);
   }
   const { stdout } = await run(
     ["-m", "waddington_select.simulate", "--dataset", dataset, "--rounds", String(rounds)],

@@ -92,3 +92,6 @@ workspace/data/depmap/
 
 # Interactive experiment campaign traces (user/run artifacts, not repo data)
 workspace/results/campaigns/
+
+# Phenotypes the scientist registers from their own screens (user data, not repo data)
+workspace/data/user_phenotypes/
