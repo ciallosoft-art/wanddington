@@ -37,13 +37,20 @@ def attribution(trace: dict, out: Path, tag: str = "") -> Path:
     )
 
     # ── composition per round (stacked; 2px surface gap between segments) ──
-    x = [r["round"] for r in rounds]
-    bottom = np.zeros(len(rounds))
+    # A trace may pool several screens, so the same round number appears many times: aggregate by
+    # round first, otherwise the bars would overlay each other instead of summing.
+    per_round: dict[int, dict[str, int]] = {}
+    for r in rounds:
+        acc = per_round.setdefault(r["round"], {s: 0 for s in SOURCES})
+        for s in SOURCES:
+            acc[s] += r["counts"][s]
+    x = sorted(per_round)
+    bottom = np.zeros(len(x))
+    biggest = max(sum(per_round[i].values()) for i in x)
     for s in SOURCES:
-        vals = np.array([r["counts"][s] for r in rounds], dtype=float)
+        vals = np.array([per_round[i][s] for i in x], dtype=float)
         ax1.bar(x, vals, bottom=bottom, width=0.62, color=S.SOURCE_COLOR[s],
                 label=S.SOURCE_LABEL[s], zorder=3, linewidth=2, edgecolor=S.SURFACE)
-        biggest = max(sum(r["counts"].values()) for r in rounds)
         for xi, v, b in zip(x, vals, bottom):
             if v >= 0.05 * biggest:  # only label segments with room, never every mark
                 ax1.text(xi, b + v / 2, f"{int(v)}", ha="center", va="center",
@@ -52,7 +59,7 @@ def attribution(trace: dict, out: Path, tag: str = "") -> Path:
 
     ax1.set_xticks(x)
     ax1.set_xlabel("Round")
-    ax1.set_ylabel("Genes in the batch")
+    ax1.set_ylabel("Genes selected (all screens)")
     ax1.set_title("What each batch was made of", color=S.INK, fontsize=11, loc="left", pad=8)
     ax1.legend(fontsize=8.5, labelcolor=S.INK_2, loc="upper center", ncols=3,
                bbox_to_anchor=(0.5, -0.22))
