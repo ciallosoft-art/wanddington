@@ -25,7 +25,15 @@ def main() -> None:
     r.add_argument("--campaign", type=Path, required=True)
     r.add_argument("--out", type=Path, default=None)
 
+    o = sub.add_parser("overview", help="shareable one-page overview of the whole project")
+    o.add_argument("--out", type=Path, required=True)
+
     args = p.parse_args()
+
+    if args.cmd == "overview":
+        from .overview import build_overview
+        print(f"Overview: {build_overview(args.out)}")
+        return
 
     if args.cmd == "figures":
         from .figures import build_all
