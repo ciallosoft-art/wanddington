@@ -350,6 +350,12 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
 <section class="prose limits">
   <h2>Limits, honestly</h2>
   <ul>
+    <li><strong>We cannot separate the LLM's biology from memorisation.</strong> Seven of the nine
+    screens are published, so their hits may sit in the model's training data. The obvious control —
+    BioDiscoveryAgent's <em>unpublished</em> screen — does not work for us: they released it publicly
+    in 2024, before our model's training cutoff. So we <em>withdraw</em> the tempting claim that the
+    LLM contributes most on the one screen it could not have memorised. Settling this needs a screen
+    released after the model's cutoff; none of ours qualifies.</li>
     <li><strong>This is not a reproduction of BioDiscoveryAgent.</strong> We use their screen data and
     their hit sets (and their non-essential evaluation convention), but we never ran their agent, and
     our numbers are <em>not</em> comparable to the ones in their paper — we add a cross-experiment ML
