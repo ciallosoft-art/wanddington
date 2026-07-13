@@ -147,6 +147,23 @@ class OnlineAdaptiveArm(BaseArm):
         """Return current ML confidence scores for all genes (gene → probability)."""
         return dict(self._scores)
 
+    def shap_for(self, genes: list[str]) -> dict[str, float]:
+        """Mean |SHAP| per feature over `genes` — which features drove this batch's ML score.
+
+        Uses LightGBM's native contribution output (`pred_contrib=True`), so no `shap` dependency.
+        The last column is the base value (bias) and is dropped.
+        """
+        if self._model is None:
+            return {}
+        want = set(genes)
+        idx = [i for i, g in enumerate(self._genes) if g in want]
+        if not idx:
+            return {}
+        X = self._test_frame.iloc[idx][self._available_feats].values
+        contrib = self._model.booster_.predict(X, pred_contrib=True)
+        mean_abs = np.abs(np.asarray(contrib)[:, :-1]).mean(axis=0)
+        return {f: float(v) for f, v in zip(self._available_feats, mean_abs)}
+
     def select(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         remaining = [g for g in self._ranking if g not in self._selected]
         return remaining[: self.batch_size]

@@ -89,12 +89,13 @@ function run(moduleArgs, { timeoutMs = 300_000 } = {}) {
  * Recommend the next batch of genes (real experiment path, feedback-aware).
  * Returns { dataset, genes: string[], info: {...} }.
  */
-export async function suggestGenes({ dataset, n, testedHits, testedMisses, exclude }) {
+export async function suggestGenes({ dataset, n, testedHits, testedMisses, exclude, trace }) {
   const known = await getDatasets();
   if (!known.includes(dataset)) {
     throw new Error(`unknown phenotype "${dataset}". Supported: ${known.join(", ")}`);
   }
   const args = ["-m", "waddington_select.suggest", "--dataset", dataset, "--json"];
+  if (trace) args.push("--trace");   // record WHY each gene was chosen -> reportable run
   if (n) args.push("--n", String(n));
   if (testedHits?.length) args.push("--tested-hits", ...testedHits);
   if (testedMisses?.length) args.push("--tested-misses", ...testedMisses);

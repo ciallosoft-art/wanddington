@@ -51,6 +51,7 @@ def suggest(
     use_skills: bool = False,
     tested_hits: list[str] | None = None,
     tested_misses: list[str] | None = None,
+    trace: bool = False,
 ) -> tuple[list[str], dict]:
     """Recommend the next batch of genes to perturb for `dataset`.
 
@@ -61,7 +62,14 @@ def suggest(
         raise SystemExit(f"Unknown dataset '{dataset}'. Available: {', '.join(ALL_DATASETS)}")
 
     batch_size = n or BATCH_SIZES[dataset]
-    arm = (WaddingtonCSkillsArm if use_skills else WaddingtonCArm)(dataset, batch_size)
+    recorder = None
+    if trace and not use_skills:  # the skills arm (a negative result) takes no recorder
+        from .analysis.trace import TraceRecorder
+        recorder = TraceRecorder()
+    if use_skills:
+        arm = WaddingtonCSkillsArm(dataset, batch_size)
+    else:
+        arm = WaddingtonCArm(dataset, batch_size, trace=recorder)
     pool: set[str] = arm._llm._gene_set  # canonical gene pool for this phenotype
 
     hits = _norm(tested_hits)
@@ -87,6 +95,11 @@ def suggest(
         arm._selected.update(g for g in excluded if g in pool)
 
     genes = arm.select(round_idx=round_idx, revealed={})
+    if recorder is not None and recorder.rounds:
+        # one selection per suggest() call; the caller renumbers it to its own campaign round
+        info_trace = recorder.rounds[-1]
+    else:
+        info_trace = None
     info = {
         "round": round_idx + 1,
         "n_feedback": len(revealed),
@@ -94,6 +107,8 @@ def suggest(
         "unknown_genes": unknown,
         "route": getattr(arm, "_route", "?"),
     }
+    if info_trace is not None:
+        info["trace"] = info_trace
     return genes, info
 
 
@@ -113,6 +128,8 @@ def main() -> None:
                         help="Genes to exclude from recommendations (outcome unknown/irrelevant)")
     parser.add_argument("--skills", action="store_true",
                         help="Use the skill library instead of flat cross-experiment memory")
+    parser.add_argument("--trace", action="store_true",
+                        help="record WHY each gene was chosen (attribution + SHAP) into info.trace")
     parser.add_argument("--json", action="store_true",
                         help="Emit a single JSON object {dataset, genes, info} instead of human text "
                              "(machine contract for the conversational frontend)")
@@ -121,6 +138,7 @@ def main() -> None:
     genes, info = suggest(
         args.dataset, args.n, args.exclude, use_skills=args.skills,
         tested_hits=args.tested_hits, tested_misses=args.tested_misses,
+        trace=args.trace,
     )
 
     if args.json:

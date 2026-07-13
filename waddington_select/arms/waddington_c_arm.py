@@ -107,8 +107,10 @@ class WaddingtonCArm(BaseArm):
         use_memory: bool = True,
         use_enrichment: bool = False,
         name: str = "waddington_c",
+        trace=None,
     ) -> None:
         super().__init__(name, dataset_name, batch_size)
+        self._trace = trace  # optional analysis.trace.TraceRecorder; off by default
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
 
@@ -161,13 +163,31 @@ class WaddingtonCArm(BaseArm):
             for g in self._online._genes
             if g not in self._selected
         }
-        return sorted(combined, key=combined.__getitem__, reverse=True)[: self.batch_size]
+        batch = sorted(combined, key=combined.__getitem__, reverse=True)[: self.batch_size]
+        if self._trace is not None:
+            # what the ML would have taken on its own — the counterfactual for attribution
+            ml_only_rank = sorted(combined, key=lambda g: -ml_scores.get(g, 0.0))
+            self._trace.record_selection(
+                round_idx, self._route, self._w_ml, self._w_llm, ml_scores, llm_set, batch,
+                ml_candidates=ml_only_rank[: self.batch_size],
+                shap=self._online.shap_for(batch),
+            )
+        return batch
 
     def _select_two_stage(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         candidates = self._online.ranked_candidates(SHORTLIST_SIZE, exclude=self._selected)
         if not candidates:
             return [g for g in self._online._ranking if g not in self._selected][: self.batch_size]
-        return self._llm.select_with_shortlist(round_idx, candidates)
+        batch = self._llm.select_with_shortlist(round_idx, candidates)
+        if self._trace is not None:
+            # here the ML shortlists and the LLM re-ranks: its own top-k is the head of the shortlist
+            self._trace.record_selection(
+                round_idx, self._route, self._w_ml, self._w_llm,
+                self._online.all_scores(), set(batch), batch,
+                ml_candidates=candidates[: self.batch_size],
+                shap=self._online.shap_for(batch),
+            )
+        return batch
 
     def update(self, round_idx: int, revealed_new: dict[str, bool]) -> None:
         self._online.update(round_idx, revealed_new)

@@ -16,8 +16,25 @@ const DEFAULT_ROUNDS = 5;
  * Begin a campaign: cold-start recommendation for round 1, awaiting commit.
  * mode: "oracle" (benchmark truth plays the wet lab) | "upload" (scientist provides each round's readout).
  */
+/** suggest() traces its own single selection; renumber it to the campaign's round. */
+function pushDecision(c, info, round) {
+  const d = info?.trace;
+  if (!d) return;
+  d.round = round;
+  c.decisions.push(d);
+}
+
+/** After a reveal, mark which of that round's picks were hits — decisions + outcomes in one artifact. */
+function attachOutcome(c, round, roundHits) {
+  const d = c.decisions.find((x) => x.round === round);
+  if (!d) return;
+  const hs = new Set(roundHits);
+  for (const g of d.genes) g.hit = hs.has(g.gene);
+  d.n_hits = roundHits.length;
+}
+
 export async function startCampaign(state, { dataset, rounds, batchSize, mode }) {
-  const r = await suggestGenes({ dataset, n: batchSize || undefined });
+  const r = await suggestGenes({ dataset, n: batchSize || undefined, trace: true });
   state.campaign = {
     active: true,
     mode: mode === "upload" ? "upload" : "oracle",
@@ -30,8 +47,10 @@ export async function startCampaign(state, { dataset, rounds, batchSize, mode })
     testedHits: [],
     testedMisses: [],
     history: [],
+    decisions: [],   // why each round's genes were chosen (attribution + SHAP)
     startedAt: new Date().toISOString(),
   };
+  pushDecision(state.campaign, r.info, 1);
   return {
     kind: "campaign", stage: "proposed", mode: state.campaign.mode,
     dataset, round: 1, maxRounds: state.campaign.maxRounds, genes: r.genes,
@@ -81,6 +100,8 @@ async function advance(state, revealedHits, total) {
   c.history.push({ round: c.round, tested: c.pending.length, hits: roundHits, cumulative, ratio });
 
   const revealedRound = c.round;
+  attachOutcome(c, revealedRound, roundHits);
+
   if (c.round < c.maxRounds) {
     c.round += 1;
     c.stage = "proposed";
@@ -89,8 +110,10 @@ async function advance(state, revealedHits, total) {
       n: c.batchSize || undefined,
       testedHits: c.testedHits,
       testedMisses: c.testedMisses,
+      trace: true,
     });
     c.pending = next.genes;
+    pushDecision(c, next.info, c.round);
     return {
       kind: "campaign", stage: "revealed", done: false, mode: c.mode,
       dataset: c.dataset, round: revealedRound, roundHits, cumulative, total, ratio,
@@ -118,6 +141,9 @@ export function finish(state, last = null) {
     cumulative_hits: cumulative,
     total_hits: totalHits,
     hit_ratio: Number(ratio.toFixed(4)),
+    // decisions + outcomes → feed straight to:
+    //   python -m waddington_select.analysis report --campaign <this file>
+    trace: { rounds: (c.decisions || []).filter((d) => d.genes?.some((g) => "hit" in g)) },
   };
   let tracePath = null;
   try {
