@@ -16,6 +16,23 @@ function render(result) {
     console.log(`\n${result.text}\n`);
     return;
   }
+  if (result.kind === "onboard") {
+    if (result.stage === "anchors") {
+      console.log(`\n[Onboarding · ${result.name}] Proposed anchor genes (${result.proposed.length}):`);
+      console.log("  " + result.proposed.join(", "));
+      console.log(`\n${result.text}\n`);
+      return;
+    }
+    if (result.stage === "done") {
+      console.log(`\n[Phenotype registered · ${result.name}]`);
+      console.log(`  gene pool: ${result.n_genes} (${result.n_genes_with_known_features} with known features)`);
+      console.log(`  anchors:   ${result.anchors.join(", ")}`);
+      console.log(`\nIt's now rankable. Say e.g. "run a real experiment on ${result.name} with my own results".\n`);
+      return;
+    }
+    console.log(`\n${result.text}\n`);
+    return;
+  }
   if (result.kind === "campaign") {
     if (result.stage === "await") { console.log(`\n${result.text}\n`); return; }
     if (result.stage === "awaiting_results") {

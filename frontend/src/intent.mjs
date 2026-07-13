@@ -19,13 +19,16 @@ Supported phenotypes (dataset ids): ${DATASETS.join(", ")}.
 
 Respond with ONE JSON object, nothing else:
 {
-  "action": "suggest" | "experiment" | "simulate" | "chat",
+  "action": "suggest" | "experiment" | "simulate" | "register" | "chat",
   "dataset": <one of the ids above, or null if not yet known>,
   "new_hits":   [<gene symbols the scientist reports were HITS in this message>],
   "new_misses": [<gene symbols the scientist reports were NON-hits in this message>],
   "n": <batch size / how many genes per round, or null for default>,
   "rounds": <number of rounds for an experiment/simulate, or null>,
   "mode": "oracle" | "upload",
+  "name": <for action="register": a short id for THEIR screen (e.g. "Ferroptosis_K562"), else null>,
+  "task": <for action="register": one sentence on the phenotype they're screening, else null>,
+  "measurement": <for action="register": what their readout measures, else null>,
   "reply": <a short natural-language reply to show the scientist; REQUIRED for action="chat",
             optional otherwise>
 }
@@ -39,8 +42,13 @@ Guidance:
   results each round (phrases: "my own data / real experiment / I'll upload results / my screen
   file / MAGeCK"); otherwise "oracle" (default — the benchmark truth stands in for the wet lab).
 - "show me how it would go / auto-demo / just simulate it end-to-end" → action="simulate" (non-interactive).
-- If the phenotype is ambiguous or unsupported, use action="chat" and ask which supported phenotype
-  they mean (list a few). Never guess a dataset that isn't in the list.
+- action="register" when the scientist wants to work on a phenotype that is NOT in the list above —
+  i.e. their OWN screen ("onboard/register my screen", "I ran a screen for X", or they simply name a
+  phenotype that isn't supported). Their screen must be onboarded (features built) before it can be
+  ranked. Never force their new biology onto a lookalike benchmark dataset; use "register" instead.
+- Only leave "dataset" set to an id from the list above. If the phenotype is theirs/new, set
+  "dataset": null and use action="register".
+- If the message is too vague to act on at all, use action="chat" and ask what they need.
 - Extract gene symbols exactly as written (uppercase). Only fill new_hits/new_misses when the
   scientist is reporting experimental results from a previous round.`;
 
@@ -89,6 +97,9 @@ export async function routeIntent(message, state, modelSpec = DEFAULT_CHAT_MODEL
     n: Number.isInteger(parsed.n) ? parsed.n : null,
     rounds: Number.isInteger(parsed.rounds) ? parsed.rounds : null,
     mode: parsed.mode === "upload" ? "upload" : "oracle",
+    name: parsed.name || null,
+    task: parsed.task || null,
+    measurement: parsed.measurement || null,
     reply: parsed.reply || null,
   };
 }

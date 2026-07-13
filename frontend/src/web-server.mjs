@@ -38,6 +38,7 @@ export async function launchWebServer({ port = 3000, modelSpec } = {}) {
           hits: state?.hits ?? [],
           misses: state?.misses ?? [],
           campaign: state?.campaign ?? null,
+          onboarding: state?.onboarding ?? null,
         };
         const result = await respond(String(message || ""), st, spec, file?.content != null ? { file } : {});
         res.writeHead(200, { "content-type": "application/json" });

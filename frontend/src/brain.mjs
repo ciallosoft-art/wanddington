@@ -44,11 +44,22 @@ export async function getDatasets() {
   return _datasets;
 }
 
-/** Onboard a new phenotype: build its ML features from the scientist's screen/library file. */
-export async function registerPhenotype({ name, genesFile, anchors, task, measurement, batchSize, expectedHitRate }) {
+/**
+ * Onboard a new phenotype: build its ML features from the scientist's screen/library file.
+ * Accepts a `genesFile` path (CLI) or raw `genesContent` (+ `genesName` for the extension hint, Web upload).
+ */
+export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate }) {
+  let poolFile = genesFile;
+  if (!poolFile) {
+    if (genesContent == null) throw new Error("registerPhenotype: need a gene-pool file path or content");
+    const ext = (genesName && extname(genesName)) || ".csv";
+    const dir = mkdtempSync(join(tmpdir(), "wadd-pool-"));
+    poolFile = join(dir, `pool${ext}`);
+    writeFileSync(poolFile, genesContent);
+  }
   const args = [
     "-m", "waddington_select.phenotype", "register", "--name", name,
-    "--genes-file", genesFile, "--anchors", ...anchors,
+    "--genes-file", poolFile, "--anchors", ...anchors,
     "--task", task, "--measurement", measurement, "--json",
   ];
   if (batchSize) args.push("--batch", String(batchSize));

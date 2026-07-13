@@ -7,6 +7,7 @@ import { routeIntent } from "./intent.mjs";
 import { complete } from "./llm/complete.mjs";
 import { suggestGenes, simulateCampaign, getDatasets } from "./brain.mjs";
 import { startCampaign, commitRound, submitResults, finish, campaignCommand } from "./campaign.mjs";
+import { startOnboarding, handleOnboarding } from "./onboard.mjs";
 
 function looksLikePath(s) {
   return /\.(csv|txt|tsv)$/i.test(s) || s.startsWith("/") || s.startsWith("~") || s.startsWith("./");
@@ -45,6 +46,11 @@ async function defaultAsk() {
  *   { kind:"suggest", dataset, genes, info, narration, feedback:{hits,misses}, state }
  */
 export async function respond(message, state, modelSpec, opts = {}) {
+  // Onboarding the scientist's own phenotype (describe → gene pool → anchors → build).
+  if (state.onboarding?.active) {
+    return { ...(await handleOnboarding(state, message, opts, modelSpec)), state };
+  }
+
   // Active experiment campaign: deterministic control (no LLM needed).
   if (state.campaign?.active) {
     const c = state.campaign;
@@ -81,6 +87,16 @@ export async function respond(message, state, modelSpec, opts = {}) {
   if (intent.dataset && known.includes(intent.dataset)) state.dataset = intent.dataset;
   state.hits = mergeUnique(state.hits, intent.new_hits);
   state.misses = mergeUnique(state.misses, intent.new_misses);
+
+  // The scientist's own screen: build its features before anything can be ranked.
+  if (intent.action === "register") {
+    const started = await startOnboarding(
+      state,
+      { name: intent.name, task: intent.task, measurement: intent.measurement, batchSize: intent.n },
+      modelSpec,
+    );
+    return { ...started, state };
+  }
 
   if (intent.action === "chat" || !state.dataset) {
     return { kind: "chat", text: intent.reply || (await defaultAsk()), state };

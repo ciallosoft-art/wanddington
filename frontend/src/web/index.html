@@ -70,6 +70,27 @@
         b.appendChild(g);
         b.appendChild(el("meta", `round ${r.info?.round ?? 1} · ${r.genes.length} genes · route ${esc(r.info?.route||"?")} · report hits to adapt`));
         addBot(b);
+      } else if (r.kind === "onboard") {
+        const b = el("bubble");
+        const chips = (list) => { const g = el("genes"); for (const x of list) g.appendChild(el("gene", esc(x))); return g; };
+        if (r.stage === "pool") {
+          b.appendChild(el(null, `<b>Onboarding · ${esc(r.name)}</b> — ${esc(r.text)}`));
+          const up = document.createElement("input");
+          up.type = "file"; up.accept = ".csv,.txt,.tsv";
+          up.onchange = () => uploadFile(up);
+          b.appendChild(up);
+        } else if (r.stage === "anchors") {
+          b.appendChild(el(null, `<b>Onboarding · ${esc(r.name)}</b> — proposed anchor genes (${r.proposed.length}):`));
+          b.appendChild(chips(r.proposed));
+          b.appendChild(el("meta", esc(r.text)));
+        } else if (r.stage === "done") {
+          b.appendChild(el(null, `<b>Phenotype registered · ${esc(r.name)}</b> — pool ${r.n_genes} genes (${r.n_genes_with_known_features} with known features)`));
+          b.appendChild(chips(r.anchors));
+          b.appendChild(el("meta", `now rankable — try “run a real experiment on ${esc(r.name)} with my own results”`));
+        } else {
+          b.appendChild(el(null, esc(r.text || "…")));
+        }
+        addBot(b);
       } else if (r.kind === "campaign") {
         if (r.stage === "await") { addBot(el("bubble", esc(r.text))); return; }
         const b = el("bubble");
@@ -80,7 +101,7 @@
             b.appendChild(el(null, `<b>Round ${r.round} committed</b> · ${r.genes.length} genes tested. Upload this round's screen readout to reveal hits:`));
             const up = document.createElement("input");
             up.type = "file"; up.accept = ".csv,.txt,.tsv";
-            up.onchange = () => uploadResults(up);
+            up.onchange = () => uploadFile(up);
             b.appendChild(up);
             b.appendChild(el("meta", "MAGeCK gene_summary or Gene,Score CSV — or type “stop” to end"));
           }
@@ -140,7 +161,7 @@
       postMessage({ message: text });
     });
 
-    function uploadResults(input) {
+    function uploadFile(input) {
       const f = input.files && input.files[0];
       if (!f) return;
       const reader = new FileReader();
