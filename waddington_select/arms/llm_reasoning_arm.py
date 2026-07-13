@@ -511,11 +511,18 @@ No explanation, no markdown."""
         llm_genes = self._call_llm(prompt)
         matched = self._match_to_pool(llm_genes)
 
+        # Record what the LLM ACTUALLY named, before any back-fill. The batch is padded from the
+        # static LOO ranker when the LLM names too few valid genes, and on some screens that padding
+        # dominates (K562-Essential: the LLM matched 1 gene of 32). Attribution must not credit those
+        # static-ranker genes to the LLM — the fusion still scores them, but they are not LLM picks.
+        self._llm_named: set[str] = set(matched[: self.batch_size])
+
         n_needed = self.batch_size - len(matched)
         if n_needed > 0:
             fallback = self._fill_from_static(matched, n_needed)
             matched = matched + fallback
 
+        self._n_fallback: int = max(0, n_needed)
         return matched[: self.batch_size]
 
     def update(self, round_idx: int, revealed_new: dict[str, bool]) -> None:

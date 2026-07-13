@@ -35,8 +35,10 @@ class TraceRecorder:
         batch: list[str],
         ml_candidates: list[str] | None = None,
         shap: dict[str, float] | None = None,
+        n_fallback: int = 0,
     ) -> None:
-        """`ml_candidates` = the genes the ML would have taken on its own (defaults to its top-k)."""
+        """`llm_set` must be the genes the LLM actually NAMED (not the static-ranker back-fill);
+        `ml_candidates` = the genes the ML would have taken on its own (defaults to its top-k)."""
         k = len(batch)
         if ml_candidates is None:
             ranked = sorted(ml_scores, key=lambda g: -ml_scores.get(g, 0.0))
@@ -60,6 +62,8 @@ class TraceRecorder:
             "w_ml": w_ml,
             "w_llm": w_llm,
             "batch_size": k,
+            "n_llm_named": len(llm_set),
+            "n_fallback": n_fallback,
             "genes": genes,
             "shap": {f: round(v, 5) for f, v in sorted((shap or {}).items(), key=lambda kv: -kv[1])},
             "counts": {s: sum(1 for x in genes if x["source"] == s) for s in ("both", "ml_only", "llm_only")},

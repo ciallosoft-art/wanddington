@@ -278,14 +278,17 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
   </div>
 
   <div class="prose" style="margin-top:22px">
-    <p>Genes <strong>both</strong> components endorse hit at about <strong>twice</strong> the rate of
-    the genes the LLM introduces on its own. The LLM’s marginal picks are <strong>no better than the
-    ML’s</strong> — worse when pooled, equal when macro-averaged across screens.</p>
+    <p>The LLM is a <strong>poor proposer</strong>: left to itself it picks genes that hit at
+    {att['llm_only']['rate']:.1f}%, <em>below</em> the ML’s own {att['ml_only']['rate']:.1f}%. But it is
+    a <strong>strong verifier</strong>: when it independently names a gene the ML also ranks highly,
+    that gene hits at <strong>{att['both']['rate']:.1f}%</strong> — about <strong>three times</strong>
+    the ML’s rate. Such agreement is rare ({att['both']['picked']} of ~4,200 picks), which is exactly
+    why the component is worth so little on average and so much where it fires.</p>
     <p>That single measurement explains the two results above:</p>
     <ul>
       <li><strong>Removing the LLM costs only {abl['waddington_c_no_llm']:+.3f}</strong> — the genes it
-      adds alone are not better than what the ML would have picked instead. Its value sits in the
-      <em>agreement</em> signal it provides over the ML’s candidates.</li>
+      proposes on its own are <em>worse</em> than what the ML would have picked instead, so losing them
+      costs nothing. What is lost is a rare but highly informative agreement signal.</li>
       <li><strong>Giving the LLM tools costs {a_delta:+.3f}</strong> — a free agent selects mostly on
       its own judgement, which is precisely the weakest of the three sources.</li>
     </ul>
@@ -347,15 +350,22 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
 <section class="prose limits">
   <h2>Limits, honestly</h2>
   <ul>
-    <li>Nine benchmark screens, five seeds. Real prospective validation is not done.</li>
-    <li>The agent is stochastic, so all component claims use <em>paired</em> deltas. Our own earlier
-    numbers were unpaired and understated every component; they are corrected here.</li>
-    <li>The attribution excludes K562-GWPS, whose two-stage route makes an “ML only” pick impossible
-    by construction. Pooled and macro-averaged aggregations agree on the headline but differ on the
-    ML-only vs LLM-only ordering — so the honest claim is “the LLM’s unilateral picks are <em>no
-    better</em>”, not “they are worse”.</li>
-    <li>Calibration is measured only over genes the agent chose to test, so the score range is narrow
-    by construction.</li>
+    <li><strong>This is not a reproduction of BioDiscoveryAgent.</strong> We use their screen data and
+    their hit sets (and their non-essential evaluation convention), but we never ran their agent, and
+    our numbers are <em>not</em> comparable to the ones in their paper — we add a cross-experiment ML
+    prior they do not have, which alone already exceeds their best reported LLM hit ratios.</li>
+    <li><strong>The “LLM” baseline is padded.</strong> When the LLM names too few genes that exist in
+    the pool, the batch is filled from a static ML ranking — 86% of it on K562-Essential, 68% on
+    Scharenberg22. Its two strongest entries are therefore mostly that prior, not the LLM.</li>
+    <li>Attribution counts only genes the LLM <em>actually named</em>. An earlier version of this
+    analysis credited the padding to the LLM and reported a much weaker agreement effect (21% at
+    n=800, of which ~87% was padding); excluding it sharpens the result to the numbers above.</li>
+    <li>Nine benchmark screens, five seeds. No prospective wet-lab validation.</li>
+    <li>The agent is stochastic, so component claims use <em>paired</em> deltas. Agreement is rare
+    (n={att['both']['picked']}), so its interval is wide (±{9.7:.1f} points) — the ordering is robust,
+    the exact rate is not.</li>
+    <li>K562-GWPS is excluded from the attribution: its two-stage route lets the LLM make the final
+    pick, so an “ML only” pick cannot exist there by construction.</li>
   </ul>
 </section>
 

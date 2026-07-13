@@ -167,10 +167,15 @@ class WaddingtonCArm(BaseArm):
         if self._trace is not None:
             # what the ML would have taken on its own — the counterfactual for attribution
             ml_only_rank = sorted(combined, key=lambda g: -ml_scores.get(g, 0.0))
+            # Attribute only genes the LLM actually NAMED. `llm_set` also contains static-ranker
+            # back-fill (up to 97% of the set on K562-Essential); crediting those to the LLM would
+            # make "ML and LLM agree" partly mean "two ML models agree".
+            named = getattr(self._llm, "_llm_named", llm_set)
             self._trace.record_selection(
-                round_idx, self._route, self._w_ml, self._w_llm, ml_scores, llm_set, batch,
+                round_idx, self._route, self._w_ml, self._w_llm, ml_scores, named, batch,
                 ml_candidates=ml_only_rank[: self.batch_size],
                 shap=self._online.shap_for(batch),
+                n_fallback=getattr(self._llm, "_n_fallback", 0),
             )
         return batch
 
