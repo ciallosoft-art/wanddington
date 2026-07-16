@@ -298,7 +298,14 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         if getattr(self, "_inter_call_sleep", 0) > 0:
             time.sleep(self._inter_call_sleep)
 
-        text = self._llm.complete(prompt)
+        text = self._llm.complete(prompt).strip()
+
+        # Some backends (the pi bridge) wrap the JSON in a ```json … ``` fence. Strip it before parsing,
+        # otherwise json.loads fails and the regex fallback below splits underscored identifiers like
+        # GENE_00001 into "GENE"+"00001" — which match no anonymized pool, silently forcing 100% padding.
+        if text.startswith("```"):
+            text = re.sub(r"^```[a-zA-Z0-9]*\n?", "", text)
+            text = re.sub(r"\n?```\s*$", "", text).strip()
 
         # Try JSON array parse
         try:
@@ -308,8 +315,8 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         except json.JSONDecodeError:
             pass
 
-        # Fallback: extract HGNC-like patterns
-        raw = re.findall(r'\b[A-Z][A-Z0-9\-]{1,9}\b', text)
+        # Fallback: extract HGNC-like patterns (allow underscores so GENE_00001 survives)
+        raw = re.findall(r'\b[A-Z][A-Z0-9_\-]{1,12}\b', text)
         return [g.upper() for g in raw]
 
     def _match_to_pool(self, llm_genes: list[str]) -> list[str]:

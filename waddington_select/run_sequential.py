@@ -23,7 +23,8 @@ Ablation arms:
   waddington_c_no_memory      C minus cross-experiment memory
   waddington_c_no_llm         C minus LLM (online ML only)
   waddington_c_no_ml          C minus online retraining (static LOO + LLM)
-  waddington_c_shuffled_names C with anonymous gene identifiers
+  waddington_c_shuffled_names   C with anonymous gene identifiers (A0: no info to reason over)
+  waddington_c_feature_reasoning C with anonymous IDs + structural feature vectors (A1: reason, not recall)
 
 Development arms (archived, not needed for paper results):
   waddington, waddington_v2 … waddington_v13, waddington_v15
@@ -55,6 +56,7 @@ from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
 from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
 from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
+from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 
@@ -64,6 +66,7 @@ _PAPER_ARMS = {
     "llm_reasoning", "waddington_c", "waddington_c_skills", "waddington_c_memskills", "waddington_c_enrich",
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
+    "waddington_c_feature_reasoning", "waddington_c_pool_only",
 }
 
 _ARCHIVE_ARMS = {
@@ -116,6 +119,10 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(WaddingtonCNoMLArm(dataset_name, bs))
         elif name == "waddington_c_shuffled_names":
             arms.append(WaddingtonCShuffledNamesArm(dataset_name, bs))
+        elif name == "waddington_c_feature_reasoning":
+            arms.append(WaddingtonCFeatureReasoningArm(dataset_name, bs))
+        elif name == "waddington_c_pool_only":
+            arms.append(WaddingtonCPoolOnlyArm(dataset_name, bs))
         elif name in _ARCHIVE_ARMS:
             print(f"    [archive] Loading {name} from arms/archive/ ...")
             arms.append(_load_archive_arm(name, dataset_name, bs))

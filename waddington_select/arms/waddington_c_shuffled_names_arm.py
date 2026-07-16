@@ -190,6 +190,9 @@ Example: ["GENE_00042", "GENE_00137"]"""
         llm_raw = self._call_llm(prompt)
         matched_anon = self._match_anon(llm_raw)
         n_needed = self.batch_size - len(matched_anon)
+        # How much of this batch is static-ranker back-fill rather than the LLM's own choice. Same
+        # accounting lesson as the C-arm: padding must be visible, never credited to the LLM.
+        self._n_fallback: int = max(0, n_needed)
         if n_needed > 0:
             matched_anon = matched_anon + self._fill_anon_from_static(matched_anon, n_needed)
         result_anon = matched_anon[: self.batch_size]
@@ -205,6 +208,7 @@ Example: ["GENE_00042", "GENE_00137"]"""
         matched_anon = self._match_anon(llm_raw)
 
         n_needed = self.batch_size - len(matched_anon)
+        self._n_fallback: int = max(0, n_needed)  # LLM-named shortfall, padded below
         if n_needed > 0:
             # Fill from fake shortlist in ML order
             sel_anon = self._selected_anon()
@@ -226,13 +230,18 @@ Example: ["GENE_00042", "GENE_00137"]"""
 class WaddingtonCShuffledNamesArm(BaseArm):
     """C-arm with anonymous gene names passed to LLM. Tests LLM gene-name semantics."""
 
+    # Which inner LLM arm to wire up. Subclasses (e.g. the feature-reasoning arm) swap this to change
+    # ONLY what the LLM sees, while keeping the identical routing / fusion / update harness.
+    _INNER_LLM_CLS = _AnonymousNamesLLMArm
+
     def __init__(
         self,
         dataset_name: str,
         batch_size: int,
         memory_path: Path = MEMORY_PATH,
+        name: str = "waddington_c_shuffled_names",
     ) -> None:
-        super().__init__("waddington_c_shuffled_names", dataset_name, batch_size)
+        super().__init__(name, dataset_name, batch_size)
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
         n_genes, n_hits = _get_dataset_stats(dataset_name)
@@ -252,7 +261,7 @@ class WaddingtonCShuffledNamesArm(BaseArm):
         task = _load_task(dataset_name)
         raw_memory = _load_memory(memory_path, exclude_dataset=dataset_name)
         memory = _rank_memory_by_relevance(raw_memory, task)[:4]
-        self._llm = _AnonymousNamesLLMArm(
+        self._llm = self._INNER_LLM_CLS(
             dataset_name, batch_size,
             memory_entries=memory,
             temperature=LLM_TEMPERATURE,
