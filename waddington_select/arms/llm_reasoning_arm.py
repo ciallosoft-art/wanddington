@@ -14,6 +14,7 @@ Each round:
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -166,6 +167,11 @@ class LLMReasoningArm(BaseArm):
         # Revealed history: cumulative hits and non-hits by round
         self._round_hits: list[list[str]] = []    # hits per round
         self._round_nonhits: list[list[str]] = [] # non-hits per round
+
+        # Seconds to pause before each LLM call. Multi-seed sweeps issue hundreds of large prompts and
+        # will trip a sustained account rate limit, which the retry backoff (capped at 120s) cannot
+        # outlast — it just burns 8 attempts and dies. Throttling up front is what keeps a sweep alive.
+        self._inter_call_sleep = float(os.environ.get("WADDINGTON_LLM_SLEEP", "0"))
 
         # Provider-agnostic LLM client (default: anthropic; opt-in pi/codex via
         # WADDINGTON_LLM_BACKEND=pi, reusing feynman's provider routing + OAuth).

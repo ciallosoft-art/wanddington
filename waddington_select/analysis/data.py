@@ -31,6 +31,7 @@ ABLATIONS = {
     "waddington_c_no_ml": ("ablation_ml.json", "− online ML"),
     "waddington_c_shuffled_names": ("ablation_shuffled.json", "gene names shuffled"),
     "waddington_c_feature_reasoning": ("ablation_feature_reasoning.json", "anonymized + structural features"),
+    "waddington_c_pool_only": ("ablation_feature_reasoning.json", "anonymized + ML pool, no features"),
     "waddington_c_skills": ("skills_ablation.json", "+ skill library"),
     "waddington_c_enrich": ("enrich_gated.json", "+ runtime enrichment"),
 }
