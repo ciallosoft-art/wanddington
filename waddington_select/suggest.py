@@ -52,6 +52,7 @@ def suggest(
     tested_hits: list[str] | None = None,
     tested_misses: list[str] | None = None,
     trace: bool = False,
+    reason_from_structure: bool | None = None,
 ) -> tuple[list[str], dict]:
     """Recommend the next batch of genes to perturb for `dataset`.
 
@@ -69,7 +70,8 @@ def suggest(
     if use_skills:
         arm = WaddingtonCSkillsArm(dataset, batch_size)
     else:
-        arm = WaddingtonCArm(dataset, batch_size, trace=recorder)
+        arm = WaddingtonCArm(dataset, batch_size, trace=recorder,
+                             reason_from_structure=reason_from_structure)
     pool: set[str] = arm._llm._gene_set  # canonical gene pool for this phenotype
 
     hits = _norm(tested_hits)
@@ -106,6 +108,7 @@ def suggest(
         "n_hits": sum(revealed.values()),
         "unknown_genes": unknown,
         "route": getattr(arm, "_route", "?"),
+        "reason_from_structure": getattr(arm, "_reason_from_structure", False),
     }
     if info_trace is not None:
         info["trace"] = info_trace
@@ -130,6 +133,10 @@ def main() -> None:
                         help="Use the skill library instead of flat cross-experiment memory")
     parser.add_argument("--trace", action="store_true",
                         help="record WHY each gene was chosen (attribution + SHAP) into info.trace")
+    parser.add_argument("--reason-from-structure", action="store_true", default=None,
+                        help="LLM reasons over anonymized structural features instead of gene names "
+                             "(opt-in; removes memorisation dependence, best for loss-of-function "
+                             "screens and novel genes). Defaults to $WADDINGTON_REASON_FROM_STRUCTURE.")
     parser.add_argument("--json", action="store_true",
                         help="Emit a single JSON object {dataset, genes, info} instead of human text "
                              "(machine contract for the conversational frontend)")
@@ -138,7 +145,7 @@ def main() -> None:
     genes, info = suggest(
         args.dataset, args.n, args.exclude, use_skills=args.skills,
         tested_hits=args.tested_hits, tested_misses=args.tested_misses,
-        trace=args.trace,
+        trace=args.trace, reason_from_structure=args.reason_from_structure,
     )
 
     if args.json:
@@ -152,8 +159,10 @@ def main() -> None:
         print(f"\nIncorporated {info['n_feedback']} tested genes "
               f"({info['n_hits']} hits) as feedback → recommending round {info['round']}.")
 
+    mode = " · reasoning from structure (names hidden)" if info.get("reason_from_structure") else ""
     print(f"\nRecommended genes to perturb next for '{args.dataset}' "
-          f"({len(genes)} genes, C-arm{' + skills' if args.skills else ''}, route={info['route']}):\n")
+          f"({len(genes)} genes, C-arm{' + skills' if args.skills else ''}, route={info['route']}"
+          f"{mode}):\n")
     for i, g in enumerate(genes, 1):
         print(f"  {i:3d}. {g}")
     print()

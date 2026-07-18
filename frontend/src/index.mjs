@@ -26,6 +26,9 @@ Usage:
 Options:
   --model provider/model     Conversation model (default: an authorized Claude Haiku)
   --port N                   Web UI port (default 3000)
+  --reason-from-structure    Hide gene names from the model; pick from structural features only
+                             (network / pathway / essentiality). Removes the memorisation
+                             dependence; best for loss-of-function screens and novel genes.
 
 Supported phenotypes: ${DATASETS.join(", ")}`);
 }
@@ -65,6 +68,7 @@ export async function main() {
       system: { type: "string" },
       temperature: { type: "string" },
       "max-tokens": { type: "string" },
+      "reason-from-structure": { type: "boolean" },
     },
   });
 
@@ -73,6 +77,15 @@ export async function main() {
   if (values.help || command === "help") return printHelp();
   if (command === "setup") return runSetup();
   if (command === "complete") return oneShotComplete(values);
+
+  // Opt-in: make the C-arm reason over anonymized structural features instead of gene names. Set here
+  // so it flows to every `waddington_select.suggest` subprocess (run() spreads process.env). Off by
+  // default; a deliberate robustness trade — see the reason-vs-recall ablation.
+  if (values["reason-from-structure"]) {
+    process.env.WADDINGTON_REASON_FROM_STRUCTURE = "1";
+    console.log("• Reasoning from structure: gene names are hidden from the model; picks are driven by "
+      + "network / pathway / essentiality features only.\n");
+  }
 
   const port = values.port ? parseInt(values.port, 10) : 3000;
 

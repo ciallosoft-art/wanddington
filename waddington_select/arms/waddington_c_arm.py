@@ -30,6 +30,7 @@ Routing unchanged from V22/V24 (ml_heavy only for n>15000, 2%<hr<7%).
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -116,9 +117,19 @@ class WaddingtonCArm(BaseArm):
         use_enrichment: bool = False,
         name: str = "waddington_c",
         trace=None,
+        reason_from_structure: bool | None = None,
     ) -> None:
         super().__init__(name, dataset_name, batch_size)
         self._trace = trace  # optional analysis.trace.TraceRecorder; off by default
+
+        # Opt-in mode: the LLM reasons over anonymized structural features instead of gene names.
+        # Off by default (real names). On loss-of-function screens it matches names at equal accuracy
+        # while removing the memorisation dependence; on gain-of-function (CRISPRa) screens it is worse
+        # (see the reason-vs-recall ablation), so this is a deliberate robustness/performance trade the
+        # caller makes, not a default. Env var lets any entry point (CLI, web, subprocess) flip it.
+        if reason_from_structure is None:
+            reason_from_structure = os.environ.get("WADDINGTON_REASON_FROM_STRUCTURE", "0") == "1"
+        self._reason_from_structure = reason_from_structure
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
 
@@ -141,7 +152,14 @@ class WaddingtonCArm(BaseArm):
             memory = _rank_memory_by_relevance(raw_memory, task)[:4]
         else:
             memory = []
-        self._llm = LLMReasoningArm(
+        if self._reason_from_structure:
+            # Lazy import: the feature-reasoning arm imports back from this module, so importing it at
+            # module top would be circular.
+            from .waddington_c_feature_reasoning_arm import _AnonymousFeaturesLLMArm
+            llm_cls = _AnonymousFeaturesLLMArm
+        else:
+            llm_cls = LLMReasoningArm
+        self._llm = llm_cls(
             dataset_name, batch_size,
             memory_entries=memory,
             temperature=LLM_TEMPERATURE,
