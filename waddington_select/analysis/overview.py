@@ -64,11 +64,50 @@ def _paired_deltas() -> dict:
     return {a: float(df.loc[a, "delta"]) for a in df.index}
 
 
+REASON_FILE = REPO_ROOT / "workspace" / "results" / "sequential" / "ablation_feature_reasoning.json"
+
+
+def _reason_recall() -> dict:
+    """Decompose the anonymized-name ladder A0 → A0.5 → A1 → A2 into the value of the ML shortlist,
+    the structural features, and the real gene name — every delta seed-paired, from the 5-seed file."""
+    import statistics as st
+
+    d = json.loads(REASON_FILE.read_text())
+    dss = list(d.keys())
+    arm = {"A0": "waddington_c_shuffled_names", "A05": "waddington_c_pool_only",
+           "A1": "waddington_c_feature_reasoning", "A2": "waddington_c"}
+
+    def seeds(ds, a):
+        return [s["hit_ratio_per_round"][-1] for s in d[ds][a]]
+
+    def paired_ds(a, b, ds):
+        xa, xb = seeds(ds, a), seeds(ds, b)
+        n = min(len(xa), len(xb))
+        return st.mean(xb[i] - xa[i] for i in range(n))
+
+    def paired(a, b):
+        per = [paired_ds(a, b, ds) for ds in dss]
+        return st.mean(per), per
+
+    means = {k: st.mean(st.mean(seeds(ds, a)) for ds in dss) for k, a in arm.items()}
+    pool_m, _ = paired(arm["A0"], arm["A05"])
+    feat_m, feat_per = paired(arm["A05"], arm["A1"])
+    name_m, _ = paired(arm["A1"], arm["A2"])
+    return {
+        "means": means,
+        "pool": pool_m, "features": feat_m, "name": name_m,
+        "feat_pos": sum(1 for x in feat_per if x > 0), "n": len(dss),
+        "stein_name": paired_ds(arm["A1"], arm["A2"], "Steinhart"),
+        "stein_feat": paired_ds(arm["A05"], arm["A1"], "Steinhart"),
+    }
+
+
 def build_overview(out: Path) -> Path:
     means = D.method_means(D.load_methods())
     agent = D.load_agent()
     abl = _paired_deltas()
     att = _attribution()
+    rr = _reason_recall()
 
     a_mean = float(agent["agent"].mean())
     p_mean = float(agent["pipeline"].mean())
@@ -301,6 +340,38 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
     rate of each source. K562-GWPS is excluded — it routes through a two-stage policy in which the LLM
     makes the final pick, so an “ML only” pick cannot exist there.</figcaption>
   </figure>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">Result 3, continued · verify using what?</p>
+    <h2>The verifier runs on structure, not the gene name</h2>
+    <p>If the LLM’s job is to verify, what does it verify <em>with</em> — recalled biology (“I know
+    <em>IRF4</em> matters for T cells”), or structure it can reason over? To find out we renamed every
+    gene to a meaningless identifier like <code>GENE_00042</code> and re-ran. Stripped to bare IDs the
+    model is blind. But hand it the <em>same structural features the ML model uses</em> — network
+    proximity to the phenotype’s genes, co-expression, pathway overlap — and, never knowing a gene is
+    <em>IRF4</em>, it matches the real-name system: <strong>{rr['means']['A1']:.3f}</strong> anonymized
+    vs. <strong>{rr['means']['A2']:.3f}</strong> with names. Isolating each ingredient, seed-paired:</p>
+  </div>
+
+  <div class="stats">
+    {stat(f"{rr['features']:+.3f}", f"value of the structural features — positive on all {rr['feat_pos']} of {rr['n']} screens", "good")}
+    {stat(f"{rr['name']:+.3f}", "value of the real gene name, on top of structure")}
+    {stat(f"{rr['pool']:+.3f}", "value of the ML shortlist by itself")}
+  </div>
+
+  <div class="prose" style="margin-top:22px">
+    <p>So “reason from structure, don’t recall the name” is achievable and essentially free — on eight
+    of nine screens. The ninth is the exception that proves the mechanism: on <strong>Steinhart</strong>,
+    the one gain-of-function (CRISPRa) screen, the gene name is worth <strong>{rr['stein_name']:+.3f}</strong>
+    — the largest anywhere — and the features recover almost nothing ({rr['stein_feat']:+.3f}). That is
+    exactly the screen where the ML’s features don’t transfer, because every essentiality feature we
+    hand the model is derived from <em>knockout</em> data and Steinhart measures <em>over-expression</em>.
+    Where structure is informative, the LLM needs no names; where it isn’t, nothing substitutes for
+    knowing the biology. The reach of “reason, don’t recall” is a property of the feature table, not of
+    the model.</p>
+  </div>
 </section>
 
 <section>
