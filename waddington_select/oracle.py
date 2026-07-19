@@ -7,13 +7,20 @@ No arm should ever read labels directly; all truth access goes through here.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+# The ground-truth / feature table. WADDINGTON_TRAINING_CSV overrides it — used by the CRISPRa
+# validation to point every consumer at an isolated superset CSV, so the frozen benchmark file (and
+# its committed results) are never touched.
+TRAINING_DATA_CSV = Path(
+    os.environ.get("WADDINGTON_TRAINING_CSV",
+                   REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv")
+)
 BDA_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
 
 # Batch sizes matching the BDA benchmark convention
@@ -28,6 +35,11 @@ BATCH_SIZES: dict[str, int] = {
     "Replogle_K562_essential": 32,
     "Replogle_K562_gwps": 128,
 }
+
+# Reason-vs-recall validation screens (Schmidt CRISPRa arm). Registered only when the isolated
+# validation CSV is active, so they never appear as benchmark datasets in normal runs.
+if os.environ.get("WADDINGTON_TRAINING_CSV"):
+    BATCH_SIZES.update({"IL2_crispra": 128, "IFNG_crispra": 128})
 
 BENCHMARK_DATASETS = list(BATCH_SIZES.keys())
 

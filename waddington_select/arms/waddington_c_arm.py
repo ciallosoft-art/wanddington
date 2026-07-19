@@ -44,7 +44,11 @@ from ..features import load_training_frame
 from ..phenotype import load_registry
 
 REPO_ROOT         = Path(__file__).resolve().parents[2]
-TRAINING_DATA_V1  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+# WADDINGTON_TRAINING_CSV overrides the v1 (no-DepMap) table, so the CRISPRa validation datasets — which
+# route through the DepMap-excluded v1 path, like Steinhart — read the isolated superset CSV without
+# touching the frozen benchmark file. v3 (with DepMap) is left alone: the validation screens never use it.
+TRAINING_DATA_V1  = Path(os.environ.get("WADDINGTON_TRAINING_CSV",
+                          REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"))
 TRAINING_DATA_V3  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data_v3.csv"
 MEMORY_PATH       = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
 
@@ -54,7 +58,10 @@ DEPMAP_K562_FEATS  = DEPMAP_PAN_FEATS + ["depmap_K562_norm"]
 # v1 (no DepMap). Both exclusions were found empirically, but both have a reason:
 #   Steinhart  — CRISPRa (gain-of-function); DepMap is knockout-derived, so the prior misleads.
 #   essential  — a curated essentiality screen; a pan-cancer essentiality prior nearly restates the label.
-DEPMAP_EXCLUDED = {"Replogle_K562_essential", "Steinhart"}
+DEPMAP_EXCLUDED = {"Replogle_K562_essential", "Steinhart",
+                   # CRISPRa validation screens: gain-of-function, so the knockout-derived DepMap
+                   # prior misleads exactly as it does on Steinhart. Routed the same way for the same reason.
+                   "IL2_crispra", "IFNG_crispra"}
 
 # v2 mode (pan-cancer only, no K562): K562 feature hurts or is redundant
 K562_EXCLUDED   = {"Replogle_K562_gwps", "IL2", "Sanchez21_down"}
