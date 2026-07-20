@@ -103,6 +103,13 @@ def _get_dataset_stats(dataset_name: str) -> tuple[int, int]:
 
 
 def _classify(n_genes: int, n_hits: int) -> str:
+    # WADDINGTON_FORCE_ROUTE pins the fusion regime for every arm (all route through this one function).
+    # Used only to test the reason-vs-recall router at a fixed LLM weight: the large CRISPRa validation
+    # screens route ml_heavy (w_llm=0.2), which suppresses the LLM and buries any modality effect, so we
+    # force `baseline` (w_llm=0.4, matching Steinhart) to see whether the name helps once the LLM matters.
+    forced = os.environ.get("WADDINGTON_FORCE_ROUTE")
+    if forced:
+        return forced
     hit_rate = n_hits / max(n_genes, 1)
     if n_genes > 15000 and 0.02 < hit_rate < 0.07:
         return "ml_heavy"

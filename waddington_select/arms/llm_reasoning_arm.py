@@ -72,6 +72,17 @@ HARDCODED_TASKS: dict[str, dict[str, str]] = {
         "Task": "Identify genes whose knockout significantly affects the fitness (growth or survival) of K562 chronic myelogenous leukemia (CML) cells",
         "Measurement": "log fold change in sgRNA abundance comparing post-selection to pre-selection timepoints in a genome-wide perturbation screen",
     },
+    # Reason-vs-recall validation: the Schmidt CRISPRa (gain-of-function) arm. Framed like Steinhart
+    # ("upon activation ...") so the LLM knows it is an OVER-EXPRESSION screen, not knockdown — without
+    # this the gene name carries no usable signal because the model does not know the question.
+    "IL2_crispra": {
+        "Task": "identify genes that, when activated (over-expressed via CRISPRa), regulate the production of Interleukin-2 (IL-2) in primary human T cells",
+        "Measurement": "the log fold change in normalized sgRNA read counts between IL-2-high and IL-2-low sorting bins in a genome-wide CRISPR activation (CRISPRa) screen",
+    },
+    "IFNG_crispra": {
+        "Task": "identify genes that, when activated (over-expressed via CRISPRa), regulate the production of Interferon-gamma (IFN-gamma) in primary human T cells",
+        "Measurement": "the log fold change in normalized sgRNA read counts between IFN-gamma-high and IFN-gamma-low sorting bins in a genome-wide CRISPR activation (CRISPRa) screen",
+    },
 }
 
 LLM_MODEL = "claude-haiku-4-5-20251001"
@@ -96,6 +107,13 @@ def _load_task(dataset_name: str) -> dict[str, str]:
     user = _user_task_prompt(dataset_name)  # a registered new phenotype describes itself
     if user:
         return user
+    # No task description anywhere. The LLM would be told to select for a phenotype named literally
+    # "<dataset>" with measurement "gene fitness" — a silent garbage prompt that quietly nullifies the
+    # LLM's contribution (it can't reason about a phenotype it was never told). Warn loudly; a benchmark
+    # dataset reaching here is a bug (add a TASK_PROMPT_FILES / HARDCODED_TASKS entry).
+    import sys
+    print(f"    [WARN] no task prompt for '{dataset_name}' — the LLM will get a placeholder and "
+          f"contribute little. Add it to HARDCODED_TASKS or TASK_PROMPT_FILES.", file=sys.stderr, flush=True)
     return {"Task": dataset_name, "Measurement": "gene fitness"}
 
 
