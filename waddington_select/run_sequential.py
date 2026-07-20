@@ -57,6 +57,7 @@ from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
 from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm
+from .arms.waddington_c_ensemble_arm import WaddingtonCEnsembleArm
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 
@@ -66,7 +67,7 @@ _PAPER_ARMS = {
     "llm_reasoning", "waddington_c", "waddington_c_skills", "waddington_c_memskills", "waddington_c_enrich",
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
-    "waddington_c_feature_reasoning", "waddington_c_pool_only",
+    "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble",
 }
 
 _ARCHIVE_ARMS = {
@@ -123,6 +124,8 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(WaddingtonCFeatureReasoningArm(dataset_name, bs))
         elif name == "waddington_c_pool_only":
             arms.append(WaddingtonCPoolOnlyArm(dataset_name, bs))
+        elif name == "waddington_c_ensemble":
+            arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
         elif name in _ARCHIVE_ARMS:
             print(f"    [archive] Loading {name} from arms/archive/ ...")
             arms.append(_load_archive_arm(name, dataset_name, bs))
