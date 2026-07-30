@@ -1,0 +1,4160 @@
+{
+  "IFNG": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          7,
+          13,
+          20,
+          25
+        ],
+        "cumulative_hits": [
+          9,
+          16,
+          29,
+          49,
+          74
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.02,
+          0.0362,
+          0.0611,
+          0.0923
+        ],
+        "auc_normalized": 0.0922
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          7,
+          13,
+          20,
+          25
+        ],
+        "cumulative_hits": [
+          9,
+          16,
+          29,
+          49,
+          74
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.02,
+          0.0362,
+          0.0611,
+          0.0923
+        ],
+        "auc_normalized": 0.0922
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          7,
+          13,
+          20,
+          25
+        ],
+        "cumulative_hits": [
+          9,
+          16,
+          29,
+          49,
+          74
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.02,
+          0.0362,
+          0.0611,
+          0.0923
+        ],
+        "auc_normalized": 0.0922
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          4,
+          5,
+          4,
+          7
+        ],
+        "cumulative_hits": [
+          9,
+          13,
+          18,
+          22,
+          29
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0162,
+          0.0224,
+          0.0274,
+          0.0362
+        ],
+        "auc_normalized": 0.0474
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          4,
+          5,
+          4,
+          7
+        ],
+        "cumulative_hits": [
+          9,
+          13,
+          18,
+          22,
+          29
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0162,
+          0.0224,
+          0.0274,
+          0.0362
+        ],
+        "auc_normalized": 0.0474
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          4,
+          5,
+          4,
+          7
+        ],
+        "cumulative_hits": [
+          9,
+          13,
+          18,
+          22,
+          29
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0162,
+          0.0224,
+          0.0274,
+          0.0362
+        ],
+        "auc_normalized": 0.0474
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          7,
+          13,
+          20,
+          25
+        ],
+        "cumulative_hits": [
+          9,
+          16,
+          29,
+          49,
+          74
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.02,
+          0.0362,
+          0.0611,
+          0.0923
+        ],
+        "auc_normalized": 0.0922
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          7,
+          13,
+          20,
+          25
+        ],
+        "cumulative_hits": [
+          9,
+          16,
+          29,
+          49,
+          74
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.02,
+          0.0362,
+          0.0611,
+          0.0923
+        ],
+        "auc_normalized": 0.0922
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          7,
+          13,
+          20,
+          25
+        ],
+        "cumulative_hits": [
+          9,
+          16,
+          29,
+          49,
+          74
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.02,
+          0.0362,
+          0.0611,
+          0.0923
+        ],
+        "auc_normalized": 0.0922
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          26,
+          12,
+          15,
+          9
+        ],
+        "cumulative_hits": [
+          9,
+          35,
+          47,
+          62,
+          71
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0436,
+          0.0586,
+          0.0773,
+          0.0885
+        ],
+        "auc_normalized": 0.1167
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          26,
+          12,
+          15,
+          9
+        ],
+        "cumulative_hits": [
+          9,
+          35,
+          47,
+          62,
+          71
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0436,
+          0.0586,
+          0.0773,
+          0.0885
+        ],
+        "auc_normalized": 0.1167
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          26,
+          12,
+          15,
+          9
+        ],
+        "cumulative_hits": [
+          9,
+          35,
+          47,
+          62,
+          71
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0436,
+          0.0586,
+          0.0773,
+          0.0885
+        ],
+        "auc_normalized": 0.1167
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          13,
+          10,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          9,
+          22,
+          32,
+          41,
+          54
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0274,
+          0.0399,
+          0.0511,
+          0.0673
+        ],
+        "auc_normalized": 0.0823
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          13,
+          10,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          9,
+          22,
+          32,
+          41,
+          54
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0274,
+          0.0399,
+          0.0511,
+          0.0673
+        ],
+        "auc_normalized": 0.0823
+      },
+      {
+        "dataset": "IFNG",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 802,
+        "n_genes": 17785,
+        "hits_per_round": [
+          9,
+          13,
+          10,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          9,
+          22,
+          32,
+          41,
+          54
+        ],
+        "hit_ratio_per_round": [
+          0.0112,
+          0.0274,
+          0.0399,
+          0.0511,
+          0.0673
+        ],
+        "auc_normalized": 0.0823
+      }
+    ]
+  },
+  "IL2": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          1,
+          23,
+          35,
+          24
+        ],
+        "cumulative_hits": [
+          2,
+          3,
+          26,
+          61,
+          85
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0062,
+          0.0541,
+          0.1268,
+          0.1767
+        ],
+        "auc_normalized": 0.1023
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          1,
+          23,
+          35,
+          24
+        ],
+        "cumulative_hits": [
+          2,
+          3,
+          26,
+          61,
+          85
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0062,
+          0.0541,
+          0.1268,
+          0.1767
+        ],
+        "auc_normalized": 0.1023
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          1,
+          23,
+          35,
+          24
+        ],
+        "cumulative_hits": [
+          2,
+          3,
+          26,
+          61,
+          85
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0062,
+          0.0541,
+          0.1268,
+          0.1767
+        ],
+        "auc_normalized": 0.1023
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          5,
+          0,
+          4,
+          6
+        ],
+        "cumulative_hits": [
+          2,
+          7,
+          7,
+          11,
+          17
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0146,
+          0.0146,
+          0.0229,
+          0.0353
+        ],
+        "auc_normalized": 0.0254
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          5,
+          0,
+          4,
+          6
+        ],
+        "cumulative_hits": [
+          2,
+          7,
+          7,
+          11,
+          17
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0146,
+          0.0146,
+          0.0229,
+          0.0353
+        ],
+        "auc_normalized": 0.0254
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          5,
+          0,
+          4,
+          6
+        ],
+        "cumulative_hits": [
+          2,
+          7,
+          7,
+          11,
+          17
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0146,
+          0.0146,
+          0.0229,
+          0.0353
+        ],
+        "auc_normalized": 0.0254
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          1,
+          23,
+          35,
+          24
+        ],
+        "cumulative_hits": [
+          2,
+          3,
+          26,
+          61,
+          85
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0062,
+          0.0541,
+          0.1268,
+          0.1767
+        ],
+        "auc_normalized": 0.1023
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          1,
+          23,
+          35,
+          24
+        ],
+        "cumulative_hits": [
+          2,
+          3,
+          26,
+          61,
+          85
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0062,
+          0.0541,
+          0.1268,
+          0.1767
+        ],
+        "auc_normalized": 0.1023
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          1,
+          23,
+          35,
+          24
+        ],
+        "cumulative_hits": [
+          2,
+          3,
+          26,
+          61,
+          85
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0062,
+          0.0541,
+          0.1268,
+          0.1767
+        ],
+        "auc_normalized": 0.1023
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          12,
+          18,
+          15,
+          15
+        ],
+        "cumulative_hits": [
+          2,
+          14,
+          32,
+          47,
+          62
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0291,
+          0.0665,
+          0.0977,
+          0.1289
+        ],
+        "auc_normalized": 0.0908
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          12,
+          18,
+          15,
+          15
+        ],
+        "cumulative_hits": [
+          2,
+          14,
+          32,
+          47,
+          62
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0291,
+          0.0665,
+          0.0977,
+          0.1289
+        ],
+        "auc_normalized": 0.0908
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          12,
+          18,
+          15,
+          15
+        ],
+        "cumulative_hits": [
+          2,
+          14,
+          32,
+          47,
+          62
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0291,
+          0.0665,
+          0.0977,
+          0.1289
+        ],
+        "auc_normalized": 0.0908
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          10,
+          12,
+          13,
+          9
+        ],
+        "cumulative_hits": [
+          2,
+          12,
+          24,
+          37,
+          46
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0249,
+          0.0499,
+          0.0769,
+          0.0956
+        ],
+        "auc_normalized": 0.0699
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          10,
+          12,
+          13,
+          9
+        ],
+        "cumulative_hits": [
+          2,
+          12,
+          24,
+          37,
+          46
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0249,
+          0.0499,
+          0.0769,
+          0.0956
+        ],
+        "auc_normalized": 0.0699
+      },
+      {
+        "dataset": "IL2",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 481,
+        "n_genes": 18273,
+        "hits_per_round": [
+          2,
+          10,
+          12,
+          13,
+          9
+        ],
+        "cumulative_hits": [
+          2,
+          12,
+          24,
+          37,
+          46
+        ],
+        "hit_ratio_per_round": [
+          0.0042,
+          0.0249,
+          0.0499,
+          0.0769,
+          0.0956
+        ],
+        "auc_normalized": 0.0699
+      }
+    ]
+  },
+  "Sanchez21": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          7,
+          12,
+          3,
+          8
+        ],
+        "cumulative_hits": [
+          4,
+          11,
+          23,
+          26,
+          34
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0128,
+          0.0268,
+          0.0303,
+          0.0396
+        ],
+        "auc_normalized": 0.051
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          7,
+          12,
+          3,
+          8
+        ],
+        "cumulative_hits": [
+          4,
+          11,
+          23,
+          26,
+          34
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0128,
+          0.0268,
+          0.0303,
+          0.0396
+        ],
+        "auc_normalized": 0.051
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          7,
+          12,
+          3,
+          8
+        ],
+        "cumulative_hits": [
+          4,
+          11,
+          23,
+          26,
+          34
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0128,
+          0.0268,
+          0.0303,
+          0.0396
+        ],
+        "auc_normalized": 0.051
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          5,
+          7,
+          6,
+          3
+        ],
+        "cumulative_hits": [
+          4,
+          9,
+          16,
+          22,
+          25
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0105,
+          0.0186,
+          0.0256,
+          0.0291
+        ],
+        "auc_normalized": 0.0396
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          5,
+          7,
+          6,
+          3
+        ],
+        "cumulative_hits": [
+          4,
+          9,
+          16,
+          22,
+          25
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0105,
+          0.0186,
+          0.0256,
+          0.0291
+        ],
+        "auc_normalized": 0.0396
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          5,
+          7,
+          6,
+          3
+        ],
+        "cumulative_hits": [
+          4,
+          9,
+          16,
+          22,
+          25
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0105,
+          0.0186,
+          0.0256,
+          0.0291
+        ],
+        "auc_normalized": 0.0396
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          7,
+          11,
+          3,
+          4
+        ],
+        "cumulative_hits": [
+          4,
+          11,
+          22,
+          25,
+          29
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0128,
+          0.0256,
+          0.0291,
+          0.0338
+        ],
+        "auc_normalized": 0.0474
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          7,
+          11,
+          3,
+          4
+        ],
+        "cumulative_hits": [
+          4,
+          11,
+          22,
+          25,
+          29
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0128,
+          0.0256,
+          0.0291,
+          0.0338
+        ],
+        "auc_normalized": 0.0474
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          7,
+          11,
+          3,
+          4
+        ],
+        "cumulative_hits": [
+          4,
+          11,
+          22,
+          25,
+          29
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0128,
+          0.0256,
+          0.0291,
+          0.0338
+        ],
+        "auc_normalized": 0.0474
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          5,
+          7,
+          9,
+          8
+        ],
+        "cumulative_hits": [
+          4,
+          9,
+          16,
+          25,
+          33
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0105,
+          0.0186,
+          0.0291,
+          0.0384
+        ],
+        "auc_normalized": 0.0453
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          5,
+          7,
+          9,
+          8
+        ],
+        "cumulative_hits": [
+          4,
+          9,
+          16,
+          25,
+          33
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0105,
+          0.0186,
+          0.0291,
+          0.0384
+        ],
+        "auc_normalized": 0.0453
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          5,
+          7,
+          9,
+          8
+        ],
+        "cumulative_hits": [
+          4,
+          9,
+          16,
+          25,
+          33
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0105,
+          0.0186,
+          0.0291,
+          0.0384
+        ],
+        "auc_normalized": 0.0453
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          11,
+          7,
+          9,
+          6
+        ],
+        "cumulative_hits": [
+          4,
+          15,
+          22,
+          31,
+          37
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0175,
+          0.0256,
+          0.0361,
+          0.0431
+        ],
+        "auc_normalized": 0.0568
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          11,
+          7,
+          9,
+          6
+        ],
+        "cumulative_hits": [
+          4,
+          15,
+          22,
+          31,
+          37
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0175,
+          0.0256,
+          0.0361,
+          0.0431
+        ],
+        "auc_normalized": 0.0568
+      },
+      {
+        "dataset": "Sanchez21",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 859,
+        "n_genes": 17807,
+        "hits_per_round": [
+          4,
+          11,
+          7,
+          9,
+          6
+        ],
+        "cumulative_hits": [
+          4,
+          15,
+          22,
+          31,
+          37
+        ],
+        "hit_ratio_per_round": [
+          0.0047,
+          0.0175,
+          0.0256,
+          0.0361,
+          0.0431
+        ],
+        "auc_normalized": 0.0568
+      }
+    ]
+  },
+  "Sanchez21_down": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          9,
+          9,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          8,
+          17,
+          26,
+          35,
+          48
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0195,
+          0.0299,
+          0.0402,
+          0.0551
+        ],
+        "auc_normalized": 0.0698
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          9,
+          9,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          8,
+          17,
+          26,
+          35,
+          48
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0195,
+          0.0299,
+          0.0402,
+          0.0551
+        ],
+        "auc_normalized": 0.0698
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          9,
+          9,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          8,
+          17,
+          26,
+          35,
+          48
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0195,
+          0.0299,
+          0.0402,
+          0.0551
+        ],
+        "auc_normalized": 0.0698
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          7,
+          4,
+          7,
+          5
+        ],
+        "cumulative_hits": [
+          8,
+          15,
+          19,
+          26,
+          31
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0172,
+          0.0218,
+          0.0299,
+          0.0356
+        ],
+        "auc_normalized": 0.0516
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          7,
+          4,
+          7,
+          5
+        ],
+        "cumulative_hits": [
+          8,
+          15,
+          19,
+          26,
+          31
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0172,
+          0.0218,
+          0.0299,
+          0.0356
+        ],
+        "auc_normalized": 0.0516
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          7,
+          4,
+          7,
+          5
+        ],
+        "cumulative_hits": [
+          8,
+          15,
+          19,
+          26,
+          31
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0172,
+          0.0218,
+          0.0299,
+          0.0356
+        ],
+        "auc_normalized": 0.0516
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          9,
+          9,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          8,
+          17,
+          26,
+          35,
+          48
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0195,
+          0.0299,
+          0.0402,
+          0.0551
+        ],
+        "auc_normalized": 0.0698
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          9,
+          9,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          8,
+          17,
+          26,
+          35,
+          48
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0195,
+          0.0299,
+          0.0402,
+          0.0551
+        ],
+        "auc_normalized": 0.0698
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          9,
+          9,
+          9,
+          13
+        ],
+        "cumulative_hits": [
+          8,
+          17,
+          26,
+          35,
+          48
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0195,
+          0.0299,
+          0.0402,
+          0.0551
+        ],
+        "auc_normalized": 0.0698
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          19,
+          14,
+          9,
+          10
+        ],
+        "cumulative_hits": [
+          8,
+          27,
+          41,
+          50,
+          60
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.031,
+          0.0471,
+          0.0574,
+          0.0689
+        ],
+        "auc_normalized": 0.0969
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          19,
+          14,
+          9,
+          10
+        ],
+        "cumulative_hits": [
+          8,
+          27,
+          41,
+          50,
+          60
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.031,
+          0.0471,
+          0.0574,
+          0.0689
+        ],
+        "auc_normalized": 0.0969
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          19,
+          14,
+          9,
+          10
+        ],
+        "cumulative_hits": [
+          8,
+          27,
+          41,
+          50,
+          60
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.031,
+          0.0471,
+          0.0574,
+          0.0689
+        ],
+        "auc_normalized": 0.0969
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          10,
+          11,
+          11,
+          10
+        ],
+        "cumulative_hits": [
+          8,
+          18,
+          29,
+          40,
+          50
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0207,
+          0.0333,
+          0.0459,
+          0.0574
+        ],
+        "auc_normalized": 0.0755
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          10,
+          11,
+          11,
+          10
+        ],
+        "cumulative_hits": [
+          8,
+          18,
+          29,
+          40,
+          50
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0207,
+          0.0333,
+          0.0459,
+          0.0574
+        ],
+        "auc_normalized": 0.0755
+      },
+      {
+        "dataset": "Sanchez21_down",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 871,
+        "n_genes": 17807,
+        "hits_per_round": [
+          8,
+          10,
+          11,
+          11,
+          10
+        ],
+        "cumulative_hits": [
+          8,
+          18,
+          29,
+          40,
+          50
+        ],
+        "hit_ratio_per_round": [
+          0.0092,
+          0.0207,
+          0.0333,
+          0.0459,
+          0.0574
+        ],
+        "auc_normalized": 0.0755
+      }
+    ]
+  },
+  "Carnevale22": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          4,
+          7,
+          5,
+          5
+        ],
+        "cumulative_hits": [
+          5,
+          9,
+          16,
+          21,
+          26
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0104,
+          0.0184,
+          0.0242,
+          0.03
+        ],
+        "auc_normalized": 0.0401
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          4,
+          7,
+          5,
+          5
+        ],
+        "cumulative_hits": [
+          5,
+          9,
+          16,
+          21,
+          26
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0104,
+          0.0184,
+          0.0242,
+          0.03
+        ],
+        "auc_normalized": 0.0401
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          4,
+          7,
+          5,
+          5
+        ],
+        "cumulative_hits": [
+          5,
+          9,
+          16,
+          21,
+          26
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0104,
+          0.0184,
+          0.0242,
+          0.03
+        ],
+        "auc_normalized": 0.0401
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          6,
+          3,
+          8,
+          10
+        ],
+        "cumulative_hits": [
+          5,
+          11,
+          14,
+          22,
+          32
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0127,
+          0.0161,
+          0.0253,
+          0.0369
+        ],
+        "auc_normalized": 0.0437
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          6,
+          3,
+          8,
+          10
+        ],
+        "cumulative_hits": [
+          5,
+          11,
+          14,
+          22,
+          32
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0127,
+          0.0161,
+          0.0253,
+          0.0369
+        ],
+        "auc_normalized": 0.0437
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          6,
+          3,
+          8,
+          10
+        ],
+        "cumulative_hits": [
+          5,
+          11,
+          14,
+          22,
+          32
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0127,
+          0.0161,
+          0.0253,
+          0.0369
+        ],
+        "auc_normalized": 0.0437
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          4,
+          7,
+          7,
+          4
+        ],
+        "cumulative_hits": [
+          5,
+          9,
+          16,
+          23,
+          27
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0104,
+          0.0184,
+          0.0265,
+          0.0311
+        ],
+        "auc_normalized": 0.0417
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          4,
+          7,
+          7,
+          4
+        ],
+        "cumulative_hits": [
+          5,
+          9,
+          16,
+          23,
+          27
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0104,
+          0.0184,
+          0.0265,
+          0.0311
+        ],
+        "auc_normalized": 0.0417
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          4,
+          7,
+          7,
+          4
+        ],
+        "cumulative_hits": [
+          5,
+          9,
+          16,
+          23,
+          27
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.0104,
+          0.0184,
+          0.0265,
+          0.0311
+        ],
+        "auc_normalized": 0.0417
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          8,
+          13,
+          14,
+          9
+        ],
+        "cumulative_hits": [
+          5,
+          13,
+          26,
+          40,
+          49
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.015,
+          0.03,
+          0.0461,
+          0.0565
+        ],
+        "auc_normalized": 0.0693
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          8,
+          13,
+          14,
+          9
+        ],
+        "cumulative_hits": [
+          5,
+          13,
+          26,
+          40,
+          49
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.015,
+          0.03,
+          0.0461,
+          0.0565
+        ],
+        "auc_normalized": 0.0693
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          8,
+          13,
+          14,
+          9
+        ],
+        "cumulative_hits": [
+          5,
+          13,
+          26,
+          40,
+          49
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.015,
+          0.03,
+          0.0461,
+          0.0565
+        ],
+        "auc_normalized": 0.0693
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          8,
+          8,
+          11,
+          9
+        ],
+        "cumulative_hits": [
+          5,
+          13,
+          21,
+          32,
+          41
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.015,
+          0.0242,
+          0.0369,
+          0.0472
+        ],
+        "auc_normalized": 0.0583
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          8,
+          8,
+          11,
+          9
+        ],
+        "cumulative_hits": [
+          5,
+          13,
+          21,
+          32,
+          41
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.015,
+          0.0242,
+          0.0369,
+          0.0472
+        ],
+        "auc_normalized": 0.0583
+      },
+      {
+        "dataset": "Carnevale22",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 868,
+        "n_genes": 18224,
+        "hits_per_round": [
+          5,
+          8,
+          8,
+          11,
+          9
+        ],
+        "cumulative_hits": [
+          5,
+          13,
+          21,
+          32,
+          41
+        ],
+        "hit_ratio_per_round": [
+          0.0058,
+          0.015,
+          0.0242,
+          0.0369,
+          0.0472
+        ],
+        "auc_normalized": 0.0583
+      }
+    ]
+  },
+  "Scharenberg22": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          3,
+          6
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          5,
+          11
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.102,
+          0.2245
+        ],
+        "auc_normalized": 0.0789
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          3,
+          6
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          5,
+          11
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.102,
+          0.2245
+        ],
+        "auc_normalized": 0.0789
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          3,
+          6
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          5,
+          11
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.102,
+          0.2245
+        ],
+        "auc_normalized": 0.0789
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          1,
+          2
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          3,
+          5
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0612,
+          0.102
+        ],
+        "auc_normalized": 0.0439
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          1,
+          2
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          3,
+          5
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0612,
+          0.102
+        ],
+        "auc_normalized": 0.0439
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          1,
+          2
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          3,
+          5
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0612,
+          0.102
+        ],
+        "auc_normalized": 0.0439
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          3,
+          6
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          5,
+          11
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.102,
+          0.2245
+        ],
+        "auc_normalized": 0.0789
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          3,
+          6
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          5,
+          11
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.102,
+          0.2245
+        ],
+        "auc_normalized": 0.0789
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          3,
+          6
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          5,
+          11
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.102,
+          0.2245
+        ],
+        "auc_normalized": 0.0789
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          1,
+          5
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          3,
+          8
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0612,
+          0.1633
+        ],
+        "auc_normalized": 0.057
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          1,
+          5
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          3,
+          8
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0612,
+          0.1633
+        ],
+        "auc_normalized": 0.057
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          1,
+          5
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          3,
+          8
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0612,
+          0.1633
+        ],
+        "auc_normalized": 0.057
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          0,
+          2
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          2,
+          4
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0408,
+          0.0816
+        ],
+        "auc_normalized": 0.0351
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          0,
+          2
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          2,
+          4
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0408,
+          0.0816
+        ],
+        "auc_normalized": 0.0351
+      },
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          0,
+          0,
+          2,
+          0,
+          2
+        ],
+        "cumulative_hits": [
+          0,
+          0,
+          2,
+          2,
+          4
+        ],
+        "hit_ratio_per_round": [
+          0.0,
+          0.0,
+          0.0408,
+          0.0408,
+          0.0816
+        ],
+        "auc_normalized": 0.0351
+      }
+    ]
+  },
+  "Steinhart": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "cumulative_hits": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0069,
+          0.0069,
+          0.0138,
+          0.0138
+        ],
+        "auc_normalized": 0.0099
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "cumulative_hits": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0069,
+          0.0069,
+          0.0138,
+          0.0138
+        ],
+        "auc_normalized": 0.0099
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "cumulative_hits": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0069,
+          0.0069,
+          0.0138,
+          0.0138
+        ],
+        "auc_normalized": 0.0099
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          1,
+          0,
+          0,
+          2
+        ],
+        "cumulative_hits": [
+          1,
+          2,
+          2,
+          2,
+          4
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0138,
+          0.0138,
+          0.0138,
+          0.0276
+        ],
+        "auc_normalized": 0.0155
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          1,
+          0,
+          0,
+          2
+        ],
+        "cumulative_hits": [
+          1,
+          2,
+          2,
+          2,
+          4
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0138,
+          0.0138,
+          0.0138,
+          0.0276
+        ],
+        "auc_normalized": 0.0155
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          1,
+          0,
+          0,
+          2
+        ],
+        "cumulative_hits": [
+          1,
+          2,
+          2,
+          2,
+          4
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0138,
+          0.0138,
+          0.0138,
+          0.0276
+        ],
+        "auc_normalized": 0.0155
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "cumulative_hits": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0069,
+          0.0069,
+          0.0138,
+          0.0138
+        ],
+        "auc_normalized": 0.0099
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "cumulative_hits": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0069,
+          0.0069,
+          0.0138,
+          0.0138
+        ],
+        "auc_normalized": 0.0099
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        "cumulative_hits": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0069,
+          0.0069,
+          0.0138,
+          0.0138
+        ],
+        "auc_normalized": 0.0099
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          4,
+          3,
+          1,
+          3
+        ],
+        "cumulative_hits": [
+          1,
+          5,
+          8,
+          9,
+          12
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0345,
+          0.0552,
+          0.0621,
+          0.0828
+        ],
+        "auc_normalized": 0.0494
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          4,
+          3,
+          1,
+          3
+        ],
+        "cumulative_hits": [
+          1,
+          5,
+          8,
+          9,
+          12
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0345,
+          0.0552,
+          0.0621,
+          0.0828
+        ],
+        "auc_normalized": 0.0494
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          4,
+          3,
+          1,
+          3
+        ],
+        "cumulative_hits": [
+          1,
+          5,
+          8,
+          9,
+          12
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0345,
+          0.0552,
+          0.0621,
+          0.0828
+        ],
+        "auc_normalized": 0.0494
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          2,
+          4,
+          2,
+          1
+        ],
+        "cumulative_hits": [
+          1,
+          3,
+          7,
+          9,
+          10
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0207,
+          0.0483,
+          0.0621,
+          0.069
+        ],
+        "auc_normalized": 0.0424
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          2,
+          4,
+          2,
+          1
+        ],
+        "cumulative_hits": [
+          1,
+          3,
+          7,
+          9,
+          10
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0207,
+          0.0483,
+          0.0621,
+          0.069
+        ],
+        "auc_normalized": 0.0424
+      },
+      {
+        "dataset": "Steinhart",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 145,
+        "n_genes": 18144,
+        "hits_per_round": [
+          1,
+          2,
+          4,
+          2,
+          1
+        ],
+        "cumulative_hits": [
+          1,
+          3,
+          7,
+          9,
+          10
+        ],
+        "hit_ratio_per_round": [
+          0.0069,
+          0.0207,
+          0.0483,
+          0.0621,
+          0.069
+        ],
+        "auc_normalized": 0.0424
+      }
+    ]
+  },
+  "Replogle_K562_essential": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          0,
+          0,
+          2,
+          9
+        ],
+        "cumulative_hits": [
+          3,
+          3,
+          3,
+          5,
+          14
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.0476,
+          0.0476,
+          0.0794,
+          0.2222
+        ],
+        "auc_normalized": 0.0986
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          0,
+          0,
+          2,
+          9
+        ],
+        "cumulative_hits": [
+          3,
+          3,
+          3,
+          5,
+          14
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.0476,
+          0.0476,
+          0.0794,
+          0.2222
+        ],
+        "auc_normalized": 0.0986
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          0,
+          0,
+          2,
+          9
+        ],
+        "cumulative_hits": [
+          3,
+          3,
+          3,
+          5,
+          14
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.0476,
+          0.0476,
+          0.0794,
+          0.2222
+        ],
+        "auc_normalized": 0.0986
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          1,
+          5,
+          4,
+          3
+        ],
+        "cumulative_hits": [
+          3,
+          4,
+          9,
+          13,
+          16
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.0635,
+          0.1429,
+          0.2063,
+          0.254
+        ],
+        "auc_normalized": 0.1585
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          1,
+          5,
+          4,
+          3
+        ],
+        "cumulative_hits": [
+          3,
+          4,
+          9,
+          13,
+          16
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.0635,
+          0.1429,
+          0.2063,
+          0.254
+        ],
+        "auc_normalized": 0.1585
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          1,
+          5,
+          4,
+          3
+        ],
+        "cumulative_hits": [
+          3,
+          4,
+          9,
+          13,
+          16
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.0635,
+          0.1429,
+          0.2063,
+          0.254
+        ],
+        "auc_normalized": 0.1585
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          32,
+          3,
+          1,
+          2
+        ],
+        "cumulative_hits": [
+          3,
+          35,
+          38,
+          39,
+          41
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.5556,
+          0.6032,
+          0.619,
+          0.6508
+        ],
+        "auc_normalized": 0.5493
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          32,
+          3,
+          1,
+          2
+        ],
+        "cumulative_hits": [
+          3,
+          35,
+          38,
+          39,
+          41
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.5556,
+          0.6032,
+          0.619,
+          0.6508
+        ],
+        "auc_normalized": 0.5493
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          32,
+          3,
+          1,
+          2
+        ],
+        "cumulative_hits": [
+          3,
+          35,
+          38,
+          39,
+          41
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.5556,
+          0.6032,
+          0.619,
+          0.6508
+        ],
+        "auc_normalized": 0.5493
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          4,
+          2,
+          4,
+          5
+        ],
+        "cumulative_hits": [
+          3,
+          7,
+          9,
+          13,
+          18
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.1111,
+          0.1429,
+          0.2063,
+          0.2857
+        ],
+        "auc_normalized": 0.1761
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          4,
+          2,
+          4,
+          5
+        ],
+        "cumulative_hits": [
+          3,
+          7,
+          9,
+          13,
+          18
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.1111,
+          0.1429,
+          0.2063,
+          0.2857
+        ],
+        "auc_normalized": 0.1761
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          4,
+          2,
+          4,
+          5
+        ],
+        "cumulative_hits": [
+          3,
+          7,
+          9,
+          13,
+          18
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.1111,
+          0.1429,
+          0.2063,
+          0.2857
+        ],
+        "auc_normalized": 0.1761
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          9,
+          5,
+          6,
+          5
+        ],
+        "cumulative_hits": [
+          3,
+          12,
+          17,
+          23,
+          28
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.1905,
+          0.2698,
+          0.3651,
+          0.4444
+        ],
+        "auc_normalized": 0.2923
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          9,
+          5,
+          6,
+          5
+        ],
+        "cumulative_hits": [
+          3,
+          12,
+          17,
+          23,
+          28
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.1905,
+          0.2698,
+          0.3651,
+          0.4444
+        ],
+        "auc_normalized": 0.2923
+      },
+      {
+        "dataset": "Replogle_K562_essential",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 32,
+        "n_rounds": 5,
+        "total_hits": 63,
+        "n_genes": 623,
+        "hits_per_round": [
+          3,
+          9,
+          5,
+          6,
+          5
+        ],
+        "cumulative_hits": [
+          3,
+          12,
+          17,
+          23,
+          28
+        ],
+        "hit_ratio_per_round": [
+          0.0476,
+          0.1905,
+          0.2698,
+          0.3651,
+          0.4444
+        ],
+        "auc_normalized": 0.2923
+      }
+    ]
+  },
+  "Replogle_K562_gwps": {
+    "genedisco_topuncertain": [
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          49,
+          55,
+          54,
+          51
+        ],
+        "cumulative_hits": [
+          12,
+          61,
+          116,
+          170,
+          221
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.066,
+          0.1255,
+          0.184,
+          0.2392
+        ],
+        "auc_normalized": 0.3021
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          49,
+          55,
+          54,
+          51
+        ],
+        "cumulative_hits": [
+          12,
+          61,
+          116,
+          170,
+          221
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.066,
+          0.1255,
+          0.184,
+          0.2392
+        ],
+        "auc_normalized": 0.3021
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_topuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          49,
+          55,
+          54,
+          51
+        ],
+        "cumulative_hits": [
+          12,
+          61,
+          116,
+          170,
+          221
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.066,
+          0.1255,
+          0.184,
+          0.2392
+        ],
+        "auc_normalized": 0.3021
+      }
+    ],
+    "genedisco_softuncertain": [
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          11,
+          14,
+          14,
+          14
+        ],
+        "cumulative_hits": [
+          12,
+          23,
+          37,
+          51,
+          65
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0249,
+          0.04,
+          0.0552,
+          0.0703
+        ],
+        "auc_normalized": 0.0979
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          11,
+          14,
+          14,
+          14
+        ],
+        "cumulative_hits": [
+          12,
+          23,
+          37,
+          51,
+          65
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0249,
+          0.04,
+          0.0552,
+          0.0703
+        ],
+        "auc_normalized": 0.0979
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_softuncertain",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          11,
+          14,
+          14,
+          14
+        ],
+        "cumulative_hits": [
+          12,
+          23,
+          37,
+          51,
+          65
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0249,
+          0.04,
+          0.0552,
+          0.0703
+        ],
+        "auc_normalized": 0.0979
+      }
+    ],
+    "genedisco_marginsample": [
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          49,
+          55,
+          54,
+          51
+        ],
+        "cumulative_hits": [
+          12,
+          61,
+          116,
+          170,
+          221
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.066,
+          0.1255,
+          0.184,
+          0.2392
+        ],
+        "auc_normalized": 0.3021
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          49,
+          55,
+          54,
+          51
+        ],
+        "cumulative_hits": [
+          12,
+          61,
+          116,
+          170,
+          221
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.066,
+          0.1255,
+          0.184,
+          0.2392
+        ],
+        "auc_normalized": 0.3021
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_marginsample",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          49,
+          55,
+          54,
+          51
+        ],
+        "cumulative_hits": [
+          12,
+          61,
+          116,
+          170,
+          221
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.066,
+          0.1255,
+          0.184,
+          0.2392
+        ],
+        "auc_normalized": 0.3021
+      }
+    ],
+    "genedisco_coreset": [
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          33,
+          35,
+          40,
+          36
+        ],
+        "cumulative_hits": [
+          12,
+          45,
+          80,
+          120,
+          156
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0487,
+          0.0866,
+          0.1299,
+          0.1688
+        ],
+        "auc_normalized": 0.2151
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          33,
+          35,
+          40,
+          36
+        ],
+        "cumulative_hits": [
+          12,
+          45,
+          80,
+          120,
+          156
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0487,
+          0.0866,
+          0.1299,
+          0.1688
+        ],
+        "auc_normalized": 0.2151
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_coreset",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          33,
+          35,
+          40,
+          36
+        ],
+        "cumulative_hits": [
+          12,
+          45,
+          80,
+          120,
+          156
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0487,
+          0.0866,
+          0.1299,
+          0.1688
+        ],
+        "auc_normalized": 0.2151
+      }
+    ],
+    "genedisco_kmeans_data": [
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          35,
+          31,
+          27,
+          24
+        ],
+        "cumulative_hits": [
+          12,
+          47,
+          78,
+          105,
+          129
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0509,
+          0.0844,
+          0.1136,
+          0.1396
+        ],
+        "auc_normalized": 0.1932
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          35,
+          31,
+          27,
+          24
+        ],
+        "cumulative_hits": [
+          12,
+          47,
+          78,
+          105,
+          129
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0509,
+          0.0844,
+          0.1136,
+          0.1396
+        ],
+        "auc_normalized": 0.1932
+      },
+      {
+        "dataset": "Replogle_K562_gwps",
+        "arm_name": "genedisco_kmeans_data",
+        "batch_size": 128,
+        "n_rounds": 5,
+        "total_hits": 924,
+        "n_genes": 9193,
+        "hits_per_round": [
+          12,
+          35,
+          31,
+          27,
+          24
+        ],
+        "cumulative_hits": [
+          12,
+          47,
+          78,
+          105,
+          129
+        ],
+        "hit_ratio_per_round": [
+          0.013,
+          0.0509,
+          0.0844,
+          0.1136,
+          0.1396
+        ],
+        "auc_normalized": 0.1932
+      }
+    ]
+  }
+}

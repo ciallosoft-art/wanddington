@@ -58,6 +58,7 @@ from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm
 from .arms.waddington_c_ensemble_arm import WaddingtonCEnsembleArm
+from .arms.genedisco_arm import GeneDiscoArm, ACQUISITIONS as _GD_ACQ
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 
@@ -68,7 +69,7 @@ _PAPER_ARMS = {
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble",
-}
+} | {f"genedisco_{a}" for a in _GD_ACQ}
 
 _ARCHIVE_ARMS = {
     "waddington", "waddington_v2", "waddington_v3", "waddington_v4",
@@ -126,6 +127,8 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(WaddingtonCPoolOnlyArm(dataset_name, bs))
         elif name == "waddington_c_ensemble":
             arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
+        elif name.startswith("genedisco_"):
+            arms.append(GeneDiscoArm(dataset_name, bs, acquisition=name[len("genedisco_"):]))
         elif name in _ARCHIVE_ARMS:
             print(f"    [archive] Loading {name} from arms/archive/ ...")
             arms.append(_load_archive_arm(name, dataset_name, bs))
