@@ -19,6 +19,7 @@ mimicking PerTurboAgent's "Train perturbation prediction model" action.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import lightgbm as lgb
@@ -83,6 +84,16 @@ class OnlineAdaptiveArm(BaseArm):
 
         # LOO train split: all datasets except this one
         self._loo_train: pd.DataFrame = df[df["dataset"] != dataset_name].copy()
+        # Stricter leave-one-study-out: also drop the target's same-study sibling screens from the
+        # cross-experiment prior, so a sister screen from the same paper cannot leak its hit structure.
+        if os.environ.get("WADDINGTON_EXCLUDE_STUDY") == "1":
+            try:
+                from ..router_protocol import siblings
+                sibs = siblings(dataset_name)
+                if sibs:
+                    self._loo_train = self._loo_train[~self._loo_train["dataset"].isin(sibs)].copy()
+            except Exception:
+                pass
         # Full feature frame for this dataset (no labels exposed)
         self._test_frame: pd.DataFrame = (
             df[df["dataset"] == dataset_name].reset_index(drop=True).copy()
