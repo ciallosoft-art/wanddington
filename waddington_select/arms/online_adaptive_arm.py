@@ -88,6 +88,16 @@ class OnlineAdaptiveArm(BaseArm):
             _ANCHOR_FEATS = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
             self._available_feats = [c for c in self._available_feats if c not in _ANCHOR_FEATS]
 
+        # Recurrence-baseline probe: replace the whole feature set with a single cross-screen hit-frequency
+        # feature (how often the gene is a hit in the OTHER benchmark screens). Lets us build
+        # "hit-frequency prior + online + LLM" and compare it to the static hit-frequency ranking, to test
+        # whether online adaptation + LLM verification carry the system beyond a pure recurrence prior.
+        if os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1":
+            other = df[df["dataset"] != dataset_name]
+            freq = other[other["label"] == 1].groupby("gene").size()
+            df["hit_frequency"] = df["gene"].map(freq).fillna(0.0).astype(float)
+            self._available_feats = ["hit_frequency"]
+
         # LOO train split: all datasets except this one
         self._loo_train: pd.DataFrame = df[df["dataset"] != dataset_name].copy()
         # Stricter leave-one-study-out: also drop the target's same-study sibling screens from the

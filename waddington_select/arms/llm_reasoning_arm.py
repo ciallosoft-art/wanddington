@@ -167,6 +167,13 @@ class LLMReasoningArm(BaseArm):
         if os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1":
             self._all_feats = [c for c in self._all_feats
                                if c not in {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}]
+        # Recurrence-baseline probe (see online_adaptive_arm): the static padding ranker also uses only
+        # the cross-screen hit-frequency feature.
+        if os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1":
+            other = df[df["dataset"] != dataset_name]
+            freq = other[other["label"] == 1].groupby("gene").size()
+            df["hit_frequency"] = df["gene"].map(freq).fillna(0.0).astype(float)
+            self._all_feats = ["hit_frequency"]
 
         # Gene pool for this dataset
         test_df = df[df["dataset"] == dataset_name].reset_index(drop=True)
