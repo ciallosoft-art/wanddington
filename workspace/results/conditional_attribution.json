@@ -1,0 +1,99 @@
+{
+  "n_rows": 4160,
+  "excluded": [
+    "Replogle_K562_gwps"
+  ],
+  "marginal": {
+    "endorsed": {
+      "n": 853,
+      "hit_rate": 0.12661195779601406
+    },
+    "not_endorsed": {
+      "n": 3307,
+      "hit_rate": 0.14726338070758996
+    }
+  },
+  "deciles": [
+    {
+      "decile": 0,
+      "endorsed_n": 289,
+      "endorsed_hit_rate": 0.06920415224913495,
+      "not_endorsed_n": 127,
+      "not_endorsed_hit_rate": 0.09448818897637795
+    },
+    {
+      "decile": 1,
+      "endorsed_n": 156,
+      "endorsed_hit_rate": 0.08333333333333333,
+      "not_endorsed_n": 260,
+      "not_endorsed_hit_rate": 0.12692307692307692
+    },
+    {
+      "decile": 2,
+      "endorsed_n": 100,
+      "endorsed_hit_rate": 0.09,
+      "not_endorsed_n": 316,
+      "not_endorsed_hit_rate": 0.11075949367088607
+    },
+    {
+      "decile": 3,
+      "endorsed_n": 69,
+      "endorsed_hit_rate": 0.07246376811594203,
+      "not_endorsed_n": 347,
+      "not_endorsed_hit_rate": 0.11239193083573487
+    },
+    {
+      "decile": 4,
+      "endorsed_n": 74,
+      "endorsed_hit_rate": 0.10810810810810811,
+      "not_endorsed_n": 342,
+      "not_endorsed_hit_rate": 0.14035087719298245
+    },
+    {
+      "decile": 5,
+      "endorsed_n": 31,
+      "endorsed_hit_rate": 0.0967741935483871,
+      "not_endorsed_n": 385,
+      "not_endorsed_hit_rate": 0.15844155844155844
+    },
+    {
+      "decile": 6,
+      "endorsed_n": 25,
+      "endorsed_hit_rate": 0.12,
+      "not_endorsed_n": 391,
+      "not_endorsed_hit_rate": 0.15601023017902813
+    },
+    {
+      "decile": 7,
+      "endorsed_n": 33,
+      "endorsed_hit_rate": 0.30303030303030304,
+      "not_endorsed_n": 383,
+      "not_endorsed_hit_rate": 0.1514360313315927
+    },
+    {
+      "decile": 8,
+      "endorsed_n": 21,
+      "endorsed_hit_rate": 0.2857142857142857,
+      "not_endorsed_n": 395,
+      "not_endorsed_hit_rate": 0.15443037974683543
+    },
+    {
+      "decile": 9,
+      "endorsed_n": 55,
+      "endorsed_hit_rate": 0.5636363636363636,
+      "not_endorsed_n": 361,
+      "not_endorsed_hit_rate": 0.2188365650969529
+    }
+  ],
+  "logit": {
+    "endorsed_logodds": 0.519182180698992,
+    "endorsed_odds_ratio": 1.6806526173627638,
+    "or_ci95": [
+      1.0539207966713247,
+      2.5240450406919415
+    ],
+    "n_screens": 8,
+    "n_genes": 4160,
+    "note": "OR>1 with CI excluding 1 => LLM endorsement predicts hits after adjusting for ML rank."
+  }
+}
