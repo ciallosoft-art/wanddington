@@ -1,0 +1,136 @@
+{
+  "description": "Frozen honest-router protocol. Committed before inspecting target results.",
+  "candidate_wllm": [
+    0.2,
+    0.3,
+    0.4
+  ],
+  "feature_policy": "metadata_rule (depmap off iff CRISPRa or curated; k562-depmap off iff cell==K562)",
+  "screen_metadata": {
+    "IFNG": {
+      "n_pool": 17785,
+      "modality": "CRISPRi",
+      "cell_line": "primary_T",
+      "curated_ess": false,
+      "study": "schmidt"
+    },
+    "IL2": {
+      "n_pool": 18273,
+      "modality": "CRISPRi",
+      "cell_line": "primary_T",
+      "curated_ess": false,
+      "study": "schmidt"
+    },
+    "Sanchez21": {
+      "n_pool": 17807,
+      "modality": "KO",
+      "cell_line": "neuronal",
+      "curated_ess": false,
+      "study": "sanchez"
+    },
+    "Sanchez21_down": {
+      "n_pool": 17807,
+      "modality": "KO",
+      "cell_line": "neuronal",
+      "curated_ess": false,
+      "study": "sanchez"
+    },
+    "Carnevale22": {
+      "n_pool": 18224,
+      "modality": "KO",
+      "cell_line": "primary_T",
+      "curated_ess": false,
+      "study": "carnevale"
+    },
+    "Scharenberg22": {
+      "n_pool": 1029,
+      "modality": "KO",
+      "cell_line": "primary_T",
+      "curated_ess": false,
+      "study": "scharenberg"
+    },
+    "Steinhart": {
+      "n_pool": 18144,
+      "modality": "CRISPRa",
+      "cell_line": "CAR_T",
+      "curated_ess": false,
+      "study": "steinhart"
+    },
+    "Replogle_K562_essential": {
+      "n_pool": 623,
+      "modality": "CRISPRi",
+      "cell_line": "K562",
+      "curated_ess": true,
+      "study": "replogle"
+    },
+    "Replogle_K562_gwps": {
+      "n_pool": 9193,
+      "modality": "CRISPRi",
+      "cell_line": "K562",
+      "curated_ess": false,
+      "study": "replogle"
+    }
+  },
+  "feature_policy_per_screen": {
+    "IFNG": {
+      "depmap": "pan_k562"
+    },
+    "IL2": {
+      "depmap": "pan_k562"
+    },
+    "Sanchez21": {
+      "depmap": "pan_k562"
+    },
+    "Sanchez21_down": {
+      "depmap": "pan_k562"
+    },
+    "Carnevale22": {
+      "depmap": "pan_k562"
+    },
+    "Scharenberg22": {
+      "depmap": "pan_k562"
+    },
+    "Steinhart": {
+      "depmap": "none"
+    },
+    "Replogle_K562_essential": {
+      "depmap": "none"
+    },
+    "Replogle_K562_gwps": {
+      "depmap": "pan"
+    }
+  },
+  "study_groups": {
+    "carnevale": [
+      "Carnevale22"
+    ],
+    "replogle": [
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "sanchez": [
+      "Sanchez21",
+      "Sanchez21_down"
+    ],
+    "scharenberg": [
+      "Scharenberg22"
+    ],
+    "schmidt": [
+      "IFNG",
+      "IL2"
+    ],
+    "steinhart": [
+      "Steinhart"
+    ]
+  },
+  "selection_rules": {
+    "global_fixed": "argmax mean hit@R5 over non-target screens over a single global w_llm",
+    "nested_router": "w_llm = LOW if n_pool > T else HIGH; (T,LOW,HIGH) argmax over non-target screens; applied via target n_pool only",
+    "leave_one_study_out": "nested_router with the whole same-study group removed from training + prior"
+  },
+  "forbidden_inputs": [
+    "target realized hit rate",
+    "target hit@R5",
+    "any target-screen outcome"
+  ]
+}

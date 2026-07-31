@@ -79,6 +79,20 @@ W_LLM_DEFAULT = 0.40
 
 
 def _get_feature_config(dataset_name: str) -> tuple[Path, list[str]]:
+    # Honest-router variant: derive the DepMap feature policy from pre-experiment metadata only
+    # (modality / curated-flag / cell line), never from the target's realized labels. See router_protocol.
+    if os.environ.get("WADDINGTON_FEATURE_POLICY") == "metadata":
+        try:
+            from ..router_protocol import feature_policy_metadata, SCREEN_METADATA
+            if dataset_name in SCREEN_METADATA:
+                pol = feature_policy_metadata(dataset_name)["depmap"]
+                if pol == "none":
+                    return TRAINING_DATA_V1, []
+                if pol == "pan":
+                    return TRAINING_DATA_V3, DEPMAP_PAN_FEATS
+                return TRAINING_DATA_V3, DEPMAP_K562_FEATS
+        except Exception:
+            pass  # fall through to the default committed policy
     if dataset_name in DEPMAP_EXCLUDED:
         return TRAINING_DATA_V1, []
     elif dataset_name in K562_EXCLUDED:
@@ -149,7 +163,14 @@ class WaddingtonCArm(BaseArm):
 
         n_genes, n_hits = _get_dataset_stats(dataset_name)
         self._route = _classify(n_genes, n_hits)
-        if self._route == "ml_heavy":
+        # Honest-router variant: WADDINGTON_FORCE_WLLM pins a single global fusion weight on EVERY screen
+        # (weighted fusion, no hit-rate-triggered ml_heavy, no two_stage). Uses no realized hit rate.
+        force_wllm = os.environ.get("WADDINGTON_FORCE_WLLM")
+        if force_wllm is not None:
+            self._route = "baseline"
+            self._w_llm = float(force_wllm)
+            self._w_ml = 1.0 - self._w_llm
+        elif self._route == "ml_heavy":
             self._w_ml, self._w_llm = W_ML_LARGE, W_LLM_LARGE
         else:
             self._w_ml, self._w_llm = W_ML_DEFAULT, W_LLM_DEFAULT
