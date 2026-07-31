@@ -1,0 +1,127 @@
+{
+  "per_screen": {
+    "IFNG": {
+      "n_recurrent": 314,
+      "n_novel": 488,
+      "feature_loo": {
+        "recurrent_recall": 0.43312101910828027,
+        "novel_recall": 0.00819672131147541
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.36942675159235666,
+        "novel_recall": 0.0
+      }
+    },
+    "IL2": {
+      "n_recurrent": 283,
+      "n_novel": 198,
+      "feature_loo": {
+        "recurrent_recall": 0.5759717314487632,
+        "novel_recall": 0.03535353535353535
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.5335689045936396,
+        "novel_recall": 0.0
+      }
+    },
+    "Sanchez21": {
+      "n_recurrent": 237,
+      "n_novel": 622,
+      "feature_loo": {
+        "recurrent_recall": 0.23628691983122363,
+        "novel_recall": 0.011254019292604502
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.29535864978902954,
+        "novel_recall": 0.0
+      }
+    },
+    "Sanchez21_down": {
+      "n_recurrent": 258,
+      "n_novel": 613,
+      "feature_loo": {
+        "recurrent_recall": 0.2558139534883721,
+        "novel_recall": 0.013050570962479609
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.2558139534883721,
+        "novel_recall": 0.0
+      }
+    },
+    "Carnevale22": {
+      "n_recurrent": 171,
+      "n_novel": 697,
+      "feature_loo": {
+        "recurrent_recall": 0.26900584795321636,
+        "novel_recall": 0.011477761836441894
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.30409356725146197,
+        "novel_recall": 0.0
+      }
+    },
+    "Scharenberg22": {
+      "n_recurrent": 24,
+      "n_novel": 25,
+      "feature_loo": {
+        "recurrent_recall": 0.875,
+        "novel_recall": 0.24
+      },
+      "hit_frequency": {
+        "recurrent_recall": 1.0,
+        "novel_recall": 0.0
+      }
+    },
+    "Steinhart": {
+      "n_recurrent": 44,
+      "n_novel": 101,
+      "feature_loo": {
+        "recurrent_recall": 0.25,
+        "novel_recall": 0.009900990099009901
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.18181818181818182,
+        "novel_recall": 0.0
+      }
+    },
+    "Replogle_K562_essential": {
+      "n_recurrent": 59,
+      "n_novel": 4,
+      "feature_loo": {
+        "recurrent_recall": 0.4915254237288136,
+        "novel_recall": 0.5
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.6101694915254238,
+        "novel_recall": 0.0
+      }
+    },
+    "Replogle_K562_gwps": {
+      "n_recurrent": 404,
+      "n_novel": 520,
+      "feature_loo": {
+        "recurrent_recall": 0.5618811881188119,
+        "novel_recall": 0.11153846153846154
+      },
+      "hit_frequency": {
+        "recurrent_recall": 0.9034653465346535,
+        "novel_recall": 0.0
+      }
+    }
+  },
+  "totals": {
+    "recurrent": 1794,
+    "novel": 3268
+  },
+  "macro_avg": {
+    "feature_loo": {
+      "recurrent_recall": 0.43873400929749784,
+      "novel_recall": 0.10453022893266758
+    },
+    "hit_frequency": {
+      "recurrent_recall": 0.4948572051770131,
+      "novel_recall": 0.0
+    }
+  },
+  "waddington_run_present": false
+}
