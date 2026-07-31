@@ -1,0 +1,38 @@
+{
+  "A1_noanchor": {
+    "IFNG": 0.1397,
+    "IL2": 0.2952,
+    "Sanchez21": 0.09200000000000001,
+    "Sanchez21_down": 0.0999,
+    "Carnevale22": 0.0691,
+    "Scharenberg22": 0.5306,
+    "Steinhart": 0.069,
+    "Replogle_K562_essential": 0.5079,
+    "Replogle_K562_gwps": 0.369
+  },
+  "A2_noanchor": {
+    "IFNG": 0.18200000000000002,
+    "IL2": 0.3306,
+    "Sanchez21": 0.0861,
+    "Sanchez21_down": 0.08650000000000001,
+    "Carnevale22": 0.0634,
+    "Scharenberg22": 0.42860000000000004,
+    "Steinhart": 0.1425,
+    "Replogle_K562_essential": 0.5873,
+    "Replogle_K562_gwps": 0.3301
+  },
+  "linear_noanchor": {
+    "IFNG": 0.1683,
+    "IL2": 0.2931,
+    "Sanchez21": 0.0861,
+    "Sanchez21_down": 0.0976,
+    "Carnevale22": 0.0622,
+    "Scharenberg22": 0.551,
+    "Steinhart": 0.0552,
+    "Replogle_K562_essential": 0.619,
+    "Replogle_K562_gwps": 0.37989999999999996
+  },
+  "A1_noanchor_mean": 0.24137777777777775,
+  "A2_noanchor_mean": 0.24856666666666666,
+  "linear_noanchor_mean": 0.25693333333333335
+}
