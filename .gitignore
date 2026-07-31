@@ -98,3 +98,4 @@ workspace/data/user_phenotypes/
 
 # CRISPRa validation table (derived from an external download; rebuild with build_crispra_validation.py)
 workspace/evaluation/lgbm_training_data_crispra_validation.csv
+*.aux
