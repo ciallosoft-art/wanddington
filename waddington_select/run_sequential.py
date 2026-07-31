@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -275,6 +276,10 @@ def _result_to_dict(r: RunResult) -> dict:
         "cumulative_hits": r.cumulative_hits,
         "hit_ratio_per_round": r.hit_ratio_per_round,
         "auc_normalized": r.auc_normalized,
+        # Gene identities of the hits found, dumped only when requested (for the novel-hit analysis);
+        # off by default so ordinary result files stay compact.
+        **({"revealed_hits": r.revealed_hits}
+           if os.environ.get("WADDINGTON_DUMP_SELECTIONS") == "1" else {}),
     }
 
 

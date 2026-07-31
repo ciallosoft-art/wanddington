@@ -31,6 +31,7 @@ class RunResult:
     cumulative_hits: list[int] = field(default_factory=list)
     hit_ratio_per_round: list[float] = field(default_factory=list)
     auc_normalized: float = 0.0
+    revealed_hits: list[str] = field(default_factory=list)  # genes selected that were hits (for novel-hit analysis)
 
     @property
     def final_hit_ratio(self) -> float:
@@ -81,6 +82,7 @@ class SequentialRunner:
             result.hit_ratio_per_round.append(round(ratio, 4))
 
         result.auc_normalized = self._normalized_auc(result)
+        result.revealed_hits = [g for g, is_hit in revealed_all.items() if is_hit]
         return result
 
     @staticmethod
