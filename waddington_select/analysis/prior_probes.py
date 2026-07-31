@@ -75,6 +75,28 @@ def _hit_frequency(df, target):
     return (sum(g in hitset[target] for g in top) / total) if total else 0.0
 
 
+def _anchor_leakage(df, bench, hitset) -> dict:
+    """How many of each screen's anchor genes (used to build the anchor-relative features) are hits in
+    that same screen — a privileged-information audit. Anchors live in the benchmark feature-prep table
+    (gene_ranker.DATASET_ANCHORS), not the deployment registry."""
+    import sys
+    sys.path.insert(0, str(REPO / "workspace" / "evaluation"))
+    try:
+        from gene_ranker import DATASET_ANCHORS  # type: ignore
+    except Exception:
+        return {"error": "gene_ranker.DATASET_ANCHORS unavailable"}
+    per = {}
+    ta = th = 0
+    for d in bench:
+        anch = [a.upper() for a in DATASET_ANCHORS.get(d, [])]
+        ah = [a for a in anch if a in hitset[d]]
+        per[d] = {"n_anchors": len(anch), "n_anchor_hits": len(ah), "anchor_hits": ah}
+        ta += len(anch)
+        th += len(ah)
+    return {"per_screen": per, "total_anchors": ta, "total_anchor_hits": th,
+            "frac_anchors_that_are_hits": round(th / ta, 3) if ta else 0.0}
+
+
 def run() -> dict:
     df = _load()
     bench = list(BENCHMARK_DATASETS)
@@ -104,8 +126,10 @@ def run() -> dict:
             "anchor": mean([_loo_hit_at_r5(df, d, ANCHOR) for d in bench]),
             "depmap": mean([_loo_hit_at_r5(df, d, DEPMAP) for d in bench]),
             "intrinsic_anchor_no_depmap": mean([_loo_hit_at_r5(df, d, INTRINSIC + ANCHOR) for d in bench]),
+            "intrinsic_depmap_no_anchor": mean([_loo_hit_at_r5(df, d, INTRINSIC + DEPMAP) for d in bench]),
             "all": mean([_loo_hit_at_r5(df, d, ALLF) for d in bench]),
         },
+        "anchor_leakage": _anchor_leakage(df, bench, hitset),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(res, indent=2))

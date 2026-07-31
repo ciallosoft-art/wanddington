@@ -75,7 +75,111 @@
       "anchor": 0.15624505321756157,
       "depmap": 0.2296446679754813,
       "intrinsic_anchor_no_depmap": 0.21932555712424806,
+      "intrinsic_depmap_no_anchor": 0.22794823031291223,
       "all": 0.24253232399737568
+    },
+    "anchor_leakage": {
+      "per_screen": {
+        "IFNG": {
+          "n_anchors": 12,
+          "n_anchor_hits": 9,
+          "anchor_hits": [
+            "ZAP70",
+            "LCK",
+            "PLCG1",
+            "VAV1",
+            "CBLB",
+            "MAP4K1",
+            "CD5",
+            "NFKB2",
+            "RNF40"
+          ]
+        },
+        "IL2": {
+          "n_anchors": 12,
+          "n_anchor_hits": 10,
+          "anchor_hits": [
+            "ZAP70",
+            "LAT",
+            "PLCG1",
+            "VAV1",
+            "CBLB",
+            "MAP4K1",
+            "CD5",
+            "IL2",
+            "IL2RA",
+            "IL2RB"
+          ]
+        },
+        "Sanchez21": {
+          "n_anchors": 8,
+          "n_anchor_hits": 3,
+          "anchor_hits": [
+            "VPS33A",
+            "STAU1",
+            "UBA5"
+          ]
+        },
+        "Sanchez21_down": {
+          "n_anchors": 8,
+          "n_anchor_hits": 1,
+          "anchor_hits": [
+            "SLC18A3"
+          ]
+        },
+        "Carnevale22": {
+          "n_anchors": 6,
+          "n_anchor_hits": 2,
+          "anchor_hits": [
+            "ADORA2A",
+            "ATP6V0D1"
+          ]
+        },
+        "Scharenberg22": {
+          "n_anchors": 8,
+          "n_anchor_hits": 5,
+          "anchor_hits": [
+            "SPNS1",
+            "ATG9A",
+            "EIF2AK3",
+            "LDLR",
+            "NPC1"
+          ]
+        },
+        "Steinhart": {
+          "n_anchors": 7,
+          "n_anchor_hits": 2,
+          "anchor_hits": [
+            "AXIN2",
+            "BATF"
+          ]
+        },
+        "Replogle_K562_essential": {
+          "n_anchors": 11,
+          "n_anchor_hits": 1,
+          "anchor_hits": [
+            "MED1"
+          ]
+        },
+        "Replogle_K562_gwps": {
+          "n_anchors": 10,
+          "n_anchor_hits": 9,
+          "anchor_hits": [
+            "MED19",
+            "MED10",
+            "MED17",
+            "TAF1",
+            "TAF2",
+            "KDM1A",
+            "MAX",
+            "WDR82",
+            "SSRP1"
+          ]
+        }
+      },
+      "total_anchors": 82,
+      "total_anchor_hits": 42,
+      "frac_anchors_that_are_hits": 0.512
     }
   }
 }
