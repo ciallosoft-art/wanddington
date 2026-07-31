@@ -1,0 +1,365 @@
+{
+  "weight_means": {
+    "IFNG|0.2": 0.1883,
+    "IFNG|0.3": 0.1845,
+    "IFNG|0.4": 0.1771,
+    "IL2|0.2": 0.3576,
+    "IL2|0.3": 0.3451,
+    "IL2|0.4": 0.3222,
+    "Sanchez21|0.2": 0.0966,
+    "Sanchez21|0.3": 0.0861,
+    "Sanchez21|0.4": 0.0594,
+    "Sanchez21_down|0.2": 0.10100000000000002,
+    "Sanchez21_down|0.3": 0.0896,
+    "Sanchez21_down|0.4": 0.0827,
+    "Carnevale22|0.2": 0.057600000000000005,
+    "Carnevale22|0.3": 0.0565,
+    "Carnevale22|0.4": 0.0645,
+    "Scharenberg22|0.2": 0.551,
+    "Scharenberg22|0.3": 0.551,
+    "Scharenberg22|0.4": 0.4898,
+    "Steinhart|0.2": 0.1103,
+    "Steinhart|0.3": 0.1379,
+    "Steinhart|0.4": 0.1448,
+    "Replogle_K562_essential|0.2": 0.5873,
+    "Replogle_K562_essential|0.3": 0.5873,
+    "Replogle_K562_essential|0.4": 0.5873,
+    "Replogle_K562_gwps|0.2": 0.329,
+    "Replogle_K562_gwps|0.3": 0.3236,
+    "Replogle_K562_gwps|0.4": 0.3063
+  },
+  "refs": {
+    "LOO": {
+      "IFNG": 0.1683,
+      "IL2": 0.3056,
+      "Sanchez21": 0.0768,
+      "Sanchez21_down": 0.0907,
+      "Carnevale22": 0.0484,
+      "Scharenberg22": 0.449,
+      "Steinhart": 0.0759,
+      "Replogle_K562_essential": 0.4920999999999999,
+      "Replogle_K562_gwps": 0.2468
+    },
+    "C_current": {
+      "IFNG": 0.19002000000000002,
+      "IL2": 0.34718,
+      "Sanchez21": 0.0873,
+      "Sanchez21_down": 0.09894,
+      "Carnevale22": 0.05576,
+      "Scharenberg22": 0.46532,
+      "Steinhart": 0.1586,
+      "Replogle_K562_essential": 0.55556,
+      "Replogle_K562_gwps": 0.3474
+    },
+    "LOO_mean": 0.21706666666666663,
+    "C_current_mean": 0.25623111111111113
+  },
+  "variants": {
+    "global_fixed": {
+      "per_screen": {
+        "IFNG": 0.1883,
+        "IL2": 0.3576,
+        "Sanchez21": 0.0966,
+        "Sanchez21_down": 0.10100000000000002,
+        "Carnevale22": 0.057600000000000005,
+        "Scharenberg22": 0.551,
+        "Steinhart": 0.1103,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.329
+      },
+      "mean": 0.26430000000000003,
+      "config_per_fold": {
+        "IFNG": {
+          "w_llm": 0.2
+        },
+        "IL2": {
+          "w_llm": 0.2
+        },
+        "Sanchez21": {
+          "w_llm": 0.2
+        },
+        "Sanchez21_down": {
+          "w_llm": 0.2
+        },
+        "Carnevale22": {
+          "w_llm": 0.2
+        },
+        "Scharenberg22": {
+          "w_llm": 0.2
+        },
+        "Steinhart": {
+          "w_llm": 0.2
+        },
+        "Replogle_K562_essential": {
+          "w_llm": 0.2
+        },
+        "Replogle_K562_gwps": {
+          "w_llm": 0.2
+        }
+      },
+      "paired_vs_LOO": {
+        "mean_delta": 0.04723333333333335,
+        "ci95": [
+          0.02521055555555556,
+          0.07135555555555559
+        ],
+        "wins": 9,
+        "ties": 0,
+        "losses": 0
+      },
+      "paired_vs_C": {
+        "mean_delta": 0.008068888888888895,
+        "ci95": [
+          -0.01265349999999998,
+          0.031449055555555466
+        ],
+        "wins": 6,
+        "ties": 0,
+        "losses": 3
+      }
+    },
+    "nested_router": {
+      "per_screen": {
+        "IFNG": 0.1883,
+        "IL2": 0.3222,
+        "Sanchez21": 0.0966,
+        "Sanchez21_down": 0.10100000000000002,
+        "Carnevale22": 0.0565,
+        "Scharenberg22": 0.551,
+        "Steinhart": 0.1103,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.329
+      },
+      "mean": 0.26024444444444444,
+      "config_per_fold": {
+        "IFNG": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "IL2": {
+          "T": 17975.5,
+          "low": 0.4,
+          "high": 0.2,
+          "w_llm": 0.4
+        },
+        "Sanchez21": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Sanchez21_down": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Carnevale22": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.3
+        },
+        "Scharenberg22": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Steinhart": {
+          "T": 0,
+          "low": 0.2,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Replogle_K562_essential": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Replogle_K562_gwps": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        }
+      },
+      "paired_vs_LOO": {
+        "mean_delta": 0.043177777777777794,
+        "ci95": [
+          0.020799444444444447,
+          0.0687444444444445
+        ],
+        "wins": 9,
+        "ties": 0,
+        "losses": 0
+      },
+      "paired_vs_C": {
+        "mean_delta": 0.004013333333333339,
+        "ci95": [
+          -0.017449055555555554,
+          0.028587277777777777
+        ],
+        "wins": 5,
+        "ties": 0,
+        "losses": 4
+      }
+    },
+    "global_fixed_study_out": {
+      "per_screen": {
+        "IFNG": 0.1883,
+        "IL2": 0.3576,
+        "Sanchez21": 0.0861,
+        "Sanchez21_down": 0.0896,
+        "Carnevale22": 0.057600000000000005,
+        "Scharenberg22": 0.551,
+        "Steinhart": 0.1103,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.329
+      },
+      "mean": 0.2618666666666667,
+      "config_per_fold": {
+        "IFNG": {
+          "w_llm": 0.2
+        },
+        "IL2": {
+          "w_llm": 0.2
+        },
+        "Sanchez21": {
+          "w_llm": 0.3
+        },
+        "Sanchez21_down": {
+          "w_llm": 0.3
+        },
+        "Carnevale22": {
+          "w_llm": 0.2
+        },
+        "Scharenberg22": {
+          "w_llm": 0.2
+        },
+        "Steinhart": {
+          "w_llm": 0.2
+        },
+        "Replogle_K562_essential": {
+          "w_llm": 0.2
+        },
+        "Replogle_K562_gwps": {
+          "w_llm": 0.2
+        }
+      },
+      "paired_vs_LOO": {
+        "mean_delta": 0.04480000000000001,
+        "ci95": [
+          0.02138777777777778,
+          0.07031833333333326
+        ],
+        "wins": 8,
+        "ties": 0,
+        "losses": 1
+      },
+      "paired_vs_C": {
+        "mean_delta": 0.005635555555555557,
+        "ci95": [
+          -0.014942611111111115,
+          0.029702611111111124
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      }
+    },
+    "nested_router_study_out": {
+      "per_screen": {
+        "IFNG": 0.1883,
+        "IL2": 0.3222,
+        "Sanchez21": 0.0861,
+        "Sanchez21_down": 0.0896,
+        "Carnevale22": 0.0565,
+        "Scharenberg22": 0.551,
+        "Steinhart": 0.1103,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.329
+      },
+      "mean": 0.2578111111111111,
+      "config_per_fold": {
+        "IFNG": {
+          "T": 17975.5,
+          "low": 0.4,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "IL2": {
+          "T": 17975.5,
+          "low": 0.4,
+          "high": 0.2,
+          "w_llm": 0.4
+        },
+        "Sanchez21": {
+          "T": 18184.0,
+          "low": 0.2,
+          "high": 0.3,
+          "w_llm": 0.3
+        },
+        "Sanchez21_down": {
+          "T": 18184.0,
+          "low": 0.2,
+          "high": 0.3,
+          "w_llm": 0.3
+        },
+        "Carnevale22": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.3
+        },
+        "Scharenberg22": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Steinhart": {
+          "T": 0,
+          "low": 0.2,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Replogle_K562_essential": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        },
+        "Replogle_K562_gwps": {
+          "T": 17975.5,
+          "low": 0.3,
+          "high": 0.2,
+          "w_llm": 0.2
+        }
+      },
+      "paired_vs_LOO": {
+        "mean_delta": 0.04074444444444446,
+        "ci95": [
+          0.017321666666666676,
+          0.06747777777777782
+        ],
+        "wins": 8,
+        "ties": 0,
+        "losses": 1
+      },
+      "paired_vs_C": {
+        "mean_delta": 0.0015800000000000026,
+        "ci95": [
+          -0.019725666666666662,
+          0.026394222222222225
+        ],
+        "wins": 3,
+        "ties": 0,
+        "losses": 6
+      }
+    }
+  }
+}
