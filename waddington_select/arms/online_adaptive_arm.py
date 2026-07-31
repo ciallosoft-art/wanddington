@@ -81,6 +81,12 @@ class OnlineAdaptiveArm(BaseArm):
         df["gene"] = df["gene"].str.strip().str.upper()
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
         self._available_feats = [c for c in all_feats if c in df.columns]
+        # Clean-headline variant: drop the anchor-relative features (proximity to the phenotype's seed
+        # genes), which the audit flagged as privileged target information (51% of anchors are own-screen
+        # hits). Uses no realized labels; removes the leak from the prior AND the online model.
+        if os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1":
+            _ANCHOR_FEATS = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
+            self._available_feats = [c for c in self._available_feats if c not in _ANCHOR_FEATS]
 
         # LOO train split: all datasets except this one
         self._loo_train: pd.DataFrame = df[df["dataset"] != dataset_name].copy()

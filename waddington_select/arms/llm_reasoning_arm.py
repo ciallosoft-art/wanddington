@@ -162,6 +162,11 @@ class LLMReasoningArm(BaseArm):
         df["gene"] = df["gene"].str.strip().str.upper()
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
         self._all_feats = [c for c in all_feats if c in df.columns]
+        # Clean-headline variant (see online_adaptive_arm): drop anchor-relative features from the static
+        # padding ranker too, so no privileged anchor signal enters the batch by any path.
+        if os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1":
+            self._all_feats = [c for c in self._all_feats
+                               if c not in {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}]
 
         # Gene pool for this dataset
         test_df = df[df["dataset"] == dataset_name].reset_index(drop=True)
