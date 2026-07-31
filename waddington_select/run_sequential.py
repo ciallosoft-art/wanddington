@@ -56,7 +56,7 @@ from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
 from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
 from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
-from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm
+from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm, WaddingtonCLinearArm
 from .arms.waddington_c_ensemble_arm import WaddingtonCEnsembleArm
 from .arms.genedisco_arm import GeneDiscoArm, ACQUISITIONS as _GD_ACQ
 
@@ -68,7 +68,7 @@ _PAPER_ARMS = {
     "llm_reasoning", "waddington_c", "waddington_c_skills", "waddington_c_memskills", "waddington_c_enrich",
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
-    "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble",
+    "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
 } | {f"genedisco_{a}" for a in _GD_ACQ}
 
 _ARCHIVE_ARMS = {
@@ -125,6 +125,8 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(WaddingtonCFeatureReasoningArm(dataset_name, bs))
         elif name == "waddington_c_pool_only":
             arms.append(WaddingtonCPoolOnlyArm(dataset_name, bs))
+        elif name == "waddington_c_linear":
+            arms.append(WaddingtonCLinearArm(dataset_name, bs))
         elif name == "waddington_c_ensemble":
             arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
         elif name.startswith("genedisco_"):

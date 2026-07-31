@@ -265,3 +265,54 @@ class WaddingtonCPoolOnlyArm(WaddingtonCShuffledNamesArm):
             memory_path=memory_path,
             name="waddington_c_pool_only",
         )
+
+
+# ── Reviewer control: is A1 the LLM reasoning, or a trivial linear rule? ──────────────────────────
+import numpy as _np
+
+
+class _LinearCentroidLLMArm(_AnonymousFeaturesLLMArm):
+    """A1 with the LLM replaced by a dead-simple linear rule: score each candidate by its projection
+    onto the (hit-centroid $-$ non-hit-centroid) axis in the SAME anonymized feature space A1 sees.
+    No LLM call. If this matches A1, then A1's result is ``structure beats names'', not ``the LLM
+    reasons''. Round 1 (no feedback) falls back to the static LOO ranking, exactly as A1 pads from."""
+
+    def _axis(self):
+        hits = [g for rnd in self._round_hits for g in rnd]
+        non = [g for rnd in self._round_nonhits for g in rnd]
+        vec = lambda gid: _np.array([self._feat_by_anon.get(gid, {}).get(t, 0.0)
+                                     for t in self._feat_tags], dtype=float)
+        H = [vec(g) for g in hits if g in self._feat_by_anon]
+        if not H:
+            return None
+        Nn = [vec(g) for g in non if g in self._feat_by_anon]
+        mu_n = _np.mean(Nn, axis=0) if Nn else _np.zeros(len(self._feat_tags))
+        return _np.mean(H, axis=0) - mu_n
+
+    def _pick(self, cand_anon):
+        sel = self._selected_anon()
+        cand = [g for g in cand_anon if g not in sel]
+        axis = self._axis()
+        self._n_fallback = 0
+        if axis is None:                                   # round 1: no feedback
+            picked = cand[: self.batch_size]
+        else:
+            vec = lambda gid: _np.array([self._feat_by_anon.get(gid, {}).get(t, 0.0)
+                                         for t in self._feat_tags], dtype=float)
+            picked = sorted(cand, key=lambda g: -float(vec(g) @ axis))[: self.batch_size]
+        return [self._f2r[g] for g in picked if g in self._f2r]
+
+    def select(self, round_idx: int, revealed: dict) -> list:
+        return self._pick(self._static_ranking_anon[: self._feature_shortlist_size])
+
+    def select_with_shortlist(self, round_idx: int, shortlist) -> list:
+        return self._pick([self._r2f.get(g, g) for g, _ in shortlist])
+
+
+class WaddingtonCLinearArm(WaddingtonCShuffledNamesArm):
+    """A1 with a linear-centroid rule instead of the LLM (reviewer control for reason-vs-recall)."""
+
+    _INNER_LLM_CLS = _LinearCentroidLLMArm
+
+    def __init__(self, dataset_name: str, batch_size: int, memory_path: Path = MEMORY_PATH) -> None:
+        super().__init__(dataset_name, batch_size, memory_path=memory_path, name="waddington_c_linear")
