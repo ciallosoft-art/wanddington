@@ -1,0 +1,81 @@
+{
+  "per_screen": {
+    "IFNG": {
+      "loo_all": 0.1745635910224439,
+      "loo_no_sibling": 0.13591022443890274,
+      "hit_frequency": 0.14463840399002495,
+      "novel_hit_frac": 0.608,
+      "has_sibling": true
+    },
+    "IL2": {
+      "loo_all": 0.35343035343035345,
+      "loo_no_sibling": 0.25571725571725573,
+      "hit_frequency": 0.31392931392931395,
+      "novel_hit_frac": 0.412,
+      "has_sibling": true
+    },
+    "Sanchez21": {
+      "loo_all": 0.07334109429569266,
+      "loo_no_sibling": 0.07450523864959255,
+      "hit_frequency": 0.08149010477299184,
+      "novel_hit_frac": 0.724,
+      "has_sibling": true
+    },
+    "Sanchez21_down": {
+      "loo_all": 0.08495981630309989,
+      "loo_no_sibling": 0.0677382319173364,
+      "hit_frequency": 0.07577497129735936,
+      "novel_hit_frac": 0.704,
+      "has_sibling": true
+    },
+    "Carnevale22": {
+      "loo_all": 0.06221198156682028,
+      "loo_no_sibling": 0.06221198156682028,
+      "hit_frequency": 0.059907834101382486,
+      "novel_hit_frac": 0.803,
+      "has_sibling": false
+    },
+    "Scharenberg22": {
+      "loo_all": 0.5510204081632653,
+      "loo_no_sibling": 0.5510204081632653,
+      "hit_frequency": 0.4897959183673469,
+      "novel_hit_frac": 0.51,
+      "has_sibling": false
+    },
+    "Steinhart": {
+      "loo_all": 0.08275862068965517,
+      "loo_no_sibling": 0.08275862068965517,
+      "hit_frequency": 0.05517241379310345,
+      "novel_hit_frac": 0.697,
+      "has_sibling": false
+    },
+    "Replogle_K562_essential": {
+      "loo_all": 0.49206349206349204,
+      "loo_no_sibling": 0.2698412698412698,
+      "hit_frequency": 0.5714285714285714,
+      "novel_hit_frac": 0.063,
+      "has_sibling": true
+    },
+    "Replogle_K562_gwps": {
+      "loo_all": 0.30844155844155846,
+      "loo_no_sibling": 0.2878787878787879,
+      "hit_frequency": 0.395021645021645,
+      "novel_hit_frac": 0.563,
+      "has_sibling": true
+    }
+  },
+  "summary": {
+    "loo_all_avg": 0.24253232399737568,
+    "loo_no_sibling_avg": 0.19862022431809842,
+    "sibling_pairs_normal": 0.24779998425944008,
+    "sibling_pairs_excluded": 0.18193183474052418,
+    "hit_frequency_avg": 0.24301768630019327,
+    "feature_family": {
+      "intrinsic": 0.2177033699802297,
+      "anchor": 0.15624505321756157,
+      "depmap": 0.2296446679754813,
+      "intrinsic_anchor_no_depmap": 0.21932555712424806,
+      "all": 0.24253232399737568
+    }
+  }
+}
