@@ -87,42 +87,62 @@ def _decile_table(rows: list[dict]) -> dict:
     return {"deciles": table}
 
 
-def _logit_or(rows: list[dict], n_boot: int = 2000, seed: int = 0) -> dict:
-    """hit ~ ml_rank_pct + endorsed with screen fixed effects (one-hot). Return the endorsed odds ratio
-    and a screen-clustered bootstrap CI (resample whole screens). Pure-numpy IRLS, no statsmodels dep."""
-    screens = sorted({r["screen"] for r in rows})
-    # within-screen ml rank percentile so the ML covariate is on a common [0,1] scale across screens
+def _irls(X, y, iters=50):
+    """Newton/IRLS logistic fit; returns the coefficient vector. Pure numpy, no statsmodels dep."""
+    b = np.zeros(X.shape[1])
+    for _ in range(iters):
+        p = 1 / (1 + np.exp(-X @ b))
+        W = np.clip(p * (1 - p), 1e-6, None)
+        z = X @ b + (y - p) / W
+        XtW = X.T * W
+        try:
+            b = np.linalg.solve(XtW @ X + 1e-6 * np.eye(X.shape[1]), XtW @ z)
+        except np.linalg.LinAlgError:
+            break
+    return b
+
+
+def _design(rr, screens):
+    """hit ~ intercept + within-screen ml percentile + endorsed + screen fixed effects."""
     by_s: dict[str, list[dict]] = {}
-    for r in rows:
+    for r in rr:
         by_s.setdefault(r["screen"], []).append(r)
     for rs in by_s.values():
         rs.sort(key=lambda r: r["ml_score"])
         n = len(rs)
         for i, r in enumerate(rs):
             r["ml_pct"] = (i + 0.5) / n
+    X = [[1.0, r["ml_pct"], 1.0 if r["endorsed"] else 0.0]
+         + [1.0 if r["screen"] == s else 0.0 for s in screens[1:]] for r in rr]
+    y = [1.0 if r["hit"] else 0.0 for r in rr]
+    return np.array(X), np.array(y)
 
-    def design(rr):
-        X = [[1.0, r["ml_pct"], 1.0 if r["endorsed"] else 0.0]
-             + [1.0 if r["screen"] == s else 0.0 for s in screens[1:]] for r in rr]
-        y = [1.0 if r["hit"] else 0.0 for r in rr]
-        return np.array(X), np.array(y)
 
-    def fit(X, y, iters=50):
-        b = np.zeros(X.shape[1])
-        for _ in range(iters):
-            p = 1 / (1 + np.exp(-X @ b))
-            W = np.clip(p * (1 - p), 1e-6, None)
-            z = X @ b + (y - p) / W
-            XtW = X.T * W
-            try:
-                b = np.linalg.solve(XtW @ X + 1e-6 * np.eye(X.shape[1]), XtW @ z)
-            except np.linalg.LinAlgError:
-                break
-        return b
+def _or_jackknife(rows: list[dict]) -> dict:
+    """Leave-one-screen-out robustness for the endorsement OR: with only eight clusters, a single screen
+    could drive the effect. Drop each screen, refit, and report the range of the adjusted OR."""
+    all_screens = sorted({r["screen"] for r in rows})
+    per = {}
+    for drop in all_screens:
+        sub = [dict(r) for r in rows if r["screen"] != drop]
+        screens = sorted({r["screen"] for r in sub})
+        X, y = _design(sub, screens)
+        per[drop] = float(np.exp(_irls(X, y)[2]))
+    vals = list(per.values())
+    return {"per_dropped_screen": per, "or_min": min(vals), "or_max": max(vals),
+            "all_above_1": bool(all(v > 1 for v in vals))}
 
-    X, y = design(rows)
-    beta = fit(X, y)
-    endorsed_coef = float(beta[2])  # index 2 = endorsed
+
+def _logit_or(rows: list[dict], n_boot: int = 2000, seed: int = 0) -> dict:
+    """hit ~ ml_rank_pct + endorsed with screen fixed effects (one-hot). Return the endorsed odds ratio
+    and a screen-clustered bootstrap CI (resample whole screens). Pure-numpy IRLS, no statsmodels dep."""
+    screens = sorted({r["screen"] for r in rows})
+    by_s: dict[str, list[dict]] = {}
+    for r in rows:
+        by_s.setdefault(r["screen"], []).append(r)
+
+    X, y = _design(rows, screens)
+    endorsed_coef = float(_irls(X, y)[2])  # index 2 = endorsed
 
     rng = np.random.default_rng(seed)
     boots = []
@@ -131,9 +151,9 @@ def _logit_or(rows: list[dict], n_boot: int = 2000, seed: int = 0) -> dict:
         rr = [r for s in pick for r in by_s[s]]
         if len({r["endorsed"] for r in rr}) < 2:
             continue
-        Xb, yb = design(rr)
+        Xb, yb = _design(rr, sorted({r["screen"] for r in rr}))
         try:
-            boots.append(float(fit(Xb, yb)[2]))
+            boots.append(float(_irls(Xb, yb)[2]))
         except Exception:
             pass
     lo, hi = np.percentile(boots, [2.5, 97.5]) if boots else (float("nan"), float("nan"))
@@ -141,6 +161,7 @@ def _logit_or(rows: list[dict], n_boot: int = 2000, seed: int = 0) -> dict:
         "endorsed_logodds": endorsed_coef,
         "endorsed_odds_ratio": float(np.exp(endorsed_coef)),
         "or_ci95": [float(np.exp(lo)), float(np.exp(hi))],
+        "leave_one_screen_out": _or_jackknife(rows),
         "n_screens": len(screens), "n_genes": len(rows),
         "note": "OR>1 with CI excluding 1 => LLM endorsement predicts hits after adjusting for ML rank.",
     }
@@ -184,4 +205,9 @@ if __name__ == "__main__":
     print(f"  endorsed OR = {lg['endorsed_odds_ratio']:.2f}  "
           f"95% CI [{lg['or_ci95'][0]:.2f}, {lg['or_ci95'][1]:.2f}]  "
           f"(screen-clustered bootstrap, {lg['n_genes']} genes / {lg['n_screens']} screens)")
+    jk = lg["leave_one_screen_out"]
+    print(f"  leave-one-screen-out OR range: [{jk['or_min']:.2f}, {jk['or_max']:.2f}]  "
+          f"(all above 1: {jk['all_above_1']})")
+    for s, v in sorted(jk["per_dropped_screen"].items(), key=lambda kv: kv[1]):
+        print(f"      drop {s:24s} OR={v:.2f}")
     print(f"saved -> {OUT}")

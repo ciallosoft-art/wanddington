@@ -89,9 +89,24 @@
     "endorsed_logodds": 0.519182180698992,
     "endorsed_odds_ratio": 1.6806526173627638,
     "or_ci95": [
-      1.0539207966713247,
-      2.5240450406919415
+      1.0539513427676737,
+      2.5239344991387447
     ],
+    "leave_one_screen_out": {
+      "per_dropped_screen": {
+        "Carnevale22": 1.576022224195965,
+        "IFNG": 1.392594086735748,
+        "IL2": 1.6669465491232511,
+        "Replogle_K562_essential": 1.6887511917439542,
+        "Sanchez21": 1.8703070400475177,
+        "Sanchez21_down": 1.86372354762014,
+        "Scharenberg22": 1.7624983650669799,
+        "Steinhart": 1.6510455742512835
+      },
+      "or_min": 1.392594086735748,
+      "or_max": 1.8703070400475177,
+      "all_above_1": true
+    },
     "n_screens": 8,
     "n_genes": 4160,
     "note": "OR>1 with CI excluding 1 => LLM endorsement predicts hits after adjusting for ML rank."
