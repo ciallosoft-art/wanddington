@@ -130,6 +130,28 @@ def run() -> dict:
             "paired_vs_LOO": _paired(per, LOO, np.random.default_rng(SEED)),
             "paired_vs_C": _paired(per, C, np.random.default_rng(SEED + 1)),
         }
+
+    # Strictest test: also remove the same-study sibling from the cross-experiment PRIOR (not just from
+    # config selection). Compared like-for-like against a sibling-excluded LOO, so the numerator and the
+    # baseline are handicapped the same way. Uses the honest global weight (0.2) with metadata features.
+    sop_path = ROUTER / "study_out_prior_w0.2.json"
+    pp_path = REPO / "workspace" / "results" / "prior_probes.json"
+    if sop_path.exists() and pp_path.exists():
+        from ..router_protocol import siblings
+        sop = json.loads(sop_path.read_text())
+        w02 = json.loads((ROUTER / "global_w0.2.json").read_text())
+        c_strict = {s: (_mean_last(sop[s]["waddington_c"]) if siblings(s) else _mean_last(w02[s]["waddington_c"]))
+                    for s in BENCH}
+        pp = json.loads(pp_path.read_text())["per_screen"]
+        loo_sibout = {s: pp[s]["loo_no_sibling"] for s in BENCH}
+        res["strict_study_out_prior"] = {
+            "per_screen": c_strict,
+            "mean": float(np.mean([c_strict[s] for s in BENCH])),
+            "loo_sibling_excluded_mean": float(np.mean([loo_sibout[s] for s in BENCH])),
+            "paired_vs_sibling_excluded_LOO": _paired(c_strict, loo_sibout, np.random.default_rng(SEED + 2)),
+            "paired_vs_standard_LOO": _paired(c_strict, LOO, np.random.default_rng(SEED + 3)),
+            "note": "fair leave-one-study-out: both C and LOO deny the same-study sibling.",
+        }
     OUT.write_text(json.dumps(res, indent=2))
     return res
 

@@ -361,5 +361,41 @@
         "losses": 6
       }
     }
+  },
+  "strict_study_out_prior": {
+    "per_screen": {
+      "IFNG": 0.1721,
+      "IL2": 0.3077,
+      "Sanchez21": 0.0838,
+      "Sanchez21_down": 0.0941,
+      "Carnevale22": 0.057600000000000005,
+      "Scharenberg22": 0.551,
+      "Steinhart": 0.1103,
+      "Replogle_K562_essential": 0.4444000000000001,
+      "Replogle_K562_gwps": 0.3344
+    },
+    "mean": 0.23948888888888886,
+    "loo_sibling_excluded_mean": 0.19862022431809842,
+    "paired_vs_sibling_excluded_LOO": {
+      "mean_delta": 0.04086866457079047,
+      "ci95": [
+        0.014671953550514987,
+        0.07878508862019636
+      ],
+      "wins": 7,
+      "ties": 0,
+      "losses": 2
+    },
+    "paired_vs_standard_LOO": {
+      "mean_delta": 0.022422222222222243,
+      "ci95": [
+        -0.00412222222222219,
+        0.0529111111111111
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    },
+    "note": "fair leave-one-study-out: both C and LOO deny the same-study sibling."
   }
 }
