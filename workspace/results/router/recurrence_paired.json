@@ -1,0 +1,33 @@
+{
+  "full_per_screen": {
+    "IFNG": 0.1683,
+    "IL2": 0.2703,
+    "Sanchez21": 0.085,
+    "Sanchez21_down": 0.0838,
+    "Carnevale22": 0.06110000000000001,
+    "Scharenberg22": 0.4898,
+    "Steinhart": 0.0897,
+    "Replogle_K562_essential": 0.6825,
+    "Replogle_K562_gwps": 0.2738
+  },
+  "hitfreq_only_per_screen": {
+    "IFNG": 0.14463840399002495,
+    "IL2": 0.31392931392931395,
+    "Sanchez21": 0.08149010477299184,
+    "Sanchez21_down": 0.07577497129735936,
+    "Carnevale22": 0.059907834101382486,
+    "Scharenberg22": 0.4897959183673469,
+    "Steinhart": 0.05517241379310345,
+    "Replogle_K562_essential": 0.5714285714285714,
+    "Replogle_K562_gwps": 0.395021645021645
+  },
+  "full_mean": 0.2449222222222222,
+  "only_mean": 0.24301768630019327,
+  "paired_delta": 0.001904535922028963,
+  "ci95": [
+    -0.03616799852802106,
+    0.037686162342240204
+  ],
+  "wins": 7,
+  "losses": 2
+}
