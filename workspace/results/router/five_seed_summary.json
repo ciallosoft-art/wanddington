@@ -1,0 +1,23 @@
+{
+  "clean_5seed_mean": 0.2510222222222222,
+  "clean_5seed_per_screen": {
+    "IFNG": 0.1833,
+    "IL2": 0.343,
+    "Sanchez21": 0.078,
+    "Sanchez21_down": 0.0884,
+    "Carnevale22": 0.0645,
+    "Scharenberg22": 0.48979999999999996,
+    "Steinhart": 0.1172,
+    "Replogle_K562_essential": 0.5714,
+    "Replogle_K562_gwps": 0.3236
+  },
+  "hitfreq_full_5seed_mean": 0.2386888888888889,
+  "hitfreq_only_mean": 0.24301768630019327,
+  "recurrence_paired": [
+    -0.004328797411304371,
+    -0.04579022075024328,
+    0.028256892715602215,
+    6,
+    3
+  ]
+}

@@ -10,6 +10,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.36942675159235666,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.45541401273885357,
+        "novel_recall": 0.00819672131147541,
+        "extra_over_hitfreq_novel_frac": 0.07017543859649122
       }
     },
     "IL2": {
@@ -22,6 +27,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.5335689045936396,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.5441696113074205,
+        "novel_recall": 0.05555555555555556,
+        "extra_over_hitfreq_novel_frac": 0.1896551724137931
       }
     },
     "Sanchez21": {
@@ -34,6 +44,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.29535864978902954,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.2742616033755274,
+        "novel_recall": 0.003215434083601286,
+        "extra_over_hitfreq_novel_frac": 0.08333333333333333
       }
     },
     "Sanchez21_down": {
@@ -46,6 +61,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.2558139534883721,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.2713178294573643,
+        "novel_recall": 0.011419249592169658,
+        "extra_over_hitfreq_novel_frac": 0.18421052631578946
       }
     },
     "Carnevale22": {
@@ -58,6 +78,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.30409356725146197,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.3157894736842105,
+        "novel_recall": 0.0028694404591104736,
+        "extra_over_hitfreq_novel_frac": 0.125
       }
     },
     "Scharenberg22": {
@@ -70,6 +95,11 @@
       "hit_frequency": {
         "recurrent_recall": 1.0,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.7916666666666666,
+        "novel_recall": 0.2,
+        "extra_over_hitfreq_novel_frac": 1.0
       }
     },
     "Steinhart": {
@@ -82,6 +112,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.18181818181818182,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.29545454545454547,
+        "novel_recall": 0.039603960396039604,
+        "extra_over_hitfreq_novel_frac": 0.2857142857142857
       }
     },
     "Replogle_K562_essential": {
@@ -94,6 +129,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.6101694915254238,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.5932203389830508,
+        "novel_recall": 0.25,
+        "extra_over_hitfreq_novel_frac": 0.09090909090909091
       }
     },
     "Replogle_K562_gwps": {
@@ -106,6 +146,11 @@
       "hit_frequency": {
         "recurrent_recall": 0.9034653465346535,
         "novel_recall": 0.0
+      },
+      "waddington": {
+        "recurrent_recall": 0.6188118811881188,
+        "novel_recall": 0.09423076923076923,
+        "extra_over_hitfreq_novel_frac": 0.7777777777777778
       }
     }
   },
@@ -121,7 +166,11 @@
     "hit_frequency": {
       "recurrent_recall": 0.4948572051770131,
       "novel_recall": 0.0
+    },
+    "waddington": {
+      "recurrent_recall": 0.46223399587286207,
+      "novel_recall": 0.07389901451430235
     }
   },
-  "waddington_run_present": false
+  "waddington_run_present": true
 }
