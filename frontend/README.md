@@ -8,9 +8,10 @@ npm install
 node bin/waddington.js
 ```
 
-On launch it authorizes a model provider (Claude / Codex / Gemini, reusing feynman's token store at
-`~/.feynman/agent/auth.json`) then lets you pick **Terminal (CLI)** or **Web UI**. You chat in
-natural language; report wet-lab results and it adapts the next round.
+On launch it authorizes a model provider (Claude / Codex / Gemini) into Waddington's **own** OAuth store
+at `~/.waddington/agent/auth.json` — self-contained, no dependency on any other tool — then lets you pick
+**Terminal (CLI)** or **Web UI**. You chat in natural language; report wet-lab results and it adapts the
+next round. (Set `WADDINGTON_REUSE_FEYNMAN=1` to instead reuse an existing `~/.feynman` token store.)
 
 ## Design (why it looks like this)
 
@@ -40,5 +41,6 @@ We deliberately removed tools: the free tool-using agent lost to this pipeline (
 
 - `--model provider/model` (or `WADDINGTON_CHAT_MODEL`) — conversation model (default: an authorized Claude Haiku).
 - `WADDINGTON_PY` — how to invoke Python (default `conda run -n waddington-bio python3`).
-- `WADDINGTON_AUTH_PATH` — OAuth/API token store. Default: `~/.feynman/agent/auth.json` if it exists
-  (reuse feynman's tokens), else a standalone `~/.waddington/agent/auth.json` created on first login.
+- `WADDINGTON_AUTH_PATH` — OAuth/API token store. Default: `~/.waddington/agent/auth.json` (Waddington's
+  own store, created on first login). Set `WADDINGTON_REUSE_FEYNMAN=1` to reuse `~/.feynman/agent/auth.json`
+  when feynman is installed.

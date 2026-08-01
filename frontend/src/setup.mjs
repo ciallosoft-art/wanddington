@@ -1,8 +1,8 @@
 // setup.mjs — provider authorization.
 //
 // Auth goes through pi-coding-agent's AuthStorage (OAuth login + auto-refresh). The store path is
-// resolved in complete.mjs (DEFAULT_AUTH_PATH): $WADDINGTON_AUTH_PATH, else feynman's shared store
-// if present (authorize once for both), else a standalone ~/.waddington store created on login.
+// resolved in complete.mjs (DEFAULT_AUTH_PATH): $WADDINGTON_AUTH_PATH, else Waddington's own
+// ~/.waddington store (created on first login). Set WADDINGTON_REUSE_FEYNMAN=1 to reuse feynman's store.
 
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";

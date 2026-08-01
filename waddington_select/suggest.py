@@ -117,7 +117,7 @@ def suggest(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Recommend genes to perturb next for a phenotype (System 2 C-arm).",
+        description="Recommend genes to perturb next for a phenotype (Waddington C-arm).",
     )
     parser.add_argument("--dataset", required=True, choices=ALL_DATASETS,
                         help="Benchmark phenotype to recommend genes for")

@@ -9,10 +9,12 @@
 // Auth goes through pi-coding-agent's AuthStorage, which refreshes expired OAuth tokens with locking
 // — so the recurring "token expired" pain of the old raw-token path is gone.
 //
-// Store path resolution (portable across machines):
-//   1. $WADDINGTON_AUTH_PATH if set (explicit override)
-//   2. ~/.feynman/agent/auth.json if it exists  → reuse feynman's tokens when feynman is installed
-//   3. ~/.waddington/agent/auth.json            → standalone store (created on first login)
+// Store path resolution (portable, SELF-CONTAINED by default):
+//   1. $WADDINGTON_AUTH_PATH if set                → explicit override
+//   2. ~/.waddington/agent/auth.json               → Waddington's OWN store (default; made on first login)
+//   • WADDINGTON_REUSE_FEYNMAN=1 opts into reusing ~/.feynman/agent/auth.json when feynman is installed
+//     (developer convenience — authorize once for both). Not the default: Waddington authorizes its own
+//     providers so it does not depend on feynman being present.
 
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -23,8 +25,12 @@ import { completeSimple } from "@earendil-works/pi-ai/compat";
 
 function resolveAuthPath() {
   if (process.env.WADDINGTON_AUTH_PATH) return process.env.WADDINGTON_AUTH_PATH;
-  const feynman = join(homedir(), ".feynman", "agent", "auth.json");
-  if (existsSync(feynman)) return feynman;
+  // Opt-in: reuse feynman's shared token store if it exists and the user asked for it.
+  if (process.env.WADDINGTON_REUSE_FEYNMAN === "1") {
+    const feynman = join(homedir(), ".feynman", "agent", "auth.json");
+    if (existsSync(feynman)) return feynman;
+  }
+  // Self-contained default: Waddington's own OAuth store, created on first `waddington setup` / login.
   return join(homedir(), ".waddington", "agent", "auth.json");
 }
 
@@ -32,7 +38,7 @@ export const DEFAULT_AUTH_PATH = resolveAuthPath();
 
 let _registry = null;
 
-/** Lazily build a ModelRegistry backed by the shared feynman auth store. */
+/** Lazily build a ModelRegistry backed by Waddington's OAuth store (see resolveAuthPath). */
 export function getRegistry(authPath = DEFAULT_AUTH_PATH) {
   if (!_registry) {
     const auth = AuthStorage.create(authPath);

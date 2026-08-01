@@ -2,8 +2,8 @@
 
 ## What this repo is
 
-A Python research project: **System 2**, a hybrid ML + LLM + verified-memory agent for
-sequential CRISPR gene selection (the "C-arm"). The agent code is the `waddington_select`
+A Python research project: a hybrid ML + LLM + verified-memory agent for sequential CRISPR gene
+selection (the "C-arm"). The agent code is the `waddington_select`
 package; data/results live under `workspace/`; the paper's tables are in `docs/`.
 
 The earlier single-cell **paper-reproduction CLI** (GEARS/scGPT, the Pi/TypeScript harness) was
@@ -27,8 +27,11 @@ conda run -n waddington-bio python3 -m waddington_select --arms waddington_c --s
 conda run -n waddington-bio python3 -m waddington_select.memory_builder
 ```
 
-LLM arms need an Anthropic token: `python experiments/setup_auth.py --token sk-ant-…`
-(written to `~/.feynman/agent/auth.json`).
+LLM arms need provider auth. Self-contained by default in Waddington's own store
+`~/.waddington/agent/auth.json`: either interactive OAuth via `node frontend/bin/waddington.js setup`
+(Claude / Codex / Gemini), or a raw token via `python experiments/setup_auth.py --token sk-ant-…`.
+The C-arm's LLM client (`llm_client.resolve_auth_json`) reads `~/.waddington` first, falling back to
+`~/.feynman`; set `WADDINGTON_REUSE_FEYNMAN=1` to prefer feynman's store, or `WADDINGTON_AUTH_PATH` to override.
 
 ## Package structure
 

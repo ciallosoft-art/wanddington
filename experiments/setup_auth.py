@@ -5,8 +5,10 @@ Set up the Anthropic API auth token for Waddington experiments.
 Usage:
     python experiments/setup_auth.py --token sk-ant-...
 
-The token is written to ~/.feynman/agent/auth.json (the path expected by
-LLMReasoningArm and all Waddington C-arm variants).
+By default the token is written to Waddington's OWN store at ~/.waddington/agent/auth.json — the same
+path the C-arm's LLM client resolves (self-contained; no dependency on feynman). Set
+WADDINGTON_REUSE_FEYNMAN=1 to write to ~/.feynman instead, or WADDINGTON_AUTH_PATH to point anywhere.
+(For interactive OAuth login across providers, prefer `node frontend/bin/waddington.js setup`.)
 
 Alternatively, set the ANTHROPIC_API_KEY environment variable and this
 script will read it automatically:
@@ -23,7 +25,16 @@ import sys
 import time
 from pathlib import Path
 
-AUTH_PATH = Path.home() / ".feynman" / "agent" / "auth.json"
+
+def _auth_write_path() -> Path:
+    if os.environ.get("WADDINGTON_AUTH_PATH"):
+        return Path(os.environ["WADDINGTON_AUTH_PATH"])
+    if os.environ.get("WADDINGTON_REUSE_FEYNMAN") == "1":
+        return Path.home() / ".feynman" / "agent" / "auth.json"
+    return Path.home() / ".waddington" / "agent" / "auth.json"
+
+
+AUTH_PATH = _auth_write_path()
 _DEFAULT_EXPIRY_HOURS = 8
 
 

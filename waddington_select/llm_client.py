@@ -38,8 +38,28 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-AUTH_JSON = Path.home() / ".feynman" / "agent" / "auth.json"
 FRONTEND_BIN = REPO_ROOT / "frontend" / "bin" / "waddington.js"
+
+
+def resolve_auth_json() -> Path:
+    """The OAuth/token store path, self-contained by default (mirrors the frontend bridge).
+
+    ``WADDINGTON_AUTH_PATH`` overrides; ``WADDINGTON_REUSE_FEYNMAN=1`` forces feynman's shared store;
+    otherwise prefer Waddington's own ``~/.waddington`` store, falling back to ``~/.feynman`` for existing
+    setups. Authorize a provider with ``node frontend/bin/waddington.js setup`` (OAuth into ~/.waddington).
+    """
+    override = os.environ.get("WADDINGTON_AUTH_PATH")
+    if override:
+        return Path(override)
+    own = Path.home() / ".waddington" / "agent" / "auth.json"
+    feynman = Path.home() / ".feynman" / "agent" / "auth.json"
+    if os.environ.get("WADDINGTON_REUSE_FEYNMAN") == "1" and feynman.exists():
+        return feynman
+    if own.exists():
+        return own
+    if feynman.exists():
+        return feynman
+    return own
 
 DEFAULT_BACKEND = os.environ.get("WADDINGTON_LLM_BACKEND", "anthropic")
 # The "pi" backend now calls the frontend's tool-less pi-ai bridge (a pure completion), not the old
@@ -57,7 +77,7 @@ class LLMError(Exception):
 
 
 def _load_anthropic_token() -> str:
-    with open(AUTH_JSON) as f:
+    with open(resolve_auth_json()) as f:
         return json.load(f)["anthropic"]["access"]
 
 

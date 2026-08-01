@@ -33,7 +33,6 @@ from ..phenotype import task_prompt as _user_task_prompt
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
 TASK_PROMPTS_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark" / "task_prompts"
-AUTH_JSON = Path.home() / ".feynman" / "agent" / "auth.json"
 
 FEATURE_COLS = [
     "g1_ppi_score", "hub_score_norm", "archs4_coexpr", "ppi_score_sum",
@@ -91,7 +90,8 @@ LLM_MAX_TOKENS = 1500
 
 
 def _load_auth_token() -> str:
-    with open(AUTH_JSON) as f:
+    from ..llm_client import resolve_auth_json  # self-contained default (~/.waddington), feynman opt-in
+    with open(resolve_auth_json()) as f:
         auth = json.load(f)
     return auth["anthropic"]["access"]
 

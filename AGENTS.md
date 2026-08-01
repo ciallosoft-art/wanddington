@@ -1,6 +1,6 @@
 # Waddington — agent instructions
 
-This repository is **System 2**: a hybrid ML + LLM + verified-memory agent that recommends which
+This repository is a hybrid ML + LLM + verified-memory agent that recommends which
 genes to perturb next in a CRISPR screen, for a given phenotype. When a user (an experimenter)
 asks you to select / recommend / rank genes for a phenotype, drive the tools below — do not answer
 from your own parametric knowledge alone.
@@ -54,7 +54,7 @@ rather than guessing.
 
 ## Show how a whole sequential experiment would go — `simulate`
 
-When a user wants to *see* how System 2 would drive a multi-round CRISPR campaign for one of the
+When a user wants to *see* how Waddington would drive a multi-round CRISPR campaign for one of the
 phenotypes (a demo of "what using this on my experiment looks like"), run:
 
 ```bash

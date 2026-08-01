@@ -1,4 +1,4 @@
-# Waddington — System 2
+# Waddington
 
 **A hybrid ML + LLM + verified-memory agent for sequential CRISPR gene selection.**
 
@@ -147,7 +147,7 @@ Environment variables (all optional; sensible defaults):
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `WADDINGTON_AUTH_PATH` | `~/.feynman/agent/auth.json` if it exists, else `~/.waddington/agent/auth.json` | OAuth/API token store used by the frontend |
+| `WADDINGTON_AUTH_PATH` | `~/.waddington/agent/auth.json` (own store; `WADDINGTON_REUSE_FEYNMAN=1` reuses `~/.feynman`) | OAuth/API token store used by the frontend |
 | `WADDINGTON_PY` | `conda run -n waddington-bio python3` | How the frontend invokes the Python brain |
 | `WADDINGTON_CHAT_MODEL` | an authorized `anthropic/claude-haiku-4-5` | Conversation model (`provider/model`) |
 | `WADDINGTON_LLM_BACKEND` | `anthropic` | The C-arm's own LLM backend: `anthropic` (benchmark) / `pi` (tool-less bridge, any provider) / `mock` |

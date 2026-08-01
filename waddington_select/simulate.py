@@ -1,7 +1,7 @@
 """
 simulate.py — Replay a full sequential CRISPR campaign, narrated round by round.
 
-This demonstrates, on the nine benchmark phenotypes, what using System 2 for a *researcher's own
+This demonstrates, on the nine benchmark phenotypes, what using Waddington for a *researcher's own
 sequential experiment* would look like: each round the C-arm recommends a batch, the "wet-lab
 result" is revealed, and the next round adapts to it. Here the benchmark's ground-truth oracle
 plays the wet lab (that is the "simulation") — in real use the same loop is driven by the
@@ -78,7 +78,7 @@ def simulate(dataset: str, rounds: int = 5, n: int | None = None,
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Replay a narrated sequential gene-selection campaign (System 2 C-arm).",
+        description="Replay a narrated sequential gene-selection campaign (Waddington C-arm).",
     )
     parser.add_argument("--dataset", required=True, choices=ALL_DATASETS)
     parser.add_argument("--rounds", type=int, default=5)

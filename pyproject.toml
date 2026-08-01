@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "waddington-select"
 version = "0.1.0"
-description = "System 2: a hybrid ML + LLM + verified-memory agent for sequential CRISPR gene selection (the Waddington C-arm)."
+description = "A hybrid ML + LLM + verified-memory agent for sequential CRISPR gene selection (the Waddington C-arm)."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
