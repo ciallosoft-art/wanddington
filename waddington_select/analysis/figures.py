@@ -35,7 +35,7 @@ def discovery_curves(out: Path) -> Path:
     live in the comparison bars. Endpoint labels are selective (hero + floor) to avoid a collision
     where three methods converge around 0.22.
     """
-    df = D.load_methods()
+    df = D.load_methods(final=True)
     S.apply()
     fig, ax = plt.subplots(figsize=(6.4, 4.2))
 
@@ -72,7 +72,7 @@ def discovery_curves(out: Path) -> Path:
 
 def method_comparison(out: Path) -> Path:
     """Magnitude, one entity per bar → a single hue + direct value labels."""
-    means = D.method_means(D.load_methods())
+    means = D.method_means(D.load_methods(final=True))
     S.apply()
     fig, ax = plt.subplots(figsize=(6.4, 3.6))
 
@@ -94,7 +94,7 @@ def method_comparison(out: Path) -> Path:
 
 def dataset_heatmap(out: Path) -> Path:
     """Magnitude across two keys → sequential single-hue ramp, with values written in."""
-    df = D.load_methods()
+    df = D.load_methods(final=True)
     fr = D.final_round(df)
     m = fr.groupby(["arm", "dataset"])["hit_ratio"].mean().unstack()
     m = m.reindex([a for a in S.METHOD_ORDER if a in m.index])
