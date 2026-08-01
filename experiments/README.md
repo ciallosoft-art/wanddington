@@ -16,7 +16,7 @@ reported in the Waddington paper.
 ## Step 1 — Create environment
 
 ```bash
-conda env create -f experiments/environment.yml
+conda env create -f environment.yml   # the canonical env file lives at the repo root
 conda activate waddington-bio
 ```
 

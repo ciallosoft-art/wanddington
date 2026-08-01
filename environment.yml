@@ -8,11 +8,13 @@ name: waddington-bio
 channels:
   - conda-forge
 dependencies:
-  - python=3.11
-  - lightgbm>=4.0        # compiled — install from conda-forge
-  - numpy>=1.24
-  - pandas>=2.0
+  - python=3.12
   - pip
   - pip:
-      - anthropic>=0.40
+      - anthropic==0.109.1
+      - lightgbm==4.6.0
+      - numpy>=2.0
+      - pandas>=2.0
+      - scikit-learn>=1.9
+      - scipy>=1.17
       - -e .             # installs the waddington_select package (editable), per pyproject.toml

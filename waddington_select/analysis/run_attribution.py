@@ -6,7 +6,7 @@ from pathlib import Path
 from waddington_select.oracle import BENCHMARK_DATASETS
 from waddington_select.analysis.trace import traced_campaign, hit_rate_by_source
 
-OUT = Path(__file__).parent / "attribution_9ds.json"
+OUT = Path(__file__).resolve().parents[2] / "workspace" / "results" / "attribution_9ds.json"
 
 pooled = {"rounds": []}
 per_ds = {}
