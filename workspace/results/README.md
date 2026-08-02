@@ -20,9 +20,3 @@ results/
 ```
 
 `campaigns/` (interactive-frontend traces) is gitignored.
-
-## Legacy
-
-`runs/` and `summary.csv` are outputs of the earlier V6 **static-ranker** evaluation
-(`workspace/evaluation/benchmark.py`, viewed with `results_summary.py`), superseded by `sequential/`.
-They are kept as a historical record.
