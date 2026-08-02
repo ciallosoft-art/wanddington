@@ -8,10 +8,6 @@ CRISPR-screen feedback — which genes to perturb next, aiming to find "hit" gen
 possible. This is the **BDA-style active gene-selection** problem (BioDiscoveryAgent /
 PerTurboAgent lineage), *not* perturbation-effect prediction.
 
-> The earlier single-cell **paper-reproduction CLI** (GEARS/scGPT benchmarking, `/replicate`,
-> the Pi agent harness) has been split out and archived at `../waddington-repro-archive` with
-> full git history. This repository is now focused solely on the gene-selection agent.
-
 ---
 
 ## The agent (C-arm)

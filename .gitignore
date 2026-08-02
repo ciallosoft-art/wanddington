@@ -24,22 +24,6 @@ workspace/models/**/*.bin
 workspace/models/**/*.pt
 workspace/models/**/*.safetensors
 
-# Model workspaces: upstream model source code, cloned separately
-# Only workspace/models/README.md and workspace/registry.json are tracked
-workspace/models/gears/
-workspace/models/scgpt/
-workspace/models/cpa/
-workspace/models/txpert/
-workspace/models/scouter/
-workspace/models/state/
-workspace/models/systema/
-workspace/models/scpram/
-workspace/models/perturbgraph/
-workspace/models/cpa_workspace/
-workspace/models/evaluate_framework/
-workspace/models/perturbgraph_workspace/
-workspace/models/scpram_workspace/
-
 # Experiment results (keep scripts, not raw outputs)
 experiments/results/
 experiments/.plans/*.lock

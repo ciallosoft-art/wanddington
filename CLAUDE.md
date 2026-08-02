@@ -6,10 +6,6 @@ A Python research project: a hybrid ML + LLM + verified-memory agent for sequent
 selection (the "C-arm"). The agent code is the `waddington_select`
 package; data/results live under `workspace/`; the paper's tables are in `docs/`.
 
-The earlier single-cell **paper-reproduction CLI** (GEARS/scGPT, the Pi/TypeScript harness) was
-split out to `../waddington-repro-archive` (full git history preserved) and is no longer part of
-this repo.
-
 ## How to run
 
 Everything runs in the `waddington-bio` conda env. From the repo root:

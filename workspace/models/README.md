@@ -10,7 +10,3 @@ Per-dataset **LightGBM** gene-selection priors used by the C-arm's online adapti
 These are the frozen priors behind the `static_ranker` and the online arm's round-1 ranking. Rebuild them
 from the feature pipeline in `workspace/evaluation/` (`bootstrap_lgbm.py`; features from
 `prep_*.py` / `gene_ranker.py`).
-
-> The large single-cell perturbation-prediction model workspaces from the earlier paper-reproduction
-> project (GEARS, scGPT, CPA, …) were split out to `../waddington-repro-archive` and are not part of this
-> repository (gitignored here).

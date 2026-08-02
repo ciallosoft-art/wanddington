@@ -25,10 +25,6 @@ Ablation arms:
   waddington_c_no_ml          C minus online retraining (static LOO + LLM)
   waddington_c_shuffled_names   C with anonymous gene identifiers (A0: no info to reason over)
   waddington_c_feature_reasoning C with anonymous IDs + structural feature vectors (A1: reason, not recall)
-
-Development arms (archived, not needed for paper results):
-  waddington, waddington_v2 … waddington_v13, waddington_v15
-  → see workspace/agent/arms/archive/
 """
 
 from __future__ import annotations
@@ -71,23 +67,6 @@ _PAPER_ARMS = {
     "waddington_c_no_ml", "waddington_c_shuffled_names",
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
 } | {f"genedisco_{a}" for a in _GD_ACQ}
-
-_ARCHIVE_ARMS = {
-    "waddington", "waddington_v2", "waddington_v3", "waddington_v4",
-    "waddington_v5", "waddington_v6", "waddington_v7", "waddington_v8",
-    "waddington_v9", "waddington_v10", "waddington_v11", "waddington_v12",
-    "waddington_v13", "waddington_v15",
-}
-
-
-def _load_archive_arm(name: str, dataset_name: str, bs: int):
-    """Lazy-load a development-history arm from the archive directory."""
-    import importlib
-    mod = importlib.import_module(f".arms.archive.{name}_arm", package=__package__)
-    cls_name = "".join(p.capitalize() for p in name.split("_")) + "Arm"
-    # e.g. "waddington_v2" → "WaddingtonV2Arm"
-    cls = getattr(mod, cls_name)
-    return cls(dataset_name, bs)
 
 
 def make_arms(dataset_name: str, arm_names: list[str]) -> list:
@@ -132,9 +111,6 @@ def make_arms(dataset_name: str, arm_names: list[str]) -> list:
             arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
         elif name.startswith("genedisco_"):
             arms.append(GeneDiscoArm(dataset_name, bs, acquisition=name[len("genedisco_"):]))
-        elif name in _ARCHIVE_ARMS:
-            print(f"    [archive] Loading {name} from arms/archive/ ...")
-            arms.append(_load_archive_arm(name, dataset_name, bs))
         else:
             print(f"    [WARN] Unknown arm '{name}', skipping")
     return arms
@@ -287,10 +263,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Sequential oracle evaluation for paper experiments.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\n".join([
-            "Paper arms:  " + "  ".join(sorted(_PAPER_ARMS)),
-            "Archive arms (dev history): " + "  ".join(sorted(_ARCHIVE_ARMS)),
-        ]),
+        epilog="Paper arms:  " + "  ".join(sorted(_PAPER_ARMS)),
     )
     parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS,
                         help="Datasets to evaluate (default: all 9)")
