@@ -5,80 +5,332 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Waddington — gene selection</title>
   <style>
-    :root { --bg:#0f1216; --panel:#171b21; --ink:#e6e9ee; --muted:#8b97a6; --sage:#a7c080; --line:#242a32; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
-    header { padding:14px 20px; border-bottom:1px solid var(--line); }
-    header h1 { margin:0; font-size:16px; font-weight:600; }
-    header p { margin:2px 0 0; color:var(--muted); font-size:12px; }
-    #log { max-width:820px; margin:0 auto; padding:20px; }
-    .msg { margin:0 0 14px; }
-    .msg .who { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:3px; }
-    .msg.you .bubble { background:#1d2530; }
-    .msg.bot .bubble { background:var(--panel); }
-    .bubble { padding:10px 14px; border-radius:10px; white-space:pre-wrap; word-wrap:break-word; }
-    .genes { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
-    .gene { background:#20303a; color:var(--sage); border:1px solid #2c3d45; border-radius:6px; padding:2px 8px; font:12px ui-monospace,monospace; }
-    .meta { color:var(--muted); font-size:12px; margin-top:6px; }
-    pre { overflow-x:auto; background:#10151b; padding:10px; border-radius:8px; }
-    form { position:sticky; bottom:0; background:var(--bg); border-top:1px solid var(--line); padding:12px 20px; }
-    .row { max-width:820px; margin:0 auto; display:flex; gap:8px; }
-    input { flex:1; background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:10px 12px; font-size:15px; }
-    button { background:var(--sage); color:#12331a; border:0; border-radius:8px; padding:0 18px; font-weight:600; cursor:pointer; }
-    button:disabled { opacity:.5; cursor:default; }
+    :root {
+      --bg:#0f1216; --sidebar:#0a0d11; --panel:#171b21; --panel-2:#1d232b;
+      --ink:#e9edf2; --muted:#8b97a6; --faint:#5b6675;
+      --sage:#a7c080; --sage-dim:#7f9c5f; --sage-ink:#12331a;
+      --line:#242a32; --line-soft:#1b2027; --user-bubble:#232c37;
+      --radius:14px; --shadow:0 8px 30px rgba(0,0,0,.35);
+    }
+    * { box-sizing:border-box; }
+    html, body { height:100%; }
+    body {
+      margin:0; background:var(--bg); color:var(--ink);
+      font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    button { font-family:inherit; }
+
+    /* ---------- App shell ---------- */
+    .app { display:grid; grid-template-columns:270px 1fr; height:100vh; overflow:hidden; }
+
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      background:var(--sidebar); border-right:1px solid var(--line-soft);
+      display:flex; flex-direction:column; min-height:0;
+    }
+    .brand { display:flex; align-items:center; gap:10px; padding:16px 16px 12px; }
+    .brand .logo {
+      width:30px; height:30px; border-radius:9px; flex:none;
+      background:linear-gradient(145deg,var(--sage),var(--sage-dim));
+      display:grid; place-items:center; font-size:16px;
+    }
+    .brand .name { font-weight:650; font-size:15px; letter-spacing:.01em; }
+    .brand .sub { font-size:11px; color:var(--faint); }
+    .new-chat {
+      margin:4px 12px 8px; padding:10px 12px; display:flex; align-items:center; gap:8px;
+      background:var(--panel); color:var(--ink); border:1px solid var(--line);
+      border-radius:10px; cursor:pointer; font-size:14px; font-weight:550; transition:background .15s,border-color .15s;
+    }
+    .new-chat:hover { background:var(--panel-2); border-color:#2f3742; }
+    .new-chat .plus { font-size:17px; line-height:1; color:var(--sage); }
+    .history-label { padding:12px 18px 6px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); }
+    .history { flex:1; overflow-y:auto; padding:0 8px 12px; }
+    .history::-webkit-scrollbar, .chat-scroll::-webkit-scrollbar { width:8px; }
+    .history::-webkit-scrollbar-thumb, .chat-scroll::-webkit-scrollbar-thumb { background:#222a33; border-radius:8px; }
+    .chat-item {
+      position:relative; display:flex; align-items:center; gap:8px;
+      padding:9px 10px; margin:2px 0; border-radius:9px; cursor:pointer;
+      color:var(--muted); font-size:13.5px; transition:background .12s,color .12s;
+    }
+    .chat-item:hover { background:var(--panel); color:var(--ink); }
+    .chat-item.active { background:var(--panel-2); color:var(--ink); }
+    .chat-item .ci-icon { flex:none; opacity:.7; font-size:13px; }
+    .chat-item .ci-title { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chat-item .ci-del {
+      flex:none; opacity:0; border:0; background:transparent; color:var(--faint);
+      cursor:pointer; font-size:15px; padding:2px 4px; border-radius:6px; line-height:1;
+    }
+    .chat-item:hover .ci-del { opacity:1; }
+    .chat-item .ci-del:hover { color:#e88; background:#2a1e1e; }
+    .history-empty { padding:14px 18px; color:var(--faint); font-size:12.5px; }
+    .sidebar-foot { border-top:1px solid var(--line-soft); padding:12px 16px; font-size:11.5px; color:var(--faint); }
+    .sidebar-foot code { color:var(--muted); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+
+    /* ---------- Main column ---------- */
+    .main { display:flex; flex-direction:column; min-width:0; min-height:0; position:relative; }
+    .topbar {
+      display:none; align-items:center; gap:12px; padding:12px 16px;
+      border-bottom:1px solid var(--line-soft); background:var(--bg);
+    }
+    .topbar .menu-btn { background:transparent; border:0; color:var(--ink); font-size:20px; cursor:pointer; padding:2px 6px; }
+    .topbar .tb-title { font-weight:600; font-size:15px; }
+
+    .chat-scroll { flex:1; overflow-y:auto; scroll-behavior:smooth; }
+    .chat-inner { max-width:800px; margin:0 auto; padding:26px 20px 8px; }
+
+    /* ---------- Turns ---------- */
+    .turn { display:flex; gap:14px; padding:12px 0; animation:rise .25s ease; }
+    @keyframes rise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+    .avatar {
+      width:30px; height:30px; border-radius:8px; flex:none; display:grid; place-items:center;
+      font-size:14px; font-weight:650; margin-top:2px;
+    }
+    .turn.bot .avatar { background:linear-gradient(145deg,var(--sage),var(--sage-dim)); color:var(--sage-ink); }
+    .turn.you .avatar { background:var(--panel-2); color:var(--muted); border:1px solid var(--line); font-size:12px; }
+    .content { flex:1; min-width:0; padding-top:1px; }
+    .who { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--faint); margin:0 0 4px; }
+    .bubble { background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius); padding:12px 15px; white-space:pre-wrap; word-wrap:break-word; overflow-wrap:anywhere; }
+    .turn.you .bubble { background:var(--user-bubble); border-color:#2a3440; }
+    .bubble b { color:#f2f5f8; }
+
+    .genes { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+    .gene {
+      background:#1b2a22; color:var(--sage); border:1px solid #2b3d31; border-radius:7px;
+      padding:3px 9px; font:12.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .meta { color:var(--muted); font-size:12.5px; margin-top:8px; }
+    .bubble pre {
+      overflow-x:auto; background:#0c1015; border:1px solid var(--line-soft);
+      padding:11px 13px; border-radius:10px; margin:10px 0 0;
+      font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; color:#cdd6df;
+    }
+    .file-input {
+      display:block; margin-top:10px; font-size:12.5px; color:var(--muted);
+    }
+    .file-input::file-selector-button {
+      background:var(--panel-2); color:var(--ink); border:1px solid var(--line);
+      border-radius:8px; padding:6px 12px; margin-right:10px; cursor:pointer; font-size:12.5px;
+    }
+    .file-input::file-selector-button:hover { border-color:var(--sage-dim); }
+
+    /* typing dots */
+    .dots { display:inline-flex; gap:4px; align-items:center; height:20px; }
+    .dots i { width:6px; height:6px; border-radius:50%; background:var(--muted); animation:blink 1.2s infinite ease-in-out; }
+    .dots i:nth-child(2){ animation-delay:.2s; } .dots i:nth-child(3){ animation-delay:.4s; }
+    @keyframes blink { 0%,80%,100%{ opacity:.25; transform:scale(.8);} 40%{ opacity:1; transform:scale(1);} }
+
+    /* ---------- Welcome hero ---------- */
+    .hero { max-width:720px; margin:0 auto; padding:8vh 20px 20px; text-align:center; }
+    .hero .mark {
+      width:56px; height:56px; border-radius:16px; margin:0 auto 18px;
+      background:linear-gradient(145deg,var(--sage),var(--sage-dim));
+      display:grid; place-items:center; font-size:28px; box-shadow:var(--shadow);
+    }
+    .hero h1 { font-size:24px; font-weight:650; margin:0 0 8px; letter-spacing:.01em; }
+    .hero p { color:var(--muted); font-size:14.5px; margin:0 auto 26px; max-width:520px; }
+    .suggestions { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:560px; margin:0 auto; }
+    .suggestion {
+      text-align:left; background:var(--panel); border:1px solid var(--line);
+      border-radius:12px; padding:12px 14px; cursor:pointer; color:var(--ink);
+      transition:background .15s,border-color .15s,transform .1s;
+    }
+    .suggestion:hover { background:var(--panel-2); border-color:#303a45; transform:translateY(-1px); }
+    .suggestion .s-icon { font-size:16px; }
+    .suggestion .s-title { font-size:13.5px; font-weight:550; margin-top:6px; }
+    .suggestion .s-desc { font-size:12px; color:var(--muted); margin-top:2px; }
+
+    /* ---------- Composer ---------- */
+    .composer-wrap { border-top:1px solid var(--line-soft); background:linear-gradient(var(--bg),var(--bg)); padding:14px 20px 10px; }
+    .composer { max-width:800px; margin:0 auto; }
+    .attach-chip {
+      display:none; align-items:center; gap:8px; margin:0 4px 8px; padding:7px 10px;
+      background:var(--panel-2); border:1px solid var(--line); border-radius:10px; font-size:12.5px; color:var(--muted); width:max-content; max-width:100%;
+    }
+    .attach-chip.show { display:inline-flex; }
+    .attach-chip .ac-name { color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px; }
+    .attach-chip .ac-x { border:0; background:transparent; color:var(--muted); cursor:pointer; font-size:15px; line-height:1; padding:0 2px; }
+    .attach-chip .ac-x:hover { color:#e88; }
+    .input-box {
+      display:flex; align-items:flex-end; gap:8px; background:var(--panel);
+      border:1px solid var(--line); border-radius:20px; padding:8px 8px 8px 10px;
+      box-shadow:var(--shadow); transition:border-color .15s;
+    }
+    .input-box:focus-within { border-color:var(--sage-dim); }
+    .icon-btn {
+      flex:none; width:38px; height:38px; border-radius:12px; border:0; background:transparent;
+      color:var(--muted); cursor:pointer; font-size:19px; display:grid; place-items:center; transition:background .12s,color .12s;
+    }
+    .icon-btn:hover { background:var(--panel-2); color:var(--ink); }
+    #q {
+      flex:1; resize:none; border:0; outline:0; background:transparent; color:var(--ink);
+      font:15px/1.5 inherit; padding:9px 4px; max-height:200px; min-height:22px;
+    }
+    #q::placeholder { color:var(--faint); }
+    .send-btn {
+      flex:none; width:38px; height:38px; border-radius:12px; border:0; cursor:pointer;
+      background:var(--sage); color:var(--sage-ink); display:grid; place-items:center; transition:opacity .15s,transform .1s;
+    }
+    .send-btn:hover { transform:translateY(-1px); }
+    .send-btn:disabled { opacity:.4; cursor:default; transform:none; }
+    .send-btn svg { width:18px; height:18px; }
+    .composer-hint { max-width:800px; margin:8px auto 0; text-align:center; font-size:11.5px; color:var(--faint); }
+
+    /* ---------- Responsive ---------- */
+    .scrim { display:none; }
+    @media (max-width:820px) {
+      .app { grid-template-columns:1fr; }
+      .sidebar {
+        position:fixed; z-index:30; top:0; bottom:0; left:0; width:280px;
+        transform:translateX(-100%); transition:transform .2s ease;
+      }
+      .app.nav-open .sidebar { transform:none; }
+      .app.nav-open .scrim { display:block; position:fixed; inset:0; z-index:20; background:rgba(0,0,0,.5); }
+      .topbar { display:flex; }
+      .suggestions { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Waddington — conversational gene selection</h1>
-    <p>Tool-less shell over the C-arm pipeline. Name a phenotype; report results to adapt the next round.</p>
-  </header>
-  <div id="log"></div>
-  <form id="f">
-    <div class="row">
-      <input id="q" autocomplete="off" placeholder="e.g. Recommend genes for an IFNG screen" autofocus />
-      <button id="send" type="submit">Send</button>
-    </div>
-  </form>
+  <div class="app" id="app">
+    <div class="scrim" id="scrim"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">🧬</div>
+        <div>
+          <div class="name">Waddington</div>
+          <div class="sub">CRISPR gene selection</div>
+        </div>
+      </div>
+      <button type="button" class="new-chat" id="newChat"><span class="plus">＋</span> New chat</button>
+      <div class="history-label">History</div>
+      <div class="history" id="history"></div>
+      <div class="sidebar-foot">
+        Tool-less shell over the <code>C-arm</code> pipeline.<br />Genes come from the deterministic model — never invented.
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="topbar">
+        <button type="button" class="menu-btn" id="menuBtn" aria-label="Toggle history">☰</button>
+        <div class="tb-title">Waddington</div>
+      </div>
+
+      <div class="chat-scroll" id="scroll">
+        <div class="chat-inner" id="log"></div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="attach-chip" id="attachChip">
+            <span>📎</span><span class="ac-name" id="attachName"></span>
+            <button type="button" class="ac-x" id="attachRemove" title="Remove attachment">✕</button>
+          </div>
+          <form class="input-box" id="f">
+            <input type="file" id="fileInput" accept=".csv,.txt,.tsv" hidden />
+            <button type="button" class="icon-btn" id="attachBtn" title="Attach a dataset / results file">📎</button>
+            <textarea id="q" rows="1" autocomplete="off" placeholder="Message Waddington…  (name a phenotype, report results, or attach a screen file)" autofocus></textarea>
+            <button type="submit" class="send-btn" id="send" title="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </button>
+          </form>
+          <div class="composer-hint">Waddington drives a deterministic CRISPR gene-selection pipeline. Report hits each round to adapt the next batch.</div>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <script>
-    const log = document.getElementById("log");
-    const form = document.getElementById("f");
-    const q = document.getElementById("q");
-    const send = document.getElementById("send");
-    let state = { dataset: null, hits: [], misses: [] };
+    "use strict";
+    // ---------------- DOM ----------------
+    const app        = document.getElementById("app");
+    const log        = document.getElementById("log");
+    const scroller   = document.getElementById("scroll");
+    const form       = document.getElementById("f");
+    const q          = document.getElementById("q");
+    const send       = document.getElementById("send");
+    const historyEl  = document.getElementById("history");
+    const fileInput  = document.getElementById("fileInput");
+    const attachBtn  = document.getElementById("attachBtn");
+    const attachChip = document.getElementById("attachChip");
+    const attachName = document.getElementById("attachName");
+    const attachRemove = document.getElementById("attachRemove");
 
-    function el(cls, html) { const d = document.createElement("div"); d.className = cls; if (html != null) d.innerHTML = html; return d; }
+    // ---------------- persistence ----------------
+    const LS_KEY = "waddington.chats.v1";
+    const NEW_TITLE = "New chat";
+    let chats = [];        // newest first: { id, title, msgs:[], state, updatedAt }
+    let current = null;    // active chat
+    let appState = { dataset:null, hits:[], misses:[], campaign:null, onboarding:null };
+    let staged = null;     // { name, content } pending composer attachment
+
+    function loadChats() {
+      try { chats = JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+      catch { chats = []; }
+      if (!Array.isArray(chats)) chats = [];
+    }
+    function saveChats() {
+      try { localStorage.setItem(LS_KEY, JSON.stringify(chats.slice(0, 100))); } catch {}
+    }
+    function freshState() { return { dataset:null, hits:[], misses:[], campaign:null, onboarding:null }; }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+    // ---------------- helpers ----------------
+    function el(cls, html) { const d = document.createElement("div"); if (cls) d.className = cls; if (html != null) d.innerHTML = html; return d; }
     function esc(s) { return String(s).replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c])); }
+    function scrollDown() { requestAnimationFrame(() => { scroller.scrollTop = scroller.scrollHeight; }); }
 
-    function addYou(text) {
-      const m = el("msg you"); m.appendChild(el("who", "you"));
-      m.appendChild(el("bubble", esc(text))); log.appendChild(m); scroll();
-    }
-    function addBot(node) {
-      const m = el("msg bot"); m.appendChild(el("who", "waddington"));
-      m.appendChild(node); log.appendChild(m); scroll();
-    }
-    function scroll() { window.scrollTo(0, document.body.scrollHeight); }
+    function clearHero() { const h = log.querySelector(".hero"); if (h) h.remove(); }
 
+    // avatar + content row
+    function turnRow(who, node) {
+      const row = el("turn " + who);
+      const av = el("avatar", who === "you" ? "You" : "🧬");
+      const content = el("content");
+      content.appendChild(el("who", who === "you" ? "You" : "Waddington"));
+      content.appendChild(node);
+      row.appendChild(av); row.appendChild(content);
+      return row;
+    }
+    function addYou(text) { clearHero(); log.appendChild(turnRow("you", el("bubble", esc(text)))); scrollDown(); }
+    function addBot(node) { clearHero(); log.appendChild(turnRow("bot", node)); scrollDown(); }
+
+    function fileInputNode() {
+      const up = document.createElement("input");
+      up.type = "file"; up.accept = ".csv,.txt,.tsv"; up.className = "file-input";
+      up.onchange = () => uploadFile(up);
+      return up;
+    }
+
+    // Gene chips are identifiers, never prose — mark them translate="no" so browser
+    // page-translation (Google Translate etc.) leaves symbols intact (COPS4 must not
+    // become “警察4”). Prose/narration stays translatable.
+    function genesBox(list) {
+      const g = el("genes"); g.setAttribute("translate", "no"); g.classList.add("notranslate");
+      for (const x of list) {
+        const chip = el("gene", esc(x)); chip.setAttribute("translate", "no");
+        g.appendChild(chip);
+      }
+      return g;
+    }
+
+    // ---------------- result rendering (kinds unchanged) ----------------
     function renderResult(r) {
       if (r.kind === "suggest") {
         const b = el("bubble");
         b.appendChild(el(null, r.narration ? esc(r.narration) : ("Recommended batch for " + esc(r.dataset) + ".")));
-        const g = el("genes");
-        for (const gene of r.genes) g.appendChild(el("gene", esc(gene)));
-        b.appendChild(g);
+        b.appendChild(genesBox(r.genes));
         b.appendChild(el("meta", `round ${r.info?.round ?? 1} · ${r.genes.length} genes · route ${esc(r.info?.route||"?")} · report hits to adapt`));
         addBot(b);
       } else if (r.kind === "onboard") {
         const b = el("bubble");
-        const chips = (list) => { const g = el("genes"); for (const x of list) g.appendChild(el("gene", esc(x))); return g; };
+        const chips = genesBox;
         if (r.stage === "pool") {
           b.appendChild(el(null, `<b>Onboarding · ${esc(r.name)}</b> — ${esc(r.text)}`));
-          const up = document.createElement("input");
-          up.type = "file"; up.accept = ".csv,.txt,.tsv";
-          up.onchange = () => uploadFile(up);
-          b.appendChild(up);
+          b.appendChild(fileInputNode());
         } else if (r.stage === "anchors") {
           b.appendChild(el(null, `<b>Onboarding · ${esc(r.name)}</b> — proposed anchor genes (${r.proposed.length}):`));
           b.appendChild(chips(r.proposed));
@@ -94,15 +346,12 @@
       } else if (r.kind === "campaign") {
         if (r.stage === "await") { addBot(el("bubble", esc(r.text))); return; }
         const b = el("bubble");
-        const chips = (list) => { const g = el("genes"); for (const x of list) g.appendChild(el("gene", esc(x))); return g; };
+        const chips = genesBox;
         if (r.stage === "awaiting_results") {
           if (r.text) { b.appendChild(el(null, esc(r.text))); }
           else {
             b.appendChild(el(null, `<b>Round ${r.round} committed</b> · ${r.genes.length} genes tested. Upload this round's screen readout to reveal hits:`));
-            const up = document.createElement("input");
-            up.type = "file"; up.accept = ".csv,.txt,.tsv";
-            up.onchange = () => uploadFile(up);
-            b.appendChild(up);
+            b.appendChild(fileInputNode());
             b.appendChild(el("meta", "MAGeCK gene_summary or Gene,Score CSV — or type “stop” to end"));
           }
           addBot(b); return;
@@ -114,7 +363,7 @@
             ? "type “commit” to lock in this batch (you'll upload results next), or “stop”"
             : "type “commit” to test this batch (reveal phenotype), or “stop” to end"));
         } else if (r.stage === "revealed") {
-          b.appendChild(el(null, `<b>Round ${r.round} results:</b> ${r.roundHits.length} hits — ${esc(r.roundHits.join(", ") || "(none)")}`));
+          b.appendChild(el(null, `<b>Round ${r.round} results:</b> ${r.roundHits.length} hits — <span translate="no">${esc(r.roundHits.join(", ") || "(none)")}</span>`));
           b.appendChild(el("meta", `cumulative ${r.cumulative}/${r.total} (${(r.ratio * 100).toFixed(1)}%)`));
           b.appendChild(el(null, `<b>Round ${r.nextRound}</b> proposed batch (${r.next.length}):`));
           b.appendChild(chips(r.next));
@@ -128,49 +377,213 @@
         }
         addBot(b);
       } else if (r.kind === "simulate") {
-        const b = el("bubble"); const pre = document.createElement("pre"); pre.textContent = r.text; b.appendChild(pre); addBot(b);
+        const b = el("bubble"); const pre = document.createElement("pre"); pre.setAttribute("translate", "no"); pre.textContent = r.text; b.appendChild(pre); addBot(b);
       } else {
         addBot(el("bubble", esc(r.text || "…")));
       }
     }
 
-    async function postMessage({ message = "", file = null }) {
-      send.disabled = true;
-      const thinking = el("bubble", "…"); addBot(thinking);
-      try {
-        const res = await fetch("/api/message", {
-          method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ message, file, state }),
-        });
-        const r = await res.json();
-        thinking.parentElement.remove();
-        if (r.state) state = r.state;
-        renderResult(r);
-      } catch (err) {
-        thinking.textContent = "[error] " + err.message;
-      } finally {
-        send.disabled = false; q.focus();
+    // Re-render a stored message (no network, no re-record).
+    function renderMsg(m) {
+      if (m.role === "you") addYou(m.text);
+      else if (m.result) renderResult(m.result);
+      else if (m.text != null) addBot(el("bubble", esc(m.text)));
+    }
+
+    // ---------------- welcome hero ----------------
+    const GREETINGS = [
+      "What phenotype are we screening today?",
+      "Point me at a phenotype and I'll rank the genes worth testing next.",
+      "Ready when you are — name a CRISPR screen and I'll propose the genes.",
+      "Which screen should we tackle? I'll handle the gene selection.",
+      "New screen? Name the phenotype (or register your own) and we'll begin.",
+      "Let's find some hits — which phenotype are you after?",
+      "Tell me the readout and I'll pick the genes worth perturbing next.",
+    ];
+    const SUGGESTIONS = [
+      { icon:"🧫", title:"Recommend a batch", desc:"Genes for an IFNG screen", send:"Recommend genes for an IFNG screen" },
+      { icon:"🔬", title:"Run an experiment", desc:"Round-by-round, adapt on results", send:"Let's run an interactive round-by-round experiment on IFNG" },
+      { icon:"▶️", title:"Simulate end-to-end", desc:"Oracle plays the wet lab", send:"Simulate an IFNG screen end to end over 5 rounds" },
+      { icon:"➕", title:"Register my screen", desc:"Onboard your own phenotype", send:"I want to register my own CRISPR screen" },
+    ];
+    function renderHero() {
+      log.innerHTML = "";
+      const hero = el("hero");
+      hero.appendChild(el("mark", "🧬"));
+      const h1 = document.createElement("h1"); h1.textContent = "Waddington"; hero.appendChild(h1);
+      const p = document.createElement("p"); p.textContent = GREETINGS[Math.floor(Math.random() * GREETINGS.length)]; hero.appendChild(p);
+      const grid = el("suggestions");
+      for (const s of SUGGESTIONS) {
+        const card = document.createElement("button");
+        card.type = "button"; card.className = "suggestion";
+        card.innerHTML = `<div class="s-icon">${s.icon}</div><div class="s-title">${esc(s.title)}</div><div class="s-desc">${esc(s.desc)}</div>`;
+        card.onclick = () => sendTurn(s.send);
+        grid.appendChild(card);
+      }
+      hero.appendChild(grid);
+      log.appendChild(hero);
+    }
+
+    // ---------------- sidebar / history ----------------
+    function chatTitle(c) { return c.title && c.title !== NEW_TITLE ? c.title : NEW_TITLE; }
+    function renderSidebar() {
+      historyEl.innerHTML = "";
+      if (!chats.length) { historyEl.appendChild(el("history-empty", "No conversations yet.")); return; }
+      for (const c of chats) {
+        const item = el("chat-item" + (current && c.id === current.id ? " active" : ""));
+        item.appendChild(el("ci-icon", "💬"));
+        const t = el("ci-title"); t.textContent = chatTitle(c); item.appendChild(t);
+        const del = document.createElement("button");
+        del.className = "ci-del"; del.textContent = "🗑"; del.title = "Delete conversation";
+        del.onclick = (e) => { e.stopPropagation(); deleteChat(c.id); };
+        item.appendChild(del);
+        item.onclick = () => selectChat(c.id);
+        historyEl.appendChild(item);
       }
     }
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const text = q.value.trim();
-      if (!text) return;
-      addYou(text); q.value = "";
-      postMessage({ message: text });
-    });
+    function refreshView() {
+      log.innerHTML = "";
+      if (!current || !current.msgs.length) { renderHero(); return; }
+      for (const m of current.msgs) renderMsg(m);
+      scrollDown();
+    }
 
+    function newChat() {
+      // Reuse an existing empty chat instead of piling up blanks.
+      const empty = chats.find(c => !c.msgs.length);
+      current = empty || { id:uid(), title:NEW_TITLE, msgs:[], state:freshState(), updatedAt:Date.now() };
+      if (!empty) chats.unshift(current);
+      appState = current.state || freshState();
+      saveChats(); renderSidebar(); refreshView();
+      closeNav(); q.focus();
+    }
+    function selectChat(id) {
+      const c = chats.find(x => x.id === id); if (!c) return;
+      current = c; appState = c.state || freshState();
+      renderSidebar(); refreshView(); closeNav();
+    }
+    function deleteChat(id) {
+      chats = chats.filter(c => c.id !== id);
+      if (current && current.id === id) current = null;
+      saveChats();
+      if (!current) { if (chats.length) selectChat(chats[0].id); else newChat(); }
+      else renderSidebar();
+    }
+    function setTitleFrom(text) {
+      if (current.title && current.title !== NEW_TITLE) return;
+      const t = (text || "").trim().replace(/\s+/g, " ");
+      if (t) current.title = t.length > 42 ? t.slice(0, 42) + "…" : t;
+    }
+    function pushMsg(m) {
+      current.msgs.push(m);
+      current.updatedAt = Date.now();
+      current.state = appState;
+      // bump to top of history
+      chats = [current, ...chats.filter(c => c.id !== current.id)];
+      saveChats(); renderSidebar();
+    }
+
+    // ---------------- network turn ----------------
+    function composerBusy(b) { send.disabled = b; }
+    function addThinking() {
+      const b = el("bubble"); b.innerHTML = `<span class="dots"><i></i><i></i><i></i></span>`;
+      const row = turnRow("bot", b); clearHero(); log.appendChild(row); scrollDown();
+      return row;
+    }
+
+    async function ask(message, file) {
+      composerBusy(true);
+      const thinking = addThinking();
+      try {
+        const res = await fetch("/api/message", {
+          method:"POST", headers:{ "content-type":"application/json" },
+          body: JSON.stringify({ message, file, state: appState }),
+        });
+        const r = await res.json();
+        thinking.remove();
+        if (r.state) appState = r.state;
+        renderResult(r);
+        pushMsg({ role:"bot", result:r });
+      } catch (err) {
+        const b = thinking.querySelector(".bubble");
+        if (b) b.textContent = "[error] " + err.message;
+      } finally {
+        composerBusy(false); q.focus();
+      }
+    }
+
+    // send a typed/clicked message (optionally with the staged composer file)
+    function sendTurn(message) {
+      const text = (message || "").trim();
+      const file = staged;
+      if (!text && !file) return;
+      const label = file
+        ? (text ? `${text}\n📎 ${file.name}` : `📎 Attached ${file.name}`)
+        : text;
+      addYou(label);
+      setTitleFrom(text || (file ? file.name : ""));
+      pushMsg({ role:"you", text:label });
+      clearStaged();
+      ask(text, file);
+    }
+
+    // send a file chosen from an inline (contextual) file input
     function uploadFile(input) {
       const f = input.files && input.files[0];
       if (!f) return;
       const reader = new FileReader();
       reader.onload = () => {
-        addYou(`📎 uploaded ${f.name} (${(f.size / 1024).toFixed(1)} KB)`);
-        postMessage({ file: { name: f.name, content: String(reader.result) } });
+        const label = `📎 uploaded ${f.name} (${(f.size / 1024).toFixed(1)} KB)`;
+        addYou(label);
+        pushMsg({ role:"you", text:label });
+        ask("", { name:f.name, content:String(reader.result) });
       };
       reader.readAsText(f);
     }
+
+    // ---------------- composer attach (persistent) ----------------
+    function clearStaged() { staged = null; fileInput.value = ""; attachChip.classList.remove("show"); }
+    attachBtn.onclick = () => fileInput.click();
+    fileInput.onchange = () => {
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        staged = { name:f.name, content:String(reader.result) };
+        attachName.textContent = `${f.name} (${(f.size / 1024).toFixed(1)} KB)`;
+        attachChip.classList.add("show");
+        q.focus();
+      };
+      reader.readAsText(f);
+    };
+    attachRemove.onclick = clearStaged;
+
+    // ---------------- composer input behaviour ----------------
+    function autogrow() { q.style.height = "auto"; q.style.height = Math.min(q.scrollHeight, 200) + "px"; }
+    q.addEventListener("input", autogrow);
+    q.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+    });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (send.disabled) return;
+      const text = q.value.trim();
+      if (!text && !staged) return;
+      q.value = ""; autogrow();
+      sendTurn(text);
+    });
+
+    // ---------------- nav (mobile) ----------------
+    function closeNav() { app.classList.remove("nav-open"); }
+    document.getElementById("menuBtn").onclick = () => app.classList.toggle("nav-open");
+    document.getElementById("scrim").onclick = closeNav;
+    document.getElementById("newChat").onclick = newChat;
+
+    // ---------------- boot ----------------
+    loadChats();
+    if (chats.length) selectChat(chats[0].id);
+    else newChat();
   </script>
 </body>
 </html>
