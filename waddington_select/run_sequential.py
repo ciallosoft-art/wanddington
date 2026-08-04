@@ -37,7 +37,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-from .oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
+from .oracle import BENCHMARK_DATASETS, BATCH_SIZES, DatasetOracle
 from .sequential_runner import RunResult, SequentialRunner
 
 # ── Paper arms ──────────────────────────────────────────────────────────────
@@ -265,8 +265,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Paper arms:  " + "  ".join(sorted(_PAPER_ARMS)),
     )
-    parser.add_argument("--datasets", nargs="+", default=ALL_DATASETS,
-                        help="Datasets to evaluate (default: all 9)")
+    parser.add_argument("--datasets", nargs="+", default=BENCHMARK_DATASETS,
+                        help="Datasets to evaluate (default: the 9 benchmark screens with ground "
+                             "truth; registered user phenotypes have no oracle and are excluded)")
     parser.add_argument("--arms", nargs="+",
                         default=["coreset", "llm_reasoning", "waddington_c"],
                         help="Arms to run")
