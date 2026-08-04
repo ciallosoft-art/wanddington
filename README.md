@@ -22,11 +22,17 @@ the feedback conditions the next round.
 | **LLM reasoning** (`LLMReasoningArm`, Claude Haiku, T=0) | Names genes from parametric biology, conditioned on task, feedback, and cross-experiment memory. Names are matched to the real gene pool; unmatched slots fall back to the LOO ranker. |
 | **Cross-experiment memory** (`memory_builder`) | Strategy summaries distilled from the *other* datasets (leave-one-out), injected into the LLM prompt. Uses **DeLM-style verified admission** — a mechanical strategy-label check plus an LLM verifier that rejects hallucinated gene names before an entry is written. |
 
-**Per-dataset routing** (`waddington_c_arm._classify`) picks the fusion mode:
+**Fusion.** The reported (leakage-free) system uses a single **global** weighted fusion — ML 0.80 /
+LLM 0.20 — on every screen, with the weight fixed on non-target screens. Unmatched LLM slots fall back
+to the LOO ranker.
 
-- `ml_heavy` (large, low-hit-rate screens) → weighted fusion, ML 0.80 / LLM 0.20
-- `baseline` (default) → weighted fusion, ML 0.60 / LLM 0.40
-- `two_stage` (mid-size, high-hit-rate) → ML shortlists 384 candidates, LLM re-ranks
+> **Legacy target-aware router (analyzed, not reported).** An earlier variant
+> (`waddington_c_arm._classify`) picks the fusion mode from the target screen's *realized* hit rate —
+> `ml_heavy` (ML 0.80 / LLM 0.20), `baseline` (0.60 / 0.40), or `two_stage` (ML shortlists 384, LLM
+> re-ranks). Because that reads a test-set statistic, it is a **leakage** variant kept only for the
+> §honest-router analysis (avg 0.256, no detected difference from the reported 0.251). It is **not** the
+> system we report. Enable it (and the metadata feature policy / no-anchor-features) via the flags in
+> **Reproduce the benchmark** below.
 
 ---
 
@@ -41,10 +47,25 @@ Hit ratio at round 5, mean over 5 seeds × 9 BDA benchmark datasets (DeLM-verifi
 | LOO-LightGBM (static) | 0.217 |
 | OnlineAdaptive | 0.224 |
 | B: LLM reasoning | 0.225 |
-| **C: Waddington (ours)** | **0.256** |
+| **C: Waddington (ours, leakage-free)** | **0.251** |
 
-Full per-dataset tables, the ablation study (memory / LLM / online-ML / gene-name-shuffle), and
-the architecture progression are in [`docs/results_tables.tex`](docs/results_tables.tex).
+The reported system is the **leakage-free, privilege-free** configuration (0.251): a *global* fusion
+weight (`w_llm = 0.2`, chosen on non-target screens — never the target's realized hit rate), a
+metadata-only DepMap feature policy, and **no** anchor-relative features. An earlier **target-aware
+routed** variant scores 0.256, but it reads the target screen's realized hit rate to pick its fusion
+mode (a test-set statistic), so we do **not** report it as the system — the two are statistically
+indistinguishable (paired −0.005, 95% CI [−0.018, 0.007]). See `§honest-router` in the paper.
+
+> **Where the advantage comes from (be honest):** the dominant ingredient is the **cross-experiment
+> supervised prior**, not agentic reasoning. A static LOO-LightGBM with *no* LLM already reaches 0.187
+> on the six screens shared with BioDiscoveryAgent — nearly double BDA's LLM agent (0.105) and
+> GeneDisco's active learning (0.113). Online adaptation and constrained LLM reasoning add a further,
+> smaller gain (against its *matched* static prior, 0.231 → 0.251, +0.020, 95% CI [0.007, 0.035]).
+> On genuinely *novel* (non-recurrent) hits the full system does **not** reliably beat the prior.
+
+Full per-dataset tables, the ablation study (memory / LLM / online-ML / gene-name-shuffle), the
+leakage-free router analysis, and the architecture progression are in
+[`docs/results_tables.tex`](docs/results_tables.tex).
 
 ---
 
@@ -132,6 +153,29 @@ conda run -n waddington-bio python3 -m waddington_select \
 # Rebuild the cross-experiment memory (with verified admission)
 conda run -n waddington-bio python3 -m waddington_select.memory_builder
 ```
+
+**Reported (leakage-free) vs legacy config.** By default `waddington_c` **is** the reported
+leakage-free system (avg 0.251): global `w_llm = 0.2`, metadata feature policy, no anchor features —
+none of which read the target screen's realized labels. No flags needed:
+
+```bash
+# Reported leakage-free C (0.251) — the plain default
+conda run -n waddington-bio python3 -m waddington_select --arms waddington_c --seeds 5 --rounds 5
+
+# Final-system paired statistics (matched-LOO, vs baselines, novel-hit)
+conda run -n waddington-bio python3 -m waddington_select.analysis.final_system_stats
+```
+
+To reproduce the **legacy target-aware routed** configuration (avg 0.256, reads the realized hit rate;
+used for the legacy SHAP / decomposition / ablation tables), set one flag:
+
+```bash
+WADDINGTON_LEGACY_ROUTER=1 conda run -n waddington-bio python3 -m waddington_select \
+    --arms waddington_c --seeds 5 --rounds 5
+```
+
+(`experiments/03_ablations.sh` sets `WADDINGTON_LEGACY_ROUTER=1` for you; `02_three_arm.sh` produces
+both configurations.)
 
 Arm names: `random`, `coreset`, `static_ranker`, `online_adaptive`, `llm_reasoning`,
 `waddington_c`, and the ablations `waddington_c_no_memory` / `_no_llm` / `_no_ml` /

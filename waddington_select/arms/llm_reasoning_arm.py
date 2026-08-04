@@ -139,6 +139,7 @@ class LLMReasoningArm(BaseArm):
         skill_library: SkillLibrary | None = None,
         dataset_hit_rate: float = 0.0,
         use_enrichment: bool = False,
+        drop_anchor_feats: bool | None = None,
     ) -> None:
         super().__init__("llm_reasoning", dataset_name, batch_size)
         self._seed = seed
@@ -147,8 +148,15 @@ class LLMReasoningArm(BaseArm):
         # Evolving skill library (Phase 1: trigger-conditioned retrieval, no evolution).
         self._skill_library = skill_library
         self._dataset_hit_rate = dataset_hit_rate
+        # The target-hit "block set" is a LEGACY-only leak-prevention filter that ITSELF reads the target
+        # screen's realized hits (to drop any skill whose directive names one). The leakage-free default
+        # reads no target labels, so it loads no block set at all (skill directives are not filtered by the
+        # target's hits). Only the legacy configuration populates it. Standalone baselines pass
+        # skill_library=None and so are always empty regardless of mode.
         self._block_genes: set[str] = (
-            load_dataset_hits(dataset_name) if skill_library is not None else set()
+            load_dataset_hits(dataset_name)
+            if (skill_library is not None and os.environ.get("WADDINGTON_LEGACY_ROUTER") == "1")
+            else set()
         )
         # Runtime enrichment: inject Enrichr pathways of the hits found so far (the C-arm's
         # enrichment-augmented "hybrid" — transplants the agent's winning ingredient).
@@ -163,8 +171,11 @@ class LLMReasoningArm(BaseArm):
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
         self._all_feats = [c for c in all_feats if c in df.columns]
         # Clean-headline variant (see online_adaptive_arm): drop anchor-relative features from the static
-        # padding ranker too, so no privileged anchor signal enters the batch by any path.
-        if os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1":
+        # padding ranker too, so no privileged anchor signal enters the batch by any path. Explicit
+        # `drop_anchor_feats` (from the C-arm) overrides the env var, scoping the default to the C-arm.
+        _drop = drop_anchor_feats if drop_anchor_feats is not None else (
+            os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1")
+        if _drop:
             self._all_feats = [c for c in self._all_feats
                                if c not in {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}]
         # Recurrence-baseline probe (see online_adaptive_arm): the static padding ranker also uses only

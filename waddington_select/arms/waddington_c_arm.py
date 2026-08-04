@@ -77,11 +77,48 @@ W_LLM_LARGE   = 0.20
 W_ML_DEFAULT  = 0.60
 W_LLM_DEFAULT = 0.40
 
+# ---- Reported leakage-free default vs. legacy target-aware opt-in -----------------------------------
+# The REPORTED system (paper §honest-router, avg 0.251) is the DEFAULT: a single global fusion weight
+# (w_llm = DEFAULT_HONEST_WLLM), a metadata-only DepMap feature policy, and no anchor-relative features
+# — none of which read the target screen's realized labels. Set WADDINGTON_LEGACY_ROUTER=1 to restore
+# the earlier target-aware routed configuration (avg 0.256, reads the realized hit rate) that the legacy
+# ablation / SHAP / decomposition tables were computed on. The explicit knobs (WADDINGTON_FORCE_WLLM /
+# _FEATURE_POLICY / _DROP_ANCHOR_FEATS) still override in either mode.
+DEFAULT_HONEST_WLLM = 0.20
+
+
+def _legacy_router() -> bool:
+    return os.environ.get("WADDINGTON_LEGACY_ROUTER") == "1"
+
+
+def _feature_policy() -> str:
+    """`metadata` (label-free; the reported default) unless legacy mode or an explicit override."""
+    pol = os.environ.get("WADDINGTON_FEATURE_POLICY")
+    if pol:
+        return pol
+    return "committed" if _legacy_router() else "metadata"
+
+
+def _drop_anchor_default() -> bool:
+    """Anchor-relative features are dropped by default (privileged-info audit); kept only in legacy mode."""
+    env = os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS")
+    if env is not None:
+        return env == "1"
+    return not _legacy_router()
+
+
+def _metadata_hit_rate(dataset_name: str) -> float:
+    """Label-free hit rate for conditioning the skills variant's trigger: a registered screen's
+    pre-declared `expected_hit_rate`, else 0.0. NEVER reads the target's realized hit labels — so the
+    leakage-free default reads no target outcome, even on the skills path (the standard C-arm ignores it)."""
+    rate = (load_registry().get(dataset_name) or {}).get("expected_hit_rate")
+    return float(rate) if rate else 0.0
+
 
 def _get_feature_config(dataset_name: str) -> tuple[Path, list[str]]:
-    # Honest-router variant: derive the DepMap feature policy from pre-experiment metadata only
+    # Reported default: derive the DepMap feature policy from pre-experiment metadata only
     # (modality / curated-flag / cell line), never from the target's realized labels. See router_protocol.
-    if os.environ.get("WADDINGTON_FEATURE_POLICY") == "metadata":
+    if _feature_policy() == "metadata":
         try:
             from ..router_protocol import feature_policy_metadata, SCREEN_METADATA
             if dataset_name in SCREEN_METADATA:
@@ -161,24 +198,40 @@ class WaddingtonCArm(BaseArm):
 
         training_csv, extra_feats = _get_feature_config(dataset_name)
 
-        n_genes, n_hits = _get_dataset_stats(dataset_name)
-        self._route = _classify(n_genes, n_hits)
-        # Honest-router variant: WADDINGTON_FORCE_WLLM pins a single global fusion weight on EVERY screen
-        # (weighted fusion, no hit-rate-triggered ml_heavy, no two_stage). Uses no realized hit rate.
+        # Fusion weight + dataset_hit_rate. The DEFAULT (reported, leakage-free) reads NO realized target
+        # labels: a single GLOBAL fusion weight on every screen, and a dataset_hit_rate taken only from
+        # pre-declared metadata (a registered screen's expected_hit_rate, else 0.0 — consumed solely by the
+        # skills variant's trigger; the standard C-arm ignores it). WADDINGTON_FORCE_WLLM pins an explicit
+        # global weight; WADDINGTON_LEGACY_ROUTER=1 restores the target-aware router (ml_heavy / two_stage /
+        # baseline) which DOES read the realized hit rate.
         force_wllm = os.environ.get("WADDINGTON_FORCE_WLLM")
-        if force_wllm is not None:
-            self._route = "baseline"
-            self._w_llm = float(force_wllm)
-            self._w_ml = 1.0 - self._w_llm
-        elif self._route == "ml_heavy":
-            self._w_ml, self._w_llm = W_ML_LARGE, W_LLM_LARGE
+        if _legacy_router():
+            n_genes, n_hits = _get_dataset_stats(dataset_name)          # legacy: reads realized labels
+            dataset_hit_rate = n_hits / max(n_genes, 1)
+            if force_wllm is not None:
+                self._route = "baseline"
+                self._w_llm = float(force_wllm)
+                self._w_ml = 1.0 - self._w_llm
+            else:
+                self._route = _classify(n_genes, n_hits)
+                if self._route == "ml_heavy":
+                    self._w_ml, self._w_llm = W_ML_LARGE, W_LLM_LARGE
+                else:
+                    self._w_ml, self._w_llm = W_ML_DEFAULT, W_LLM_DEFAULT
         else:
-            self._w_ml, self._w_llm = W_ML_DEFAULT, W_LLM_DEFAULT
+            dataset_hit_rate = _metadata_hit_rate(dataset_name)         # leakage-free: no realized-label read
+            self._route = "baseline"
+            self._w_llm = float(force_wllm) if force_wllm is not None else DEFAULT_HONEST_WLLM
+            self._w_ml = 1.0 - self._w_llm
 
+        # Anchor-drop is passed EXPLICITLY (not via the global env) so the leakage-free default is scoped
+        # to the C-arm's own child arms; the standalone baselines that share these classes are untouched.
+        drop_anchor = _drop_anchor_default()
         self._online = OnlineAdaptiveArm(
             dataset_name, batch_size,
             training_csv=training_csv,
             extra_feature_cols=extra_feats,
+            drop_anchor_feats=drop_anchor,
         )
 
         task = _load_task(dataset_name)
@@ -202,8 +255,9 @@ class WaddingtonCArm(BaseArm):
             training_csv=training_csv,
             extra_feature_cols=extra_feats,
             skill_library=skill_library,
-            dataset_hit_rate=n_hits / max(n_genes, 1),
+            dataset_hit_rate=dataset_hit_rate,
             use_enrichment=use_enrichment,
+            drop_anchor_feats=drop_anchor,
         )
 
     def _on_reset(self) -> None:
@@ -267,6 +321,11 @@ class WaddingtonCSkillsArm(WaddingtonCArm):
 
     For the ablation: waddington_c (flat top-4 memory) vs waddington_c_skills
     (verified skill library, injected only when a skill's trigger fires).
+
+    Diagnostic variant — NOT the reported leakage-free system. Under WADDINGTON_LEGACY_ROUTER=1 the skill
+    layer reads target-screen signals (the realized hit rate for trigger `hit_rate`, and the target hit
+    set as a directive block-list); the leakage-free default suppresses both (hit_rate=metadata/0, empty
+    block set), but this variant is a NEGATIVE result kept for analysis, not part of the 0.251 headline.
     """
 
     def __init__(

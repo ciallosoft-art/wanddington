@@ -74,6 +74,7 @@ class OnlineAdaptiveArm(BaseArm):
         batch_size: int,
         training_csv: Path | None = None,
         extra_feature_cols: list[str] | None = None,
+        drop_anchor_feats: bool | None = None,
     ) -> None:
         super().__init__("online_adaptive", dataset_name, batch_size)
         csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
@@ -84,7 +85,11 @@ class OnlineAdaptiveArm(BaseArm):
         # Clean-headline variant: drop the anchor-relative features (proximity to the phenotype's seed
         # genes), which the audit flagged as privileged target information (51% of anchors are own-screen
         # hits). Uses no realized labels; removes the leak from the prior AND the online model.
-        if os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1":
+        # `drop_anchor_feats` (passed explicitly by the C-arm) overrides the env var, so the leakage-free
+        # default can be scoped to the C-arm without changing the standalone baselines that use this class.
+        _drop = drop_anchor_feats if drop_anchor_feats is not None else (
+            os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1")
+        if _drop:
             _ANCHOR_FEATS = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
             self._available_feats = [c for c in self._available_feats if c not in _ANCHOR_FEATS]
 

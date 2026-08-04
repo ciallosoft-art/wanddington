@@ -10,8 +10,14 @@
 #   workspace/results/sequential/ablation_llm.json
 #   workspace/results/sequential/ablation_ml.json
 #   workspace/results/sequential/ablation_shuffled.json
+#
+# These ablation tables were computed on the LEGACY target-aware routed C-arm (avg 0.256). The default
+# code path is now the reported leakage-free config (0.251), so we pin the legacy router here to keep the
+# committed ablation_*.json reproducible. (The final leakage-free system's paired stats are in
+# workspace/results/router/clean_headline_w0.2_5seed.json — the plain default run; see README.)
 set -euo pipefail
 cd "$(dirname "$0")/.."
+export WADDINGTON_LEGACY_ROUTER=1
 
 echo "=== Experiment 03: Ablation study ==="
 echo
