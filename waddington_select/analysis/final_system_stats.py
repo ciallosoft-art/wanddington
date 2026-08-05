@@ -67,15 +67,14 @@ def _matched_loo() -> dict:
 
 
 def run() -> dict:
-    baselines = json.loads((SEQ / "baselines.json").read_text())
-    three = json.loads((SEQ / "three_arm.json").read_text())
-    clean = json.loads((ROUTER / "clean_headline_w0.2_5seed.json").read_text())
+    # All six main-table arms come from the reported 20-seed run (main_table_20seed.json).
+    m20 = json.loads((ROUTER / "main_table_20seed.json").read_text())
 
-    FINAL = {s: _mean_last(clean[s]["waddington_c"]) for s in BENCH}
-    LOO = {s: _mean_last(baselines[s]["static_ranker"]) for s in BENCH}
-    ONLINE = {s: _mean_last(baselines[s]["online_adaptive"]) for s in BENCH}
-    CORESET = {s: _mean_last(baselines[s]["coreset"]) for s in BENCH}
-    LLM = {s: _mean_last(three[s]["llm_reasoning"]) for s in BENCH}
+    FINAL = {s: _mean_last(m20[s]["waddington_c"]) for s in BENCH}
+    LOO = {s: _mean_last(m20[s]["static_ranker"]) for s in BENCH}
+    ONLINE = {s: _mean_last(m20[s]["online_adaptive"]) for s in BENCH}
+    CORESET = {s: _mean_last(m20[s]["coreset"]) for s in BENCH}
+    LLM = {s: _mean_last(m20[s]["llm_reasoning"]) for s in BENCH}
     MLOO = _matched_loo()
 
     mean = lambda x: float(np.mean([x[s] for s in BENCH]))
@@ -119,7 +118,7 @@ def _fmt(p):
 
 if __name__ == "__main__":
     r = run()
-    print(f"final 5-seed Waddington mean = {r['final_mean']:.3f}")
+    print(f"final 20-seed Waddington mean = {r['final_mean']:.3f}")
     ml = r["matched_loo"]
     print(f"\n[#7] matched no-anchor-metadata LOO = {ml['mean']:.3f}  (unmatched paper LOO = 0.217)")
     print(f"     final vs matched-LOO: {_fmt(ml['final_vs_matched_loo'])}")

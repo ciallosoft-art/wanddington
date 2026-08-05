@@ -14,9 +14,9 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULTS = REPO_ROOT / "workspace" / "results" / "sequential"
-# The final leakage-free 5-seed Waddington run (used for the principal figures 1-3); the legacy
-# three_arm.json waddington_c stays the reference for the component-ablation figure.
-FINAL_WADD = REPO_ROOT / "workspace" / "results" / "router" / "clean_headline_w0.2_5seed.json"
+# The final leakage-free 20-seed run of all six main-table arms (used for the principal figures 1-3);
+# the legacy three_arm.json waddington_c stays the reference for the component-ablation figure.
+FINAL_WADD = REPO_ROOT / "workspace" / "results" / "router" / "main_table_20seed.json"
 
 # Which file each method's runs live in (baselines + the three-arm comparison).
 METHOD_FILES = {
@@ -61,8 +61,8 @@ def _runs(path: Path) -> pd.DataFrame:
 def load_methods(final: bool = False) -> pd.DataFrame:
     """All six methods, tidy. (Coreset appears in two files; keep the baselines copy.)
 
-    final=True swaps the `waddington_c` rows for the final leakage-free 5-seed run (for the principal
-    figures); the baselines are unchanged and already 5-seed.
+    final=True swaps every arm present in the 20-seed run (FINAL_WADD) for the principal figures, so the
+    figures match the 20-seed main table; arms absent from that file fall back to their 5-seed runs.
     """
     frames = []
     for path in sorted({f for f in METHOD_FILES.values()}):
@@ -80,8 +80,8 @@ def load_methods(final: bool = False) -> pd.DataFrame:
     result = pd.concat(out, ignore_index=True)
     if final and FINAL_WADD.exists():
         fw = _runs(FINAL_WADD)
-        fw = fw[fw["arm"] == "waddington_c"]
-        result = pd.concat([result[result["arm"] != "waddington_c"], fw], ignore_index=True)
+        arms20 = set(fw["arm"].unique())
+        result = pd.concat([result[~result["arm"].isin(arms20)], fw], ignore_index=True)
     return result
 
 
