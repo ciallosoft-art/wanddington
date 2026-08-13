@@ -1,8 +1,9 @@
 """
 data.py — load the committed benchmark results into tidy frames.
 
-Every figure reads from `workspace/results/sequential/*.json`, which are the frozen benchmark
-outputs. Nothing here re-runs an experiment, so a figure can never disagree with the paper.
+Figures read frozen benchmark outputs under `workspace/results/sequential/` and
+`workspace/results/router/`. The principal figures use `router/main_table_20seed.json`; supporting
+diagnostic figures use their matched 5-seed files. Nothing here re-runs an experiment.
 """
 
 from __future__ import annotations

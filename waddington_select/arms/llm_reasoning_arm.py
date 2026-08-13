@@ -214,8 +214,8 @@ class LLMReasoningArm(BaseArm):
         # outlast — it just burns 8 attempts and dies. Throttling up front is what keeps a sweep alive.
         self._inter_call_sleep = float(os.environ.get("WADDINGTON_LLM_SLEEP", "0"))
 
-        # Provider-agnostic LLM client (default: anthropic; opt-in pi/codex via
-        # WADDINGTON_LLM_BACKEND=pi, reusing feynman's provider routing + OAuth).
+        # Provider-agnostic LLM client (default: anthropic; opt-in pi/codex via the frontend's
+        # tool-less completion bridge with WADDINGTON_LLM_BACKEND=pi).
         self._llm = LLMClient(
             model=self._model,
             temperature=self._temperature,

@@ -1,16 +1,18 @@
 """
-final_system_stats.py — statistics for the FINAL 5-seed leakage-free Waddington (reviewer round 5).
+final_system_stats.py — statistics for the FINAL 20-seed leakage-free Waddington (reviewer round 5).
 
-Three deterministic re-computes (no LLM), so the paper's final-system numbers stop referring to the legacy
-0.256 configuration:
+Three deterministic re-computes (no LLM). The headline and paired comparisons use the reported 20-seed
+run, rather than the legacy 5-seed supporting configuration (0.256). The matched 20-seed legacy-router
+control (0.259) is analyzed separately in the paper:
 
   1. matched_loo   — the static LOO prior in the final config's OWN feature space (no anchor + metadata
                      DepMap policy), so the "improves its deployed prior" claim is matched. Compares
                      matched-LOO -> final Waddington with a paired screen-clustered CI.
-  2. final_paired  — final Waddington (5 seeds) vs Online ML / LLM branch / Coreset / LOO: paired deltas,
+  2. final_paired  — final Waddington (20 seeds) vs Online ML / LLM branch / Coreset / LOO: paired deltas,
                      95% CI, win/tie/loss (replaces the legacy paired table near tab:main).
   3. novel_hit     — macro averages + paired screen-level CI for Waddington vs feature-LOO novel-recall
-                     (reads the per-screen recalls already in novel_hit_analysis.json).
+                     (exploratory: reads per-screen recalls from a selection-dump 5-seed run already in
+                     novel_hit_analysis.json).
 
     python -m waddington_select.analysis.final_system_stats
 """

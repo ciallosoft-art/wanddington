@@ -85,7 +85,7 @@ def method_comparison(out: Path) -> Path:
                     va="center", fontsize=9, color=S.INK_2)
 
     ax.set_yticks(y, labels, fontsize=9.5)
-    ax.set_xlabel("Hit ratio @ round 5  (mean over 9 screens × 5 seeds)")
+    ax.set_xlabel("Hit ratio @ round 5  (mean over 9 screens × 20 seeds)")
     ax.set_title("The hybrid pipeline beats every baseline", color=S.INK, fontsize=11.5, loc="left", pad=10)
     ax.set_xlim(0, max(means.values) * 1.16)
     ax.grid(axis="y", visible=False)
@@ -121,8 +121,17 @@ def dataset_heatmap(out: Path) -> Path:
 
 
 def ablations(out: Path) -> Path:
-    """Polarity (helps / hurts) → diverging hues around a neutral zero."""
+    """Polarity (helps / hurts) for the component/tool ablations around a neutral zero.
+
+    The anonymized-name reasoning ladder is a separate experiment and figure/table narrative; mixing
+    its pool-only controls into this chart would make the component-ablation title false.
+    """
     df = D.ablation_deltas()
+    component_arms = {
+        "waddington_c_no_memory", "waddington_c_no_llm", "waddington_c_no_ml",
+        "waddington_c_shuffled_names", "waddington_c_skills", "waddington_c_enrich",
+    }
+    df = df[df["arm"].isin(component_arms)]
     if df.empty:
         return None
     S.apply()

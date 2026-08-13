@@ -30,15 +30,15 @@ to the LOO ranker.
 > (`waddington_c_arm._classify`) picks the fusion mode from the target screen's *realized* hit rate —
 > `ml_heavy` (ML 0.80 / LLM 0.20), `baseline` (0.60 / 0.40), or `two_stage` (ML shortlists 384, LLM
 > re-ranks). Because that reads a test-set statistic, it is a **leakage** variant kept only for the
-> §honest-router analysis (avg 0.256, no detected difference from the reported 0.251). It is **not** the
-> system we report. Enable it (and the metadata feature policy / no-anchor-features) via the flags in
-> **Reproduce the benchmark** below.
+> §honest-router analysis (avg 0.259 over the matched 20-seed run, with no detected difference from the
+> reported 0.253). It is **not** the system we report. Enable it with
+> `WADDINGTON_LEGACY_ROUTER=1`; the reported leakage-free settings are the plain defaults.
 
 ---
 
 ## Results
 
-Hit ratio at round 5, mean over 5 seeds × 9 BDA benchmark datasets (DeLM-verified memory):
+Hit ratio at round 5, mean over 20 seeds × 9 BDA benchmark datasets (DeLM-verified memory):
 
 | Method | avg hit@R5 |
 |--------|-----------|
@@ -46,21 +46,21 @@ Hit ratio at round 5, mean over 5 seeds × 9 BDA benchmark datasets (DeLM-verifi
 | A: Coreset | 0.134 |
 | LOO-LightGBM (static) | 0.217 |
 | OnlineAdaptive | 0.224 |
-| B: LLM reasoning | 0.225 |
-| **C: Waddington (ours, leakage-free)** | **0.251** |
+| B: LLM reasoning | 0.222 |
+| **C: Waddington (ours, leakage-free)** | **0.253** |
 
-The reported system is the **leakage-free, privilege-free** configuration (0.251): a *global* fusion
+The reported system is the **leakage-free, privilege-free** configuration (0.253): a *global* fusion
 weight (`w_llm = 0.2`, chosen on non-target screens — never the target's realized hit rate), a
 metadata-only DepMap feature policy, and **no** anchor-relative features. An earlier **target-aware
-routed** variant scores 0.256, but it reads the target screen's realized hit rate to pick its fusion
+routed** variant scores 0.259 over a matched 20-seed run, but it reads the target screen's realized hit rate to pick its fusion
 mode (a test-set statistic), so we do **not** report it as the system — the two are statistically
-indistinguishable (paired −0.005, 95% CI [−0.018, 0.007]). See `§honest-router` in the paper.
+indistinguishable (paired −0.006, 95% CI [−0.019, 0.007]). See `§honest-router` in the paper.
 
 > **Where the advantage comes from (be honest):** the dominant ingredient is the **cross-experiment
 > supervised prior**, not agentic reasoning. A static LOO-LightGBM with *no* LLM already reaches 0.187
 > on the six screens shared with BioDiscoveryAgent — nearly double BDA's LLM agent (0.105) and
 > GeneDisco's active learning (0.113). Online adaptation and constrained LLM reasoning add a further,
-> smaller gain (against its *matched* static prior, 0.231 → 0.251, +0.020, 95% CI [0.007, 0.035]).
+> smaller gain (against its *matched* static prior, 0.231 → 0.253, +0.022, 95% CI [0.012, 0.036]).
 > On genuinely *novel* (non-recurrent) hits the full system does **not** reliably beat the prior.
 
 Full per-dataset tables, the ablation study (memory / LLM / online-ML / gene-name-shuffle), the
@@ -140,42 +140,50 @@ conda run -n waddington-bio python3 -m waddington_select.simulate --dataset IFNG
 ## Reproduce the benchmark
 
 The benchmark is kept separate from deployment and frozen on `claude-haiku` for reproducibility.
+The scripts also clear experimental routing/feature overrides before launching; the equivalent direct
+commands below assume those overrides are not set in the parent shell.
 
 ```bash
-bash experiments/01_baselines.sh     # no API needed
-bash experiments/02_three_arm.sh     # A / B / C
-bash experiments/03_ablations.sh     # four ablations
+bash experiments/00_main_table_20seed.sh  # reported main table + matched legacy, both at 20 seeds
+bash experiments/01_baselines.sh          # 5-seed companion baselines; no API needed
+bash experiments/02_three_arm.sh          # legacy/component run + 5-seed honest companion
+bash experiments/03_ablations.sh          # legacy 5-seed component ablations
 
 # Or run the runner directly (from repo root)
-conda run -n waddington-bio python3 -m waddington_select \
-    --arms coreset llm_reasoning waddington_c --seeds 5 --rounds 5
+WADDINGTON_LLM_BACKEND=anthropic conda run -n waddington-bio python3 -m waddington_select \
+    --arms random coreset static_ranker online_adaptive llm_reasoning waddington_c \
+    --seeds 20 --rounds 5 --out workspace/results/router/main_table_20seed.json
 
 # Rebuild the cross-experiment memory (with verified admission)
 conda run -n waddington-bio python3 -m waddington_select.memory_builder
 ```
 
 **Reported (leakage-free) vs legacy config.** By default `waddington_c` **is** the reported
-leakage-free system (avg 0.251): global `w_llm = 0.2`, metadata feature policy, no anchor features —
+leakage-free system (avg 0.253 over 20 seeds): global `w_llm = 0.2`, metadata feature policy, no anchor features —
 none of which read the target screen's realized labels. No flags needed:
 
 ```bash
-# Reported leakage-free C (0.251) — the plain default
-conda run -n waddington-bio python3 -m waddington_select --arms waddington_c --seeds 5 --rounds 5
+# Reported leakage-free C (0.253 over 20 seeds) — the plain default
+WADDINGTON_LLM_BACKEND=anthropic conda run -n waddington-bio python3 -m waddington_select \
+    --arms waddington_c --seeds 20 --rounds 5
 
 # Final-system paired statistics (matched-LOO, vs baselines, novel-hit)
 conda run -n waddington-bio python3 -m waddington_select.analysis.final_system_stats
 ```
 
-To reproduce the **legacy target-aware routed** configuration (avg 0.256, reads the realized hit rate;
-used for the legacy SHAP / decomposition / ablation tables), set one flag:
+To reproduce the **legacy target-aware routed** configuration (avg 0.259 over 20 seeds, reads the
+realized hit rate), set one flag. The detailed legacy SHAP / decomposition / ablation analyses remain
+paired 5-seed runs with an average near 0.256:
 
 ```bash
-WADDINGTON_LEGACY_ROUTER=1 conda run -n waddington-bio python3 -m waddington_select \
-    --arms waddington_c --seeds 5 --rounds 5
+WADDINGTON_LLM_BACKEND=anthropic WADDINGTON_LEGACY_ROUTER=1 \
+  conda run -n waddington-bio python3 -m waddington_select \
+    --arms waddington_c --seeds 20 --rounds 5 \
+    --out workspace/results/router/legacy_waddington_20seed.json
 ```
 
 (`experiments/03_ablations.sh` sets `WADDINGTON_LEGACY_ROUTER=1` for you; `02_three_arm.sh` produces
-both configurations.)
+the paired 5-seed legacy and leakage-free supporting runs.)
 
 Arm names: `random`, `coreset`, `static_ranker`, `online_adaptive`, `llm_reasoning`,
 `waddington_c`, and the ablations `waddington_c_no_memory` / `_no_llm` / `_no_ml` /
@@ -193,8 +201,8 @@ Environment variables (all optional; sensible defaults):
 | `WADDINGTON_LLM_BACKEND` | `anthropic` | The C-arm's own LLM backend: `anthropic` (benchmark) / `pi` (tool-less bridge, any provider) / `mock` |
 | `WADDINGTON_PI_MODEL` | — | With `WADDINGTON_LLM_BACKEND=pi`: the provider/model the C-arm reasons on |
 
-The benchmark path (`run_sequential.py`, direct `anthropic` backend, `claude-haiku`) is intentionally
-**not** switched by these — deployment can use any provider; reproduction stays fixed.
+The reproduction scripts pin the direct `anthropic` backend and `claude-haiku`; direct runner commands
+still obey `WADDINGTON_LLM_BACKEND`. Deployment can use any provider without changing the reported runs.
 
 ---
 

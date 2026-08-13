@@ -15,7 +15,7 @@ The primary way a scientist uses this project is the tool-less conversational sh
 cd frontend && node bin/waddington.js
 ```
 
-On launch it authorizes a model provider (Claude / Codex / Gemini, reusing feynman's token store)
+On launch it authorizes a model provider (Claude / Codex / Gemini) in Waddington's own token store
 then offers **Terminal (CLI)** or **Web UI**. The scientist chats in natural language; the shell's
 LLM only *routes intent + narrates* (it never picks genes), and the deterministic **C-arm pipeline**
 (`waddington_select.suggest` / `.simulate`) does the selection. Provider is switchable with
@@ -24,7 +24,7 @@ LLM only *routes intent + narrates* (it never picks genes), and the deterministi
 The `suggest` / `simulate` commands below are the same brain that entry drives; use them directly
 when you (an agent) are operating the repo. **Do not** use the free tool-using
 `skills/gene-selection-agent` agent for real selection — it is benchmark-only and loses to the
-pipeline (0.209 vs 0.256).
+pipeline (0.209 vs 0.256 in the matched legacy 5-seed diagnostic).
 
 ## Primary action — recommend genes to perturb
 
@@ -69,22 +69,25 @@ use `suggest` with `--tested-hits/--tested-misses` iteratively.)
 
 ## Choosing the LLM provider
 
-The gene-selection agent's own reasoning model defaults to Claude. To run it on another provider
-that feynman is authenticated for (e.g. codex), set an env var — no code change:
+The gene-selection pipeline's own reasoning model defaults to Claude. To run it through the frontend's
+tool-less, multi-provider pi-ai bridge (for example with Codex), set an env var — no code change:
 
 ```bash
 WADDINGTON_LLM_BACKEND=pi conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG
 ```
 
-`pi` shells out to `feynman --prompt`, reusing feynman's provider routing + OAuth. `WADDINGTON_PI_MODEL="provider/model"` picks a specific model. Default (`anthropic`) is faster and is what the paper benchmark uses.
+`pi` shells out to `node frontend/bin/waddington.js complete`, a pure completion bridge with OAuth
+auto-refresh and no tools. `WADDINGTON_PI_MODEL="provider/model"` picks a specific model. Default
+(`anthropic`) is faster and is what the paper benchmark uses. `WADDINGTON_REUSE_FEYNMAN=1` is only an
+opt-in way to reuse an existing feynman token store.
 
 ## Benchmark / evaluation (for reproduction, not for recommending)
 
 ```bash
-conda run -n waddington-bio python3 -m waddington_select --arms waddington_c waddington_c_skills --seeds 5 --rounds 5
+bash experiments/00_main_table_20seed.sh  # reported six-method table + matched legacy control
 bash experiments/01_baselines.sh   # baselines (no API)
-bash experiments/02_three_arm.sh   # A: coreset / B: llm_reasoning / C: waddington_c
-bash experiments/03_ablations.sh   # four ablations
+bash experiments/02_three_arm.sh   # supporting 5-seed legacy/component comparison
+bash experiments/03_ablations.sh   # four legacy 5-seed ablations
 ```
 
 Rebuild memory / skills (needs API):
@@ -96,12 +99,15 @@ conda run -n waddington-bio python3 -m waddington_select.skill_builder        # 
 
 ## How the recommendation is produced (for explaining to the user)
 
-`waddington_c` fuses three signals, routed per phenotype (`arms/waddington_c_arm.py`):
-online-retrained LightGBM over PPI/KEGG/pLI/DepMap features + Claude/LLM biological reasoning +
-cross-experiment memory (or the skill library). See `README.md` and `docs/` for details.
+`waddington_c` fuses three signals with a globally fixed 0.8/0.2 ML/LLM weight
+(`arms/waddington_c_arm.py`): online-retrained LightGBM over PPI/KEGG/pLI/metadata-selected DepMap
+features + Claude/LLM biological reasoning + cross-experiment memory (or the skill library). The
+per-phenotype target-aware router exists only behind `WADDINGTON_LEGACY_ROUTER=1`. See `README.md` and
+`docs/` for details.
 
 ## Conventions
 
 - Never fabricate benchmark numbers — run the command and report what it prints.
-- If a command needs an Anthropic/feynman token and it is missing/expired, tell the user to run
-  `feynman model login` (or `python experiments/setup_auth.py --token …` for the anthropic path).
+- If a command needs provider auth and it is missing/expired, tell the user to run
+  `node frontend/bin/waddington.js setup` (OAuth) or
+  `python experiments/setup_auth.py --token …` (direct Anthropic benchmark path).

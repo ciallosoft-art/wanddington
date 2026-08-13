@@ -103,7 +103,7 @@ def _reason_recall() -> dict:
 
 
 def build_overview(out: Path) -> Path:
-    means = D.method_means(D.load_methods())
+    means = D.method_means(D.load_methods(final=True))
     agent = D.load_agent()
     abl = _paired_deltas()
     att = _attribution()
@@ -225,7 +225,7 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
 <div class="wrap">
 
 <header class="prose">
-  <p class="eyebrow">Sequential CRISPR screen design · 9 benchmark screens · 5 seeds</p>
+  <p class="eyebrow">Sequential CRISPR screen design · headline: 9 benchmark screens × 20 seeds</p>
   <h1>The LLM is a verifier, not a proposer</h1>
   <p class="lede">We built a gene-selection agent that pairs an online ML model with an LLM, and it
   beats every baseline. Then we tried to make it <em>more</em> agentic — tools, memory, a skill
@@ -251,6 +251,10 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
     <h2>Then three things that should have helped, didn’t</h2>
     <p>The obvious next steps all point the same way in the literature: give the model tools, give it
     memory, let it plan. We implemented each and benchmarked it honestly.</p>
+    <p><strong>Scope:</strong> the three diagnostic results below are paired, five-seed analyses of the
+    legacy target-aware predecessor. They were not re-estimated under the final 0.253 configuration, so
+    they support the mechanism and design history rather than a quantitative decomposition of the
+    headline system.</p>
   </div>
 
   <div class="prose" style="margin-top:28px">
@@ -427,17 +431,19 @@ footer {{ border-top:1px solid var(--rule); margin-top:44px; padding-top:20px;
     in 2024, before our model's training cutoff. So we <em>withdraw</em> the tempting claim that the
     LLM contributes most on the one screen it could not have memorised. Settling this needs a screen
     released after the model's cutoff; none of ours qualifies.</li>
-    <li><strong>This is not a reproduction of BioDiscoveryAgent.</strong> We use their screen data and
-    their hit sets (and their non-essential evaluation convention), but we never ran their agent, and
-    our numbers are <em>not</em> comparable to the ones in their paper — we add a cross-experiment ML
-    prior they do not have, which alone already exceeds their best reported LLM hit ratios.</li>
+    <li><strong>This is not a verbatim reproduction of BioDiscoveryAgent's headline.</strong> We use
+    their screen data, hit sets, and non-essential evaluation convention, and we also ran a controlled
+    version of their agent on six shared screens. Our Waddington headline is still a different method:
+    it adds a cross-experiment ML prior BDA does not have, so the gain should be attributed primarily
+    to that extra information rather than to a better agent.</li>
     <li><strong>The “LLM” baseline is padded.</strong> When the LLM names too few genes that exist in
     the pool, the batch is filled from a static ML ranking — 86% of it on K562-Essential, 68% on
     Scharenberg22. Its two strongest entries are therefore mostly that prior, not the LLM.</li>
     <li>Attribution counts only genes the LLM <em>actually named</em>. An earlier version of this
     analysis credited the padding to the LLM and reported a much weaker agreement effect (21% at
     n=800, of which ~87% was padding); excluding it sharpens the result to the numbers above.</li>
-    <li>Nine benchmark screens, five seeds. No prospective wet-lab validation.</li>
+    <li>Nine benchmark screens; 20 seeds for the headline comparison, while supporting attribution,
+    agent, and component diagnostics generally use five. No prospective wet-lab validation.</li>
     <li>The agent is stochastic, so component claims use <em>paired</em> deltas. Agreement is rare
     (n={att['both']['picked']}), so its interval is wide (±{9.7:.1f} points) — the ordering is robust,
     the exact rate is not.</li>

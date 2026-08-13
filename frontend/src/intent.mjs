@@ -3,7 +3,7 @@
 // This is the ONLY place the conversation LLM is used, and it is used tool-lessly: it reads the
 // message + session state and returns a small JSON object. It never selects genes — that is the
 // Python C-arm's job (brain.mjs). Keeping the LLM to intent-parsing + narration is exactly the
-// "remove the tools" finding (the free tool-using agent lost to the pipeline, 0.209 vs 0.256).
+// "remove the tools" finding (matched legacy 5-seed diagnostic: agent 0.209 vs pipeline 0.256).
 
 import { complete } from "./llm/complete.mjs";
 import { getDatasets } from "./brain.mjs";

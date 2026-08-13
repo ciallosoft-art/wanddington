@@ -12,7 +12,7 @@ results/
 ├── figures/        # generated figures (waddington_select.analysis.figures)
 ├── bda_controlled/ # controlled BioDiscoveryAgent run on our benchmark
 ├── prior_probes.json          # what the cross-experiment prior learns (sibling / feature-family / hit-freq / anchor)
-├── final_system_stats.json    # final 5-seed system: matched-LOO, paired deltas, novel-hit stats
+├── final_system_stats.json    # final 20-seed headline/paired stats + exploratory 5-seed novel-hit stats
 ├── conditional_attribution.json  # LLM-endorsement odds ratio (verifier analysis)
 ├── clustered_ci.json          # screen-clustered bootstrap CIs
 ├── novel_hit_analysis.json    # recurrent vs novel hit recall

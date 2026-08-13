@@ -1,7 +1,8 @@
 """
 clustered_ci.py — screen-clustered bootstrap CIs and paired win/tie/loss (reviewer: statistics).
 
-The results are nine screens times five seeds. Treating each selected gene (or each screen-seed cell) as
+This supporting robustness probe uses the legacy configuration over nine screens times five seeds.
+Treating each selected gene (or each screen-seed cell) as
 an independent sample understates uncertainty: picks within a screen/round/seed are highly correlated,
 and the real unit of replication is the screen. This probe resamples whole screens with replacement (the
 cluster), averaging over a screen's five seeds first, to produce:

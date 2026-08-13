@@ -1,7 +1,8 @@
 # Skill: Sequential CRISPR gene-selection agent (EXPERIMENTAL / BENCHMARK-ONLY)
 
 > ⚠️ **Not the recommended path.** This free tool-using agent was benchmarked against the
-> deterministic C-arm pipeline and **loses on average (hit@R5 0.209 vs 0.256)** — it only wins on
+> deterministic C-arm pipeline and **loses on average in the matched legacy 5-seed diagnostic
+> (hit@R5 0.209 vs 0.256)** — it only wins on
 > one dataset (Scharenberg22) and loses badly on strong-ML genome-wide screens. It is kept for the
 > record and for `agent_benchmark.py`. **For real gene selection, use the conversational entry**
 > (`node frontend/bin/waddington.js`) or `python -m waddington_select.suggest` — both drive the

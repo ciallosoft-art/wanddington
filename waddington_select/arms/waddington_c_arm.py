@@ -78,11 +78,12 @@ W_ML_DEFAULT  = 0.60
 W_LLM_DEFAULT = 0.40
 
 # ---- Reported leakage-free default vs. legacy target-aware opt-in -----------------------------------
-# The REPORTED system (paper §honest-router, avg 0.251) is the DEFAULT: a single global fusion weight
+# The REPORTED system (paper §honest-router, avg 0.253 over 20 seeds) is the DEFAULT: a single global fusion weight
 # (w_llm = DEFAULT_HONEST_WLLM), a metadata-only DepMap feature policy, and no anchor-relative features
 # — none of which read the target screen's realized labels. Set WADDINGTON_LEGACY_ROUTER=1 to restore
-# the earlier target-aware routed configuration (avg 0.256, reads the realized hit rate) that the legacy
-# ablation / SHAP / decomposition tables were computed on. The explicit knobs (WADDINGTON_FORCE_WLLM /
+# the earlier target-aware routed configuration (avg 0.259 in the matched 20-seed control, reads the
+# realized hit rate). Legacy ablation / SHAP / decomposition tables use its 5-seed run (avg 0.256).
+# The explicit knobs (WADDINGTON_FORCE_WLLM /
 # _FEATURE_POLICY / _DROP_ANCHOR_FEATS) still override in either mode.
 DEFAULT_HONEST_WLLM = 0.20
 
@@ -325,7 +326,7 @@ class WaddingtonCSkillsArm(WaddingtonCArm):
     Diagnostic variant — NOT the reported leakage-free system. Under WADDINGTON_LEGACY_ROUTER=1 the skill
     layer reads target-screen signals (the realized hit rate for trigger `hit_rate`, and the target hit
     set as a directive block-list); the leakage-free default suppresses both (hit_rate=metadata/0, empty
-    block set), but this variant is a NEGATIVE result kept for analysis, not part of the 0.251 headline.
+    block set), but this variant is a NEGATIVE result kept for analysis, not part of the 0.253 headline.
     """
 
     def __init__(

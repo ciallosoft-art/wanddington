@@ -35,8 +35,8 @@ To verify the token is valid at any time:
 python3 experiments/setup_auth.py --check
 ```
 
-> **Note**: tokens expire after ~8 hours. Re-run the command above if you get
-> a 429 rate-limit error mid-experiment.
+> **Note**: `setup_auth.py` records an ~8-hour validity window. Re-run it when `--check` reports expiry.
+> HTTP 429 means rate limiting, not token expiry; wait for the limit to clear rather than reauthorizing.
 
 Experiments 01 (baselines) do **not** require a token.
 
@@ -45,36 +45,48 @@ Experiments 01 (baselines) do **not** require a token.
 ### Option A: Run all experiments
 
 ```bash
-bash experiments/run_all.sh          # ~8-12 hours total
+bash experiments/run_all.sh          # long-running; total time depends on API throughput
 ```
 
 ### Option B: Run experiments individually
 
 ```bash
-# Table 2, baseline rows (Random / Coreset / LOO-ML / OnlineAdaptive) — no API token
+# Reported main table: all six methods × 20 seeds — requires API token
+bash experiments/00_main_table_20seed.sh
+
+# Five-seed companion baseline rows — no API token
 bash experiments/01_baselines.sh     # ~5-10 min
 
-# Table 2, main result (A vs B vs C, 5 seeds) — requires API token
+# Supporting legacy/component comparison + honest 5-seed companion — requires API token
 bash experiments/02_three_arm.sh     # ~2-3 hours
 
 # Table 4, ablation study (4 ablations × 5 seeds) — requires API token
 bash experiments/03_ablations.sh     # ~6-8 hours
 ```
 
+The scripts recompute their outputs from scratch by default. Set `WADDINGTON_RESUME=1` only to continue
+an interrupted rerun whose JSON already contains partial checkpoints; a fresh clone already contains
+complete frozen outputs, so enabling resume on the first run would intentionally skip them.
+
 ## Output
 
-All result files are written to `workspace/results/sequential/` as JSON.
+Result files are written to `workspace/results/router/` (headline/router controls) and
+`workspace/results/sequential/` (5-seed supporting analyses) as JSON.
 
 | File | Content |
 |---|---|
-| `baselines.json` | Experiment 01 (Random, Coreset, StaticRanker, OnlineAdaptive) |
-| `three_arm.json` | Experiment 02 (A=Coreset, B=LLM, C=Waddington) |
-| `ablation_memory.json` | C vs C−memory |
-| `ablation_llm.json` | C vs C−LLM |
-| `ablation_ml.json` | C vs C−ML |
-| `ablation_shuffled.json` | C vs shuffled gene names |
+| `router/main_table_20seed.json` | Reported 20-seed main table (all six methods) |
+| `router/legacy_waddington_20seed.json` | Matched 20-seed legacy target-aware control |
+| `sequential/baselines.json` | Five-seed companion baselines |
+| `sequential/three_arm.json` | Five-seed legacy A/B/C comparison used by supporting analyses |
+| `router/clean_headline_w0.2_5seed.json` | Five-seed companion for the leakage-free C-arm |
+| `sequential/ablation_memory.json` | C vs C−memory |
+| `sequential/ablation_llm.json` | C vs C−LLM |
+| `sequential/ablation_ml.json` | C vs C−ML |
+| `sequential/ablation_shuffled.json` | C vs shuffled gene names |
 
-Each JSON maps `dataset → arm → [seed_0_result, ..., seed_4_result]`.
+Each JSON maps `dataset → arm → [seed_0_result, ...]`; the headline files contain 20 seeds and the
+supporting files contain 5 unless their filename says otherwise.
 
 ## Code structure
 
@@ -111,8 +123,9 @@ workspace/data/bda_benchmark/
 ├── task_prompts/           ← per-dataset LLM task descriptions
 └── ...                     ← ground-truth labels per dataset
 
-workspace/results/sequential/
-└── *.json                  ← experiment outputs (written by run_sequential.py)
+workspace/results/
+├── router/                 ← reported 20-seed table + matched router controls
+└── sequential/             ← supporting 5-seed experiments and ablations
 ```
 
 ## Arm descriptions
@@ -124,7 +137,7 @@ workspace/results/sequential/
 | LOO-LightGBM | `static_ranker` | Cross-experiment LightGBM prior, static |
 | OnlineAdaptive | `online_adaptive` | PerTurboAgent: LOO prior + in-experiment retraining |
 | LLM Reasoning (B) | `llm_reasoning` | Claude Haiku with LOO-ML fallback |
-| **Waddington (C)** | `waddington_c` | **Online ML + LLM + DepMap routing (paper method)** |
+| **Waddington (C)** | `waddington_c` | **Online ML + LLM; global 0.8/0.2 fusion, metadata-selected DepMap policy, no anchor features (paper method)** |
 | C − memory | `waddington_c_no_memory` | Ablation: no cross-experiment memory |
 | C − LLM | `waddington_c_no_llm` | Ablation: online ML only |
 | C − ML | `waddington_c_no_ml` | Ablation: static LOO prior + LLM |

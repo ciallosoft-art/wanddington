@@ -12,12 +12,16 @@
 #   workspace/results/sequential/ablation_shuffled.json
 #
 # These ablation tables were computed on the LEGACY target-aware routed C-arm (avg 0.256). The default
-# code path is now the reported leakage-free config (0.251), so we pin the legacy router here to keep the
-# committed ablation_*.json reproducible. (The final leakage-free system's paired stats are in
-# workspace/results/router/clean_headline_w0.2_5seed.json — the plain default run; see README.)
+# code path is now the reported 20-seed leakage-free config (0.253), so we pin the legacy router here to
+# keep the committed 5-seed ablation_*.json reproducible. (The final system and its paired statistics use
+# workspace/results/router/main_table_20seed.json; see README.)
 set -euo pipefail
 cd "$(dirname "$0")/.."
+unset WADDINGTON_FORCE_WLLM WADDINGTON_FORCE_ROUTE
+unset WADDINGTON_FEATURE_POLICY WADDINGTON_DROP_ANCHOR_FEATS WADDINGTON_HITFREQ_ONLY
+unset WADDINGTON_REASON_FROM_STRUCTURE WADDINGTON_EXCLUDE_STUDY WADDINGTON_TRAINING_CSV
 export WADDINGTON_LEGACY_ROUTER=1
+export WADDINGTON_LLM_BACKEND=anthropic
 
 echo "=== Experiment 03: Ablation study ==="
 echo
@@ -27,6 +31,11 @@ python3 experiments/setup_auth.py --check || {
     exit 1
 }
 
+resume_args=()
+if [[ "${WADDINGTON_RESUME:-0}" == "1" ]]; then
+    resume_args+=(--resume)
+fi
+
 run_ablation() {
     local label="$1"; local arm="$2"; local out="$3"
     echo "--- Ablation: $label ---"
@@ -34,12 +43,10 @@ run_ablation() {
         --arms waddington_c "$arm" \
         --seeds 5 \
         --rounds 5 \
-        --resume \
+        "${resume_args[@]}" \
         --out "workspace/results/sequential/$out"
     echo "  Saved: workspace/results/sequential/$out"
     echo
-    # Refresh token between long runs to avoid expiry
-    python3 experiments/setup_auth.py --check 2>/dev/null || true
 }
 
 run_ablation "C - memory"         waddington_c_no_memory   ablation_memory.json

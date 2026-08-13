@@ -11,13 +11,18 @@ package; data/results live under `workspace/`; the paper's tables are in `docs/`
 Everything runs in the `waddington-bio` conda env. From the repo root:
 
 ```bash
-# Full benchmark
+# Reported 20-seed main table + matched legacy control
+bash experiments/00_main_table_20seed.sh
+
+# Five-seed supporting analyses
 bash experiments/01_baselines.sh
 bash experiments/02_three_arm.sh
 bash experiments/03_ablations.sh
 
-# Package directly
-conda run -n waddington-bio python3 -m waddington_select --arms waddington_c --seeds 5 --rounds 5
+# Package directly (reported main table)
+WADDINGTON_LLM_BACKEND=anthropic conda run -n waddington-bio python3 -m waddington_select \
+  --arms random coreset static_ranker online_adaptive llm_reasoning waddington_c \
+  --seeds 20 --rounds 5 --out workspace/results/router/main_table_20seed.json
 
 # Rebuild verified cross-experiment memory
 conda run -n waddington-bio python3 -m waddington_select.memory_builder

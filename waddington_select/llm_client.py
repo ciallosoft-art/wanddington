@@ -112,7 +112,7 @@ class LLMClient:
         """Return the model's text response, retrying transient failures with backoff.
 
         temperature/max_tokens override the per-client defaults for this call (honoured by the
-        anthropic backend; the pi backend delegates sampling to feynman's own settings).
+        anthropic backend; the pi backend delegates sampling to the selected pi-ai provider/model).
         """
         wait = _BASE_WAIT
         last_err: Exception | None = None

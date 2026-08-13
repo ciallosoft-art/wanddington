@@ -24,9 +24,10 @@ Three layers, **no agent tools in the loop**:
 2. **conversation** — `src/converse.mjs` (shared by CLI `src/chat.mjs` and Web `src/web-server.mjs`).
 3. **brain** — `src/brain.mjs` shells out to the Python C-arm pipeline
    (`python -m waddington_select.suggest --json` / `.simulate`), the benchmark system
-   (reported leakage-free hit@R5 = 0.251). Gene selection is deterministic and lives in Python.
+   (reported 20-seed leakage-free hit@R5 = 0.253). Gene selection is deterministic and lives in Python.
 
-We deliberately removed tools: the free tool-using agent lost to this pipeline (0.209 vs ~0.25).
+We deliberately removed tools: in the matched legacy 5-seed diagnostic, the free tool-using agent lost
+to the constrained pipeline (0.209 vs 0.256).
 
 ## Commands
 
