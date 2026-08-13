@@ -5,7 +5,7 @@ The main runner (`python -m waddington_select`) is a *benchmark* loop that needs
 reveal hits. This module is the *forward* action an experimenter actually wants: "for this
 phenotype, which genes should I perturb next?" — the C-arm's ranking with no oracle involved.
 
-It is what feynman invokes from chat (see repo AGENTS.md).
+It is what the Waddington frontend invokes from chat (see repo AGENTS.md).
 
 Two modes:
 - Cold start: no feedback → the C-arm's first-round recommendation.
@@ -17,8 +17,8 @@ Usage:
     conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG
     conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG --n 20 \
         --tested-hits ZAP70 LCK PLCG1 --tested-misses ACTB GAPDH TUBB
-    # run the LLM component on codex instead of Claude:
-    WADDINGTON_LLM_BACKEND=pi python3 -m waddington_select.suggest --dataset IFNG
+    # GPT-5.6 Luna/none through Codex OAuth is the default:
+    python3 -m waddington_select.suggest --dataset IFNG
 
 Note (v1): --dataset must be one of the nine benchmark phenotypes, since the ML features are
 precomputed per dataset. Suggesting for an arbitrary new phenotype needs the feature pipeline to

@@ -26,7 +26,7 @@ ATTRIB = REPO_ROOT / "workspace" / "results" / "attribution_9ds.json"
 TWO_STAGE = "Replogle_K562_gwps"  # LLM makes the final pick there → "ML only" cannot exist
 
 PRETTY = {
-    "waddington_c": "Hybrid (ours)", "llm_reasoning": "LLM only", "online_adaptive": "Online ML",
+    "waddington_c": "Hybrid (ours)", "llm_reasoning": "LLM + LOO padding", "online_adaptive": "Online ML",
     "static_ranker": "Static LOO model", "coreset": "Coreset", "random": "Random",
 }
 SCREEN = {

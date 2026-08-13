@@ -1,18 +1,20 @@
 """
 LLMReasoningArm — B-arm (BDA-style LLM gene selection).
 
-Uses Claude's parametric biological knowledge to select genes each round.
-No ML features, no cross-experiment memory — pure LLM reasoning.
+Uses the configured LLM's parametric biological knowledge to propose genes each round. The prompt has
+no ML features or cross-experiment memory, but the returned evaluation batch is composite: unmatched
+slots are filled by a static leave-one-phenotype-out ML ranker.
 
 Each round:
   1. Builds a prompt: task description + revealed hits/non-hits so far
-  2. Calls Claude API → receives a list of gene names
+  2. Calls the provider-agnostic LLM client → receives a list of gene names
   3. Matches names to actual gene pool (case-insensitive)
   4. Fills unmatched slots with top StaticRanker genes (fallback)
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -26,7 +28,7 @@ import lightgbm as lgb
 
 from .base import BaseArm
 from ..skills import SkillLibrary, load_dataset_hits
-from ..llm_client import LLMClient
+from ..llm_client import LLMClient, default_model_for_backend
 from ..features import load_training_frame
 from ..phenotype import task_prompt as _user_task_prompt
 
@@ -84,7 +86,7 @@ HARDCODED_TASKS: dict[str, dict[str, str]] = {
     },
 }
 
-LLM_MODEL = "claude-haiku-4-5-20251001"
+LLM_MODEL = default_model_for_backend()
 LLM_TEMPERATURE = 0.5
 LLM_MAX_TOKENS = 1500
 
@@ -119,9 +121,9 @@ def _load_task(dataset_name: str) -> dict[str, str]:
 
 class LLMReasoningArm(BaseArm):
     """
-    B-arm: LLM-based gene selection using Claude's parametric knowledge.
+    B-arm: LLM-based gene selection using the configured model's parametric knowledge.
 
-    Each round, Claude receives the task description and revealed feedback,
+    Each round, the LLM receives the task description and revealed feedback,
     then names genes it believes will be hits. Names are matched against the
     actual gene pool; unmatched slots fall back to StaticRanker order.
     """
@@ -214,8 +216,8 @@ class LLMReasoningArm(BaseArm):
         # outlast — it just burns 8 attempts and dies. Throttling up front is what keeps a sweep alive.
         self._inter_call_sleep = float(os.environ.get("WADDINGTON_LLM_SLEEP", "0"))
 
-        # Provider-agnostic LLM client (default: anthropic; opt-in pi/codex via the frontend's
-        # tool-less completion bridge with WADDINGTON_LLM_BACKEND=pi).
+        # Provider-agnostic LLM client (default: GPT-5.6 Luna/none through the frontend's
+        # tool-less completion bridge; direct Anthropic remains an explicit legacy backend).
         self._llm = LLMClient(
             model=self._model,
             temperature=self._temperature,
@@ -226,6 +228,9 @@ class LLMReasoningArm(BaseArm):
         self._round_hits = []
         self._round_nonhits = []
         self._rng = np.random.default_rng(self._seed)
+        self._llm_named = set()
+        self._static_padding = []
+        self._n_fallback = 0
 
     def _build_memory_section(self) -> str:
         if not self._memory:
@@ -290,6 +295,21 @@ class LLMReasoningArm(BaseArm):
         lines.append("Prioritise untested genes in these active pathways.")
         return "\n".join(lines)
 
+    def _already_selected_note(self) -> str:
+        """Render deterministic exclusion context.
+
+        Active GPT runs include the full tested set so later rounds do not unknowingly repeat genes.
+        Frozen Claude reproduction scripts set WADDINGTON_FULL_SELECTED_CONTEXT=0 to preserve their
+        original 50-gene prompt truncation.
+        """
+        selected = sorted(self._selected)
+        if not selected:
+            return ""
+        full = os.environ.get("WADDINGTON_FULL_SELECTED_CONTEXT", "1") == "1"
+        shown = selected if full else selected[:50]
+        suffix = "" if full or len(selected) <= 50 else "..."
+        return f"\n\nALREADY SELECTED (do NOT repeat): {', '.join(shown)}{suffix}"
+
     def _build_prompt(self, round_idx: int) -> str:
         task_text = self._task.get("Task", self.dataset_name)
         measurement = self._task.get("Measurement", "")
@@ -316,10 +336,7 @@ class LLMReasoningArm(BaseArm):
                 history_section += f"\n\nCumulative hits found so far: {', '.join(all_hits[:30])}"
                 history_section += "\nUse the pattern of hits to infer which biological pathways or gene families to prioritize next."
 
-        already_selected = list(self._selected)
-        already_note = ""
-        if already_selected:
-            already_note = f"\n\nALREADY SELECTED (do NOT repeat): {', '.join(already_selected[:50])}{'...' if len(already_selected) > 50 else ''}"
+        already_note = self._already_selected_note()
 
         prompt = f"""You are a CRISPR screen expert selecting genes for a perturbation experiment.
 
@@ -346,6 +363,8 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
             time.sleep(self._inter_call_sleep)
 
         text = self._llm.complete(prompt).strip()
+        self._last_response_sha256 = hashlib.sha256(text.encode()).hexdigest()
+        self._last_response_chars = len(text)
 
         # Some backends (the pi bridge) wrap the JSON in a ```json … ``` fence. Strip it before parsing,
         # otherwise json.loads fails and the regex fallback below splits underscored identifiers like
@@ -358,11 +377,13 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         try:
             genes = json.loads(text)
             if isinstance(genes, list):
+                self._last_parse_mode = "json_array"
                 return [str(g).strip().upper() for g in genes if g]
         except json.JSONDecodeError:
             pass
 
         # Fallback: extract HGNC-like patterns (allow underscores so GENE_00001 survives)
+        self._last_parse_mode = "regex_fallback"
         raw = re.findall(r'\b[A-Z][A-Z0-9_\-]{1,12}\b', text)
         return [g.upper() for g in raw]
 
@@ -370,11 +391,32 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
         """Return genes from llm_genes that are in the actual gene pool and not yet selected."""
         seen: set[str] = set()
         matched: list[str] = []
+        duplicates = 0
+        already_selected = 0
+        out_of_pool = 0
         for g in llm_genes:
             g = g.strip().upper()
-            if g in self._gene_set and g not in self._selected and g not in seen:
+            if g in seen:
+                duplicates += 1
+                continue
+            seen.add(g)
+            if g not in self._gene_set:
+                out_of_pool += 1
+            elif g in self._selected:
+                already_selected += 1
+            else:
                 matched.append(g)
-                seen.add(g)
+        self._last_llm_diagnostics = {
+            "parse_mode": getattr(self, "_last_parse_mode", "unknown"),
+            "response_sha256": getattr(self, "_last_response_sha256", None),
+            "response_chars": getattr(self, "_last_response_chars", None),
+            "raw_gene_count": len(llm_genes),
+            "unique_gene_count": len(seen),
+            "matched_gene_count": len(matched),
+            "duplicate_count": duplicates,
+            "already_selected_count": already_selected,
+            "out_of_pool_count": out_of_pool,
+        }
         return matched
 
     def _fill_from_static(self, matched: list[str], n_needed: int) -> list[str]:
@@ -416,13 +458,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                     "\nUse the hit pattern to infer pathways and prioritize next candidates."
                 )
 
-        already_selected = list(self._selected)
-        already_note = ""
-        if already_selected:
-            already_note = (
-                f"\n\nALREADY SELECTED (do NOT repeat): "
-                f"{', '.join(already_selected[:50])}{'...' if len(already_selected) > 50 else ''}"
-            )
+        already_note = self._already_selected_note()
 
         cand_lines = [f"  {g} (ML confidence: {s:.3f})" for g, s in shortlist]
         shortlist_section = "\n\nML-RANKED CANDIDATE POOL:\n" + "\n".join(cand_lines)
@@ -496,10 +532,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
                 history_section += f"\n\nCumulative hits found so far: {', '.join(all_hits[:30])}"
                 history_section += "\nUse the pattern of hits to infer which biological pathways or gene families to prioritize next."
 
-        already_selected = list(self._selected)
-        already_note = ""
-        if already_selected:
-            already_note = f"\n\nALREADY SELECTED (do NOT repeat): {', '.join(already_selected[:50])}{'...' if len(already_selected) > 50 else ''}"
+        already_note = self._already_selected_note()
 
         return f"""You are a CRISPR screen expert selecting genes for a perturbation experiment.
 
@@ -568,15 +601,19 @@ No explanation, no markdown."""
         # Record what the LLM ACTUALLY named, before any back-fill. The batch is padded from the
         # static LOO ranker when the LLM names too few valid genes, and on some screens that padding
         # dominates (K562-Essential: the LLM matched 1 gene of 32). Attribution must not credit those
-        # static-ranker genes to the LLM — the fusion still scores them, but they are not LLM picks.
+        # static-ranker genes to the LLM. Active C fusion ignores padding; frozen scripts restore the
+        # historical policy that scored the padded batch as the branch output.
         self._llm_named: set[str] = set(matched[: self.batch_size])
 
         n_needed = self.batch_size - len(matched)
+        fallback: list[str] = []
         if n_needed > 0:
             fallback = self._fill_from_static(matched, n_needed)
             matched = matched + fallback
 
         self._n_fallback: int = max(0, n_needed)
+        self._static_padding: list[str] = list(fallback)
+        self._last_llm_diagnostics["fallback_count"] = self._n_fallback
         return matched[: self.batch_size]
 
     def update(self, round_idx: int, revealed_new: dict[str, bool]) -> None:

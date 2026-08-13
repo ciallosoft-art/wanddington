@@ -1,7 +1,7 @@
-# Reproducing Paper Results
+# Experiments: Frozen Paper Runs and Active GPT Evaluation
 
-This directory contains all scripts needed to reproduce the experimental results
-reported in the Waddington paper.
+Scripts 00–03 reproduce the frozen paper experiments. Script 04 is the active end-to-end GPT
+evaluation; it writes to a separate result tree and never relabels or overwrites the paper outputs.
 
 ## Requirements
 
@@ -11,7 +11,8 @@ reported in the Waddington paper.
 | GPU | Not required (CPU only) |
 | RAM | ≥ 8 GB |
 | Disk | ≥ 2 GB (datasets + feature files) |
-| API token | Anthropic API key (for LLM experiments) |
+| Active GPT auth | ChatGPT/Codex OAuth in `~/.waddington/agent/auth.json` |
+| Historical auth | Anthropic API key, only for frozen paper reproduction |
 
 ## Step 1 — Create environment
 
@@ -20,10 +21,40 @@ conda env create -f environment.yml   # the canonical env file lives at the repo
 conda activate waddington-bio
 ```
 
-## Step 2 — Configure API token
+## Step 2 — Configure the active GPT backend
 
-LLM-based experiments (B arm, C arm, ablations) call the Claude API via Anthropic.
-Set your token once:
+Authorize once, selecting **Codex (OpenAI / ChatGPT)**:
+
+```bash
+node frontend/bin/waddington.js setup
+```
+
+The current project default is `openai-codex/gpt-5.6-luna` with Codex reasoning effort `none`.
+Run the five-replicate GPT experiment with:
+
+```bash
+bash experiments/04_gpt_luna_5repeat.sh
+```
+
+It runs in three provenance-separated stages: five-arm calibration (including GPT-B), fail-closed
+memory generation from those GPT calibration results, then GPT-C evaluation and a validated merge.
+GPT-B is explicitly treated as a composite because its unmatched slots use StaticRanker padding;
+active GPT-C gives the LLM fusion vote only to genes GPT actually named. The protocol is
+leave-one-phenotype-out and allows same-study sibling screens, which its manifest records.
+The optional skill library is not used by this six-arm table and is not built unless
+`WADDINGTON_BUILD_GPT_SKILLS=1`. Every arm replicate is atomically checkpointed; rerunning the same
+command resumes only when the exact runtime/input fingerprint matches. Outputs are isolated under
+`workspace/results/gpt/gpt_5_6_luna_none/` and carry manifest sidecars.
+
+> Script 04 uses `--replicates 5 --seed-mode local`. Random receives a distinct deterministic local
+> seed; Coreset/static/online are deterministic re-evaluations. Codex exposes no provider sampling
+> seed, so GPT-B/C are repeated API invocations (independence not assumed), not reproducible model seeds.
+
+## Historical Claude paper reproduction
+
+Scripts 00–03 form the frozen paper suite. Scripts 00, 02, and 03 explicitly pin the historical
+Claude model/backend and legacy prompt/memory paths; script 01 has no LLM. Set an Anthropic token only
+if you need that historical reproduction:
 
 ```bash
 python3 experiments/setup_auth.py --token sk-ant-YOUR_TOKEN_HERE
@@ -40,7 +71,7 @@ python3 experiments/setup_auth.py --check
 
 Experiments 01 (baselines) do **not** require a token.
 
-## Step 3 — Reproduce experiments
+## Run historical experiments
 
 ### Option A: Run all experiments
 
@@ -51,7 +82,7 @@ bash experiments/run_all.sh          # long-running; total time depends on API t
 ### Option B: Run experiments individually
 
 ```bash
-# Reported main table: all six methods × 20 seeds — requires API token
+# Reported main table: all six methods × 20 historical evaluation repeats — requires API token
 bash experiments/00_main_table_20seed.sh
 
 # Five-seed companion baseline rows — no API token
@@ -60,18 +91,22 @@ bash experiments/01_baselines.sh     # ~5-10 min
 # Supporting legacy/component comparison + honest 5-seed companion — requires API token
 bash experiments/02_three_arm.sh     # ~2-3 hours
 
-# Table 4, ablation study (4 ablations × 5 seeds) — requires API token
+# Table 4, ablation study (4 ablations × 5 historical evaluation repeats) — requires API token
 bash experiments/03_ablations.sh     # ~6-8 hours
+
+# Active end-to-end GPT evaluation (5 API replicates; local baselines are seeded)
+bash experiments/04_gpt_luna_5repeat.sh
 ```
 
-The scripts recompute their outputs from scratch by default. Set `WADDINGTON_RESUME=1` only to continue
-an interrupted rerun whose JSON already contains partial checkpoints; a fresh clone already contains
-complete frozen outputs, so enabling resume on the first run would intentionally skip them.
+Scripts 00–03 recompute their outputs from scratch by default. Set `WADDINGTON_RESUME=1` only to
+continue a matching historical rerun. Script 04 always uses strict resume: every checkpoint must match
+its manifest and runtime/input hashes, so an interrupted quota window can be continued safely.
 
 ## Output
 
 Result files are written to `workspace/results/router/` (headline/router controls) and
-`workspace/results/sequential/` (5-seed supporting analyses) as JSON.
+`workspace/results/sequential/` (historical supporting analyses), while new GPT results go to
+`workspace/results/gpt/`, as JSON.
 
 | File | Content |
 |---|---|
@@ -79,14 +114,21 @@ Result files are written to `workspace/results/router/` (headline/router control
 | `router/legacy_waddington_20seed.json` | Matched 20-seed legacy target-aware control |
 | `sequential/baselines.json` | Five-seed companion baselines |
 | `sequential/three_arm.json` | Five-seed legacy A/B/C comparison used by supporting analyses |
-| `router/clean_headline_w0.2_5seed.json` | Five-seed companion for the leakage-free C-arm |
+| `router/clean_headline_w0.2_5seed.json` | Five-repeat companion for the target-label-free router/features C-arm |
 | `sequential/ablation_memory.json` | C vs C−memory |
 | `sequential/ablation_llm.json` | C vs C−LLM |
 | `sequential/ablation_ml.json` | C vs C−ML |
 | `sequential/ablation_shuffled.json` | C vs shuffled gene names |
+| `gpt/gpt_5_6_luna_none/calibration_5rep.json` | Stage-1 five-arm GPT calibration checkpoints |
+| `gpt/gpt_5_6_luna_none/experience_memory.json` | GPT-generated, fail-closed memory conditioned on Stage 1 |
+| `gpt/gpt_5_6_luna_none/waddington_c_5rep.json` | Stage-3 GPT-C checkpoints |
+| `gpt/gpt_5_6_luna_none/main_table_5rep.json` | Validated six-arm GPT table, created only after completion |
+| `gpt/gpt_5_6_luna_none/main_table_5rep.manifest.json` | Component hashes and final GPT provenance |
+| `gpt/gpt_5_6_luna_minimal/` | Superseded incomplete pilot; never resume or use as a headline |
 
-Each JSON maps `dataset → arm → [seed_0_result, ...]`; the headline files contain 20 seeds and the
-supporting files contain 5 unless their filename says otherwise.
+Result JSON maps `dataset → arm → [result_0, ...]`. Frozen files retain the paper's historical
+"seed" terminology. Active GPT files record `repeat_index`, any local seed, and
+`provider_seed: null` for Codex-backed arms.
 
 ## Code structure
 
@@ -101,9 +143,9 @@ waddington_select/
     ├── coreset_arm.py      ← A arm: Coreset diversity selection
     ├── static_ranker_arm.py ← LOO LightGBM static prior
     ├── online_adaptive_arm.py ← PerTurboAgent-style online ML
-    ├── llm_reasoning_arm.py  ← B arm: pure LLM reasoning
+    ├── llm_reasoning_arm.py  ← B arm: GPT proposals + static LOO-ML padding
     ├── waddington_arm.py     ← memory utilities (shared by C arm)
-    ├── waddington_c_arm.py ← C arm: Waddington (paper final)
+    ├── waddington_c_arm.py ← C arm: active GPT protocol; paper scripts pin legacy vote semantics
     │
     ├── waddington_c_no_memory_arm.py   ← ablation: C − memory
     ├── waddington_c_no_llm_arm.py      ← ablation: C − LLM
@@ -125,7 +167,8 @@ workspace/data/bda_benchmark/
 
 workspace/results/
 ├── router/                 ← reported 20-seed table + matched router controls
-└── sequential/             ← supporting 5-seed experiments and ablations
+├── sequential/             ← supporting 5-seed experiments and ablations
+└── gpt/                    ← active GPT calibration, memory, C-arm, and manifests
 ```
 
 ## Arm descriptions
@@ -136,8 +179,8 @@ workspace/results/
 | Coreset (A) | `coreset` | Greedy diversity-maximising k-center |
 | LOO-LightGBM | `static_ranker` | Cross-experiment LightGBM prior, static |
 | OnlineAdaptive | `online_adaptive` | PerTurboAgent: LOO prior + in-experiment retraining |
-| LLM Reasoning (B) | `llm_reasoning` | Claude Haiku with LOO-ML fallback |
-| **Waddington (C)** | `waddington_c` | **Online ML + LLM; global 0.8/0.2 fusion, metadata-selected DepMap policy, no anchor features (paper method)** |
+| LLM Reasoning (B) | `llm_reasoning` | GPT-5.6 Luna/none proposals plus LOO-ML padding; composite, not pure LLM |
+| **Waddington (C)** | `waddington_c` | **Online ML + GPT-named-only vote; global 0.8/0.2 weight, metadata DepMap policy, no anchor features** |
 | C − memory | `waddington_c_no_memory` | Ablation: no cross-experiment memory |
 | C − LLM | `waddington_c_no_llm` | Ablation: online ML only |
 | C − ML | `waddington_c_no_ml` | Ablation: static LOO prior + LLM |
@@ -146,15 +189,15 @@ workspace/results/
 ## Custom runs
 
 ```bash
-# Single dataset, 3 seeds
+# Single dataset, 3 repeated API evaluations (Codex has no provider seed)
 conda run -n waddington-bio python3 -m waddington_select \
     --arms waddington_c llm_reasoning \
     --datasets IFNG \
-    --seeds 3
+    --replicates 3 --seed-mode local
 
-# Quick smoke test (1 dataset, 1 seed)
+# Quick smoke test (1 dataset, 1 replicate)
 conda run -n waddington-bio python3 -m waddington_select \
     --arms waddington_c \
     --datasets Scharenberg22 \
-    --seeds 1
+    --replicates 1 --seed-mode local
 ```

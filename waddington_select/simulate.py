@@ -11,7 +11,7 @@ Usage:
     conda run -n waddington-bio python3 -m waddington_select.simulate --dataset IFNG --rounds 5
     conda run -n waddington-bio python3 -m waddington_select.simulate --dataset Scharenberg22 \
         --rounds 5 --skills
-    WADDINGTON_LLM_BACKEND=pi python3 -m waddington_select.simulate --dataset IFNG   # run on codex
+    python3 -m waddington_select.simulate --dataset IFNG   # GPT-5.6 Luna/none by default
 """
 
 from __future__ import annotations

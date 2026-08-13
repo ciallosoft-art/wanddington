@@ -37,9 +37,10 @@ import pandas as pd
 
 from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
-from .llm_reasoning_arm import LLMReasoningArm
+from .llm_reasoning_arm import LLMReasoningArm, LLM_MODEL as DEFAULT_LLM_MODEL
 from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 from ..skills import SkillLibrary, SKILL_LIBRARY_PATH
+from ..config import ACTIVE_MEMORY_PATH
 from ..features import load_training_frame
 from ..phenotype import load_registry
 
@@ -50,7 +51,7 @@ REPO_ROOT         = Path(__file__).resolve().parents[2]
 TRAINING_DATA_V1  = Path(os.environ.get("WADDINGTON_TRAINING_CSV",
                           REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"))
 TRAINING_DATA_V3  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data_v3.csv"
-MEMORY_PATH       = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
+MEMORY_PATH       = ACTIVE_MEMORY_PATH
 
 DEPMAP_PAN_FEATS   = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm"]
 DEPMAP_K562_FEATS  = DEPMAP_PAN_FEATS + ["depmap_K562_norm"]
@@ -69,7 +70,7 @@ K562_EXCLUDED   = {"Replogle_K562_gwps", "IL2", "Sanchez21_down"}
 # all others → v3 mode (pan-cancer + K562)
 
 LLM_TEMPERATURE = 0.0
-LLM_MODEL       = "claude-haiku-4-5-20251001"
+LLM_MODEL       = DEFAULT_LLM_MODEL
 SHORTLIST_SIZE  = 384
 
 W_ML_LARGE    = 0.80
@@ -78,9 +79,10 @@ W_ML_DEFAULT  = 0.60
 W_LLM_DEFAULT = 0.40
 
 # ---- Reported leakage-free default vs. legacy target-aware opt-in -----------------------------------
-# The REPORTED system (paper §honest-router, avg 0.253 over 20 seeds) is the DEFAULT: a single global fusion weight
+# The active routing/feature DEFAULT matches the REPORTED paper method: a single global fusion weight
 # (w_llm = DEFAULT_HONEST_WLLM), a metadata-only DepMap feature policy, and no anchor-relative features
-# — none of which read the target screen's realized labels. Set WADDINGTON_LEGACY_ROUTER=1 to restore
+# — none of which read the target screen's realized labels. The paper's 0.253 is a frozen Claude-backend
+# result, not a claim about the new GPT default. Set WADDINGTON_LEGACY_ROUTER=1 to restore
 # the earlier target-aware routed configuration (avg 0.259 in the matched 20-seed control, reads the
 # realized hit rate). Legacy ablation / SHAP / decomposition tables use its 5-seed run (avg 0.256).
 # The explicit knobs (WADDINGTON_FORCE_WLLM /
@@ -106,6 +108,16 @@ def _drop_anchor_default() -> bool:
     if env is not None:
         return env == "1"
     return not _legacy_router()
+
+
+def _named_only_llm_vote() -> bool:
+    """Whether fusion credits only genes the model itself named.
+
+    The historical harness gave the LLM branch's StaticRanker padding the same binary vote as a real
+    model proposal. That makes the vote partly a second ML prior. The active protocol fixes this by
+    default; frozen Claude scripts explicitly set the legacy policy to preserve their artifacts.
+    """
+    return os.environ.get("WADDINGTON_LLM_NAMED_ONLY", "1") == "1"
 
 
 def _metadata_hit_rate(dataset_name: str) -> float:
@@ -264,6 +276,8 @@ class WaddingtonCArm(BaseArm):
     def _on_reset(self) -> None:
         self._online.reset()
         self._llm.reset()
+        self._last_llm_named_proposals = set()
+        self._last_llm_static_padding_proposals = set()
 
     def select(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         if self._route == "two_stage":
@@ -272,7 +286,13 @@ class WaddingtonCArm(BaseArm):
 
     def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         ml_scores = self._online.all_scores()
-        llm_set = set(self._llm.select(round_idx, revealed))
+        padded_llm_batch = set(self._llm.select(round_idx, revealed))
+        named = set(getattr(self._llm, "_llm_named", padded_llm_batch))
+        self._last_llm_named_proposals = named
+        self._last_llm_static_padding_proposals = set(
+            getattr(self._llm, "_static_padding", [])
+        )
+        llm_set = named if _named_only_llm_vote() else padded_llm_batch
         combined: dict[str, float] = {
             g: self._w_ml * ml_scores.get(g, 0.0)
                + self._w_llm * (1.0 if g in llm_set else 0.0)
@@ -283,10 +303,8 @@ class WaddingtonCArm(BaseArm):
         if self._trace is not None:
             # what the ML would have taken on its own — the counterfactual for attribution
             ml_only_rank = sorted(combined, key=lambda g: -ml_scores.get(g, 0.0))
-            # Attribute only genes the LLM actually NAMED. `llm_set` also contains static-ranker
-            # back-fill (up to 97% of the set on K562-Essential); crediting those to the LLM would
-            # make "ML and LLM agree" partly mean "two ML models agree".
-            named = getattr(self._llm, "_llm_named", llm_set)
+            # Attribution always uses actual model names. Under the active vote policy this is also
+            # the fusion set; the frozen legacy policy can still include StaticRanker padding.
             self._trace.record_selection(
                 round_idx, self._route, self._w_ml, self._w_llm, ml_scores, named, batch,
                 ml_candidates=ml_only_rank[: self.batch_size],

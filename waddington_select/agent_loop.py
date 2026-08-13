@@ -6,7 +6,7 @@ simple JSON protocol, we dispatch to the native Python tools, and feed the resul
 commits a batch; then `reveal_fn` returns the results and the next round adapts.
 
 Design goals (why no LangChain/Agno): exact prompt control, reproducibility, provider-agnostic
-(LLM via llm_client — anthropic for the benchmark, pi/codex for deployment, mock for tests), and
+(LLM via llm_client — GPT/Codex by default, legacy Anthropic for frozen reproduction, mock for tests), and
 ONE harness that serves both the benchmark and the scientist entry:
   - benchmark:  reveal_fn = the ground-truth oracle
   - deployment: reveal_fn = the scientist's wet-lab results
@@ -23,10 +23,10 @@ import json
 import re
 
 from .oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
-from .llm_client import LLMClient
+from .llm_client import LLMClient, default_model_for_backend
 from . import tools
 
-LLM_MODEL = "claude-haiku-4-5-20251001"
+LLM_MODEL = default_model_for_backend()
 MAX_STEPS_PER_ROUND = 6
 
 _ACTIONS = """\

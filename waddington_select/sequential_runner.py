@@ -32,6 +32,20 @@ class RunResult:
     hit_ratio_per_round: list[float] = field(default_factory=list)
     auc_normalized: float = 0.0
     revealed_hits: list[str] = field(default_factory=list)  # genes selected that were hits (for novel-hit analysis)
+    # Gene-level audit trail. These make the direct basis for each hit recoverable without replaying
+    # hundreds of remote calls: final tested batch, actual model names, and static padding per round.
+    selected_genes_per_round: list[list[str]] = field(default_factory=list)
+    llm_named_proposals_per_round: list[list[str]] = field(default_factory=list)
+    llm_static_padding_proposals_per_round: list[list[str]] = field(default_factory=list)
+    selected_llm_named_genes_per_round: list[list[str]] = field(default_factory=list)
+    selected_without_llm_vote_per_round: list[list[str]] = field(default_factory=list)
+    # Number of batch slots silently padded by the static ranker after the LLM failed to name a valid
+    # in-pool gene. Empty for non-LLM arms. Recording this is essential when comparing providers.
+    llm_fallback_per_round: list[int] = field(default_factory=list)
+    # Provider/parser diagnostics without storing raw model text. Response hashes make repeated
+    # outputs detectable while counts separate duplicates, already-tested genes, and out-of-pool
+    # names from true JSON parse fallback.
+    llm_diagnostics_per_round: list[dict] = field(default_factory=list)
 
     @property
     def final_hit_ratio(self) -> float:
@@ -69,6 +83,41 @@ class SequentialRunner:
 
         for r in range(self.n_rounds):
             selected = self.arm.select(r, revealed_all)
+            # Standalone LLMReasoningArm stores `_n_fallback` on itself, while hybrid C arms store it
+            # on their nested `_llm` arm. Prefer the outer arm when it has the metric so we do not
+            # accidentally inspect its low-level LLMClient instead.
+            llm_component = (
+                self.arm if hasattr(self.arm, "_n_fallback")
+                else getattr(self.arm, "_llm", self.arm)
+            )
+            n_fallback = getattr(llm_component, "_n_fallback", None)
+            has_llm = n_fallback is not None or hasattr(llm_component, "_llm_named")
+            named = set(
+                getattr(
+                    self.arm,
+                    "_last_llm_named_proposals",
+                    getattr(llm_component, "_llm_named", set()),
+                )
+            )
+            result.selected_genes_per_round.append(list(selected))
+            static_padding = list(
+                getattr(
+                    self.arm,
+                    "_last_llm_static_padding_proposals",
+                    getattr(llm_component, "_static_padding", []),
+                )
+            ) if has_llm else []
+            result.llm_named_proposals_per_round.append(sorted(named))
+            result.llm_static_padding_proposals_per_round.append(static_padding)
+            result.selected_llm_named_genes_per_round.append([gene for gene in selected if gene in named])
+            result.selected_without_llm_vote_per_round.append(
+                [gene for gene in selected if gene not in named] if has_llm else []
+            )
+            if n_fallback is not None:
+                result.llm_fallback_per_round.append(int(n_fallback))
+            diagnostics = getattr(llm_component, "_last_llm_diagnostics", None)
+            if diagnostics is not None:
+                result.llm_diagnostics_per_round.append(dict(diagnostics))
             new_reveals = self.oracle.reveal(selected)
             self.arm.update(r, new_reveals)
             revealed_all.update(new_reveals)

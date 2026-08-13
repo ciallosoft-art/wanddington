@@ -1,10 +1,10 @@
 // Tool-less pi-ai LLM bridge.
 //
 // This is the whole point of the "use pi, not feynman" decision: we get pi's unified,
-// multi-provider LLM access (Claude / codex / gemini) WITH OAuth token auto-refresh, but WITHOUT
+// multi-provider LLM access (Codex / Claude / Gemini) WITH OAuth token auto-refresh, but WITHOUT
 // the coding-agent's tools. It is a pure completion — `completeSimple(model, { messages })` with no
-// `tools` field — so the model can only talk, never act. Gene selection is done by the deterministic
-// Python C-arm pipeline (see ../brain.mjs), not by the LLM wielding tools.
+// `tools` field — so the model can only talk, never act. Gene selection is done by the Python C-arm
+// pipeline (see ../brain.mjs), not by the LLM wielding tools.
 //
 // Auth goes through pi-coding-agent's AuthStorage, which refreshes expired OAuth tokens with locking
 // — so the recurring "token expired" pain of the old raw-token path is gone.
@@ -35,6 +35,10 @@ function resolveAuthPath() {
 }
 
 export const DEFAULT_AUTH_PATH = resolveAuthPath();
+export const DEFAULT_CODEX_MODEL = "openai-codex/gpt-5.6-luna";
+export const DEFAULT_CODEX_REASONING = "none";
+
+const REASONING_LEVELS = new Set(["none", "minimal", "low", "medium", "high", "xhigh", "max"]);
 
 let _registry = null;
 
@@ -74,6 +78,7 @@ function textOf(message) {
  * @param {string} [opts.systemPrompt] optional system prompt
  * @param {number} [opts.temperature]
  * @param {number} [opts.maxTokens]
+ * @param {string} [opts.reasoning]     none | minimal | low | medium | high | xhigh | max
  * @param {string} [opts.authPath]
  * @returns {Promise<string>} the model's text response
  */
@@ -83,6 +88,7 @@ export async function complete(opts) {
     systemPrompt,
     temperature,
     maxTokens = 1200,
+    reasoning,
     authPath = DEFAULT_AUTH_PATH,
   } = opts;
 
@@ -95,6 +101,18 @@ export async function complete(opts) {
   }
   if (!provider || !modelId) throw new Error("complete() needs provider+modelId (or spec)");
   if (!prompt) throw new Error("complete() needs a prompt");
+
+  // Codex subscription models use reasoning effort rather than sampling temperature.  Passing
+  // `temperature` to that endpoint is a hard error, so retain it for providers that support it and
+  // omit it for openai-codex. Luna is the cost-sensitive GPT-5.6 tier. The installed pi-ai adapter
+  // maps `minimal` to Codex `low`; for the actual lowest reasoning setting we inject the officially
+  // supported `none` value into the Codex Responses payload below.
+  const effectiveReasoning = reasoning
+    ?? process.env.WADDINGTON_PI_REASONING
+    ?? (provider === "openai-codex" ? DEFAULT_CODEX_REASONING : undefined);
+  if (effectiveReasoning && !REASONING_LEVELS.has(effectiveReasoning)) {
+    throw new Error(`invalid reasoning level '${effectiveReasoning}'`);
+  }
 
   const registry = getRegistry(authPath);
   const model = registry.find(provider, modelId);
@@ -110,6 +128,7 @@ export async function complete(opts) {
     throw new Error(`no working auth for ${provider}: ${JSON.stringify(resolved)}`);
   }
 
+  const codexNone = provider === "openai-codex" && effectiveReasoning === "none";
   const message = await completeSimple(
     model,
     {
@@ -120,8 +139,19 @@ export async function complete(opts) {
     {
       ...(resolved.apiKey ? { apiKey: resolved.apiKey } : {}),
       ...(resolved.headers ? { headers: resolved.headers } : {}),
-      ...(temperature != null ? { temperature } : {}),
+      ...(temperature != null && provider !== "openai-codex" ? { temperature } : {}),
       ...(maxTokens != null ? { maxTokens } : {}),
+      ...(effectiveReasoning && !codexNone ? { reasoning: effectiveReasoning } : {}),
+      // The installed adapter represents `off` by omitting reasoning (which would let GPT-5.6 use
+      // its medium default). Inject `none` explicitly. The ChatGPT/Codex OAuth endpoint rejects
+      // max_output_tokens, so maxTokens remains a provider hint for other backends and output length
+      // on this route is controlled by the strict response contract in the prompt.
+      ...(codexNone ? {
+        onPayload: (payload) => ({
+          ...payload,
+          reasoning: { effort: "none", summary: "auto" },
+        }),
+      } : {}),
     },
   );
 

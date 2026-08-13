@@ -1,14 +1,18 @@
-# Results
+# Results: Frozen Paper Outputs and Active GPT Runs
 
-Frozen benchmark outputs. The paper's numbers and figures are generated from these JSONs by
-`python -m waddington_select.analysis` — no value is transcribed by hand.
+The paper's frozen numbers and figures are generated from the historical JSONs by
+`python -m waddington_select.analysis` — no value is transcribed by hand. Active GPT experiments live
+under `gpt/`; they are separate experiments and do not replace or relabel paper results.
 
 ## Layout
 
 ```
 results/
-├── sequential/     # main benchmark: run_sequential.py output (per arm × dataset × seed) + experience_memory.json
-├── router/         # leakage-free router / final-system runs + router_analysis, protocol.json
+├── sequential/     # frozen supporting runs + historical Claude memory
+├── router/         # frozen paper headline/router controls + protocol.json
+├── gpt/
+│   ├── gpt_5_6_luna_none/     # formal staged GPT calibration/memory/C-arm outputs
+│   └── gpt_5_6_luna_minimal/  # superseded incomplete pilot; not a headline
 ├── figures/        # generated figures (waddington_select.analysis.figures)
 ├── bda_controlled/ # controlled BioDiscoveryAgent run on our benchmark
 ├── prior_probes.json          # what the cross-experiment prior learns (sibling / feature-family / hit-freq / anchor)
@@ -20,3 +24,8 @@ results/
 ```
 
 `campaigns/` (interactive-frontend traces) is gitignored.
+
+The formal GPT directory is complete only when `main_table_5rep.json` and its manifest both exist
+with `status: complete`. Its LLM conditions are five repeated API invocations (`provider_seed: null`),
+because the Codex OAuth endpoint does not expose a sampling seed; independence between API calls is
+not assumed. In the formal six-arm set, only Random consumes the local replicate-index seed.

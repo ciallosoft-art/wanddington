@@ -1,7 +1,7 @@
 """
 skill_builder.py — Distil the episodic memory into a verified skill library (Phase 1).
 
-Reads experience_memory.json (per-experiment episodic entries) and asks Claude to distil
+Reads experience_memory.json (per-experiment episodic entries) and asks the configured LLM to distil
 *general, transferable* when-then strategy skills across experiments. Each candidate skill then
 passes a verified-admission gate modelled on memory_builder._verify_entry:
 
@@ -23,16 +23,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 
 from .oracle import ALL_DATASETS
 from .memory_builder import MEMORY_PATH
 from .skills import SKILL_LIBRARY_PATH
-from .llm_client import LLMClient
+from .llm_client import DEFAULT_PI_REASONING, LLMClient, default_model_for_backend
 
 MAX_VERIFY_RETRIES = 2
-LLM_MODEL = "claude-haiku-4-5-20251001"
+LLM_MODEL = default_model_for_backend()
 
 
 def _parse_skill_array(text: str) -> list[dict]:
@@ -175,20 +176,27 @@ def _verify_skill(skill: dict, entries_by_ds: dict, client: LLMClient) -> tuple[
         trigger=skill.get("trigger", {}),
         directive=skill.get("directive", ""),
     )
+    # Fail closed: infrastructure errors propagate, while malformed/rejected verifier responses make
+    # the skill unverified. A missing response must never be relabeled as successful verification.
+    text = client.complete(prompt, temperature=0.0, max_tokens=200)
     try:
-        text = client.complete(prompt, temperature=0.0, max_tokens=200)
         m = re.search(r"\{.*\}", text, re.DOTALL)
-        result = json.loads(m.group()) if m else {}
-        if not result.get("valid", True):
-            issues.extend(result.get("issues", ["verifier rejected skill"]))
-    except Exception:
-        pass  # fail-open on infra hiccups, as in memory_builder
+        result = json.loads(m.group()) if m else None
+    except json.JSONDecodeError:
+        result = None
+    if not isinstance(result, dict) or not isinstance(result.get("valid"), bool):
+        issues.append("verifier returned malformed JSON or omitted boolean 'valid'")
+    elif result["valid"] is False:
+        rejected = result.get("issues")
+        issues.extend(rejected if isinstance(rejected, list) and rejected else ["verifier rejected skill"])
     return len(issues) == 0, issues
 
 
 def build_skills(n_skills: int = 12) -> list[dict]:
     with open(MEMORY_PATH) as f:
-        entries = json.load(f)
+        entries = [e for e in json.load(f) if e.get("verified") is True]
+    if not entries:
+        raise ValueError(f"no verified memory entries in {MEMORY_PATH}")
     entries_by_ds = {e["dataset"]: e for e in entries}
 
     client = LLMClient(model=LLM_MODEL, temperature=0.3, max_tokens=2000)
@@ -216,6 +224,14 @@ def build_skills(n_skills: int = 12) -> list[dict]:
             "evidence_datasets": cand.get("evidence_datasets", []),
             "marker_genes": [g.strip().upper() for g in cand.get("marker_genes", []) if g.strip()],
             "verified": valid,
+            "generator": {
+                "backend": client.backend,
+                "model": client.model,
+                "reasoning": (
+                    os.environ.get("WADDINGTON_PI_REASONING", DEFAULT_PI_REASONING)
+                    if client.backend == "pi" else None
+                ),
+            },
         }
         skills.append(skill)
         status = "✓" if valid else "✗"

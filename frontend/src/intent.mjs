@@ -8,10 +8,10 @@
 import { complete } from "./llm/complete.mjs";
 import { getDatasets } from "./brain.mjs";
 
-export const DEFAULT_CHAT_MODEL = process.env.WADDINGTON_CHAT_MODEL || "anthropic/claude-haiku-4-5";
+export const DEFAULT_CHAT_MODEL = process.env.WADDINGTON_CHAT_MODEL || "openai-codex/gpt-5.6-luna";
 
 const SYSTEM = (DATASETS) => `You are **Waddington**, a conversational assistant for CRISPR
-gene-selection. The gene selection itself is done by a separate deterministic model (the "C-arm
+gene-selection. The gene selection itself is done by a separate Python-orchestrated model (the "C-arm
 pipeline") — your ONLY job is to read the scientist's message plus the running session state and emit a
 single JSON object describing the action. Do not list or invent genes yourself.
 

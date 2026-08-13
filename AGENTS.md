@@ -15,9 +15,9 @@ The primary way a scientist uses this project is the tool-less conversational sh
 cd frontend && node bin/waddington.js
 ```
 
-On launch it authorizes a model provider (Claude / Codex / Gemini) in Waddington's own token store
+On launch it authorizes Codex (or an optional compatibility provider) in Waddington's own token store
 then offers **Terminal (CLI)** or **Web UI**. The scientist chats in natural language; the shell's
-LLM only *routes intent + narrates* (it never picks genes), and the deterministic **C-arm pipeline**
+LLM only *routes intent + narrates* (it never picks genes), and the Python-orchestrated **C-arm pipeline**
 (`waddington_select.suggest` / `.simulate`) does the selection. Provider is switchable with
 `--model provider/model`. This is built on **pi-ai** (the tool-less LLM layer), not feynman-the-agent.
 
@@ -67,19 +67,22 @@ prints per-round hits, cumulative discovery, and what it would test next. Relay 
 the final hit ratio. (For a real experiment with the user's own results instead of the oracle,
 use `suggest` with `--tested-hits/--tested-misses` iteratively.)
 
-## Choosing the LLM provider
+## Active LLM configuration
 
-The gene-selection pipeline's own reasoning model defaults to Claude. To run it through the frontend's
-tool-less, multi-provider pi-ai bridge (for example with Codex), set an env var — no code change:
+The conversation shell and gene-selection pipeline both default to the cost-sensitive GPT-5.6 tier,
+`openai-codex/gpt-5.6-luna`, with reasoning effort `none`, through the tool-less pi-ai bridge and
+Waddington's own OAuth store. The formal script builds GPT-calibrated memory at the active path;
+until that artifact exists, a direct C-arm command warns and runs without memory. Claude/Gemini are
+never automatic fallbacks. A direct command therefore needs no provider flags:
 
 ```bash
-WADDINGTON_LLM_BACKEND=pi conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG
+conda run -n waddington-bio python3 -m waddington_select.suggest --dataset IFNG
 ```
 
 `pi` shells out to `node frontend/bin/waddington.js complete`, a pure completion bridge with OAuth
-auto-refresh and no tools. `WADDINGTON_PI_MODEL="provider/model"` picks a specific model. Default
-(`anthropic`) is faster and is what the paper benchmark uses. `WADDINGTON_REUSE_FEYNMAN=1` is only an
-opt-in way to reuse an existing feynman token store.
+auto-refresh and no tools. Override with `WADDINGTON_PI_MODEL="provider/model"` and
+`WADDINGTON_PI_REASONING=LEVEL`. Direct `anthropic` remains only for the frozen historical paper
+scripts. `WADDINGTON_REUSE_FEYNMAN=1` is an opt-in way to reuse an existing feynman token store.
 
 ## Benchmark / evaluation (for reproduction, not for recommending)
 
@@ -88,26 +91,36 @@ bash experiments/00_main_table_20seed.sh  # reported six-method table + matched 
 bash experiments/01_baselines.sh   # baselines (no API)
 bash experiments/02_three_arm.sh   # supporting 5-seed legacy/component comparison
 bash experiments/03_ablations.sh   # four legacy 5-seed ablations
+bash experiments/04_gpt_luna_5repeat.sh  # GPT calibration → verified memory → GPT-C; strict resume
 ```
 
 Rebuild memory / skills (needs API):
 
 ```bash
-conda run -n waddington-bio python3 -m waddington_select.memory_builder     # experience_memory.json
-conda run -n waddington-bio python3 -m waddington_select.skill_builder        # skill_library.json
+bash experiments/04_gpt_luna_5repeat.sh  # canonical build order; calibration is required first
+conda run -n waddington-bio python3 -m waddington_select.skill_builder  # optional, not headline
 ```
 
 ## How the recommendation is produced (for explaining to the user)
 
 `waddington_c` fuses three signals with a globally fixed 0.8/0.2 ML/LLM weight
 (`arms/waddington_c_arm.py`): online-retrained LightGBM over PPI/KEGG/pLI/metadata-selected DepMap
-features + Claude/LLM biological reasoning + cross-experiment memory (or the skill library). The
+features + GPT/LLM biological reasoning + cross-experiment memory (or the skill library). The
 per-phenotype target-aware router exists only behind `WADDINGTON_LEGACY_ROUTER=1`. See `README.md` and
 `docs/` for details.
+
+In the active GPT protocol, the binary LLM vote applies only to genes GPT actually named; the
+standalone B arm's StaticRanker padding remains a documented composite baseline. Memory is
+leave-one-phenotype-out (the exact target is excluded) but same-study sibling screens remain allowed
+in this first run; do not describe it as study-LOO.
 
 ## Conventions
 
 - Never fabricate benchmark numbers — run the command and report what it prints.
+- Use `--replicates N --seed-mode local` for new work. In the formal six-arm set only Random consumes
+  the replicate-index seed; Coreset/static/online are deterministic re-evaluations. Codex exposes no
+  provider seed, so GPT-B/C are repeated API invocations whose independence is not assumed, not
+  reproducible LLM seeds. `--seeds` and `--seed-mode legacy` exist only for paper compatibility.
 - If a command needs provider auth and it is missing/expired, tell the user to run
-  `node frontend/bin/waddington.js setup` (OAuth) or
-  `python experiments/setup_auth.py --token …` (direct Anthropic benchmark path).
+  `node frontend/bin/waddington.js setup` (Codex OAuth). The raw-token setup script is only for
+  historical Anthropic reproduction.

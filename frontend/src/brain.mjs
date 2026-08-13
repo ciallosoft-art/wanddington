@@ -1,9 +1,9 @@
 // brain.mjs — the gene-selection "brain" seam.
 //
-// The conversational shell never decides genes itself. It shells out to the deterministic Python
+// The conversational shell never decides genes itself. It shells out to the Python-orchestrated
 // C-arm pipeline (the benchmark system, reported 20-seed leakage-free hit@R5 = 0.253), the pattern the archived
 // app used (execFile → a Python ranker) — but re-pointed from the old System-1 static ranker to the
-// current `waddington_select.suggest` / `.simulate`.
+// current `waddington_select.suggest` / `.simulate`; GPT-backed proposals can vary across calls.
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -79,8 +79,8 @@ function run(moduleArgs, { timeoutMs = 300_000 } = {}) {
     maxBuffer: 32 * 1024 * 1024,
     timeout: timeoutMs,
     // Deployment default: run the C-arm's own LLM through the tool-less pi bridge, which refreshes
-    // OAuth tokens. (The raw-token `anthropic` backend expires and 401s.) The benchmark is unaffected:
-    // run_sequential is invoked directly, not through here, and stays on the frozen direct backend.
+    // OAuth tokens. GPT-5.6 Luna/none is the project default; historical paper scripts explicitly
+    // pin the legacy direct Anthropic backend and therefore remain reproducible.
     env: { ...process.env, WADDINGTON_LLM_BACKEND: process.env.WADDINGTON_LLM_BACKEND || "pi" },
   });
 }

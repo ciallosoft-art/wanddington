@@ -7,7 +7,7 @@ Round R flow:
   1. OnlineAdaptiveArm provides top-K candidates with ML confidence scores
      (K = SHORTLIST_FACTOR × batch_size, after in-experiment retraining)
   2. Cross-experiment memory (LOO) provides strategy insights from other datasets
-  3. Claude reasons over candidates + memory + revealed feedback → selects batch
+  3. The configured LLM reasons over candidates + memory + revealed feedback → selects batch
 
 Expected: avg hit@R5 > max(OnlineAdaptive=0.224, LLMReasoning=0.220)
 """
@@ -15,19 +15,21 @@ Expected: avg hit@R5 > max(OnlineAdaptive=0.224, LLMReasoning=0.220)
 from __future__ import annotations
 
 import json
+import os
 import re
+import warnings
 from pathlib import Path
-
-import anthropic
 
 from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
-from .llm_reasoning_arm import _load_auth_token, _load_task
+from .llm_reasoning_arm import _load_task
+from ..config import ACTIVE_MEMORY_PATH
+from ..llm_client import LLMClient, default_model_for_backend
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MEMORY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "experience_memory.json"
+MEMORY_PATH = ACTIVE_MEMORY_PATH
 
-LLM_MODEL = "claude-haiku-4-5-20251001"
+LLM_MODEL = default_model_for_backend()
 LLM_TEMPERATURE = 0.3   # Lower than B-arm: memory context makes more determinism better
 LLM_MAX_TOKENS = 1500
 SHORTLIST_FACTOR = 3    # Show LLM top (3 × batch_size) ML candidates
@@ -37,10 +39,20 @@ MAX_CANDIDATES_IN_PROMPT = 80  # Cap shortlist shown to LLM to control prompt si
 
 def _load_memory(memory_path: Path, exclude_dataset: str) -> list[dict]:
     if not memory_path.exists():
+        warnings.warn(
+            f"verified memory not found at {memory_path}; running {exclude_dataset} without memory",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         return []
     with open(memory_path) as f:
         all_entries = json.load(f)
-    return [e for e in all_entries if e.get("dataset") != exclude_dataset]
+    # A failed verifier entry is retained on disk for auditability, but must never become model
+    # context. Historical files without the field predate the admission gate and remain compatible.
+    return [
+        e for e in all_entries
+        if e.get("dataset") != exclude_dataset and e.get("verified") is True
+    ]
 
 
 def _rank_memory_by_relevance(entries: list[dict], task: dict) -> list[dict]:
@@ -91,7 +103,11 @@ class WaddingtonArm(BaseArm):
         self._memory = ranked[:MAX_MEMORY_ENTRIES]
 
         # LLM client
-        self._client = anthropic.Anthropic(auth_token=_load_auth_token())
+        self._client = LLMClient(
+            model=LLM_MODEL,
+            temperature=LLM_TEMPERATURE,
+            max_tokens=LLM_MAX_TOKENS,
+        )
         self._shortlist_factor = shortlist_factor
 
         # Revealed history for LLM context
@@ -185,13 +201,7 @@ Return ONLY a JSON array of {self.batch_size} gene symbols. No explanation.
 Example: ["JAK1", "STAT1", "IRF1", ...]"""
 
     def _call_llm(self, prompt: str, candidates: list[tuple[str, float]]) -> list[str]:
-        response = self._client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=LLM_MAX_TOKENS,
-            temperature=LLM_TEMPERATURE,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text.strip()
+        text = self._client.complete(prompt).strip()
 
         # Parse JSON array
         try:

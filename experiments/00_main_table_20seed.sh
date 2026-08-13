@@ -14,7 +14,13 @@ cd "$(dirname "$0")/.."
 unset WADDINGTON_LEGACY_ROUTER WADDINGTON_FORCE_WLLM WADDINGTON_FORCE_ROUTE
 unset WADDINGTON_FEATURE_POLICY WADDINGTON_DROP_ANCHOR_FEATS WADDINGTON_HITFREQ_ONLY
 unset WADDINGTON_REASON_FROM_STRUCTURE WADDINGTON_EXCLUDE_STUDY WADDINGTON_TRAINING_CSV
+unset WADDINGTON_PI_MODEL WADDINGTON_PI_REASONING WADDINGTON_PI_CMD
 export WADDINGTON_LLM_BACKEND=anthropic
+export WADDINGTON_LLM_MODEL=claude-haiku-4-5-20251001
+export WADDINGTON_FULL_SELECTED_CONTEXT=0
+export WADDINGTON_LLM_NAMED_ONLY=0
+export WADDINGTON_MEMORY_PATH=workspace/results/sequential/experience_memory.json
+export WADDINGTON_SKILL_LIBRARY_PATH=workspace/results/sequential/skill_library.json
 
 echo "=== Experiment 00: Reported 20-seed main table ==="
 echo "Arms: random  coreset  static_ranker  online_adaptive  llm_reasoning  waddington_c"

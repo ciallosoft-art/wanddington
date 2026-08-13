@@ -1,6 +1,6 @@
 // converse.mjs — the one conversation turn, shared by the CLI and Web frontends.
 //
-// message + session state → (LLM intent route) → (deterministic C-arm brain) → structured result.
+// message + session state → (LLM intent route) → (Python-orchestrated C-arm brain) → structured result.
 // The LLM only routes intent and narrates; genes come solely from the Python pipeline.
 
 import { routeIntent } from "./intent.mjs";
@@ -22,7 +22,7 @@ function mergeUnique(existing, incoming) {
 async function narrateBatch(dataset, genes, modelSpec) {
   try {
     const prompt =
-      `For the CRISPR phenotype "${dataset}", the deterministic C-arm model recommends testing these ` +
+      `For the CRISPR phenotype "${dataset}", the C-arm pipeline recommends testing these ` +
       `${genes.length} genes next: ${genes.join(", ")}.\n` +
       `Write 1-2 short sentences on the biological theme of this batch. Do NOT add or remove genes.`;
     return await complete({ spec: modelSpec, prompt, temperature: 0.2, maxTokens: 200 });

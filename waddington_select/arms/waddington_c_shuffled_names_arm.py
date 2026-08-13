@@ -20,8 +20,6 @@ import re
 import time
 from pathlib import Path
 
-import anthropic
-
 from .base import BaseArm
 from .llm_reasoning_arm import LLMReasoningArm, LLM_MAX_TOKENS
 from .online_adaptive_arm import OnlineAdaptiveArm
@@ -193,8 +191,13 @@ Example: ["GENE_00042", "GENE_00137"]"""
         # How much of this batch is static-ranker back-fill rather than the LLM's own choice. Same
         # accounting lesson as the C-arm: padding must be visible, never credited to the LLM.
         self._n_fallback: int = max(0, n_needed)
+        named_anon = list(matched_anon[: self.batch_size])
+        fallback_anon: list[str] = []
         if n_needed > 0:
-            matched_anon = matched_anon + self._fill_anon_from_static(matched_anon, n_needed)
+            fallback_anon = self._fill_anon_from_static(matched_anon, n_needed)
+            matched_anon = matched_anon + fallback_anon
+        self._llm_named = {self._f2r[g] for g in named_anon if g in self._f2r}
+        self._static_padding = [self._f2r[g] for g in fallback_anon if g in self._f2r]
         result_anon = matched_anon[: self.batch_size]
         return [self._f2r[g] for g in result_anon if g in self._f2r]
 
@@ -206,6 +209,7 @@ Example: ["GENE_00042", "GENE_00137"]"""
         prompt = self._build_anon_shortlist_prompt(round_idx, fake_shortlist)
         llm_raw = self._call_llm(prompt)
         matched_anon = self._match_anon(llm_raw)
+        named_anon = list(matched_anon[: self.batch_size])
 
         n_needed = self.batch_size - len(matched_anon)
         self._n_fallback: int = max(0, n_needed)  # LLM-named shortfall, padded below
@@ -220,8 +224,13 @@ Example: ["GENE_00042", "GENE_00137"]"""
                     matched_anon.append(fg)
                     matched_set.add(fg)
                     n_needed -= 1
+        fallback_anon: list[str] = []
         if len(matched_anon) < self.batch_size:
-            matched_anon += self._fill_anon_from_static(matched_anon, self.batch_size - len(matched_anon))
+            fallback_anon = self._fill_anon_from_static(matched_anon, self.batch_size - len(matched_anon))
+            matched_anon += fallback_anon
+
+        self._llm_named = {self._f2r[g] for g in named_anon if g in self._f2r}
+        self._static_padding = [self._f2r.get(g, g) for g in fallback_anon]
 
         result_anon = matched_anon[: self.batch_size]
         return [self._f2r.get(g, g) for g in result_anon]
@@ -281,7 +290,12 @@ class WaddingtonCShuffledNamesArm(BaseArm):
 
     def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         ml_scores = self._online.all_scores()
-        llm_set = set(self._llm.select(round_idx, revealed))
+        padded_llm_batch = set(self._llm.select(round_idx, revealed))
+        from .waddington_c_arm import _named_only_llm_vote
+        llm_set = (
+            set(getattr(self._llm, "_llm_named", padded_llm_batch))
+            if _named_only_llm_vote() else padded_llm_batch
+        )
         combined: dict[str, float] = {
             g: self._w_ml * ml_scores.get(g, 0.0)
                + self._w_llm * (1.0 if g in llm_set else 0.0)

@@ -42,11 +42,14 @@ Skill schema
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
+from .config import ACTIVE_SKILL_LIBRARY_PATH
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SKILL_LIBRARY_PATH = REPO_ROOT / "workspace" / "results" / "sequential" / "skill_library.json"
+SKILL_LIBRARY_PATH = ACTIVE_SKILL_LIBRARY_PATH
 
 # HGNC-like token, for the mechanical leakage scan of a directive.
 _GENE_TOKEN = re.compile(r"\b[A-Z][A-Z0-9]{1,9}\b")

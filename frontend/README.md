@@ -8,7 +8,7 @@ npm install
 node bin/waddington.js
 ```
 
-On launch it authorizes a model provider (Claude / Codex / Gemini) into Waddington's **own** OAuth store
+On launch it authorizes Codex (or an optional compatibility provider) into Waddington's **own** OAuth store
 at `~/.waddington/agent/auth.json` — self-contained, no dependency on any other tool — then lets you pick
 **Terminal (CLI)** or **Web UI**. You chat in natural language; report wet-lab results and it adapts the
 next round. (Set `WADDINGTON_REUSE_FEYNMAN=1` to instead reuse an existing `~/.feynman` token store.)
@@ -23,8 +23,9 @@ Three layers, **no agent tools in the loop**:
    routes intent (`src/intent.mjs`) and narrates; it never selects genes.
 2. **conversation** — `src/converse.mjs` (shared by CLI `src/chat.mjs` and Web `src/web-server.mjs`).
 3. **brain** — `src/brain.mjs` shells out to the Python C-arm pipeline
-   (`python -m waddington_select.suggest --json` / `.simulate`), the benchmark system
-   (reported 20-seed leakage-free hit@R5 = 0.253). Gene selection is deterministic and lives in Python.
+   (`python -m waddington_select.suggest --json` / `.simulate`). The paper reports a historical
+   Claude-backend hit@R5 of 0.253; active GPT results are tracked separately. Selection policy and
+   state transitions live in Python, while LLM-backed recommendations can vary across API calls.
 
 We deliberately removed tools: in the matched legacy 5-seed diagnostic, the free tool-using agent lost
 to the constrained pipeline (0.209 vs 0.256).
@@ -40,7 +41,10 @@ to the constrained pipeline (0.209 vs 0.256).
 
 ## Config
 
-- `--model provider/model` (or `WADDINGTON_CHAT_MODEL`) — conversation model (default: an authorized Claude Haiku).
+- `--model provider/model` (or `WADDINGTON_CHAT_MODEL`) — conversation model (default: `openai-codex/gpt-5.6-luna`).
+- `--reasoning LEVEL` (or `WADDINGTON_PI_REASONING`) — Codex effort; default `none`. The flag applies
+  to one-shot, interactive CLI/Web narration, and child Python calls.
+- `WADDINGTON_PI_MODEL` — Python C-arm model; default `openai-codex/gpt-5.6-luna`.
 - `WADDINGTON_PY` — how to invoke Python (default `conda run -n waddington-bio python3`).
 - `WADDINGTON_AUTH_PATH` — OAuth/API token store. Default: `~/.waddington/agent/auth.json` (Waddington's
   own store, created on first login). Set `WADDINGTON_REUSE_FEYNMAN=1` to reuse `~/.feynman/agent/auth.json`

@@ -29,6 +29,7 @@ from .waddington_c_arm import (
     SHORTLIST_SIZE,
     W_ML_LARGE, W_LLM_LARGE,
     W_ML_DEFAULT, W_LLM_DEFAULT,
+    _named_only_llm_vote,
 )
 
 
@@ -89,7 +90,11 @@ class WaddingtonCNoMLArm(BaseArm):
 
     def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         ml_scores = self._online.all_scores()
-        llm_set = set(self._llm.select(round_idx, revealed))
+        padded_llm_batch = set(self._llm.select(round_idx, revealed))
+        llm_set = (
+            set(getattr(self._llm, "_llm_named", padded_llm_batch))
+            if _named_only_llm_vote() else padded_llm_batch
+        )
         combined: dict[str, float] = {
             g: self._w_ml * ml_scores.get(g, 0.0)
                + self._w_llm * (1.0 if g in llm_set else 0.0)

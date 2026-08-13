@@ -24,7 +24,8 @@ Usage:
   waddington --help
 
 Options:
-  --model provider/model     Conversation model (default: an authorized Claude Haiku)
+  --model provider/model     Conversation model (default: openai-codex/gpt-5.6-luna)
+  --reasoning LEVEL          Codex effort (default: none; options: none/minimal/low/medium/high/xhigh/max)
   --port N                   Web UI port (default 3000)
   --reason-from-structure    Hide gene names from the model; pick from structural features only
                              (network / pathway / essentiality). Removes the memorisation
@@ -49,8 +50,9 @@ async function oneShotComplete(values) {
     spec,
     prompt,
     ...(values.system ? { systemPrompt: values.system } : {}),
-    temperature: values.temperature != null ? Number(values.temperature) : 0,
+    ...(values.temperature != null ? { temperature: Number(values.temperature) } : {}),
     maxTokens: values["max-tokens"] != null ? Number(values["max-tokens"]) : 1200,
+    ...(values.reasoning ? { reasoning: values.reasoning } : {}),
   });
   process.stdout.write(out + "\n");
 }
@@ -68,11 +70,16 @@ export async function main() {
       system: { type: "string" },
       temperature: { type: "string" },
       "max-tokens": { type: "string" },
+      reasoning: { type: "string" },
       "reason-from-structure": { type: "boolean" },
     },
   });
 
   const command = positionals[0];
+
+  // Keep interactive narration and every child Python C-arm on the same requested effort. Previously
+  // this flag affected only the one-shot `complete` subcommand and was silently ignored by CLI/Web.
+  if (values.reasoning) process.env.WADDINGTON_PI_REASONING = values.reasoning;
 
   if (values.help || command === "help") return printHelp();
   if (command === "setup") return runSetup();

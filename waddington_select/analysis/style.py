@@ -31,7 +31,7 @@ METHOD_ORDER = ["waddington_c", "llm_reasoning", "online_adaptive", "static_rank
 METHOD_COLOR = dict(zip(METHOD_ORDER, SLOTS))
 METHOD_LABEL = {
     "waddington_c": "Waddington C (ours)",
-    "llm_reasoning": "LLM only",
+    "llm_reasoning": "LLM + LOO padding",
     "online_adaptive": "Online ML",
     "static_ranker": "Static LOO-LGBM",
     "coreset": "Coreset",

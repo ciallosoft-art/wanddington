@@ -10,12 +10,12 @@ import { stdin, stdout } from "node:process";
 import { AuthStorage } from "@earendil-works/pi-coding-agent";
 import { select, isCancel } from "@clack/prompts";
 
-import { DEFAULT_AUTH_PATH, listAvailableModels } from "./llm/complete.mjs";
+import { DEFAULT_AUTH_PATH, DEFAULT_CODEX_MODEL, listAvailableModels } from "./llm/complete.mjs";
 
 // Provider ids we surface, with friendly labels.
 const PROVIDERS = [
-  { id: "anthropic", label: "Claude (Anthropic)" },
   { id: "openai-codex", label: "Codex (OpenAI / ChatGPT)" },
+  { id: "anthropic", label: "Claude (Anthropic, legacy compatibility)" },
   { id: "google-gemini-cli", label: "Gemini (Google)" },
 ];
 
@@ -28,14 +28,17 @@ export function authorizedProviders(authPath = DEFAULT_AUTH_PATH) {
   return makeAuth(authPath).list();
 }
 
-/** Prefer an anthropic haiku model; else any authorized model that isn't a known-unsupported one. */
+/** Use the active GPT model; compatibility providers require an explicit --model override. */
 export function pickDefaultChatModel(authPath = DEFAULT_AUTH_PATH) {
   if (process.env.WADDINGTON_CHAT_MODEL) return process.env.WADDINGTON_CHAT_MODEL;
   const avail = listAvailableModels(authPath);
-  const haiku = avail.find((m) => m.provider === "anthropic" && m.id === "claude-haiku-4-5");
-  if (haiku) return "anthropic/claude-haiku-4-5";
-  const usable = avail.find((m) => !m.id.includes("spark"));
-  return usable ? `${usable.provider}/${usable.id}` : "anthropic/claude-haiku-4-5";
+  const [codexProvider, codexId] = DEFAULT_CODEX_MODEL.split("/", 2);
+  const luna = avail.find((m) => m.provider === codexProvider && m.id === codexId);
+  if (luna) return DEFAULT_CODEX_MODEL;
+  throw new Error(
+    `${DEFAULT_CODEX_MODEL} is not authorized. Run 'node frontend/bin/waddington.js setup' and `
+    + "choose Codex, or explicitly pass --model provider/model for a compatibility provider.",
+  );
 }
 
 function loginCallbacks() {
