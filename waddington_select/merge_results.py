@@ -98,12 +98,13 @@ def _validated_repeats(data: dict, dataset: str, arm: str, n: int = 5) -> list[d
     return repeats
 
 
-def _validate_protocol(protocol: dict, expected_arms: tuple[str, ...], label: str) -> None:
+def _validate_protocol(protocol: dict, expected_arms: tuple[str, ...], label: str,
+                       expected_repeats: int = 5) -> None:
     expected = {
         "datasets": list(BENCHMARK_DATASETS),
         "arms": list(expected_arms),
         "rounds": 5,
-        "repeats": 5,
+        "repeats": expected_repeats,
         "seed_mode": "local",
         "llm_backend": "pi",
         "llm_model": "openai-codex/gpt-5.6-luna",
@@ -186,6 +187,8 @@ def main() -> None:
     p.add_argument("--carm", type=Path, required=True)
     p.add_argument("--memory", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--repeats", type=int, default=5,
+                   help="Evaluation replicates the run used (protocol check; default 5)")
     args = p.parse_args()
 
     resolved_inputs = {args.calibration.resolve(), args.carm.resolve(), args.memory.resolve()}
@@ -200,8 +203,8 @@ def main() -> None:
     )
     carm_manifest_path, carm_manifest, carm_protocol = _load_run_manifest(args.carm, "C-arm")
 
-    _validate_protocol(calibration_protocol, CALIBRATION_ARMS, "calibration")
-    _validate_protocol(carm_protocol, (C_ARM,), "C-arm")
+    _validate_protocol(calibration_protocol, CALIBRATION_ARMS, "calibration", args.repeats)
+    _validate_protocol(carm_protocol, (C_ARM,), "C-arm", args.repeats)
     for key in (
         "llm_backend", "llm_model", "llm_reasoning", "codex_reasoning_effective",
         "runtime_fingerprint", "full_selected_context", "llm_vote_policy",
