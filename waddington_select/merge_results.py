@@ -250,7 +250,7 @@ def main() -> None:
         summary[dataset] = {}
         for arm in (*CALIBRATION_ARMS, C_ARM):
             source = carm if arm == C_ARM else calibration
-            repeats = _validated_repeats(source, dataset, arm)
+            repeats = _validated_repeats(source, dataset, arm, args.repeats)
             merged[dataset][arm] = repeats
             summary[dataset][arm] = round(
                 sum(float(result["hit_ratio_per_round"][-1]) for result in repeats) / len(repeats), 6
@@ -275,7 +275,7 @@ def main() -> None:
         "cross_experiment_split": calibration_protocol["cross_experiment_split"],
         "same_study_siblings_allowed": calibration_protocol["same_study_siblings_allowed"],
         "llm_vote_policy": calibration_protocol["llm_vote_policy"],
-        "replicates": 5,
+        "replicates": args.repeats,
         "provider_seed": None,
         "provider_seed_note": (
             "Codex OAuth does not expose a sampling seed; these are repeated API invocations and "
