@@ -300,12 +300,13 @@ class WaddingtonCArm(BaseArm):
             if g not in self._selected
         }
         batch = sorted(combined, key=combined.__getitem__, reverse=True)[: self.batch_size]
-        if self._trace is not None:
+        trace = getattr(self, "_trace", None)  # ablation subclasses bypass __init__ and never set it
+        if trace is not None:
             # what the ML would have taken on its own — the counterfactual for attribution
             ml_only_rank = sorted(combined, key=lambda g: -ml_scores.get(g, 0.0))
             # Attribution always uses actual model names. Under the active vote policy this is also
             # the fusion set; the frozen legacy policy can still include StaticRanker padding.
-            self._trace.record_selection(
+            trace.record_selection(
                 round_idx, self._route, self._w_ml, self._w_llm, ml_scores, named, batch,
                 ml_candidates=ml_only_rank[: self.batch_size],
                 shap=self._online.shap_for(batch),
@@ -318,9 +319,10 @@ class WaddingtonCArm(BaseArm):
         if not candidates:
             return [g for g in self._online._ranking if g not in self._selected][: self.batch_size]
         batch = self._llm.select_with_shortlist(round_idx, candidates)
-        if self._trace is not None:
+        trace = getattr(self, "_trace", None)  # ablation subclasses bypass __init__ and never set it
+        if trace is not None:
             # here the ML shortlists and the LLM re-ranks: its own top-k is the head of the shortlist
-            self._trace.record_selection(
+            trace.record_selection(
                 round_idx, self._route, self._w_ml, self._w_llm,
                 self._online.all_scores(), set(batch), batch,
                 ml_candidates=candidates[: self.batch_size],

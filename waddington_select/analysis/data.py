@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULTS = REPO_ROOT / "workspace" / "results" / "sequential"
 # The final leakage-free 20-seed run of all six main-table arms (used for the principal figures 1-3);
 # the legacy three_arm.json waddington_c stays the reference for the component-ablation figure.
-FINAL_WADD = REPO_ROOT / "workspace" / "results" / "router" / "main_table_20seed.json"
+FINAL_WADD = REPO_ROOT / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "main_table_20rep.json"
 
 # Which file each method's runs live in (baselines + the three-arm comparison).
 METHOD_FILES = {
