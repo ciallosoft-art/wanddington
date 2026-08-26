@@ -1,0 +1,30 @@
+{
+  "created_at": "2026-08-13T01:34:20.253415+00:00",
+  "git_commit": "019a0899cacb99d832418ab5ffb45d914918a7ab",
+  "git_dirty": true,
+  "protocol": {
+    "datasets": [
+      "Scharenberg22"
+    ],
+    "arms": [
+      "llm_reasoning",
+      "waddington_c"
+    ],
+    "rounds": 1,
+    "repeats": 1,
+    "cli_option": "--seeds",
+    "seed_semantics": "protocol-compatible repeated arm construction; the repeat index is not currently propagated into every arm constructor, so these are repeats rather than independent seeds",
+    "llm_backend": "pi",
+    "llm_model": "openai-codex/gpt-5.6-luna",
+    "llm_reasoning": "minimal",
+    "codex_reasoning_mapping": "pi-ai maps the requested 'minimal' setting to Codex effort 'low'",
+    "codex_temperature_policy": "requested arm temperatures are omitted because the openai-codex endpoint does not support temperature",
+    "memory_path": "workspace/results/gpt/gpt_5_6_luna_minimal/experience_memory.json",
+    "memory_sha256": "454fa7952764e655af2d01b42c66c36bc9da61a885a96eb475d5050d2544551d",
+    "legacy_router": false,
+    "force_wllm": null,
+    "feature_policy": "default",
+    "drop_anchor_features": "default",
+    "reason_from_structure": false
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "Scharenberg22": {
+    "llm_reasoning": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "llm_reasoning",
+        "batch_size": 32,
+        "n_rounds": 1,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          5
+        ],
+        "cumulative_hits": [
+          5
+        ],
+        "hit_ratio_per_round": [
+          0.102
+        ],
+        "auc_normalized": 0.1563,
+        "repeat_index": 0
+      }
+    ],
+    "waddington_c": [
+      {
+        "dataset": "Scharenberg22",
+        "arm_name": "waddington_c",
+        "batch_size": 32,
+        "n_rounds": 1,
+        "total_hits": 49,
+        "n_genes": 1029,
+        "hits_per_round": [
+          6
+        ],
+        "cumulative_hits": [
+          6
+        ],
+        "hit_ratio_per_round": [
+          0.1224
+        ],
+        "auc_normalized": 0.1875,
+        "llm_fallback_per_round": [
+          10
+        ],
+        "repeat_index": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,322 @@
+[
+  {
+    "id": "sk_001",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate T-cell receptor or proximal immune signaling, prioritize untested genes in receptor-proximal adaptor, kinase, NF-kB, and downstream transcriptional modules.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2"
+    ],
+    "marker_genes": [
+      "CD3D",
+      "CD3E",
+      "CD247",
+      "LCK",
+      "ZAP70",
+      "LAT",
+      "MALT1",
+      "CARD11"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_002",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate cytokine-receptor signaling, prioritize genes spanning JAK-STAT activation, receptor-proximal adaptors, and cytokine-responsive transcriptional regulation.",
+    "evidence_datasets": [
+      "IL2",
+      "Steinhart"
+    ],
+    "marker_genes": [
+      "JAK1",
+      "JAK3",
+      "STAT1",
+      "STAT3",
+      "STAT5A",
+      "STAT5B",
+      "SOCS1",
+      "TYK2"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_003",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate endosomal, lysosomal, or vesicular trafficking, prioritize genes across vesicle tethering, membrane fusion, cargo sorting, and organelle acidification rather than only close paralogs.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Sanchez21_down",
+      "Carnevale22",
+      "Scharenberg22"
+    ],
+    "marker_genes": [
+      "RAB5A",
+      "RAB7A",
+      "VPS16",
+      "VPS18",
+      "VPS33A",
+      "VPS35",
+      "SNAP29",
+      "ATP6V1A"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_004",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate autophagy or lysosomal homeostasis, prioritize core autophagy initiation, phagophore formation, lysosome biogenesis, and autophagic flux regulators.",
+    "evidence_datasets": [
+      "Scharenberg22",
+      "Carnevale22"
+    ],
+    "marker_genes": [
+      "ATG5",
+      "ATG7",
+      "BECN1",
+      "ULK1",
+      "MAP1LC3B",
+      "SQSTM1",
+      "LAMP1",
+      "TFEB"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_005",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate ubiquitin or proteostasis, prioritize genes in ubiquitin conjugation, proteasomal degradation, protein quality control, and stress-response machinery.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Sanchez21_down",
+      "Replogle_K562_essential"
+    ],
+    "marker_genes": [
+      "UBC",
+      "UBA1",
+      "UBE2D3",
+      "CUL1",
+      "PSMA1",
+      "PSMB5",
+      "VCP",
+      "HSPA5"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_006",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate core transcription or chromatin regulation, prioritize genes in Mediator, general transcription-factor, chromatin-remodeling, histone-modification, and transcription-coupled RNA-processing complexes.",
+    "evidence_datasets": [
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [
+      "MED1",
+      "MED12",
+      "TAF1",
+      "SUPT5H",
+      "CHD1",
+      "SSRP1",
+      "WDR5",
+      "SETD1A"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_007",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate RNA processing or ribosome biogenesis, prioritize genes across spliceosome assembly, RNA surveillance, ribosome maturation, and stress-granule regulation.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Replogle_K562_essential"
+    ],
+    "marker_genes": [
+      "SF3B1",
+      "SNRNP70",
+      "PRPF8",
+      "DROSHA",
+      "DICER1",
+      "NPM1",
+      "FBL",
+      "G3BP1"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_008",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate adenosine-cAMP, calcium, or MAPK signaling, prioritize pathway components connecting second-messenger production to calcium-dependent kinases and transcriptional responses.",
+    "evidence_datasets": [
+      "Carnevale22",
+      "Steinhart"
+    ],
+    "marker_genes": [
+      "ADORA2A",
+      "ADCY6",
+      "PRKACA",
+      "CREB1",
+      "CAMK2A",
+      "CALM1",
+      "RAF1",
+      "MAPK1"
+    ],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_009",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate lipid, cholesterol, or ER-stress biology, prioritize genes controlling lipid sensing and transport, membrane composition, unfolded-protein response, and organelle quality control.",
+    "evidence_datasets": [
+      "Scharenberg22",
+      "Carnevale22"
+    ],
+    "marker_genes": [
+      "SREBF2",
+      "SCAP",
+      "NPC1",
+      "ABCA1",
+      "INSIG1",
+      "XBP1",
+      "ATF6",
+      "ERN1"
+    ],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_010",
+    "type": "selection_heuristic",
+    "trigger": {
+      "max_n_genes": 10000
+    },
+    "directive": "For compact candidate spaces, use biological reasoning to cover coherent complexes and essential functional modules, while retaining enough exploration to avoid overcommitting to a single pathway.",
+    "evidence_datasets": [
+      "Scharenberg22",
+      "Replogle_K562_essential"
+    ],
+    "marker_genes": [],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_011",
+    "type": "selection_heuristic",
+    "trigger": {
+      "min_n_genes": 10000
+    },
+    "directive": "For genome-scale candidate spaces, favor feature-based online-adaptive selection and use revealed-hit features to update rankings, with biological reasoning as a complementary source rather than the primary selector.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2",
+      "Sanchez21",
+      "Sanchez21_down",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  },
+  {
+    "id": "sk_012",
+    "type": "calibration",
+    "trigger": {
+      "min_hit_rate": 0.045
+    },
+    "directive": "In screens with a relatively high hit rate, treat early empirical feature associations as reliable and exploit them aggressively, while still reserving a modest exploration fraction for unrepresented pathways.",
+    "evidence_datasets": [
+      "IFNG",
+      "Sanchez21",
+      "Sanchez21_down",
+      "Carnevale22",
+      "Scharenberg22",
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal"
+    }
+  }
+]

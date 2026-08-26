@@ -1,0 +1,335 @@
+[
+  {
+    "dataset": "IFNG",
+    "task": "identify genes that regulate the production of Interferon-gamma (IFNG)",
+    "measurement": "the log fold change in Interferon-gamma (IFNG) normalized read counts",
+    "n_genes": 17785,
+    "n_hits": 802,
+    "hit_rate": 0.0451,
+    "arm_performance": {
+      "random": 0.029,
+      "coreset": 0.1,
+      "static_ranker": 0.168,
+      "online_adaptive": 0.183,
+      "llm_reasoning": 0.156
+    },
+    "best_arm": "online_adaptive",
+    "strategy_insight": "Sample hits are enriched for T-cell receptor/proximal signaling, NF-\u03baB transcriptional regulation, and immune adaptor/kinase pathways. ML feature-based selection was more effective than LLM biological knowledge in this experiment, with online_adaptive achieving the highest hit ratio (0.183 versus 0.156 for llm_reasoning), although the results do not establish why. For similar screens, prioritize genes connected to receptor-proximal signaling and inflammatory transcriptional networks, while retaining exploration beyond canonical pathway members. The 4.5% overall hit rate and strong gap versus random selection support guided prioritization, but sample hits alone cannot determine the full spectrum of IFNG regulators or rule out context-specific effects.",
+    "top_hit_families": [
+      "T-cell receptor signaling",
+      "NF-kB signaling",
+      "immune adaptor and kinase pathways"
+    ],
+    "best_strategy": "ml",
+    "key_genes": [
+      "ZAP70",
+      "PLCG1",
+      "LCK",
+      "NFKB2",
+      "CD247"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "IL2",
+    "task": "identify genes that regulate the production of Interleukin-2 (IL-2)",
+    "measurement": "the log fold change in Interleukin-2 (IL-2) normalized read counts",
+    "n_genes": 18273,
+    "n_hits": 481,
+    "hit_rate": 0.0263,
+    "arm_performance": {
+      "random": 0.031,
+      "coreset": 0.139,
+      "static_ranker": 0.306,
+      "online_adaptive": 0.314,
+      "llm_reasoning": 0.253
+    },
+    "best_arm": "online_adaptive",
+    "strategy_insight": "The sample hits are enriched for T-cell receptor/CD3 signaling, adaptor and proximal kinase networks, IL-2 receptor signaling, and JAK-STAT pathways. Feature-based ML selection was most effective empirically, with online_adaptive achieving the highest hit ratio (0.314), although the margin over static ranking was modest. For a similar task, prioritize genes in these pathways while maintaining diversity beyond canonical components and validating candidates experimentally. The 2.6% hit rate and sample-based PPI ranking do not establish that adaptive updating caused the advantage or that other strategies systematically miss context-specific regulators.",
+    "top_hit_families": [
+      "T-cell receptor/CD3 signaling",
+      "Adaptor and proximal kinase signaling",
+      "IL-2 receptor/JAK-STAT signaling"
+    ],
+    "best_strategy": "ml",
+    "key_genes": [
+      "ZAP70",
+      "LAT",
+      "PLCG1",
+      "IL2RA",
+      "STAT5B"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Sanchez21",
+    "task": "identify genes that, when knocked out, either increase or decrease expression of endogenous tau protein levels in neurons",
+    "measurement": "the change in tau protein level compared to the non-targeting control, using a total tau antibody",
+    "n_genes": 17807,
+    "n_hits": 859,
+    "hit_rate": 0.0482,
+    "arm_performance": {
+      "random": 0.037,
+      "coreset": 0.031,
+      "static_ranker": 0.077,
+      "online_adaptive": 0.087,
+      "llm_reasoning": 0.06
+    },
+    "best_arm": "online_adaptive",
+    "strategy_insight": "The hits are enriched for endolysosomal/vacuolar trafficking (VPS33A, VPS41, VPS18, VPS39, VPS35, SNAP29), ubiquitin-related processes (UBA5, UFC1, UBE2F, UBE2H), and RNA processing/stress-granule biology (STAU1, DROSHA, FUS, G3BP2, AGO2). The online_adaptive arm performed best (0.087), ahead of LLM reasoning (0.060), but the results do not establish that online_adaptive was specifically an ML feature-based method. For future screens, prioritize adaptive selection and seed candidates from vesicle trafficking, proteostasis, and RNA-regulatory networks, while iteratively updating from observed hits. The 4.8% hit rate and inclusion of MAPT suggest substantial biology-specific signal, but the sample is connectivity-biased and cannot prove pathway enrichment or causal direction.",
+    "top_hit_families": [
+      "endolysosomal and vacuolar trafficking",
+      "ubiquitin and proteostasis",
+      "RNA processing and stress-granule regulation"
+    ],
+    "best_strategy": "ml",
+    "key_genes": [
+      "STAU1",
+      "VPS33A",
+      "UBA5",
+      "VPS41",
+      "VPS18"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Sanchez21_down",
+    "task": "identify genes that, when knocked out, decrease expression of endogenous tau protein levels in neurons",
+    "measurement": "the change in tau protein level compared to the non-targeting control, using a total tau antibody",
+    "n_genes": 17807,
+    "n_hits": 871,
+    "hit_rate": 0.0489,
+    "arm_performance": {
+      "random": 0.029,
+      "coreset": 0.078,
+      "static_ranker": 0.091,
+      "online_adaptive": 0.101,
+      "llm_reasoning": 0.069
+    },
+    "best_arm": "online_adaptive",
+    "strategy_insight": "The sample hits are enriched for vesicle and endosomal trafficking genes, ubiquitin/proteostasis machinery, and neuronal or synaptic genes. ML feature-based selection was more effective than LLM reasoning in this benchmark, as the online_adaptive arm had the highest hit ratio (0.101 versus 0.069 for llm_reasoning). For a similar task, prioritize genes from these families while using iterative adaptive ranking to update candidates from observed assay outcomes. Include trafficking, ubiquitin, and neuronal genes rather than relying only on canonical tau biology. These patterns are hypothesis-generating because the sample is PPI-connected and does not establish mechanism or distinguish direct effects from broader cellular effects.",
+    "top_hit_families": [
+      "vesicle/endosomal trafficking",
+      "ubiquitin and proteostasis",
+      "neuronal/synaptic function"
+    ],
+    "best_strategy": "ml",
+    "key_genes": [
+      "SLC18A3",
+      "VPS45",
+      "RAB11A",
+      "UBA3",
+      "CALB1"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Carnevale22",
+    "task": "identify genes that, upon being knocked out, would boost the efficacy of engineered T cells in the presence of an adenosine agonist that creates an immunosuppresive condition",
+    "measurement": "the change in T cell proliferation",
+    "n_genes": 18224,
+    "n_hits": 868,
+    "hit_rate": 0.0476,
+    "arm_performance": {
+      "random": 0.024,
+      "coreset": 0.054,
+      "static_ranker": 0.048,
+      "online_adaptive": 0.047,
+      "llm_reasoning": 0.058
+    },
+    "best_arm": "llm_reasoning",
+    "strategy_insight": "The sample hits suggest enrichment of lysosomal/vacuolar ATPase genes, adenosine\u2013cAMP/PKA signaling, and calcium\u2013MAPK/transcriptional regulation. LLM biological-knowledge selection was most effective empirically, with the highest hit ratio (0.058), although the results do not establish why it performed better. A future agent should prioritize genes forming coherent signaling or functional modules, while retaining diverse candidates outside the most obvious pathways. The evidence is based on a small, connectivity-selected sample, so pathway enrichment and mechanistic interpretations require validation.",
+    "top_hit_families": [
+      "V-ATPase and vesicle acidification",
+      "Adenosine\u2013cAMP/PKA signaling",
+      "Calcium\u2013MAPK/transcriptional regulation"
+    ],
+    "best_strategy": "llm",
+    "key_genes": [
+      "ATP6V0D1",
+      "ADORA2A",
+      "PRKAR1B",
+      "ITPR1",
+      "MAPK1"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Scharenberg22",
+    "task": "identify genes mediating lysosomal choline recycling using an endolysosome-focused CRISPR-Cas9 screen",
+    "measurement": "enrichment or depletion of targeting sgRNAs (indicated by a high score) in the culture medium lacking free choline",
+    "n_genes": 1029,
+    "n_hits": 49,
+    "hit_rate": 0.0476,
+    "arm_performance": {
+      "random": 0.102,
+      "coreset": 0.286,
+      "static_ranker": 0.449,
+      "online_adaptive": 0.449,
+      "llm_reasoning": 0.469
+    },
+    "best_arm": "llm_reasoning",
+    "strategy_insight": "The sample hits are enriched for autophagy, lysosomal/endosomal trafficking, and lipid or cholesterol handling, with additional ER-stress and vesicle-biogenesis components. LLM biological-knowledge selection performed best (0.469 hit ratio), outperforming all other arms, although the data do not establish that pathway reasoning caused this advantage. A future agent should prioritize genes connecting lysosomal transport, autophagosome formation, and lipid recycling, then diversify across less obvious trafficking regulators. Caveats include the small hit set and the fact that enrichment or depletion of sgRNAs does not by itself establish mechanism; PPI connectivity may also favor well-studied genes.",
+    "top_hit_families": [
+      "autophagy",
+      "lysosomal and endosomal trafficking",
+      "lipid and cholesterol handling"
+    ],
+    "best_strategy": "llm",
+    "key_genes": [
+      "SPNS1",
+      "ATG9A",
+      "NPC1",
+      "RAB7A",
+      "ATG7"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Steinhart",
+    "task": "identify genes that upon activation allow cells to resist T-cell exhaustion, under the HA GD2 CAR (chimeric-antigenic receptor) condition",
+    "measurement": "the log fold change in normalized sgRNA read counts compared to the non-targeting control, 22 days after perturbation",
+    "n_genes": 18144,
+    "n_hits": 145,
+    "hit_rate": 0.008,
+    "arm_performance": {
+      "random": 0.021,
+      "coreset": 0.09,
+      "static_ranker": 0.076,
+      "online_adaptive": 0.09,
+      "llm_reasoning": 0.152
+    },
+    "best_arm": "llm_reasoning",
+    "strategy_insight": "The sampled hits suggest enrichment in cytokine/JAK-STAT signaling, T-cell transcriptional regulation, and developmental pathways including Wnt, Hedgehog, and PI3K-related regulation. LLM reasoning was the strongest strategy, achieving a hit ratio of 0.152 versus 0.090 or lower for all alternatives, although the data do not establish why it performed better. For similar screens, use LLM-guided biological grouping to prioritize genes spanning these families, then diversify selections across pathways rather than selecting only one module. Validate candidates experimentally because the sample is PPI-connectivity-based and does not provide formal pathway enrichment statistics. The low overall hit rate and inclusion of unexpected genes indicate that broad, hypothesis-generating prioritization is preferable to a narrowly predefined exhaustion-resistance model.",
+    "top_hit_families": [
+      "Cytokine/JAK-STAT signaling",
+      "T-cell transcription factors",
+      "Wnt/Hedgehog/PI3K regulatory pathways"
+    ],
+    "best_strategy": "llm",
+    "key_genes": [
+      "IL2RB",
+      "STAT5A",
+      "BATF",
+      "IRF4",
+      "AXIN2"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Replogle_K562_essential",
+    "task": "Identify essential genes required for the survival and proliferation of K562 chronic myelogenous leukemia (CML) cells",
+    "measurement": "the fitness effect (depletion) of gene knockout as measured by sgRNA read count changes in a genome-wide CRISPR screen",
+    "n_genes": 623,
+    "n_hits": 63,
+    "hit_rate": 0.1011,
+    "arm_performance": {
+      "random": 0.254,
+      "coreset": 0.27,
+      "static_ranker": 0.492,
+      "online_adaptive": 0.476,
+      "llm_reasoning": 0.55
+    },
+    "best_arm": "llm_reasoning",
+    "strategy_insight": "The sample hits are enriched for Mediator/CAP transcriptional machinery, proteasome components, and RNA-splicing/ribosome-related genes. LLM biological-knowledge selection was the most effective strategy, with the highest observed hit ratio (0.550), although the results do not establish why it outperformed the other arms. For similar screens, prioritize genes from these functional families while maintaining coverage across distinct complexes and validating candidates experimentally. A caveat is that the listed genes are only a sample and may overrepresent connected, well-characterized complexes rather than reflecting complete pathway enrichment.",
+    "top_hit_families": [
+      "Mediator/transcriptional regulation",
+      "Proteasome/protein degradation",
+      "RNA splicing and ribosome biogenesis"
+    ],
+    "best_strategy": "llm",
+    "key_genes": [
+      "MED1",
+      "PSMD2",
+      "GATA1",
+      "SNRPE",
+      "RPS15"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  },
+  {
+    "dataset": "Replogle_K562_gwps",
+    "task": "Identify genes whose knockout significantly affects the fitness (growth or survival) of K562 chronic myelogenous leukemia (CML) cells",
+    "measurement": "log fold change in sgRNA abundance comparing post-selection to pre-selection timepoints in a genome-wide perturbation screen",
+    "n_genes": 9193,
+    "n_hits": 924,
+    "hit_rate": 0.1005,
+    "arm_performance": {
+      "random": 0.065,
+      "coreset": 0.156,
+      "static_ranker": 0.247,
+      "online_adaptive": 0.273,
+      "llm_reasoning": 0.214
+    },
+    "best_arm": "online_adaptive",
+    "strategy_insight": "The sampled hits are enriched for core transcriptional machinery, including Mediator and TFIID components, as well as chromatin and epigenetic regulators such as FACT, SETD1A/MLL-associated factors, and WDR5. Online adaptive selection performed best (0.273), so feature-based ML with iterative feedback was more effective than static ranking, LLM reasoning, coreset selection, or random choice. A future agent should prioritize genes connected to these transcriptional and chromatin complexes, then update rankings using observed screen outcomes. The PPI-connected examples support these pathway-level priorities but do not establish broad transcriptional dependency across all hits. Validate candidates across replicates and distinguish general essentiality from K562-specific effects.",
+    "top_hit_families": [
+      "Mediator and general transcription factors",
+      "Chromatin remodeling and FACT complex",
+      "Histone methylation and MLL/SETD1A-associated complexes"
+    ],
+    "best_strategy": "ml",
+    "key_genes": [
+      "WDR82",
+      "KDM1A",
+      "MED10",
+      "SSRP1",
+      "WDR5"
+    ],
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "minimal",
+      "performance_source": "historical V9-V11 arm summaries"
+    },
+    "verified": true
+  }
+]
