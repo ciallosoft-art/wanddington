@@ -6,6 +6,12 @@ Runs one or more arms across all BDA benchmark datasets for N evaluation replica
 and reports hit_ratio@R5 per dataset plus averages. New GPT work should use
 ``--replicates N --seed-mode local``; ``--seeds`` is a historical compatibility alias.
 
+The LLM call is the wall-clock bottleneck (~1800 sequential calls x ~19s for a 20-repeat main run).
+Set ``WADDINGTON_PARALLEL=N`` to run N repeats of the same arm concurrently (default 1 = sequential):
+the Codex/OpenAI endpoint tolerates concurrency with flat per-call latency, so N=6-8 gives a ~6-8x
+speedup. Results, checkpointing and ``--resume`` are unchanged (repeats still flush in index order);
+deterministic arms are byte-identical regardless of N, and N is not part of the provenance manifest.
+
 Usage:
     conda run -n waddington-bio python3 run_sequential.py \\
         --arms waddington_c llm_reasoning coreset \\
@@ -31,6 +37,7 @@ Ablation arms:
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 from datetime import datetime, timezone
 import hashlib
 import importlib.metadata
@@ -364,6 +371,45 @@ def _write_or_validate_manifest(save_path: Path, protocol: dict, resume: bool) -
     return manifest_path
 
 
+def _parallel_workers() -> int:
+    """WADDINGTON_PARALLEL=N runs N repeats of the same arm concurrently (default 1 = sequential).
+    The LLM call is the bottleneck and the provider tolerates concurrency with flat per-call latency;
+    correctness is unaffected because each repeat builds a fresh arm and the oracle is a read-only lookup.
+    Results are still checkpointed in repeat-index order, so resume is identical to the sequential path."""
+    try:
+        n = int(os.environ.get("WADDINGTON_PARALLEL", "1"))
+    except ValueError:
+        n = 1
+    return max(1, n)
+
+
+def _run_one_repeat(ds: str, arm_name: str, repeat_idx: int, oracle, n_rounds: int, seed_mode: str):
+    """One independent (dataset, arm, repeat) campaign -> its result dict, or None if the arm is
+    unavailable. Builds a fresh arm and runner, so it is safe to call concurrently for distinct repeats."""
+    local_seed = repeat_idx if seed_mode == "local" else 42
+    arms = make_arms(ds, [arm_name], local_seed=local_seed)
+    if not arms:
+        return None
+    arm = arms[0]
+    runner = SequentialRunner(arm, oracle, n_rounds=n_rounds)
+    r = runner.run(seed=repeat_idx)
+    item = _result_to_dict(r)
+    item["repeat_index"] = repeat_idx
+    consumes_local_rng = arm_name == "random" or arm_name.startswith("genedisco_")
+    item["local_seed"] = local_seed if consumes_local_rng else None
+    item["provider_seed"] = None if (
+        arm_name == "llm_reasoning" or arm_name.startswith("waddington")
+    ) else "not_applicable"
+    item["replicate_semantics"] = (
+        "local_rng_seeded" if consumes_local_rng else
+        "remote_api_invocation; independence_not_assumed" if (
+            arm_name == "llm_reasoning" or arm_name.startswith("waddington")
+        ) else "deterministic_re_evaluation"
+    )
+    item["completed_at"] = datetime.now(timezone.utc).isoformat()
+    return item
+
+
 def run_all(
     datasets: list[str],
     arm_names: list[str],
@@ -446,31 +492,35 @@ def run_all(
             if stored_results:
                 print(f"  [resume] {ds}/{arm_name}: {len(stored_results)}/{n_seeds} repeats complete")
 
-            for repeat_idx in range(len(stored_results), n_seeds):
-                local_seed = repeat_idx if seed_mode == "local" else 42
-                arms = make_arms(ds, [arm_name], local_seed=local_seed)
-                if not arms:
-                    continue
-                arm = arms[0]
-                runner = SequentialRunner(arm, oracle, n_rounds=n_rounds)
-                r = runner.run(seed=repeat_idx)
-                item = _result_to_dict(r)
-                item["repeat_index"] = repeat_idx
-                consumes_local_rng = arm_name == "random" or arm_name.startswith("genedisco_")
-                item["local_seed"] = local_seed if consumes_local_rng else None
-                item["provider_seed"] = None if (
-                    arm_name == "llm_reasoning" or arm_name.startswith("waddington")
-                ) else "not_applicable"
-                item["replicate_semantics"] = (
-                    "local_rng_seeded" if consumes_local_rng else
-                    "remote_api_invocation; independence_not_assumed" if (
-                        arm_name == "llm_reasoning" or arm_name.startswith("waddington")
-                    ) else "deterministic_re_evaluation"
-                )
-                item["completed_at"] = datetime.now(timezone.utc).isoformat()
-                stored_results.append(item)
-                _atomic_write_json(save_path, all_results)
-                print(f"    [checkpoint] {arm_name} repeat {repeat_idx + 1}/{n_seeds}", flush=True)
+            remaining = list(range(len(stored_results), n_seeds))
+            workers = _parallel_workers()
+            if workers <= 1 or len(remaining) <= 1:
+                for repeat_idx in remaining:
+                    item = _run_one_repeat(ds, arm_name, repeat_idx, oracle, n_rounds, seed_mode)
+                    if item is None:
+                        continue
+                    stored_results.append(item)
+                    _atomic_write_json(save_path, all_results)
+                    print(f"    [checkpoint] {arm_name} repeat {repeat_idx + 1}/{n_seeds}", flush=True)
+            else:
+                # Run repeats concurrently but flush to the checkpoint strictly in repeat-index order,
+                # so an interrupted parallel run resumes exactly like the sequential path.
+                buffer: dict[int, dict] = {}
+                next_flush = len(stored_results)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+                    futures = {
+                        pool.submit(_run_one_repeat, ds, arm_name, i, oracle, n_rounds, seed_mode): i
+                        for i in remaining
+                    }
+                    for fut in concurrent.futures.as_completed(futures):
+                        buffer[futures[fut]] = fut.result()
+                        while next_flush in buffer:
+                            done = buffer.pop(next_flush)
+                            if done is not None:
+                                stored_results.append(done)
+                                _atomic_write_json(save_path, all_results)
+                                print(f"    [checkpoint] {arm_name} repeat {next_flush + 1}/{n_seeds} (parallel x{workers})", flush=True)
+                            next_flush += 1
 
             if not stored_results:
                 continue
