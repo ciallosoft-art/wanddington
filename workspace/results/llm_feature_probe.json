@@ -1,0 +1,37 @@
+{
+  "feature_set": "intrinsic+depmap (no anchor)",
+  "ml_hit_share": {
+    "hub_score_norm": 0.019888749934464246,
+    "ppi_score_sum": 0.09111770456929848,
+    "pli_score": 0.10571837671346597,
+    "string_degree_norm": 0.06503561159201413,
+    "kegg_pathway_count_norm": 0.06354480644349224,
+    "reactome_pathway_count_norm": 0.035375558736996895,
+    "depmap_frac_ess": 0.234824114523512,
+    "depmap_mean_norm": 0.15004206544360507,
+    "depmap_min_norm": 0.12444278877664516,
+    "depmap_K562_norm": 0.11001022326650575
+  },
+  "llm_named_share": {
+    "hub_score_norm": 0.009112251979248247,
+    "ppi_score_sum": 0.31415521106997135,
+    "pli_score": 0.16957785673040446,
+    "string_degree_norm": 0.09065096619987925,
+    "kegg_pathway_count_norm": 0.04915530562192208,
+    "reactome_pathway_count_norm": 0.0635634774023019,
+    "depmap_frac_ess": 0.061387629235869864,
+    "depmap_mean_norm": 0.0666563396810191,
+    "depmap_min_norm": 0.13698362743469916,
+    "depmap_K562_norm": 0.03875733464468462
+  },
+  "family_share": {
+    "ml": {
+      "depmap": 0.619319192010268,
+      "connectivity_constraint": 0.380680807989732
+    },
+    "llm": {
+      "depmap": 0.30378493099627274,
+      "connectivity_constraint": 0.6962150690037273
+    }
+  }
+}
