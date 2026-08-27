@@ -180,6 +180,23 @@
       "total_anchors": 82,
       "total_anchor_hits": 42,
       "frac_anchors_that_are_hits": 0.512
+    },
+    "permutation_importance": {
+      "baseline_hit_at_r5": 0.22794823031291223,
+      "feature_set": "intrinsic+depmap (no anchor)",
+      "n_shuffles": 8,
+      "importance": {
+        "hub_score_norm": -0.0012927184120675758,
+        "ppi_score_sum": 0.02055801126182153,
+        "pli_score": 0.014982281272134298,
+        "string_degree_norm": 0.01773233351467907,
+        "kegg_pathway_count_norm": -0.001870799604743473,
+        "reactome_pathway_count_norm": 0.0036679296849349546,
+        "depmap_frac_ess": 0.11153443155912386,
+        "depmap_mean_norm": 0.010188118607940508,
+        "depmap_min_norm": 0.03190436080461931,
+        "depmap_K562_norm": 0.021183790001156503
+      }
     }
   }
 }

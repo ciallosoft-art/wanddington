@@ -97,6 +97,50 @@ def _anchor_leakage(df, bench, hitset) -> dict:
             "frac_anchors_that_are_hits": round(th / ta, 3) if ta else 0.0}
 
 
+def permutation_importance(df, feats=None, n_shuffles: int = 8, seed: int = 0) -> dict:
+    """Per-feature permutation importance for the LOO prior, in hit@R5 units. For each screen the LightGBM
+    is trained on the other screens (as in ``_loo_hit_at_r5``); then each feature is permuted across the
+    target genes and we measure how far hit@R5 falls (averaged over shuffles, then screens). Reported over
+    the no-anchor feature set the paper ships, so it corroborates the SHAP attributions on the same
+    features. An independent method (SHAP attributes the score; this destroys a feature and measures the
+    ranking loss). Deterministic (fixed LightGBM + permutation seed), no LLM -> model-independent."""
+    if feats is None:
+        feats = INTRINSIC + DEPMAP  # no-anchor reported configuration
+    rng = np.random.default_rng(seed)
+    drops = {f: [] for f in feats}
+    base_all = []
+    for target in BENCHMARK_DATASETS:
+        sub = df[df["dataset"] == target]
+        pool, y = sub["gene"].tolist(), dict(zip(sub["gene"], sub["label"]))
+        total, bs = int(sub["label"].sum()), BATCH_SIZES[target]
+        train = df[df["dataset"] != target]
+        pos, neg = (train["label"] == 1).sum(), (train["label"] == 0).sum()
+        m = lgb.LGBMClassifier(**LGBM, scale_pos_weight=neg / max(pos, 1))
+        m.fit(train[feats].values, train["label"].values)
+        X = sub[feats].values.astype(float)
+
+        def hit(matrix):
+            order = np.argsort(-m.predict_proba(matrix)[:, 1])
+            top = [pool[i] for i in order[:5 * bs]]
+            return (sum(y[g] for g in top) / total) if total else 0.0
+
+        base = hit(X)
+        base_all.append(base)
+        for j, f in enumerate(feats):
+            ds = []
+            for _ in range(n_shuffles):
+                perturbed = X.copy()
+                perturbed[:, j] = rng.permutation(perturbed[:, j])
+                ds.append(base - hit(perturbed))
+            drops[f].append(float(np.mean(ds)))
+    return {
+        "baseline_hit_at_r5": float(np.mean(base_all)),
+        "feature_set": "intrinsic+depmap (no anchor)",
+        "n_shuffles": n_shuffles,
+        "importance": {f: float(np.mean(v)) for f, v in drops.items()},
+    }
+
+
 def run() -> dict:
     df = _load()
     bench = list(BENCHMARK_DATASETS)
@@ -130,6 +174,7 @@ def run() -> dict:
             "all": mean([_loo_hit_at_r5(df, d, ALLF) for d in bench]),
         },
         "anchor_leakage": _anchor_leakage(df, bench, hitset),
+        "permutation_importance": permutation_importance(df),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(res, indent=2))
@@ -144,4 +189,8 @@ if __name__ == "__main__":
           f"{s['sibling_pairs_normal']:.3f} -> {s['sibling_pairs_excluded']:.3f})")
     print(f"hit-frequency baseline avg       {s['hit_frequency_avg']:.3f}")
     print("feature family:", {k: round(v, 3) for k, v in s["feature_family"].items()})
+    pi = s["permutation_importance"]
+    print(f"\npermutation importance (no-anchor, hit@R5 drop; baseline {pi['baseline_hit_at_r5']:.3f}):")
+    for f, v in sorted(pi["importance"].items(), key=lambda kv: -kv[1]):
+        print(f"  {f:28s} {v:+.4f}")
     print(f"saved -> {OUT}")
