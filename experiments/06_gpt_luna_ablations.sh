@@ -42,6 +42,9 @@ export PYTHONHASHSEED=0
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
+# Repeat-level parallelism (default 6; export WADDINGTON_PARALLEL=1 to force sequential).
+# N is not part of the provenance manifest and does not change results.
+export WADDINGTON_PARALLEL="${WADDINGTON_PARALLEL:-6}"
 export WADDINGTON_MEMORY_PATH="$MEMORY_PATH"
 
 mkdir -p "$RESULT_DIR"
