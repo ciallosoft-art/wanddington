@@ -125,12 +125,13 @@ def ablation_deltas() -> pd.DataFrame:
 
 
 def load_agent() -> pd.DataFrame | None:
-    """The tool-using agent vs the pipeline, per dataset (from agent_benchmark.json)."""
-    p = RESULTS / "agent_benchmark.json"
+    """The tool-using agent vs the pipeline, per dataset. Agent run and pipeline reference are both the
+    reported GPT system (agent under gpt/agent_benchmark.json; pipeline from the GPT main table)."""
+    p = REPO_ROOT / "workspace" / "results" / "gpt" / "agent_benchmark.json"
     if not p.exists():
         return None
     agent = json.loads(p.read_text())
-    base = final_round(_runs(RESULTS / "three_arm.json"))
+    base = final_round(_runs(FINAL_WADD))
     pipe = base[base["arm"] == "waddington_c"].groupby("dataset")["hit_ratio"].mean()
     rows = []
     for ds, v in agent.items():

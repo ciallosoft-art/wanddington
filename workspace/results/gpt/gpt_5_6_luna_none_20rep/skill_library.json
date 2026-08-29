@@ -1,0 +1,310 @@
+[
+  {
+    "id": "sk_001",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits include canonical T-cell receptor or proximal adaptor-kinase components, prioritize untested genes in the broader T-cell receptor, costimulatory, and NF-kB signaling networks.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2"
+    ],
+    "marker_genes": [
+      "CD3D",
+      "CD3E",
+      "CD247",
+      "LCK",
+      "ZAP70",
+      "PLCG1",
+      "VAV1",
+      "RELA"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_002",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate cytokine-receptor or JAK/STAT signaling, prioritize additional receptor-associated kinases, STAT regulators, and transcriptional state-control genes.",
+    "evidence_datasets": [
+      "IL2",
+      "Steinhart"
+    ],
+    "marker_genes": [
+      "IL2RA",
+      "IL2RB",
+      "JAK1",
+      "JAK3",
+      "STAT3",
+      "STAT5A",
+      "STAT5B",
+      "SOCS1"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_003",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits include endosomal, lysosomal, or HOPS/VPS machinery, expand selection toward vesicle tethering, endosomal sorting, and lysosome-biogenesis complexes.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Sanchez21_down",
+      "Scharenberg22"
+    ],
+    "marker_genes": [
+      "RAB7A",
+      "VPS16",
+      "VPS18",
+      "VPS33A",
+      "VPS41",
+      "LAMP1",
+      "SPNS1",
+      "WDR81"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_004",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate lysosomal trafficking, prioritize autophagy initiation, cargo recognition, and lysosome-maintenance genes.",
+    "evidence_datasets": [
+      "Sanchez21_down",
+      "Scharenberg22"
+    ],
+    "marker_genes": [
+      "ATG5",
+      "ATG7",
+      "BECN1",
+      "MAP1LC3B",
+      "SQSTM1",
+      "ULK1",
+      "TFEB"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_005",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate ubiquitin, UFMylation, or proteostasis, prioritize related ubiquitin-ligase, deubiquitinase, protein-quality-control, and proteasome modules.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Sanchez21_down",
+      "Replogle_K562_essential"
+    ],
+    "marker_genes": [
+      "UBE2G2",
+      "UBA5",
+      "UFM1",
+      "UFSP2",
+      "VCP",
+      "PSMB5",
+      "PSMD1"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_006",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate RNA processing or stress-granule biology, prioritize spliceosomal, RNA-surveillance, translation-control, and stress-response regulators.",
+    "evidence_datasets": [
+      "Sanchez21",
+      "Replogle_K562_essential"
+    ],
+    "marker_genes": [
+      "SRSF1",
+      "SF3B1",
+      "PRPF8",
+      "DDX3X",
+      "G3BP1",
+      "TIA1",
+      "UPF1"
+    ],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_007",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate adenosine, purinergic, or cAMP signaling, prioritize receptors, nucleotide-metabolism enzymes, and downstream PKA/MAPK effectors.",
+    "evidence_datasets": [
+      "Carnevale22",
+      "IFNG"
+    ],
+    "marker_genes": [
+      "ADORA2A",
+      "P2RX7",
+      "ADCY3",
+      "PRKACA",
+      "GNAS",
+      "PDE4D",
+      "MAPK1"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_008",
+    "type": "pathway_prior",
+    "trigger": {
+      "requires_revealed_hits": true
+    },
+    "directive": "When revealed hits implicate core transcription, chromatin, or transcription-elongation machinery, prioritize neighboring members of the same complexes and essential RNA-polymerase support modules.",
+    "evidence_datasets": [
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [
+      "MED1",
+      "MED12",
+      "TAF1",
+      "POLR2A",
+      "CDK9",
+      "SUPT5H",
+      "KMT2A",
+      "SETD1A"
+    ],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_009",
+    "type": "selection_heuristic",
+    "trigger": {
+      "max_round": 2,
+      "min_n_genes": 5000
+    },
+    "directive": "In early rounds of large screens, favor broad exploration across independent pathway families rather than concentrating on a single inferred mechanism.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2",
+      "Sanchez21",
+      "Sanchez21_down",
+      "Carnevale22",
+      "Steinhart",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_010",
+    "type": "selection_heuristic",
+    "trigger": {
+      "min_round": 3,
+      "min_n_genes": 5000
+    },
+    "directive": "After initial evidence accumulates in large screens, use adaptive machine-learning ranking as the default, while retaining a minority exploration batch for underrepresented pathways.",
+    "evidence_datasets": [
+      "IFNG",
+      "IL2",
+      "Sanchez21",
+      "Sanchez21_down",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_011",
+    "type": "selection_heuristic",
+    "trigger": {
+      "max_n_genes": 2000
+    },
+    "directive": "For compact libraries, combine pathway-aware reasoning with static ranking and avoid relying solely on broad adaptive-model exploration.",
+    "evidence_datasets": [
+      "Scharenberg22",
+      "Replogle_K562_essential"
+    ],
+    "marker_genes": [],
+    "verified": true,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  },
+  {
+    "id": "sk_012",
+    "type": "calibration",
+    "trigger": {
+      "min_hit_rate": 0.08
+    },
+    "directive": "When the screen has a high overall hit rate, treat broad essentiality and core cellular-machinery signals as more reliable, but downweight phenotype-specific mechanistic confidence unless supported by pathway coherence.",
+    "evidence_datasets": [
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "marker_genes": [],
+    "verified": false,
+    "generator": {
+      "backend": "pi",
+      "model": "openai-codex/gpt-5.6-luna",
+      "reasoning": "none"
+    }
+  }
+]
