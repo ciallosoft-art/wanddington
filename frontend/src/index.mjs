@@ -10,6 +10,7 @@ import { runChat } from "./chat.mjs";
 import { complete } from "./llm/complete.mjs";
 import { launchWebServer } from "./web-server.mjs";
 import { getDatasets } from "./brain.mjs";
+import { autoRun, autoRunUpload } from "./autorun.mjs";
 
 async function printHelp() {
   const DATASETS = await getDatasets();
@@ -19,6 +20,12 @@ Usage:
   waddington                 Interactive: authorize a provider, then pick Terminal (CLI) or Web UI
   waddington setup           Authorize model providers (Claude / Codex / Gemini)
   waddington --web [--port N]  Launch the Web UI directly (default port 3000)
+  waddington run [DATASET]   Retrospective one-click run: treat a completed screen's readout as ground
+                             truth, auto-run the sequential campaign, print a live step-by-step timeline
+                             and the final hit@R5 (e.g. "waddington run IFNG --rounds 5")
+  waddington run --upload FILE --name X [--task "…"] [--anchors A,B,C]
+                             Same, for a BRAND-NEW screen: register it from the uploaded readout (builds
+                             its features — no code change), then run. Anchors are LLM-proposed if omitted.
   waddington complete        One-shot completion (reads prompt from stdin or --prompt); used by the
                              Python pipeline's provider-agnostic backend
   waddington --help
@@ -57,6 +64,59 @@ async function oneShotComplete(values) {
   process.stdout.write(out + "\n");
 }
 
+/**
+ * `waddington run [DATASET] [--rounds N]` — retrospective one-click evaluation with a live terminal
+ * timeline. Uses a benchmark screen's own readout as a stand-in for a scientist's completed screen,
+ * runs the sequential C-arm campaign against it, and prints each step as it happens.
+ */
+async function runAutoDemo(values, positionals) {
+  const rounds = values.rounds ? parseInt(values.rounds, 10) : 5;
+  const spec = values.model || pickDefaultChatModel();
+  const bar = (r) => "█".repeat(Math.round(r * 30)).padEnd(30, "·");
+  const onStep = (e) => {
+    if (e.type === "upload") console.log(`📤 Uploaded readout for a NEW screen "${e.name}" (${e.bytes} bytes).`);
+    else if (e.type === "anchor-proposing") console.log(`   proposing anchor genes from the task…`);
+    else if (e.type === "anchors") console.log(`   anchors: ${e.anchors.join(", ")}`);
+    else if (e.type === "registering") console.log(`   building ML features (registering "${e.name}")…`);
+    else if (e.type === "registered") console.log(`✅ Registered "${e.name}" — ${e.nGenes} genes (${e.nWithFeatures} with known features). Now rankable.\n`);
+    else if (e.type === "already-registered") console.log(`   "${e.name}" is already registered.\n`);
+    else if (e.type === "intent") console.log(`🧠 ${e.text}\n   readout: ${e.readout}\n`);
+    else if (e.type === "round-open") console.log(`── Round ${e.round}/${e.rounds} ─────────────────────────────`);
+    else if (e.type === "proposed") {
+      const c = e.counts || {}, tf = e.transfer || {};
+      const top = Object.entries(e.shap || {}).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k).join(", ");
+      const prior = tf.zeroShot
+        ? `prior: trained on ${tf.refScreens} reference screens, 0 in-experiment labels yet (zero-shot transfer)`
+        : `prior: ${tf.refScreens} reference screens + ${tf.inExpLabels} in-experiment labels`;
+      console.log(`  ⚙ C-arm proposed ${e.genes.length} genes  (ML ${c.ml_only ?? "?"} · LLM ${c.llm_only ?? "?"} · both ${c.both ?? "?"};  w_ml ${e.w_ml}/w_llm ${e.w_llm})`);
+      console.log(`     ${prior}`);
+      if (top) console.log(`     top ML features: ${top}`);
+    } else if (e.type === "revealed") {
+      console.log(`  ✓ revealed from readout: +${e.nHits} hits  →  ${bar(e.ratio)}  ${e.cumulative}/${e.total}  hit@R${e.round}=${e.ratio.toFixed(4)}\n`);
+    } else if (e.type === "summary") {
+      console.log(`✅ Done.  hit@R${e.rounds} = ${e.hit_at_r5.toFixed(4)}  (${e.cumulative}/${e.total} hits found)\n`);
+    }
+  };
+
+  if (values.upload) {
+    // Real production path: register a brand-new screen from an uploaded readout, then run it.
+    const name = values.name || positionals[1];
+    if (!name) throw new Error("run --upload needs --name <phenotype id>");
+    console.log(`\n▶ Uploaded-screen run — registering "${name}" from ${values.upload}, then ranking it.\n`);
+    await autoRunUpload({
+      name, readoutFile: values.upload, rounds, modelSpec: spec,
+      task: values.task, measurement: values.measurement,
+      anchors: values.anchors ? values.anchors.split(/[,\s]+/).filter(Boolean) : undefined,
+      onStep,
+    });
+    return;
+  }
+
+  const dataset = positionals[1] || values.dataset || "IFNG";
+  console.log(`\n▶ Retrospective run — treating ${dataset}'s readout as an uploaded completed screen.\n`);
+  await autoRun({ dataset, rounds, modelSpec: spec, readoutFile: values.readout || undefined, onStep });
+}
+
 export async function main() {
   const { values, positionals } = parseArgs({
     args: process.argv.slice(2),
@@ -72,6 +132,14 @@ export async function main() {
       "max-tokens": { type: "string" },
       reasoning: { type: "string" },
       "reason-from-structure": { type: "boolean" },
+      dataset: { type: "string" },
+      rounds: { type: "string" },
+      readout: { type: "string" },
+      upload: { type: "string" },
+      name: { type: "string" },
+      task: { type: "string" },
+      measurement: { type: "string" },
+      anchors: { type: "string" },
     },
   });
 
@@ -84,6 +152,7 @@ export async function main() {
   if (values.help || command === "help") return printHelp();
   if (command === "setup") return runSetup();
   if (command === "complete") return oneShotComplete(values);
+  if (command === "run") return runAutoDemo(values, positionals);
 
   // Opt-in: make the C-arm reason over anonymized structural features instead of gene names. Set here
   // so it flows to every `waddington_select.suggest` subprocess (run() spreads process.env). Off by

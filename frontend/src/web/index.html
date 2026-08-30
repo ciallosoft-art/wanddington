@@ -189,6 +189,39 @@
       .topbar { display:flex; }
       .suggestions { grid-template-columns:1fr; }
     }
+
+    /* ---------- Live retrospective-run timeline (SSE, Claude-Code-style) ---------- */
+    .run-timeline { display:flex; flex-direction:column; gap:10px; }
+    .run-head { background:#122019; border:1px solid #294034; border-radius:10px; padding:10px 13px; font-size:13.5px; color:var(--ink); }
+    .run-head .rh-readout { color:var(--muted); font-size:12px; margin-top:4px; word-break:break-all; }
+    .run-round { border:1px solid var(--line-soft); border-radius:10px; padding:11px 13px; background:var(--panel); }
+    .run-round .rr-head { display:flex; align-items:center; gap:8px; font-weight:600; font-size:13.5px; }
+    .run-round .rr-spin { width:9px; height:9px; border-radius:50%; border:2px solid var(--sage); border-top-color:transparent; animation:rspin .7s linear infinite; }
+    @keyframes rspin { to { transform:rotate(360deg); } }
+    .run-round.done .rr-spin { display:none; }
+    .rr-body { margin-top:8px; font-size:12.5px; color:var(--muted); }
+    .src-chips { display:flex; gap:6px; flex-wrap:wrap; margin:7px 0; }
+    .src-chip { font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--line); color:var(--ink); }
+    .src-chip.ml   { background:#0e2033; border-color:#20537f; }
+    .src-chip.llm  { background:#241a33; border-color:#5a3aa7; }
+    .src-chip.both { background:#0f2a1c; border-color:#1f7f52; }
+    .transfer-note { margin:7px 0 2px; font-size:11.5px; color:var(--sage); background:#101d16; border:1px solid #26402f; border-radius:7px; padding:4px 9px; }
+    .shap-row { display:flex; align-items:center; gap:8px; margin:3px 0; font-size:11.5px; }
+    .shap-row .sh-name { width:150px; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .shap-row .sh-bar { height:8px; border-radius:5px; background:linear-gradient(90deg,var(--sage),var(--sage-dim)); }
+    .reveal-line { display:flex; align-items:center; gap:10px; margin-top:9px; font-size:12.5px; color:var(--ink); }
+    .reveal-line .rv-hits { color:var(--sage); font-weight:600; }
+    .progress { flex:1; height:9px; border-radius:6px; background:#0c1015; border:1px solid var(--line-soft); overflow:hidden; }
+    .progress > i { display:block; height:100%; background:linear-gradient(90deg,var(--sage),var(--sage-dim)); transition:width .5s ease; }
+    .run-genes { font-size:11px; color:var(--muted); margin-top:6px; line-height:1.7; }
+    .run-genes .g { display:inline-block; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:0 5px; margin:0 3px 3px 0; color:var(--ink); }
+    .run-summary { background:linear-gradient(145deg,#12241a,#0e1c15); border:1px solid #2b4d38; border-radius:12px; padding:15px 17px; }
+    .run-summary .rs-num { font-size:30px; font-weight:700; color:var(--sage); letter-spacing:-.5px; }
+    .run-summary .rs-sub { color:var(--muted); font-size:12.5px; margin-top:2px; }
+    .run-summary table { width:100%; border-collapse:collapse; margin-top:11px; font-size:12px; }
+    .run-summary td, .run-summary th { text-align:right; padding:3px 8px; border-bottom:1px solid var(--line-soft); color:var(--ink); }
+    .run-summary th { color:var(--muted); font-weight:550; }
+    .run-summary td:first-child, .run-summary th:first-child { text-align:left; }
   </style>
 </head>
 <body>
@@ -401,10 +434,10 @@
       "Tell me the readout and I'll pick the genes worth perturbing next.",
     ];
     const SUGGESTIONS = [
+      { icon:"⚡", title:"Auto-run a completed screen", desc:"Live step-by-step → final hit@R5", run:{ dataset:"IFNG", rounds:5 } },
+      { icon:"📤", title:"Upload & run my own screen", desc:"Register a new screen → hit@R5", upload:true },
       { icon:"🧫", title:"Recommend a batch", desc:"Genes for an IFNG screen", send:"Recommend genes for an IFNG screen" },
       { icon:"🔬", title:"Run an experiment", desc:"Round-by-round, adapt on results", send:"Let's run an interactive round-by-round experiment on IFNG" },
-      { icon:"▶️", title:"Simulate end-to-end", desc:"Oracle plays the wet lab", send:"Simulate an IFNG screen end to end over 5 rounds" },
-      { icon:"➕", title:"Register my screen", desc:"Onboard your own phenotype", send:"I want to register my own CRISPR screen" },
     ];
     function renderHero() {
       log.innerHTML = "";
@@ -417,7 +450,9 @@
         const card = document.createElement("button");
         card.type = "button"; card.className = "suggestion";
         card.innerHTML = `<div class="s-icon">${s.icon}</div><div class="s-title">${esc(s.title)}</div><div class="s-desc">${esc(s.desc)}</div>`;
-        card.onclick = () => sendTurn(s.send);
+        card.onclick = s.run ? () => runDemo(s.run.dataset, s.run.rounds)
+          : s.upload ? () => startUploadRun()
+          : () => sendTurn(s.send);
         grid.appendChild(card);
       }
       hero.appendChild(grid);
@@ -511,6 +546,113 @@
       } finally {
         composerBusy(false); q.focus();
       }
+    }
+
+    // One live-timeline renderer, shared by both run paths (benchmark demo + uploaded new screen).
+    // Renders register steps, the per-round proposal (source mix, SHAP, cross-experiment transfer note,
+    // genes), the reveal + rising progress bar, and the final hit@R5 table. `finish` closes the stream.
+    function makeRunHandler(tl, finish) {
+      let roundEl = null;
+      return (e) => {
+        if (e.type === "upload") tl.appendChild(el("run-head", `📤 New screen <b>${esc(e.name)}</b> uploaded (${(e.bytes / 1024).toFixed(0)} KB) — registering it (no code change, just data)…`));
+        else if (e.type === "anchor-proposing") tl.appendChild(el("run-head", "🧬 Proposing anchor genes from the phenotype…"));
+        else if (e.type === "anchors") tl.appendChild(el("run-head", `anchor genes: <span translate="no">${e.anchors.map(esc).join(", ")}</span>`));
+        else if (e.type === "registering") tl.appendChild(el("run-head", `⚙ Building ML features for <b>${esc(e.name)}</b>…`));
+        else if (e.type === "registered") tl.appendChild(el("run-head", `✅ Registered <b>${esc(e.name)}</b> — ${e.nGenes} genes (${e.nWithFeatures} with known features). Rankable now.`));
+        else if (e.type === "already-registered") tl.appendChild(el("run-head", `<b>${esc(e.name)}</b> is already registered.`));
+        else if (e.type === "intent") tl.appendChild(el("run-head", `🧠 ${esc(e.text)}<div class="rh-readout">reveal source: ${esc(e.readout)}</div>`));
+        else if (e.type === "round-open") {
+          roundEl = el("run-round", `<div class="rr-head"><span class="rr-spin"></span>Round ${e.round}/${e.rounds}</div><div class="rr-body">C-arm ranking the pool…</div>`);
+          tl.appendChild(roundEl);
+        } else if (e.type === "proposed" && roundEl) {
+          const c = e.counts || {}, tf = e.transfer || {};
+          const shap = Object.entries(e.shap || {}).sort((a, b) => b[1] - a[1]).slice(0, 4);
+          const mx = shap.length ? shap[0][1] : 1;
+          const shown = e.genes.slice(0, 16);
+          const prior = tf.zeroShot
+            ? `prior: trained on <b>${tf.refScreens}</b> reference screens · 0 in-experiment labels yet — zero-shot transfer`
+            : `prior: ${tf.refScreens} reference screens · +${tf.inExpLabels} in-experiment labels revealed`;
+          let html = `Proposed <b>${e.genes.length}</b> genes &nbsp;(w<sub>ML</sub> ${e.w_ml ?? "?"} · w<sub>LLM</sub> ${e.w_llm ?? "?"})`;
+          if (tf.refScreens != null) html += `<div class="transfer-note">🔀 ${prior}</div>`;
+          html += `<div class="src-chips"><span class="src-chip ml">ML ${c.ml_only ?? "?"}</span><span class="src-chip llm">LLM ${c.llm_only ?? "?"}</span><span class="src-chip both">both ${c.both ?? "?"}</span></div>`;
+          html += shap.map(([k, v]) => `<div class="shap-row"><span class="sh-name">${esc(k)}</span><span class="sh-bar" style="width:${Math.max(6, Math.round(v / mx * 120))}px"></span><span>${v.toFixed(2)}</span></div>`).join("");
+          html += `<div class="run-genes" translate="no">${shown.map(g => `<span class="g">${esc(g)}</span>`).join("")}${e.genes.length > 16 ? ` <span style="color:var(--faint)">+${e.genes.length - 16} more</span>` : ""}</div>`;
+          roundEl.querySelector(".rr-body").innerHTML = html;
+        } else if (e.type === "revealed" && roundEl) {
+          const line = el("reveal-line");
+          line.innerHTML = `<span class="rv-hits">+${e.nHits} hits</span><div class="progress"><i style="width:${(e.ratio * 100).toFixed(1)}%"></i></div><span>${e.cumulative}/${e.total} · hit@R${e.round} ${(e.ratio * 100).toFixed(1)}%</span>`;
+          roundEl.querySelector(".rr-body").appendChild(line);
+          roundEl.classList.add("done");
+        } else if (e.type === "summary") {
+          const rows = (e.perRound || []).map(r => `<tr><td>Round ${r.round}</td><td>+${r.nHits}</td><td>${r.cumulative}</td><td>${(r.ratio * 100).toFixed(1)}%</td></tr>`).join("");
+          tl.appendChild(el("run-summary",
+            `<div class="rs-num">hit@R${e.rounds} = ${(e.hit_at_r5 * 100).toFixed(1)}%</div>`
+            + `<div class="rs-sub">${e.cumulative} of ${e.total} true hits found across ${e.rounds} rounds on ${esc(e.dataset)}</div>`
+            + `<table><thead><tr><th>Round</th><th>new hits</th><th>cumulative</th><th>hit@R</th></tr></thead><tbody>${rows}</tbody></table>`));
+        } else if (e.type === "done") { finish(); }
+        else if (e.type === "error") { tl.appendChild(el("run-head", "⚠ " + esc(e.text))); finish(); }
+        scrollDown();
+      };
+    }
+
+    // Benchmark demo: a bundled screen's readout stands in as ground truth (EventSource / GET).
+    function runDemo(dataset, rounds) {
+      clearHero();
+      addYou(`Auto-run ${dataset} — retrospective evaluation (${rounds} rounds)`);
+      const tl = el("run-timeline"); addBot(tl); composerBusy(true);
+      const es = new EventSource(`/api/run-stream?dataset=${encodeURIComponent(dataset)}&rounds=${rounds}`);
+      const finish = () => { es.close(); composerBusy(false); q.focus(); };
+      const h = makeRunHandler(tl, finish);
+      es.onmessage = (ev) => { let e; try { e = JSON.parse(ev.data); } catch { return; } h(e); };
+      es.onerror = () => { tl.appendChild(el("run-head", "⚠ connection closed")); finish(); };
+    }
+
+    // Real production path: register a brand-new screen from the scientist's uploaded readout, then run
+    // it — streamed over POST (the file body won't fit in a GET) and read from the fetch response stream.
+    async function runUpload({ name, content, fileName, task, rounds }) {
+      clearHero();
+      addYou(`📤 Upload & run "${name}" — register from my screen, then rank (${rounds} rounds)`);
+      const tl = el("run-timeline"); addBot(tl); composerBusy(true);
+      const finish = () => { composerBusy(false); q.focus(); };
+      const h = makeRunHandler(tl, finish);
+      try {
+        const res = await fetch("/api/run-upload", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name, readoutContent: content, readoutName: fileName, task, rounds }),
+        });
+        const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
+        for (;;) {
+          const { value, done } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let i;
+          while ((i = buf.indexOf("\n\n")) >= 0) {
+            const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+            const line = chunk.split("\n").find(l => l.startsWith("data:"));
+            if (line) { let e; try { e = JSON.parse(line.slice(5).trim()); } catch { continue; } h(e); }
+          }
+        }
+        finish();
+      } catch (err) { tl.appendChild(el("run-head", "⚠ " + esc(err.message))); finish(); }
+    }
+
+    // "Upload & run my own screen" affordance: pick a readout, name it, one line on the phenotype, go.
+    function startUploadRun() {
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.accept = ".csv,.txt,.tsv";
+      inp.onchange = () => {
+        const f = inp.files && inp.files[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base = (f.name.replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9_]/g, "_").slice(0, 40)) || "MyScreen";
+          let name = prompt("Name this screen (letters / digits / underscore):", base);
+          if (name == null) return;
+          name = name.replace(/[^A-Za-z0-9_]/g, "_") || base;
+          const task = prompt("One line — what phenotype does this screen measure?", "") || "";
+          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5 });
+        };
+        reader.readAsText(f);
+      };
+      inp.click();
     }
 
     // send a typed/clicked message (optionally with the staged composer file)

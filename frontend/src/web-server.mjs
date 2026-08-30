@@ -7,6 +7,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { respond } from "./converse.mjs";
+import { autoRun, autoRunUpload } from "./autorun.mjs";
 import { pickDefaultChatModel } from "./setup.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,49 @@ export async function launchWebServer({ port = 3000, modelSpec } = {}) {
       if (req.method === "GET" && (req.url === "/" || req.url.startsWith("/index"))) {
         res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
         res.end(readFileSync(INDEX_HTML));
+        return;
+      }
+      // Live step-by-step retrospective run (SSE): treat a completed screen's readout as ground truth,
+      // auto-run the sequential campaign, and stream each step to the browser (Claude-Code-style).
+      if (req.method === "GET" && req.url.startsWith("/api/run-stream")) {
+        const u = new URL(req.url, "http://localhost");
+        const dataset = u.searchParams.get("dataset") || "IFNG";
+        const rounds = Math.max(1, Math.min(8, parseInt(u.searchParams.get("rounds") || "5", 10) || 5));
+        const batchSize = u.searchParams.get("batch") ? parseInt(u.searchParams.get("batch"), 10) : undefined;
+        res.writeHead(200, {
+          "content-type": "text/event-stream", "cache-control": "no-cache",
+          connection: "keep-alive", "x-accel-buffering": "no",
+        });
+        let alive = true;
+        req.on("close", () => { alive = false; });
+        const send = (e) => { if (alive) res.write(`data: ${JSON.stringify(e)}\n\n`); };
+        autoRun({ dataset, rounds, batchSize, modelSpec: spec, onStep: send })
+          .then((sum) => { send({ type: "done", ...sum }); res.end(); })
+          .catch((err) => { send({ type: "error", text: String(err.message || err) }); res.end(); });
+        return;
+      }
+      // Real production path (streamed over POST so the file body fits): register a brand-new screen
+      // from the uploaded readout, then auto-run it — every step (upload → anchors → register → rounds)
+      // streams back as SSE-style `data:` lines the browser reads from the fetch body.
+      if (req.method === "POST" && req.url === "/api/run-upload") {
+        const body = JSON.parse((await readBody(req)) || "{}");
+        res.writeHead(200, {
+          "content-type": "text/event-stream", "cache-control": "no-cache",
+          connection: "keep-alive", "x-accel-buffering": "no",
+        });
+        let alive = true;
+        req.on("close", () => { alive = false; });
+        const send = (e) => { if (alive) res.write(`data: ${JSON.stringify(e)}\n\n`); };
+        autoRunUpload({
+          name: body.name, readoutContent: body.readoutContent, readoutName: body.readoutName,
+          task: body.task, measurement: body.measurement,
+          anchors: Array.isArray(body.anchors) ? body.anchors
+            : (body.anchors ? String(body.anchors).split(/[,\s]+/).filter(Boolean) : undefined),
+          rounds: Math.max(1, Math.min(8, parseInt(body.rounds || "5", 10) || 5)),
+          batchSize: body.batchSize ? parseInt(body.batchSize, 10) : undefined,
+          modelSpec: spec, onStep: send,
+        }).then((sum) => { send({ type: "done", ...sum }); res.end(); })
+          .catch((err) => { send({ type: "error", text: String(err.message || err) }); res.end(); });
         return;
       }
       if (req.method === "POST" && req.url === "/api/message") {
