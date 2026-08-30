@@ -124,6 +124,38 @@ def ablation_deltas() -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("delta")
 
 
+def load_external() -> pd.DataFrame:
+    """The two external prior methods on the full nine-screen benchmark, as tidy rows (round 5, seed 0)
+    so they append to the method frame for the comparison figures (Fig.~2 bars, Fig.~3 heatmap):
+      * ``bda``       — BioDiscoveryAgent's no-tools agent on GPT-5.6 Luna, our-oracle hit@R5 per screen.
+      * ``genedisco`` — GeneDisco's strongest single acquisition rule (marginsample), ported onto our
+                        features; per-screen final-round hit@R5 (mean over its seeds).
+    Both carry the caveats spelled out in the external-comparison tables; they are shown in neutral grey.
+    """
+    rows = []
+    bda_p = REPO_ROOT / "workspace" / "results" / "bda_controlled" / "bda_gpt.json"
+    if bda_p.exists():
+        for ds, v in json.loads(bda_p.read_text()).get("results", {}).items():
+            prr = v.get("hit_ratio_per_round") or [v["hit_at_r5"]]
+            for i, hr in enumerate(prr):
+                rows.append({"dataset": ds, "arm": "bda", "seed": 0, "round": i + 1,
+                             "hit_ratio": float(hr), "cumulative_hits": float("nan"),
+                             "total_hits": v["total_hits"], "auc": float("nan")})
+    gd_p = RESULTS / "genedisco_ported.json"
+    if gd_p.exists():
+        gd = json.loads(gd_p.read_text())
+        for ds, arms in gd.items():
+            seeds = arms.get("genedisco_marginsample")
+            if seeds:
+                nr = len(seeds[0]["hit_ratio_per_round"])
+                for i in range(nr):
+                    hr = sum(r["hit_ratio_per_round"][i] for r in seeds) / len(seeds)
+                    rows.append({"dataset": ds, "arm": "genedisco", "seed": 0, "round": i + 1,
+                                 "hit_ratio": float(hr), "cumulative_hits": float("nan"),
+                                 "total_hits": float("nan"), "auc": float("nan")})
+    return pd.DataFrame(rows)
+
+
 def load_agent() -> pd.DataFrame | None:
     """The tool-using agent vs the pipeline, per dataset. Agent run and pipeline reference are both the
     reported GPT system (agent under gpt/agent_benchmark.json; pipeline from the GPT main table)."""

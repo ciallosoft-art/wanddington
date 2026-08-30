@@ -12,6 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from . import data as D
@@ -35,12 +36,12 @@ def discovery_curves(out: Path) -> Path:
     live in the comparison bars. Endpoint labels are selective (hero + floor) to avoid a collision
     where three methods converge around 0.22.
     """
-    df = D.load_methods(final=True)
+    df = pd.concat([D.load_methods(final=True), D.load_external()], ignore_index=True)
     S.apply()
     fig, ax = plt.subplots(figsize=(6.4, 4.2))
 
     labelled = {"waddington_c", "random"}
-    for arm in S.METHOD_ORDER:
+    for arm in S.METHOD_ORDER + S.EXTERNAL_ORDER:
         sub = df[df["arm"] == arm]
         if sub.empty:
             continue
@@ -49,10 +50,12 @@ def discovery_curves(out: Path) -> Path:
         mean = per_ds.groupby("round")["hit_ratio"].mean()
         c = S.METHOD_COLOR[arm]
         hero = arm == "waddington_c"
+        ext = arm in S.EXTERNAL_ORDER  # external priors: dashed grey, so they read as reference lines
         ax.plot(mean.index, mean.values, color=c, linewidth=2.4 if hero else 1.8,
-                marker="o", markersize=5 if hero else 4,
+                linestyle="--" if ext else "-",
+                marker="s" if ext else "o", markersize=5 if hero else 4,
                 markeredgecolor=S.SURFACE, markeredgewidth=0.8,
-                label=S.METHOD_LABEL[arm], zorder=4 if hero else 3)
+                label=S.METHOD_LABEL[arm], zorder=2 if ext else (4 if hero else 3))
         if arm in labelled:
             ax.annotate(f"{mean.iloc[-1]:.3f}", (mean.index[-1], mean.iloc[-1]),
                         xytext=(7, 0), textcoords="offset points", va="center",
@@ -71,10 +74,15 @@ def discovery_curves(out: Path) -> Path:
 
 
 def method_comparison(out: Path) -> Path:
-    """Magnitude, one entity per bar → a single hue + direct value labels."""
+    """Magnitude, one entity per bar → a single hue + direct value labels. External prior methods
+    (BDA, GeneDisco) are appended in neutral grey and ranked with the rest by value."""
     means = D.method_means(D.load_methods(final=True))
+    ext = D.load_external()
+    if not ext.empty:
+        ext_means = D.final_round(ext).groupby("arm")["hit_ratio"].mean()
+        means = pd.concat([means, ext_means]).sort_values(ascending=False)
     S.apply()
-    fig, ax = plt.subplots(figsize=(6.4, 3.6))
+    fig, ax = plt.subplots(figsize=(6.4, 4.0))
 
     labels = [S.METHOD_LABEL.get(a, a) for a in means.index]
     y = np.arange(len(means))[::-1]
@@ -85,7 +93,7 @@ def method_comparison(out: Path) -> Path:
                     va="center", fontsize=9, color=S.INK_2)
 
     ax.set_yticks(y, labels, fontsize=9.5)
-    ax.set_xlabel("Hit ratio @ round 5  (mean over 9 screens × 20 seeds)")
+    ax.set_xlabel("Hit ratio @ round 5  (mean over 9 screens; ours 20 seeds, external single run)")
     ax.set_title("The hybrid pipeline beats every baseline", color=S.INK, fontsize=11.5, loc="left", pad=10)
     ax.set_xlim(0, max(means.values) * 1.16)
     ax.grid(axis="y", visible=False)
@@ -94,12 +102,12 @@ def method_comparison(out: Path) -> Path:
 
 def dataset_heatmap(out: Path) -> Path:
     """Magnitude across two keys → sequential single-hue ramp, with values written in."""
-    df = D.load_methods(final=True)
+    df = pd.concat([D.load_methods(final=True), D.load_external()], ignore_index=True)
     fr = D.final_round(df)
     m = fr.groupby(["arm", "dataset"])["hit_ratio"].mean().unstack()
-    m = m.reindex([a for a in S.METHOD_ORDER if a in m.index])
+    m = m.reindex([a for a in (S.METHOD_ORDER + S.EXTERNAL_ORDER) if a in m.index])
     S.apply()
-    fig, ax = plt.subplots(figsize=(8.6, 3.5))
+    fig, ax = plt.subplots(figsize=(8.6, 4.1))
 
     im = ax.imshow(m.values, cmap=S.cmap_sequential(), aspect="auto", vmin=0)
     ax.set_xticks(range(len(m.columns)), m.columns, rotation=38, ha="right", fontsize=8.5)

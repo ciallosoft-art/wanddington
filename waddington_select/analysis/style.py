@@ -38,6 +38,14 @@ METHOD_LABEL = {
     "random": "Random",
 }
 
+# External prior methods (BioDiscoveryAgent, GeneDisco) — shown in neutral greys so they read as
+# reference points, not as one of our arms (colour follows the entity; these are a separate category).
+EXTERNAL_ORDER = ["genedisco", "bda"]
+METHOD_LABEL["bda"] = "BioDiscoveryAgent"
+METHOD_LABEL["genedisco"] = "GeneDisco"
+METHOD_COLOR["bda"] = "#8f8d86"
+METHOD_COLOR["genedisco"] = "#bfbdb4"
+
 # Attribution sources (Phase B) — first three slots.
 SOURCE_COLOR = {"both": SLOTS[0], "ml_only": SLOTS[1], "llm_only": SLOTS[2]}
 SOURCE_LABEL = {"both": "ML + LLM agree", "ml_only": "ML only", "llm_only": "LLM only"}
