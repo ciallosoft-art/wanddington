@@ -85,3 +85,15 @@ workspace/evaluation/lgbm_training_data_crispra_validation.csv
 # CRISPRa validation run outputs — regenerable from the (gitignored) table above; not committed
 workspace/results/sequential/crispra_*.json
 *.aux
+
+# LaTeX / hyperref bookmark aux (regenerated on compile)
+*.out
+
+# Stale experiment locks left under results (never source)
+workspace/results/**/*.lock
+
+# Figures live in workspace/results/figures/ (paper loads them via graphicspath); keep docs/ free of figure copies
+docs/*.png
+
+# Session retrospective / PPT plan — working note, not committed
+docs/RETROSPECTIVE_AND_PPT_PLAN.md
