@@ -45,12 +45,11 @@ from ..features import load_training_frame
 from ..phenotype import load_registry
 
 REPO_ROOT         = Path(__file__).resolve().parents[2]
-# WADDINGTON_TRAINING_CSV overrides the v1 (no-DepMap) table, so the CRISPRa validation datasets — which
-# route through the DepMap-excluded v1 path, like Steinhart — read the isolated superset CSV without
-# touching the frozen benchmark file. v3 (with DepMap) is left alone: the validation screens never use it.
-TRAINING_DATA_V1  = Path(os.environ.get("WADDINGTON_TRAINING_CSV",
-                          REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"))
-TRAINING_DATA_V3  = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data_v3.csv"
+# Both tiers are resolved centrally (tables.py). WADDINGTON_TRAINING_CSV overrides the v1 (no-DepMap)
+# table and WADDINGTON_TRAINING_CSV_V3 the v3 (with-DepMap) one, so an isolated superset table — the
+# CRISPRa validation, or either BDA difficulty tier — is picked up on BOTH feature routes. v3 used to
+# be hardcoded, which pinned most screens to the frozen benchmark pool whatever the override said.
+from ..tables import TRAINING_DATA_CSV as TRAINING_DATA_V1, TRAINING_DATA_V3
 MEMORY_PATH       = ACTIVE_MEMORY_PATH
 
 DEPMAP_PAN_FEATS   = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm"]

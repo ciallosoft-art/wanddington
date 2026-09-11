@@ -1,7 +1,8 @@
 # Experiments: Frozen Paper Runs and Active GPT Evaluation
 
-Scripts 00–03 reproduce the frozen paper experiments. Script 04 is the active end-to-end GPT
-evaluation; it writes to a separate result tree and never relabels or overwrites the paper outputs.
+Scripts 00–03 reproduce the frozen paper experiments. Scripts 04–05 are the active end-to-end GPT
+evaluation; they write to a separate result tree and never relabel or overwrite the paper outputs.
+Scripts 08–09 run BioDiscoveryAgent's other two difficulty tiers (see below).
 
 ## Requirements
 
@@ -50,6 +51,36 @@ command resumes only when the exact runtime/input fingerprint matches. Outputs a
 > seed; Coreset/static/online are deterministic re-evaluations. Codex exposes no provider sampling
 > seed, so GPT-B/C are repeated API invocations (independence not assumed), not reproducible model seeds.
 
+## BDA difficulty tiers (scripts 08–09)
+
+BioDiscoveryAgent grades the benchmark into three tiers. The paper's headline runs the middle one;
+scripts 08 and 09 run the other two under exactly the same protocol — same batch sizes, same rounds,
+same twenty evaluation replicates, same six arms, same task prompts — so the three are comparable.
+
+| Tier | Candidates | Table | Script | Result dir |
+|---|---|---|---|---|
+| easier | 1 gene, full pool (essentials included) | `lgbm_training_data_tier_a{,_v3}.csv` | `08_tier_a_full_pool.sh` | `gpt/tier_a_full_pool_20rep/` |
+| harder *(headline)* | 1 gene, CEGv2-filtered pool | `lgbm_training_data{,_v3}.csv` | `05_gpt_luna_20repeat.sh` | `gpt/gpt_5_6_luna_none_20rep/` |
+| hardest | 2 genes, Horlbeck GI map | `lgbm_training_data_horlbeck_pairs{,_v3}.csv` | `09_tier_b_pairs.sh` | `gpt/tier_b_pairs_20rep/` |
+
+Build the tables first (both builders self-verify against the frozen benchmark and refuse to write a
+table that does not reproduce it):
+
+```bash
+conda run -n waddington-bio python3 workspace/evaluation/build_tier_a_unfiltered.py
+conda run -n waddington-bio python3 workspace/evaluation/build_horlbeck_pairs.py   # needs tier A
+bash experiments/08_tier_a_full_pool.sh
+bash experiments/09_tier_b_pairs.sh        # reuses experiment 08's memory
+conda run -n waddington-bio python3 workspace/evaluation/summarize_tiers.py
+```
+
+No arm code is tier-specific. A tier is selected entirely by `WADDINGTON_TRAINING_CSV`,
+`WADDINGTON_TRAINING_CSV_V3` and `WADDINGTON_EXTRA_DATASETS`, which every consumer now reads from
+`waddington_select/tables.py`. In the combinatorial tier a candidate is one opaque token
+`"GENEA|GENEB"`, so the oracle, round loop, hit@R5 and result JSON are unchanged; only the LLM prompt
+asks for `"GENE1 + GENE2"` and injects the 449-gene screen library, without which the model's
+round-1 proposals are ~98% outside the measured pool.
+
 ## Historical Claude paper reproduction
 
 Scripts 00–03 form the frozen paper suite. Scripts 00, 02, and 03 explicitly pin the historical
@@ -96,6 +127,10 @@ bash experiments/03_ablations.sh     # ~6-8 hours
 
 # Active end-to-end GPT evaluation (5 API replicates; local baselines are seeded)
 bash experiments/04_gpt_luna_5repeat.sh
+
+# BDA's other two difficulty tiers (build the tables first — see "BDA difficulty tiers")
+bash experiments/08_tier_a_full_pool.sh    # 1-gene, full pool
+bash experiments/09_tier_b_pairs.sh        # 2-gene combinations
 ```
 
 Scripts 00–03 recompute their outputs from scratch by default. Set `WADDINGTON_RESUME=1` only to
@@ -159,6 +194,11 @@ workspace/evaluation/
 ├── lgbm_training_data.csv        ← feature matrix (v1: 9 PPI features)
 ├── lgbm_training_data_v2.csv     ← + 3 pan-cancer DepMap features
 ├── lgbm_training_data_v3.csv     ← + K562 Chronos (ACH-000551)
+├── lgbm_training_data_tier_a{,_v3}.csv        ← BDA "easier" tier: unfiltered full pool
+├── lgbm_training_data_horlbeck_pairs{,_v3}.csv ← BDA "hardest" tier: 2-gene candidates
+├── build_tier_a_unfiltered.py    ← builds the full-pool tables (verifies against the frozen ones)
+├── build_horlbeck_pairs.py       ← builds the pair tables
+├── summarize_tiers.py            ← side-by-side tier table (+ LaTeX)
 └── ...
 
 workspace/data/bda_benchmark/
@@ -169,6 +209,9 @@ workspace/results/
 ├── router/                 ← reported 20-seed table + matched router controls
 ├── sequential/             ← supporting 5-seed experiments and ablations
 └── gpt/                    ← active GPT calibration, memory, C-arm, and manifests
+    ├── gpt_5_6_luna_none_20rep/    ← headline tier (1-gene, non-essential)
+    ├── tier_a_full_pool_20rep/     ← BDA "easier" tier
+    └── tier_b_pairs_20rep/         ← BDA "hardest" tier (2-gene)
 ```
 
 ## Arm descriptions

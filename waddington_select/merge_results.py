@@ -119,7 +119,12 @@ def _validate_protocol(protocol: dict, expected_arms: tuple[str, ...], label: st
         "drop_anchor_features": True,
         "hit_frequency_only": False,
         "exclude_study": False,
-        "training_csv_override": None,
+        # The gate's job is that this stage was calibrated on the SAME feature/label table that is
+        # active now — not that the table is the frozen benchmark one. Hardcoding None here made the
+        # provenance check unsatisfiable for any isolated superset table (the CRISPRa validation, and
+        # BDA's two other difficulty tiers), which is a configuration the runner explicitly supports.
+        "training_csv_override": os.environ.get("WADDINGTON_TRAINING_CSV"),
+        "training_csv_v3_override": os.environ.get("WADDINGTON_TRAINING_CSV_V3"),
         "reason_from_structure": False,
         "gene_level_audit": True,
         "dump_revealed_hit_genes": True,

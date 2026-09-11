@@ -1,0 +1,109 @@
+"""
+tables.py — single source of truth for *which* feature/label table a run reads.
+
+Every arm used to re-declare its own ``TRAINING_DATA_CSV`` constant pointing at the frozen v1 table,
+so ``WADDINGTON_TRAINING_CSV`` (honoured only by the oracle) silently desynchronised them: the arms
+selected from the frozen pool while the oracle scored a different one. Anything that needs a table
+now imports it from here, so one env var moves the whole system together.
+
+Env vars
+--------
+WADDINGTON_TRAINING_CSV      v1 table (9 gene-intrinsic features).  Default: lgbm_training_data.csv
+WADDINGTON_TRAINING_CSV_V3   v3 table (v1 + 4 DepMap columns).      Default: lgbm_training_data_v3.csv
+WADDINGTON_EXTRA_DATASETS    extra screens the oracle should serve, "Name:batch,Name:batch"
+WADDINGTON_PAIR_DATASETS     screens whose candidates are gene PAIRS, comma-separated
+
+Difficulty tiers
+----------------
+The paper's main results are BDA's *harder* single-gene tier (non-essential pool). The two other
+BDA tiers are run by pointing these variables at purpose-built tables:
+
+  easier   1-gene, full pool     WADDINGTON_TRAINING_CSV{,_V3}=…_tier_a_unfiltered{,_v3}.csv
+  harder   2-gene combinations   WADDINGTON_TRAINING_CSV{,_V3}=…_horlbeck_pairs{,_v3}.csv
+                                 WADDINGTON_EXTRA_DATASETS=Horlbeck:128
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVAL_DIR = REPO_ROOT / "workspace" / "evaluation"
+
+DEFAULT_TRAINING_CSV = EVAL_DIR / "lgbm_training_data.csv"
+DEFAULT_TRAINING_V3 = EVAL_DIR / "lgbm_training_data_v3.csv"
+CRISPRA_VALIDATION_CSV = EVAL_DIR / "lgbm_training_data_crispra_validation.csv"
+
+TRAINING_DATA_CSV = Path(os.environ.get("WADDINGTON_TRAINING_CSV", DEFAULT_TRAINING_CSV))
+TRAINING_DATA_V3 = Path(os.environ.get("WADDINGTON_TRAINING_CSV_V3", DEFAULT_TRAINING_V3))
+
+# ── Combinatorial (2-gene) screens ──────────────────────────────────────────────────────────────
+# A pair candidate is ONE opaque token "GENEA|GENEB" with the two symbols sorted alphabetically, so
+# every layer below the prompt (oracle, runner, hit@R5, result JSON) is unchanged — the candidate
+# unit was already an opaque string end to end. Only the LLM prompt/parse needs to know.
+PAIR_SEP = "|"
+_DEFAULT_PAIR_DATASETS = {"Horlbeck"}
+PAIR_DATASETS: set[str] = _DEFAULT_PAIR_DATASETS | {
+    s.strip() for s in os.environ.get("WADDINGTON_PAIR_DATASETS", "").split(",") if s.strip()
+}
+
+
+def is_pair_dataset(dataset_name: str) -> bool:
+    return dataset_name in PAIR_DATASETS
+
+
+def pair_token(gene_a: str, gene_b: str) -> str:
+    """Canonical pair token: alphabetically sorted, matching BDA's `tuple(sorted(...))` convention."""
+    a, b = sorted((gene_a.strip().upper(), gene_b.strip().upper()))
+    return f"{a}{PAIR_SEP}{b}"
+
+
+def split_pair(token: str) -> tuple[str, str]:
+    a, _, b = token.partition(PAIR_SEP)
+    return a, b
+
+
+# ── Feature columns ─────────────────────────────────────────────────────────────────────────────
+# A pair table carries each gene-intrinsic feature twice: the canonical column name holds the pair
+# MEAN (x(a)+x(b))/2 — scale-equivalent to the sum, and LightGBM is scale-invariant — and a
+# "<feat>_absdiff" companion holds |x(a)-x(b)|, the within-pair spread. Single-gene tables have no
+# _absdiff columns, so this helper is a strict no-op on every existing run.
+ABSDIFF_SUFFIX = "_absdiff"
+
+
+def with_pair_spread(feats: list[str], df: pd.DataFrame) -> list[str]:
+    """Append the |x(a)-x(b)| companion of each feature, where the table provides one."""
+    return list(feats) + [
+        f"{c}{ABSDIFF_SUFFIX}" for c in feats if f"{c}{ABSDIFF_SUFFIX}" in df.columns
+    ]
+
+
+# ── Extra screens the oracle should serve ───────────────────────────────────────────────────────
+
+def extra_datasets() -> dict[str, int]:
+    """Parse WADDINGTON_EXTRA_DATASETS ("Name:batch,Name:batch") into {name: batch_size}."""
+    spec = os.environ.get("WADDINGTON_EXTRA_DATASETS", "").strip()
+    out: dict[str, int] = {}
+    for item in spec.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        name, _, batch = item.partition(":")
+        name = name.strip()
+        if not name:
+            continue
+        try:
+            out[name] = int(batch) if batch.strip() else 128
+        except ValueError as exc:
+            raise ValueError(
+                f"WADDINGTON_EXTRA_DATASETS entry {item!r} is not 'Name:batch_size'"
+            ) from exc
+    # Back-compat: the CRISPRa reason-vs-recall validation used to be registered whenever ANY table
+    # override was set, which would misfire for every other superset table. Bind it to its own file.
+    if TRAINING_DATA_CSV == CRISPRA_VALIDATION_CSV:
+        out.setdefault("IL2_crispra", 128)
+        out.setdefault("IFNG_crispra", 128)
+    return out

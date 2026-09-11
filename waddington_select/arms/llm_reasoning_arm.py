@@ -33,7 +33,11 @@ from ..features import load_training_frame
 from ..phenotype import task_prompt as _user_task_prompt
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+# Resolved centrally (tables.py) so WADDINGTON_TRAINING_CSV moves the arm and the oracle
+# together. Hardcoding it here used to leave the arm selecting from the frozen pool while the
+# oracle scored an overridden one — silently wrong numbers, no error.
+from ..tables import (ABSDIFF_SUFFIX, PAIR_SEP, TRAINING_DATA_CSV, is_pair_dataset,
+                      pair_token, split_pair, with_pair_spread)
 TASK_PROMPTS_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark" / "task_prompts"
 
 FEATURE_COLS = [
@@ -62,6 +66,8 @@ TASK_PROMPT_FILES: dict[str, Optional[str]] = {
     "Steinhart": "Steinhart_crispra_GD2_D22.json",
     "Replogle_K562_essential": None,
     "Replogle_K562_gwps": None,
+    # BDA's two-gene combinatorial tier (Horlbeck 2018 GI map, K562).
+    "Horlbeck": "Horlbeck.json",
 }
 
 HARDCODED_TASKS: dict[str, dict[str, str]] = {
@@ -166,20 +172,24 @@ class LLMReasoningArm(BaseArm):
         self._enrich_cache: dict = {}
         self._temperature = temperature
         self._model = model
+        # Combinatorial screens: a candidate is a PAIR token "GENEA|GENEB". Only the prompt wording
+        # and the response parser change; everything downstream still sees one opaque string.
+        self._pair_mode = is_pair_dataset(dataset_name)
 
         csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
         df = load_training_frame(csv_path, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
-        self._all_feats = [c for c in all_feats if c in df.columns]
+        self._all_feats = with_pair_spread([c for c in all_feats if c in df.columns], df)
         # Clean-headline variant (see online_adaptive_arm): drop anchor-relative features from the static
         # padding ranker too, so no privileged anchor signal enters the batch by any path. Explicit
         # `drop_anchor_feats` (from the C-arm) overrides the env var, scoping the default to the C-arm.
         _drop = drop_anchor_feats if drop_anchor_feats is not None else (
             os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1")
         if _drop:
-            self._all_feats = [c for c in self._all_feats
-                               if c not in {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}]
+            _anchor = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
+            _anchor |= {f + ABSDIFF_SUFFIX for f in _anchor}  # pair tables: drop the spread too
+            self._all_feats = [c for c in self._all_feats if c not in _anchor]
         # Recurrence-baseline probe (see online_adaptive_arm): the static padding ranker also uses only
         # the cross-screen hit-frequency feature.
         if os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1":
@@ -192,6 +202,14 @@ class LLMReasoningArm(BaseArm):
         test_df = df[df["dataset"] == dataset_name].reset_index(drop=True)
         self._genes: list[str] = test_df["gene"].tolist()
         self._gene_set: set[str] = set(self._genes)
+        # A combinatorial screen is a small designed library (Horlbeck: 449 genes), not the genome.
+        # Without it the model proposes biologically sensible pairs that were simply never measured —
+        # 138 of 140 fell outside the pool in round 1 — so the LLM branch degenerates to ML padding
+        # until feedback happens to name real pairs. BDA injects the candidate list for the same
+        # reason; single-gene screens are genome-wide and need no such section.
+        self._pair_gene_pool: list[str] = (
+            sorted({g for t in self._genes for g in split_pair(t)}) if self._pair_mode else []
+        )
 
         # Build StaticRanker fallback order (LOO LightGBM)
         train_df = df[df["dataset"] != dataset_name].copy()
@@ -231,6 +249,110 @@ class LLMReasoningArm(BaseArm):
         self._llm_named = set()
         self._static_padding = []
         self._n_fallback = 0
+
+    # ── candidate vocabulary ────────────────────────────────────────────────────────────────────
+    # Single-gene screens render and request bare HGNC symbols; combinatorial screens render and
+    # request "GENE1 + GENE2" (BDA's own wire format) which the parser folds back to a "A|B" token.
+    # Every method below returns byte-identical text to the historical prompt when not in pair mode.
+
+    def _fmt(self, tokens) -> list[str]:
+        """Render candidate tokens for the prompt."""
+        if not self._pair_mode:
+            return list(tokens)
+        return [t.replace(PAIR_SEP, " + ") for t in tokens]
+
+    def _pool_section(self) -> str:
+        if not self._pair_gene_pool:
+            return ""
+        return (f"\n\nSCREEN LIBRARY ({len(self._pair_gene_pool)} genes). Every pair you propose must "
+                f"use TWO genes from this list — no other gene was measured in this screen:\n"
+                + ", ".join(self._pair_gene_pool) + "\n")
+
+    def _selection_instructions(self) -> str:
+        if self._pair_mode:
+            return f"""Select exactly {self.batch_size} PAIRS of human protein-coding genes to knock down together in this round.
+
+Rules:
+- Write each pair as "GENE1 + GENE2" using standard HGNC gene symbols (e.g., "TP53 + MDM2")
+- A pair is unordered: "A + B" and "B + A" are the same experiment
+- Do not repeat previously selected pairs
+- Choose pairs most likely to show a genetic interaction on the measured phenotype
+- Prefer genes that act in the same complex or in parallel branches of one pathway
+
+Return ONLY a JSON array of {self.batch_size} pair strings. No explanation, no markdown, just the JSON array.
+Example: ["TP53 + MDM2", "BRCA1 + PARP1", "MYC + MAX", "RPL5 + RPL11"]"""
+        return f"""Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
+
+Rules:
+- Use standard HGNC gene symbols (e.g., TP53, EGFR, BRCA1)
+- Do not repeat previously selected genes
+- Choose genes most likely to affect the measured phenotype
+- Prioritize biological relevance over coverage
+
+Return ONLY a JSON array of {self.batch_size} gene symbols. No explanation, no markdown, just the JSON array.
+Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
+
+    def _shortlist_instructions(self) -> str:
+        if self._pair_mode:
+            return f"""INSTRUCTIONS:
+Select exactly {self.batch_size} gene pairs for this round.
+- Prefer pairs from the ML candidate pool above (they are pre-filtered by the model).
+- You MAY also suggest pairs NOT in the pool if you have strong biological justification.
+- Write each pair as "GENE1 + GENE2" using standard HGNC symbols. Do not repeat already-selected pairs.
+
+Return ONLY a JSON array of {self.batch_size} pair strings. No explanation.
+Example: ["TP53 + MDM2", "BRCA1 + PARP1", "MYC + MAX", "RPL5 + RPL11"]"""
+        return f"""INSTRUCTIONS:
+Select exactly {self.batch_size} genes for this round.
+- Prefer genes from the ML candidate pool above (they are pre-filtered by the model).
+- You MAY also suggest genes NOT in the pool if you have strong biological justification.
+- Use standard HGNC gene symbols. Do not repeat already-selected genes.
+
+Return ONLY a JSON array of {self.batch_size} gene symbols. No explanation.
+Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
+
+    def _confidence_instructions(self) -> str:
+        if self._pair_mode:
+            return f"""Select exactly {self.batch_size} PAIRS of human protein-coding genes to knock down together in this round.
+
+Rules:
+- Write each pair as "GENE1 + GENE2" using standard HGNC gene symbols (e.g., "TP53 + MDM2")
+- A pair is unordered: "A + B" and "B + A" are the same experiment
+- Do not repeat previously selected pairs
+- Choose pairs most likely to show a genetic interaction on the measured phenotype
+- Prefer genes that act in the same complex or in parallel branches of one pathway
+
+Return ONLY a JSON object with two fields:
+- "genes": an array of exactly {self.batch_size} pair strings
+- "confidence": your overall confidence (0.0-1.0) that these selections are biologically relevant
+
+Example: {{"genes": ["TP53 + MDM2", "BRCA1 + PARP1", "MYC + MAX"], "confidence": 0.75}}
+No explanation, no markdown."""
+        return f"""Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
+
+Rules:
+- Use standard HGNC gene symbols (e.g., TP53, EGFR, BRCA1)
+- Do not repeat previously selected genes
+- Choose genes most likely to affect the measured phenotype
+- Prioritize biological relevance over coverage
+
+Return ONLY a JSON object with two fields:
+- "genes": an array of exactly {self.batch_size} gene symbols
+- "confidence": your overall confidence (0.0-1.0) that these selections are biologically relevant
+
+Example: {{"genes": ["TP53", "EGFR", "BRCA1", "MYC"], "confidence": 0.75}}
+No explanation, no markdown."""
+
+    def _normalize_llm_tokens(self, raw: list[str]) -> list[str]:
+        """Fold raw model output into canonical candidate tokens."""
+        if not self._pair_mode:
+            return raw
+        out: list[str] = []
+        for item in raw:
+            m = re.match(r"^\s*([A-Za-z0-9._\-]+)\s*[+&,/]\s*([A-Za-z0-9._\-]+)\s*$", str(item))
+            if m:
+                out.append(pair_token(m.group(1), m.group(2)))
+        return out
 
     def _build_memory_section(self) -> str:
         if not self._memory:
@@ -308,7 +430,7 @@ class LLMReasoningArm(BaseArm):
         full = os.environ.get("WADDINGTON_FULL_SELECTED_CONTEXT", "1") == "1"
         shown = selected if full else selected[:50]
         suffix = "" if full or len(selected) <= 50 else "..."
-        return f"\n\nALREADY SELECTED (do NOT repeat): {', '.join(shown)}{suffix}"
+        return f"\n\nALREADY SELECTED (do NOT repeat): {', '.join(self._fmt(shown))}{suffix}"
 
     def _build_prompt(self, round_idx: int) -> str:
         task_text = self._task.get("Task", self.dataset_name)
@@ -320,9 +442,9 @@ class LLMReasoningArm(BaseArm):
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
-            hit_str = ", ".join(hits[:20]) + ("..." if len(hits) > 20 else "")
+            hit_str = ", ".join(self._fmt(hits[:20])) + ("..." if len(hits) > 20 else "")
             nonhit_sample = nonhits[:10]
-            nonhit_str = ", ".join(nonhit_sample) + f"... ({len(nonhits)} total)"
+            nonhit_str = ", ".join(self._fmt(nonhit_sample)) + f"... ({len(nonhits)} total)"
             history_lines.append(
                 f"Round {r+1} — Hits ({len(hits)}): {hit_str or 'none'} | "
                 f"Non-hits sample: {nonhit_str}"
@@ -333,7 +455,7 @@ class LLMReasoningArm(BaseArm):
             history_section = "\n\nEXPERIMENTAL FEEDBACK FROM PREVIOUS ROUNDS:\n" + "\n".join(history_lines)
             all_hits = [g for rnd in self._round_hits for g in rnd]
             if all_hits:
-                history_section += f"\n\nCumulative hits found so far: {', '.join(all_hits[:30])}"
+                history_section += f"\n\nCumulative hits found so far: {', '.join(self._fmt(all_hits[:30]))}"
                 history_section += "\nUse the pattern of hits to infer which biological pathways or gene families to prioritize next."
 
         already_note = self._already_selected_note()
@@ -342,19 +464,10 @@ class LLMReasoningArm(BaseArm):
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}{skill_section}{enrichment_section}
+{memory_section}{skill_section}{enrichment_section}{self._pool_section()}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
-Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
-
-Rules:
-- Use standard HGNC gene symbols (e.g., TP53, EGFR, BRCA1)
-- Do not repeat previously selected genes
-- Choose genes most likely to affect the measured phenotype
-- Prioritize biological relevance over coverage
-
-Return ONLY a JSON array of {self.batch_size} gene symbols. No explanation, no markdown, just the JSON array.
-Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
+{self._selection_instructions()}"""
         return prompt
 
     def _call_llm(self, prompt: str) -> list[str]:
@@ -378,12 +491,19 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
             genes = json.loads(text)
             if isinstance(genes, list):
                 self._last_parse_mode = "json_array"
-                return [str(g).strip().upper() for g in genes if g]
+                return self._normalize_llm_tokens(
+                    [str(g).strip().upper() for g in genes if g])
         except json.JSONDecodeError:
             pass
 
-        # Fallback: extract HGNC-like patterns (allow underscores so GENE_00001 survives)
+        # Fallback: extract HGNC-like patterns (allow underscores so GENE_00001 survives).
+        # In pair mode the unit is "GENE1 + GENE2", so a symbol-only regex would shred every pair into
+        # two unmatched halves and silently force 100% ML padding — match the pair form directly.
         self._last_parse_mode = "regex_fallback"
+        if self._pair_mode:
+            raw_pairs = re.findall(
+                r'\b([A-Z][A-Z0-9_\-]{1,12})\s*\+\s*([A-Z][A-Z0-9_\-]{1,12})\b', text.upper())
+            return [pair_token(a, b) for a, b in raw_pairs]
         raw = re.findall(r'\b[A-Z][A-Z0-9_\-]{1,12}\b', text)
         return [g.upper() for g in raw]
 
@@ -442,8 +562,8 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
-            hit_str = ", ".join(hits[:20]) + ("..." if len(hits) > 20 else "")
-            nonhit_str = ", ".join(nonhits[:10]) + f"... ({len(nonhits)} total)"
+            hit_str = ", ".join(self._fmt(hits[:20])) + ("..." if len(hits) > 20 else "")
+            nonhit_str = ", ".join(self._fmt(nonhits[:10])) + f"... ({len(nonhits)} total)"
             history_lines.append(
                 f"Round {r+1} — Hits ({len(hits)}): {hit_str or 'none'} | "
                 f"Non-hits sample: {nonhit_str}"
@@ -454,31 +574,26 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
             all_hits = [g for rnd in self._round_hits for g in rnd]
             if all_hits:
                 history_section += (
-                    f"\n\nCumulative hits so far: {', '.join(all_hits[:30])}"
+                    f"\n\nCumulative hits so far: {', '.join(self._fmt(all_hits[:30]))}"
                     "\nUse the hit pattern to infer pathways and prioritize next candidates."
                 )
 
         already_note = self._already_selected_note()
 
-        cand_lines = [f"  {g} (ML confidence: {s:.3f})" for g, s in shortlist]
+        cand_lines = [f"  {g} (ML confidence: {s:.3f})"
+                      for g, s in zip(self._fmt([g for g, _ in shortlist]),
+                                      [v for _, v in shortlist])]
         shortlist_section = "\n\nML-RANKED CANDIDATE POOL:\n" + "\n".join(cand_lines)
 
         return f"""You are a CRISPR screen expert selecting genes for a perturbation experiment.
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}{skill_section}{enrichment_section}
+{memory_section}{skill_section}{enrichment_section}{self._pool_section()}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 {shortlist_section}
 
-INSTRUCTIONS:
-Select exactly {self.batch_size} genes for this round.
-- Prefer genes from the ML candidate pool above (they are pre-filtered by the model).
-- You MAY also suggest genes NOT in the pool if you have strong biological justification.
-- Use standard HGNC gene symbols. Do not repeat already-selected genes.
-
-Return ONLY a JSON array of {self.batch_size} gene symbols. No explanation.
-Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
+{self._shortlist_instructions()}"""
 
     def select_with_shortlist(
         self, round_idx: int, shortlist: list[tuple[str, float]]
@@ -516,9 +631,9 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
         history_lines = []
         for r, (hits, nonhits) in enumerate(zip(self._round_hits, self._round_nonhits)):
-            hit_str = ", ".join(hits[:20]) + ("..." if len(hits) > 20 else "")
+            hit_str = ", ".join(self._fmt(hits[:20])) + ("..." if len(hits) > 20 else "")
             nonhit_sample = nonhits[:10]
-            nonhit_str = ", ".join(nonhit_sample) + f"... ({len(nonhits)} total)"
+            nonhit_str = ", ".join(self._fmt(nonhit_sample)) + f"... ({len(nonhits)} total)"
             history_lines.append(
                 f"Round {r+1} — Hits ({len(hits)}): {hit_str or 'none'} | "
                 f"Non-hits sample: {nonhit_str}"
@@ -529,7 +644,7 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
             history_section = "\n\nEXPERIMENTAL FEEDBACK FROM PREVIOUS ROUNDS:\n" + "\n".join(history_lines)
             all_hits = [g for rnd in self._round_hits for g in rnd]
             if all_hits:
-                history_section += f"\n\nCumulative hits found so far: {', '.join(all_hits[:30])}"
+                history_section += f"\n\nCumulative hits found so far: {', '.join(self._fmt(all_hits[:30]))}"
                 history_section += "\nUse the pattern of hits to infer which biological pathways or gene families to prioritize next."
 
         already_note = self._already_selected_note()
@@ -538,23 +653,10 @@ Example: ["TP53", "EGFR", "BRCA1", "MYC"]"""
 
 TASK: {task_text}
 MEASUREMENT: {measurement}
-{memory_section}{skill_section}{enrichment_section}
+{memory_section}{skill_section}{enrichment_section}{self._pool_section()}
 You are in round {round_idx + 1} of a sequential CRISPR screen.{history_section}{already_note}
 
-Select exactly {self.batch_size} human protein-coding gene symbols to perturb in this round.
-
-Rules:
-- Use standard HGNC gene symbols (e.g., TP53, EGFR, BRCA1)
-- Do not repeat previously selected genes
-- Choose genes most likely to affect the measured phenotype
-- Prioritize biological relevance over coverage
-
-Return ONLY a JSON object with two fields:
-- "genes": an array of exactly {self.batch_size} gene symbols
-- "confidence": your overall confidence (0.0-1.0) that these selections are biologically relevant
-
-Example: {{"genes": ["TP53", "EGFR", "BRCA1", "MYC"], "confidence": 0.75}}
-No explanation, no markdown."""
+{self._confidence_instructions()}"""
 
     def select_with_confidence(
         self, round_idx: int, revealed: dict[str, bool]
@@ -571,15 +673,21 @@ No explanation, no markdown."""
         try:
             obj = json.loads(text)
             if isinstance(obj, dict) and "genes" in obj:
-                llm_genes = [str(g).strip().upper() for g in obj["genes"] if g]
+                llm_genes = self._normalize_llm_tokens(
+                    [str(g).strip().upper() for g in obj["genes"] if g])
                 raw_conf = obj.get("confidence", 0.5)
                 llm_conf = float(max(0.0, min(1.0, float(raw_conf))))
             elif isinstance(obj, list):
-                llm_genes = [str(g).strip().upper() for g in obj if g]
+                llm_genes = self._normalize_llm_tokens(
+                    [str(g).strip().upper() for g in obj if g])
                 llm_conf = 0.5
         except (json.JSONDecodeError, ValueError, TypeError):
-            raw = re.findall(r'\b[A-Z][A-Z0-9\-]{1,9}\b', text)
-            llm_genes = [g.upper() for g in raw]
+            if self._pair_mode:
+                llm_genes = [pair_token(a, b) for a, b in re.findall(
+                    r'\b([A-Z][A-Z0-9_\-]{1,12})\s*\+\s*([A-Z][A-Z0-9_\-]{1,12})\b', text.upper())]
+            else:
+                raw = re.findall(r'\b[A-Z][A-Z0-9\-]{1,9}\b', text)
+                llm_genes = [g.upper() for g in raw]
             conf_match = re.search(r'"confidence"\s*:\s*([0-9.]+)', text)
             if conf_match:
                 try:

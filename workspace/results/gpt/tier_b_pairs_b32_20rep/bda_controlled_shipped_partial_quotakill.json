@@ -1,0 +1,103 @@
+{
+  "Horlbeck": {
+    "bda": [
+      {
+        "dataset": "Horlbeck",
+        "arm_name": "bda",
+        "batch_size": 32,
+        "n_rounds": 2,
+        "total_hits": 9959,
+        "n_genes": 100576,
+        "hits_per_round": [
+          6,
+          10
+        ],
+        "cumulative_hits": [
+          6,
+          16
+        ],
+        "hit_ratio_per_round": [
+          0.000602,
+          0.001607
+        ],
+        "auc_normalized": 0.001105,
+        "selected_genes_per_round": [
+          [
+            "KIF11|TUBB",
+            "NUP85|XPO1",
+            "DHODH|FH",
+            "BUB1B|ZWINT",
+            "ATP5A1|NDUFA9",
+            "DNA2|RAD51",
+            "ATP1A1|SLC7A1",
+            "DICER1|PRMT5",
+            "PRMT5|SF3B1",
+            "DYNC1H1|OPA1",
+            "CLSPN|DNA2",
+            "RAD51|RRM1",
+            "POLD1|RAD51",
+            "ATP1A1|OPA1",
+            "CDK1|MCM3",
+            "MCM3|MCM4",
+            "CLSPN|POLE",
+            "PGD|PGK1",
+            "AURKA|CDK1",
+            "NAMPT|SLC7A1",
+            "MED1|MED17",
+            "POLR2B|POLR3A",
+            "DHODH|NAMPT",
+            "COPS5|XPO1",
+            "MTOR|PPP2R1A",
+            "MTOR|SLC7A1",
+            "MTOR|RPTOR",
+            "AURKA|BUB1B",
+            "POLA1|POLD1",
+            "MAPKAP1|RPTOR",
+            "ATP1A1|TRPM7",
+            "COX16|SCO1"
+          ],
+          [
+            "GTF2H1|GTF2H4",
+            "EMC1|EMC7",
+            "PSMB6|PSMD6",
+            "RPL11|RPL24",
+            "EMC7|SEC22B",
+            "CDK12|GTF2H1",
+            "DDX46|RBM22",
+            "MAT2A|PMVK",
+            "NDUFB2|UQCRB",
+            "CSTF3|SRSF7",
+            "PSMB6|PSMC6",
+            "RFC4|TIMELESS",
+            "CDK12|GTF2H4",
+            "DAP3|MRPS30",
+            "CEP63|TIMELESS",
+            "RPL24|RPL27",
+            "NDUFA8|NDUFB2",
+            "GTPBP4|NOP58",
+            "GTPBP4|TCOF1",
+            "MRPS30|TIMM22",
+            "CEP63|CKAP5",
+            "AFG3L2|LONP1",
+            "SNRPD3|SRSF7",
+            "NOP58|TCOF1",
+            "EMC1|SEC22B",
+            "NDUFA8|UQCRB",
+            "IMPDH2|PFAS",
+            "RPL11|RPL27",
+            "DDX46|SNRPD3",
+            "PSMC6|PSMD6",
+            "DAP3|TIMM22",
+            "AFG3L2|GFER"
+          ]
+        ],
+        "repeat_index": 0,
+        "provider_seed": null,
+        "model": "openai-codex/gpt-5.6-luna",
+        "combinatorial": true,
+        "pair_pool": "shipped",
+        "seconds": 3283.2
+      }
+    ]
+  }
+}

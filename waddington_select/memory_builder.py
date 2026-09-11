@@ -107,7 +107,12 @@ def _load_calibration_performance(
         "drop_anchor_features": True,
         "hit_frequency_only": False,
         "exclude_study": False,
-        "training_csv_override": None,
+        # The gate's job is that this stage was calibrated on the SAME feature/label table that is
+        # active now — not that the table is the frozen benchmark one. Hardcoding None here made the
+        # provenance check unsatisfiable for any isolated superset table (the CRISPRa validation, and
+        # BDA's two other difficulty tiers), which is a configuration the runner explicitly supports.
+        "training_csv_override": os.environ.get("WADDINGTON_TRAINING_CSV"),
+        "training_csv_v3_override": os.environ.get("WADDINGTON_TRAINING_CSV_V3"),
         "reason_from_structure": False,
         "gene_level_audit": True,
         "dump_revealed_hit_genes": True,
@@ -227,7 +232,8 @@ def _legacy_performance_source() -> tuple[dict[str, dict[str, float]], dict]:
 # These are the actual hits - legitimate to use in memory since they were "revealed" in our experiments
 def get_top_hit_genes(dataset_name: str, n: int = 20) -> list[str]:
     import pandas as pd
-    df = pd.read_csv(REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv")
+    from .tables import TRAINING_DATA_CSV
+    df = pd.read_csv(TRAINING_DATA_CSV)
     df["gene"] = df["gene"].str.strip().str.upper()
     sub = df[(df["dataset"] == dataset_name) & (df["label"] == 1)]
     # Return genes with highest PPI scores (most biologically "visible" hits)

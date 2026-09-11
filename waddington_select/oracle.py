@@ -14,13 +14,11 @@ import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-# The ground-truth / feature table. WADDINGTON_TRAINING_CSV overrides it — used by the CRISPRa
-# validation to point every consumer at an isolated superset CSV, so the frozen benchmark file (and
-# its committed results) are never touched.
-TRAINING_DATA_CSV = Path(
-    os.environ.get("WADDINGTON_TRAINING_CSV",
-                   REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv")
-)
+# The ground-truth / feature table. Resolved in tables.py so the oracle and every arm read the SAME
+# file: WADDINGTON_TRAINING_CSV points all of them at an isolated superset CSV (the CRISPRa
+# validation, the difficulty-tier tables) without touching the frozen benchmark file.
+from .tables import TRAINING_DATA_CSV, extra_datasets as _extra_datasets  # noqa: E402
+
 BDA_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
 
 # Batch sizes matching the BDA benchmark convention
@@ -36,10 +34,12 @@ BATCH_SIZES: dict[str, int] = {
     "Replogle_K562_gwps": 128,
 }
 
-# Reason-vs-recall validation screens (Schmidt CRISPRa arm). Registered only when the isolated
-# validation CSV is active, so they never appear as benchmark datasets in normal runs.
-if os.environ.get("WADDINGTON_TRAINING_CSV"):
-    BATCH_SIZES.update({"IL2_crispra": 128, "IFNG_crispra": 128})
+# Screens that exist only inside an isolated superset table: the Schmidt CRISPRa reason-vs-recall
+# arm, and BDA's two-gene combinatorial screen. Registered from WADDINGTON_EXTRA_DATASETS (the
+# CRISPRa pair is still auto-registered when its own validation CSV is the active table), so they
+# never appear as benchmark datasets in a normal run. The old guard fired on ANY table override,
+# which would have raised on every other superset table.
+BATCH_SIZES.update(_extra_datasets())
 
 BENCHMARK_DATASETS = list(BATCH_SIZES.keys())
 

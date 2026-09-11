@@ -30,7 +30,10 @@ from .base import BaseArm
 from ..features import load_training_frame
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+# Resolved centrally (tables.py) so WADDINGTON_TRAINING_CSV moves the arm and the oracle
+# together. Hardcoding it here used to leave the arm selecting from the frozen pool while the
+# oracle scored an overridden one — silently wrong numbers, no error.
+from ..tables import ABSDIFF_SUFFIX, TRAINING_DATA_CSV, with_pair_spread
 
 FEATURE_COLS = [
     "g1_ppi_score",
@@ -81,7 +84,7 @@ class OnlineAdaptiveArm(BaseArm):
         df = load_training_frame(csv_path, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
         all_feats = FEATURE_COLS + (extra_feature_cols or [])
-        self._available_feats = [c for c in all_feats if c in df.columns]
+        self._available_feats = with_pair_spread([c for c in all_feats if c in df.columns], df)
         # Clean-headline variant: drop the anchor-relative features (proximity to the phenotype's seed
         # genes), which the audit flagged as privileged target information (51% of anchors are own-screen
         # hits). Uses no realized labels; removes the leak from the prior AND the online model.
@@ -91,6 +94,7 @@ class OnlineAdaptiveArm(BaseArm):
             os.environ.get("WADDINGTON_DROP_ANCHOR_FEATS") == "1")
         if _drop:
             _ANCHOR_FEATS = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
+            _ANCHOR_FEATS |= {f + ABSDIFF_SUFFIX for f in _ANCHOR_FEATS}  # pair tables: drop the spread too
             self._available_feats = [c for c in self._available_feats if c not in _ANCHOR_FEATS]
 
         # Recurrence-baseline probe: replace the whole feature set with a single cross-screen hit-frequency

@@ -318,6 +318,9 @@ def _protocol_manifest(
         "hit_frequency_only": os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1",
         "exclude_study": os.environ.get("WADDINGTON_EXCLUDE_STUDY") == "1",
         "training_csv_override": os.environ.get("WADDINGTON_TRAINING_CSV"),
+        # v3 (with-DepMap) is overridable too, and most screens route through it, so record it
+        # alongside v1 rather than leaving half the table provenance implicit.
+        "training_csv_v3_override": os.environ.get("WADDINGTON_TRAINING_CSV_V3"),
         "reason_from_structure": os.environ.get("WADDINGTON_REASON_FROM_STRUCTURE") == "1",
         "gene_level_audit": True,
         "dump_revealed_hit_genes": os.environ.get("WADDINGTON_DUMP_SELECTIONS") == "1",

@@ -169,7 +169,8 @@ def load_dataset_hits(dataset_name: str) -> set[str]:
     """All hit genes (label==1) for a dataset — used as the leakage block set for that fold."""
     import pandas as pd
 
-    df = pd.read_csv(REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv")
+    from .tables import TRAINING_DATA_CSV
+    df = pd.read_csv(TRAINING_DATA_CSV)
     df["gene"] = df["gene"].str.strip().str.upper()
     sub = df[(df["dataset"] == dataset_name) & (df["label"] == 1)]
     return set(sub["gene"].tolist())

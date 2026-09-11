@@ -20,7 +20,10 @@ import pandas as pd
 from .base import BaseArm
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+# Resolved centrally (tables.py) so WADDINGTON_TRAINING_CSV moves the arm and the oracle
+# together. Hardcoding it here used to leave the arm selecting from the frozen pool while the
+# oracle scored an overridden one — silently wrong numbers, no error.
+from ..tables import TRAINING_DATA_CSV, with_pair_spread
 
 FEATURE_COLS = [
     "g1_ppi_score",
@@ -63,7 +66,8 @@ class StaticRankerArm(BaseArm):
         df = pd.read_csv(TRAINING_DATA_CSV)
         df["gene"] = df["gene"].str.strip().str.upper()
 
-        available_feats = [c for c in FEATURE_COLS if c in df.columns]
+        available_feats = with_pair_spread(
+            [c for c in FEATURE_COLS if c in df.columns], df)
 
         train_df = df[df["dataset"] != dataset_name]
         test_df = df[df["dataset"] == dataset_name].copy()

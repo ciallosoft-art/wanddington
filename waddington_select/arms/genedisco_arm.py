@@ -33,6 +33,7 @@ from .base import BaseArm
 from .llm_reasoning_arm import FEATURE_COLS, LGBM_PARAMS
 from .waddington_c_arm import _get_feature_config
 from ..features import load_training_frame
+from ..tables import with_pair_spread
 
 ACQUISITIONS = ("topuncertain", "softuncertain", "marginsample", "coreset", "kmeans_data", "random")
 
@@ -59,7 +60,11 @@ class GeneDiscoArm(BaseArm):
         df["gene"] = df["gene"].str.strip().str.upper()
         sub = df[df["dataset"] == dataset_name].reset_index(drop=True)
         self._genes: list[str] = sub["gene"].tolist()
-        feats = [c for c in FEATURE_COLS + (extra_feats or []) if c in sub.columns]
+        # with_pair_spread is a no-op on the single-gene tables; on the combinatorial one it adds the
+        # |x(a)-x(b)| columns, so GeneDisco's acquisition rules see exactly the same representation as
+        # every other arm — which is what makes the comparison a comparison of acquisition strategy.
+        feats = with_pair_spread(
+            [c for c in FEATURE_COLS + (extra_feats or []) if c in sub.columns], sub)
         X = sub[feats].to_numpy(dtype=float)
         # standardise: k-center / k-means distances are scale-sensitive
         mu, sd = X.mean(0), X.std(0)

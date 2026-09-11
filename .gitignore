@@ -97,3 +97,16 @@ docs/*.png
 
 # Session retrospective / PPT plan — working note, not committed
 docs/RETROSPECTIVE_AND_PPT_PLAN.md
+
+# BDA difficulty-tier tables. The two full-pool tables are committed alongside v1/v2/v3 because, like
+# them, they cannot be rebuilt from a fresh clone (the STRING PPI / KEGG / Reactome caches are
+# ignored). The two combinatorial tables are NOT: build_horlbeck_pairs.py regenerates them in seconds,
+# deterministically and offline, from inputs that are committed -- the full-pool tables plus BDA's own
+# ground_truth_Horlbeck.csv / topmovers_Horlbeck.npy -- so 72 MB of derived rows buys nothing.
+workspace/evaluation/lgbm_training_data_horlbeck_pairs.csv
+workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv
+
+# Run logs under results/ are console transcripts, not results (matching the existing 20-rep dirs,
+# which track only .json). The provenance that matters lives in the .manifest.json sidecars.
+workspace/results/**/*.log
+workspace/results/**/*.tmp

@@ -24,8 +24,14 @@ import pandas as pd
 
 from .base import BaseArm
 
+# Max floats materialised at once by the greedy k-center distance step (~64 MB at float32).
+_PAIRWISE_BUDGET = 16_000_000
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TRAINING_DATA_CSV = REPO_ROOT / "workspace" / "evaluation" / "lgbm_training_data.csv"
+# Resolved centrally (tables.py) so WADDINGTON_TRAINING_CSV moves the arm and the oracle
+# together. Hardcoding it here used to leave the arm selecting from the frozen pool while the
+# oracle scored an overridden one — silently wrong numbers, no error.
+from ..tables import TRAINING_DATA_CSV, with_pair_spread
 
 FEATURE_COLS = [
     "g1_ppi_score",
@@ -66,7 +72,7 @@ class CoresetArm(BaseArm):
         sub = df[df["dataset"] == dataset_name].reset_index(drop=True)
         if sub.empty:
             raise RuntimeError(f"Dataset '{dataset_name}' not found")
-        available = [c for c in FEATURE_COLS if c in sub.columns]
+        available = with_pair_spread([c for c in FEATURE_COLS if c in sub.columns], sub)
         X = sub[available].fillna(0.0).values.astype(np.float32)
         return sub["gene"].tolist(), X
 
@@ -96,10 +102,15 @@ class CoresetArm(BaseArm):
         X_sel = X_all[selected_arr]           # (|S|, D)
         X_pool = X_all[unselected_idx]        # (|P|, D)
 
-        # d[j] = min distance from pool point j to any selected point
-        # shape: (|P|, |S|) -> min over S axis
-        diffs = X_pool[:, None, :] - X_sel[None, :, :]   # (|P|, |S|, D)
-        d = np.linalg.norm(diffs, axis=2).min(axis=1)    # (|P|,)
+        # d[j] = min distance from pool point j to any selected point.
+        # Chunked over the pool: the one-shot (|P|, |S|, D) tensor is ~2 GB on the 100k-candidate
+        # combinatorial pool (|P|=1e5, |S|=512 by round 5). Chunking is numerically identical.
+        d = np.empty(len(X_pool), dtype=X_all.dtype)
+        chunk = max(1, _PAIRWISE_BUDGET // max(len(X_sel) * X_all.shape[1], 1))
+        for lo in range(0, len(X_pool), chunk):
+            block = X_pool[lo: lo + chunk]
+            diffs = block[:, None, :] - X_sel[None, :, :]        # (chunk, |S|, D)
+            d[lo: lo + chunk] = np.linalg.norm(diffs, axis=2).min(axis=1)
 
         remaining = list(range(len(unselected_idx)))  # local indices into X_pool
 

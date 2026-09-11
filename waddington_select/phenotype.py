@@ -34,7 +34,7 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVAL_DIR = REPO_ROOT / "workspace" / "evaluation"
-BASE_CSV = EVAL_DIR / "lgbm_training_data_v3.csv"
+from .tables import TRAINING_DATA_V3 as BASE_CSV  # noqa: E402  (override-aware; see tables.py)
 USER_DIR = REPO_ROOT / "workspace" / "data" / "user_phenotypes"
 REGISTRY_PATH = USER_DIR / "registry.json"
 
