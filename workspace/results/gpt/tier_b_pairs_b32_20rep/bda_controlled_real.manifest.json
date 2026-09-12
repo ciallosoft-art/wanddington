@@ -1,11 +1,11 @@
 {
-  "created_utc": "2026-09-11T07:46:41.173586+00:00",
+  "created_utc": "2026-09-12T05:52:26.490414+00:00",
   "protocol": {
     "agent": "BioDiscoveryAgent (no tools)",
     "datasets": [
       "Horlbeck"
     ],
-    "replicates": 3,
+    "replicates": 20,
     "rounds": 5,
     "combinatorial": true,
     "pair_pool": "real",
@@ -17,9 +17,9 @@
   },
   "scientific_inputs": {
     "training_csv": "/home/duanyu/Python/SKILL/waddington/workspace/evaluation/lgbm_training_data_horlbeck_pairs.csv",
-    "training_csv_sha256": "ebfc7edbf801e94f833114ce3e903b219d2dabbf0245e268480517400e31ee10",
+    "training_csv_sha256": "35d95fc98db61d5d919eebf9199483992a1e21ff791eb78e35b7bdb80fd9c604",
     "training_csv_v3": "/home/duanyu/Python/SKILL/waddington/workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv",
-    "training_csv_v3_sha256": "050beae66a0968ad8a16c8b3d153ae158c0d356626b9a697249cabcdec7d31b2"
+    "training_csv_v3_sha256": "34c8b28ebaf33c1cbbfdafca597f53f5d5613efa4eb6e8e2bc5c40d149a27d1a"
   },
   "external_agent": {
     "repo": "/home/duanyu/Python/keypaper/code/BioDiscoveryAgent",
