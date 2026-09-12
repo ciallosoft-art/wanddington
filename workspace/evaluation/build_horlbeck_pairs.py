@@ -67,6 +67,7 @@ BDA_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
 GROUND_TRUTH = BDA_DIR / "ground_truth_Horlbeck.csv"
 TOPMOVERS = BDA_DIR / "topmovers_Horlbeck.npy"
 
+INTERACTION_CSV = HERE / "pair_interaction_features.csv"
 TIER_A_V1 = HERE / "lgbm_training_data_tier_a.csv"
 TIER_A_V3 = HERE / "lgbm_training_data_tier_a_v3.csv"
 OUT_V1 = HERE / "lgbm_training_data_horlbeck_pairs.csv"
@@ -137,12 +138,38 @@ def build(tier_a_csv: Path, out_csv: Path) -> pd.DataFrame:
     pair_df["label"] = [labels[t] for t in tokens]
     pair_df["dataset"] = DATASET
 
+    # Genuine interaction features, if they have been built. These are the only columns here that a
+    # symmetric function of the two marginals cannot produce, and the diagnosis says they are the ones
+    # that matter: ranking the pool by them alone puts 182 hits in the top 640 against 63 for random
+    # and 113 for the full C-arm on mean+spread features.
+    inter_cols: list[str] = []
+    if INTERACTION_CSV.exists():
+        inter = pd.read_csv(INTERACTION_CSV)
+        inter_cols = [c for c in inter.columns if c != "gene"]
+        pair_df = pair_df.merge(inter, on="gene", how="left")
+        missing = pair_df[inter_cols].isna().any(axis=1).sum()
+        pair_df[inter_cols] = pair_df[inter_cols].fillna(0.0)
+        print(f"  interaction features: {len(inter_cols)} columns"
+              f"{f' ({missing} pairs unmatched -> 0)' if missing else ''}")
+    else:
+        print(f"  [NOTE] {INTERACTION_CSV.name} missing — build it with "
+              f"build_pair_interaction_features.py; pairs will carry no interaction features")
+
     # The nine single-gene screens as degenerate pairs (a = b): spread is 0 by construction.
     single = base.copy()
     for c in feature_cols:
         single[c + ABSDIFF_SUFFIX] = 0.0
+    # A single-gene screen contains no pair interactions, so these are 0 for the degenerate rows --
+    # NOT the self-value (r = 1, every pathway shared), which would be a constant the model could only
+    # learn as "this row is training data". The consequence is stated plainly: the cross-experiment
+    # prior cannot use them at all; only the online model, retraining on pairs revealed inside the
+    # screen, can. That is the falsifiable prediction -- online_adaptive should gain, static_ranker
+    # should not.
+    for c in inter_cols:
+        single[c] = 0.0
 
-    cols = ["gene"] + feature_cols + [c + ABSDIFF_SUFFIX for c in feature_cols] + ["label", "dataset"]
+    cols = (["gene"] + feature_cols + [c + ABSDIFF_SUFFIX for c in feature_cols]
+            + inter_cols + ["label", "dataset"])
     out = pd.concat([single[cols], pair_df[cols]], ignore_index=True)
     if out.isna().any().any():
         raise RuntimeError(f"NaNs in the pair table: "

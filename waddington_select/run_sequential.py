@@ -85,6 +85,7 @@ from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm, WaddingtonCLinearArm
 from .arms.waddington_c_ensemble_arm import WaddingtonCEnsembleArm
+from .arms.waddington_c_pair_arm import WaddingtonCPairArm
 from .arms.genedisco_arm import GeneDiscoArm, ACQUISITIONS as _GD_ACQ
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -96,6 +97,7 @@ _PAPER_ARMS = {
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
+    "waddington_c_pair",
 } | {f"genedisco_{a}" for a in _GD_ACQ}
 
 
@@ -137,6 +139,8 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(WaddingtonCPoolOnlyArm(dataset_name, bs))
         elif name == "waddington_c_linear":
             arms.append(WaddingtonCLinearArm(dataset_name, bs))
+        elif name == "waddington_c_pair":
+            arms.append(WaddingtonCPairArm(dataset_name, bs))
         elif name == "waddington_c_ensemble":
             arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
         elif name.startswith("genedisco_"):

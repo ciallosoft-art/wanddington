@@ -72,13 +72,30 @@ def split_pair(token: str) -> tuple[str, str]:
 # "<feat>_absdiff" companion holds |x(a)-x(b)|, the within-pair spread. Single-gene tables have no
 # _absdiff columns, so this helper is a strict no-op on every existing run.
 ABSDIFF_SUFFIX = "_absdiff"
+# True interaction features x(g_a, g_b) -- co-essentiality, co-pathway, the STRING a--b edge. Unlike
+# the mean and the spread, these are NOT symmetric functions of the two marginals, which is what a
+# genetic interaction (deviation from the additive expectation) actually requires. Built by
+# workspace/evaluation/build_pair_interaction_features.py; absent from every single-gene table, so
+# picking them up by prefix is a no-op there.
+INTERACTION_PREFIX = "pair_"
 
 
-def with_pair_spread(feats: list[str], df: pd.DataFrame) -> list[str]:
-    """Append the |x(a)-x(b)| companion of each feature, where the table provides one."""
-    return list(feats) + [
+def with_pair_features(feats: list[str], df: pd.DataFrame) -> list[str]:
+    """Extend a single-gene feature list with everything a pair table additionally provides.
+
+    Two kinds are added: the |x(a)-x(b)| companion of each base feature, and any interaction column.
+    On a single-gene table neither exists, so the result is the input unchanged.
+    """
+    out = list(feats) + [
         f"{c}{ABSDIFF_SUFFIX}" for c in feats if f"{c}{ABSDIFF_SUFFIX}" in df.columns
     ]
+    out += [c for c in df.columns
+            if c.startswith(INTERACTION_PREFIX) and c not in out]
+    return out
+
+
+# Historical name, kept so nothing breaks mid-refactor.
+with_pair_spread = with_pair_features
 
 
 # ── Extra screens the oracle should serve ───────────────────────────────────────────────────────

@@ -110,3 +110,9 @@ workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv
 # which track only .json). The provenance that matters lives in the .manifest.json sidecars.
 workspace/results/**/*.log
 workspace/results/**/*.tmp
+
+# Fetch caches for the combinatorial interaction features, ignored like every other API cache here
+# (_kegg_cache, _reactome_cache, _ppi_cache). The artifact that matters -- and the one that lets the
+# pair tables be rebuilt offline -- is the derived pair_interaction_features.csv, which IS committed.
+workspace/evaluation/_reactome_id_cache/
+workspace/evaluation/_string_pair_cache/
