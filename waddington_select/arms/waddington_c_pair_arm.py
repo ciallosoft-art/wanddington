@@ -53,7 +53,7 @@ import pandas as pd
 
 from .waddington_c_arm import WaddingtonCArm, _get_feature_config, _named_only_llm_vote
 from ..features import load_training_frame
-from ..tables import INTERACTION_PREFIX
+from ..tables import INTERACTION_PREFIX, split_pair
 
 
 def _flag(name: str, default: str = "1") -> bool:
@@ -71,6 +71,7 @@ class WaddingtonCPairArm(WaddingtonCArm):
         # Opt-in: existing results stay reproducible with it off.
         self._cold_start = _flag("WADDINGTON_PAIR_COLD_START", "0")
         self._complex_first = _flag("WADDINGTON_PAIR_COMPLEX_FIRST", "0")
+        self._explore_frac = float(os.environ.get("WADDINGTON_PAIR_EXPLORE_FRAC", "0"))
         self._complex: set[str] = set()
         if self._complex_first:
             self._complex = self._load_complex_pairs(dataset_name)
@@ -106,6 +107,46 @@ class WaddingtonCPairArm(WaddingtonCArm):
             return set()
         return set(sub.loc[sub[col] > 0, "gene"].tolist())
 
+    def _explore_picks(self, pool: list[str], exclude: set[str], n: int,
+                       score: dict[str, float] | None = None) -> list[str]:
+        """n pairs chosen for coverage: the best-scoring pair containing the least-sampled gene.
+
+        Not random exploration -- the prior still orders the candidates, coverage only decides which
+        gene to look at next. Selection is otherwise very redundant: round 1 touches 47 of 449 genes,
+        five rounds reach 61%, and the most-sampled gene appears 31 times against 2.9 under uniform
+        sampling, so the online model sees a narrow slice of the feature space.
+        """
+        from collections import Counter
+        counts: Counter = Counter()
+        for tok in self._selected:
+            for g in split_pair(tok):
+                counts[g] += 1
+        rank = score if score is not None else self._prior
+        by_gene: dict[str, list[str]] = {}
+        for tok in pool:
+            if tok in exclude:
+                continue
+            for g in split_pair(tok):
+                by_gene.setdefault(g, []).append(tok)
+        for lst in by_gene.values():
+            lst.sort(key=lambda t: rank.get(t, 0.0), reverse=True)
+        picked: list[str] = []
+        taken: set[str] = set()
+        while len(picked) < n and by_gene:
+            gene = min(by_gene, key=lambda g: (counts[g], -len(by_gene[g])))
+            lst = by_gene[gene]
+            while lst and lst[0] in taken:
+                lst.pop(0)
+            if not lst:
+                del by_gene[gene]
+                continue
+            tok = lst.pop(0)
+            picked.append(tok)
+            taken.add(tok)
+            for g in split_pair(tok):
+                counts[g] += 1
+        return picked
+
     def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         ml_scores = self._online.all_scores()
         padded = set(self._llm.select(round_idx, revealed))
@@ -115,6 +156,7 @@ class WaddingtonCPairArm(WaddingtonCArm):
         llm_set = named if _named_only_llm_vote() else padded
 
         pool = [g for g in self._online._genes if g not in self._selected]
+        n_explore = int(round(self.batch_size * self._explore_frac))
 
         def _take(order: list[str], batch: list[str]) -> list[str]:
             """Complex-sharing candidates first, then the given order."""
@@ -129,7 +171,11 @@ class WaddingtonCPairArm(WaddingtonCArm):
             # Cold start: no feedback exists yet, so neither the LLM nor the online model has anything
             # this screen has taught it. Rank on the one source that is informative from the outset.
             order = sorted(pool, key=lambda g: self._prior.get(g, 0.0), reverse=True)
-            return _take(order, [])
+            batch = _take(order, [])
+            if n_explore:
+                keep = batch[: self.batch_size - n_explore]
+                batch = keep + self._explore_picks(pool, set(keep), n_explore)
+            return batch[: self.batch_size]
 
         def fill_score(g: str) -> float:
             ml = ml_scores.get(g, 0.0)
@@ -144,6 +190,10 @@ class WaddingtonCPairArm(WaddingtonCArm):
             named = sorted((g for g in pool if g in llm_set), key=fill_score, reverse=True)
             rest = sorted((g for g in pool if g not in llm_set), key=fill_score, reverse=True)
             batch = _take(named + rest, [])
+            if n_explore:
+                keep = batch[: self.batch_size - n_explore]
+                scores = {g: fill_score(g) for g in pool}
+                batch = keep + self._explore_picks(pool, set(keep), n_explore, scores)
         else:
             combined = {g: self._w_ml * fill_score(g) + self._w_llm * (1.0 if g in llm_set else 0.0)
                         for g in pool}

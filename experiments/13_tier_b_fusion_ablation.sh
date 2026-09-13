@@ -36,10 +36,11 @@ export PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS
 export WADDINGTON_PARALLEL="${WADDINGTON_PARALLEL:-4}"
 mkdir -p "$R"
 
-run () {   # label  named_first  prior_fill  [cold_start]  [complex_first]
-  echo "### $1  (nf=$2 pf=$3 cs=${4:-0} cx=${5:-0})  $(date '+%m-%d %H:%M')"
+run () {   # label  named_first  prior_fill  [cold_start] [complex_first] [explore_frac]
+  echo "### $1  (nf=$2 pf=$3 cs=${4:-0} cx=${5:-0} ex=${6:-0})  $(date '+%m-%d %H:%M')"
   env WADDINGTON_PAIR_NAMED_FIRST="$2" WADDINGTON_PAIR_PRIOR_FILL="$3" \
       WADDINGTON_PAIR_COLD_START="${4:-0}" WADDINGTON_PAIR_COMPLEX_FIRST="${5:-0}" \
+      WADDINGTON_PAIR_EXPLORE_FRAC="${6:-0}" \
     conda run -n waddington-bio python3 -m waddington_select --arms waddington_c_pair \
       --datasets Horlbeck --replicates "$REPS" --seed-mode local --rounds 5 --resume \
       --out "$R/pair_$1.json"
@@ -57,4 +58,10 @@ run complex_first    1 1 1 1
 # complex_first would otherwise differ from them by two things at once (the extra column in the
 # feature table AND the ordering rule). This rerun isolates the ordering.
 run coldstart_prior_v8 1 1 1 0
+# Explore/exploit. Selection is heavily redundant: round 1 touches 47 of 449 genes, five rounds reach
+# 61%, the most-sampled gene appears 31 times against 2.9 under uniform sampling -- so the online model
+# trains on a narrow slice, and its learning curve is far from saturated. Spend part of each batch on
+# the best pair containing the least-sampled gene and see whether better rounds 3-5 repay round 1.
+run explore_12pct    1 1 1 0 0.125
+run explore_25pct    1 1 1 0 0.25
 echo "### ABLATION DONE $(date '+%m-%d %H:%M')"
