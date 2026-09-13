@@ -75,7 +75,7 @@ DEPMAP_CSV = REPO_ROOT / "workspace" / "data" / "depmap" / "CRISPRGeneEffect.csv
 KEGG_CACHE = HERE / "_kegg_cache"
 ARCHS4_CACHE = HERE / "_archs4_cache"
 REACTOME_ID_CACHE = HERE / "_reactome_id_cache"      # pathway IDs (the old cache stores only counts)
-STRING_CACHE = HERE / "_string_pair_cache" / "horlbeck_network.tsv"
+STRING_CACHE_DIR = HERE / "_string_pair_cache"
 OUT_CSV = HERE / "pair_interaction_features.csv"
 
 FEATURES = ["pair_coessential", "pair_kegg_shared", "pair_kegg_jaccard",
@@ -90,6 +90,13 @@ def horlbeck_pairs() -> tuple[list[tuple[str, str]], list[str]]:
     gt = pd.read_csv(BDA_DIR / "ground_truth_Horlbeck.csv")
     raw = [ast.literal_eval(s) for s in gt["Gene_pairs"]]
     key = [tuple(sorted((a.upper(), b.upper()))) for a, b in raw]
+    return key, sorted({g for k in key for g in k})
+
+
+def pairs_from_csv(path: Path) -> tuple[list[tuple[str, str]], list[str]]:
+    """Any screen with a `pair` column of "A|B" tokens -- used for the Norman transfer set."""
+    df = pd.read_csv(path)
+    key = [tuple(sorted(t.upper().split("|"))) for t in df["pair"]]
     return key, sorted({g for k in key for g in k})
 
 
@@ -169,7 +176,8 @@ def reactome_sets(genes: list[str], offline: bool) -> dict[str, set]:
 
 # ── STRING direct edges ─────────────────────────────────────────────────────────────────────────
 
-def string_edges(genes: list[str], offline: bool) -> dict[tuple[str, str], float]:
+def string_edges(genes: list[str], offline: bool, tag: str = "horlbeck") -> dict[tuple[str, str], float]:
+    STRING_CACHE = STRING_CACHE_DIR / f"{tag}_network.tsv"
     if not STRING_CACHE.exists() and not offline:
         STRING_CACHE.parent.mkdir(parents=True, exist_ok=True)
         print(f"  STRING: fetching the induced network over {len(genes)} genes")
@@ -214,15 +222,17 @@ def complex_membership(genes: list[str], offline: bool) -> dict[str, set[int]]:
     if not COMPLEX_TSV.exists():
         print(f"  [NOTE] {COMPLEX_TSV.name} missing — complex co-membership will be 0 for every pair")
         return {}
-    if UNIPROT_MAP.exists():
-        u2g = json.loads(UNIPROT_MAP.read_text())
-    elif offline:
-        print("  [--offline] no UniProt map cached — complex co-membership will be 0")
-        return {}
-    else:
-        u2g = {}
-        for i in range(0, len(genes), 200):
-            chunk = genes[i: i + 200]
+    # The map is keyed by accession, so a cache built for one screen silently covers none of another
+    # screen's genes and every pair comes out 0. Top it up for whatever is missing instead.
+    u2g = json.loads(UNIPROT_MAP.read_text()) if UNIPROT_MAP.exists() else {}
+    have = set(u2g.values())
+    missing = [g for g in genes if g not in have]
+    if missing and offline:
+        print(f"  [--offline] {len(missing)}/{len(genes)} genes unmapped — their pairs will read 0")
+    elif missing:
+        print(f"  UniProt: fetching {len(missing)} unmapped genes")
+        for i in range(0, len(missing), 200):
+            chunk = missing[i: i + 200]
             body = json.dumps({"q": chunk, "scopes": "symbol",
                                "fields": "uniprot.Swiss-Prot", "species": "human"}).encode()
             req = urllib.request.Request("https://mygene.info/v3/query", data=body,
@@ -252,7 +262,9 @@ def complex_membership(genes: list[str], offline: bool) -> dict[str, set[int]]:
         for g in sym:
             member.setdefault(g, set()).add(n)
         n += 1
-    print(f"  Complex Portal: {n} complexes with >=2 of these genes, covering {len(member)}/{len(genes)}")
+    covered = len(set(member) & set(genes))
+    print(f"  Complex Portal: {n} complexes with >=2 annotated genes, covering {covered}/{len(genes)} "
+          f"of this screen")
     return member
 
 
@@ -269,15 +281,20 @@ def archs4_pairs(genes: list[str]) -> dict[str, dict[str, float]]:
     return out
 
 
-def main(offline: bool = False) -> None:
-    key, genes = horlbeck_pairs()
-    print(f"Horlbeck: {len(key)} pairs over {len(genes)} genes\n")
+def main(offline: bool = False, pairs_csv: str | None = None,
+         out: str | None = None, tag: str = "horlbeck") -> None:
+    if pairs_csv:
+        key, genes = pairs_from_csv(Path(pairs_csv))
+    else:
+        key, genes = horlbeck_pairs()
+    out_csv = Path(out) if out else OUT_CSV
+    print(f"{tag}: {len(key)} pairs over {len(genes)} genes\n")
 
     print("DepMap co-essentiality")
     C, idx = coessentiality(genes)["__matrix__"]
     print("\nKEGG");     kegg = kegg_sets(genes, offline)
     print("\nReactome"); reac = reactome_sets(genes, offline)
-    print("\nSTRING");   edges = string_edges(genes, offline)
+    print("\nSTRING");   edges = string_edges(genes, offline, tag=tag)
     print("\nARCHS4");   a4 = archs4_pairs(genes)
     print("\nComplex Portal"); cx = complex_membership(genes, offline)
 
@@ -303,15 +320,18 @@ def main(offline: bool = False) -> None:
             "pair_archs4_coexpr": round(coexpr, 5),
             "pair_complex_shared": len(cx.get(a, set()) & cx.get(b, set())),
         })
-    out = pd.DataFrame(rows)
-    out.to_csv(OUT_CSV, index=False)
-    print(f"wrote {OUT_CSV.name}: {len(out)} pairs x {len(FEATURES)} features")
+    out_df = pd.DataFrame(rows)
+    out_df.to_csv(out_csv, index=False)
+    print(f"wrote {out_csv.name}: {len(out_df)} pairs x {len(FEATURES)} features")
     print("\nnon-zero coverage:")
     for c in FEATURES:
-        print(f"  {c:24s} {100 * (out[c] != 0).mean():6.2f}%   std={out[c].std():.4f}")
+        print(f"  {c:24s} {100 * (out_df[c] != 0).mean():6.2f}%   std={out_df[c].std():.4f}")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--offline", action="store_true", help="use only what is already cached")
+    ap.add_argument("--pairs-csv", default=None, help="CSV with a `pair` column of A|B tokens")
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--tag", default="horlbeck", help="names the STRING network cache")
     main(**vars(ap.parse_args()))

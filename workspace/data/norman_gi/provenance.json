@@ -1,0 +1,12 @@
+{
+  "source_h5ad": "/home/duanyu/Python/Myproject/GEARS (\u526f\u672c)/data/norman/perturb_processed.h5ad",
+  "cells": 91205,
+  "measured_genes": 5045,
+  "cell_type": [
+    "A549"
+  ],
+  "phenotype": "delta_P = mean(cells of P) - mean(control cells), over all measured genes",
+  "gi_score": "||delta_AB|| - ||delta_A + delta_B||  (signed; <0 buffering, >0 synergy)",
+  "hit_rule": "two-tailed, most extreme 5% per tail by signed gi_score",
+  "note": "phenotype and hit rule are ours, not from BioDiscoveryAgent; Norman is CRISPRa while Horlbeck is CRISPRi, and the two gene sets are disjoint"
+}
