@@ -63,6 +63,10 @@ same twenty evaluation replicates, same six arms, same task prompts — so the t
 | harder *(headline)* | 1 gene, CEGv2-filtered pool | `lgbm_training_data{,_v3}.csv` | `05_gpt_luna_20repeat.sh` | `gpt/gpt_5_6_luna_none_20rep/` |
 | hardest | 2 genes, Horlbeck GI map | `lgbm_training_data_horlbeck_pairs{,_v3}.csv` | `09_tier_b_pairs.sh` | `gpt/tier_b_pairs_20rep/` |
 
+The combinatorial tier is where the reported C-arm fails (112.6 hits at 640 picks, below its own
+padded-LLM baseline) and where the diagnosis and repair in scripts 12-13 take it to 220.9. See the
+paper's "Diagnosing and repairing the combinatorial failure".
+
 Build the tables first (both builders self-verify against the frozen benchmark and refuse to write a
 table that does not reproduce it):
 
@@ -73,6 +77,29 @@ bash experiments/08_tier_a_full_pool.sh
 bash experiments/09_tier_b_pairs.sh        # reuses experiment 08's memory
 conda run -n waddington-bio python3 workspace/evaluation/summarize_tiers.py
 ```
+
+### External baselines and the combinatorial repair (scripts 10-14)
+
+| Script | What it runs |
+|---|---|
+| `10_tiers_genedisco.sh` | GeneDisco's acquisition functions on the tier tables. Forced sequential: `WADDINGTON_PARALLEL>=2` deadlocks the `kmeans_data` arm (sklearn's KMeans spawns its own threads inside the harness's ThreadPoolExecutor — 33 threads, no progress). |
+| `11_tiers_bda.sh` | BioDiscoveryAgent's own agent, scored by our oracle. Two-gene runs twice: `--pair-pool real` injects Horlbeck's actual 449-gene library, `shipped` keeps the released 124-gene one. |
+| `12_tier_b_interaction.sh` | Combinatorial tier with genuine interaction features `x(g_a, g_b)`. |
+| `13_tier_b_fusion_ablation.sh` | The fusion repair, one switch at a time: named-first, interaction-prior fill, round-1 cold start, complex-first, explore quota. Takes `[replicates] [batch]`; pass `32` for BDA's own protocol. |
+| `14_bda_pairs_20rep.sh` | Raises the BDA two-gene baseline to twenty replicates. |
+
+Feature and label builders these depend on:
+
+```bash
+conda run -n waddington-bio python3 workspace/evaluation/build_pair_interaction_features.py   # 8 interaction features
+conda run -n waddington-bio python3 workspace/evaluation/build_norman_gi.py                   # second GI screen
+conda run -n waddington-bio python3 workspace/evaluation/run_bda_controlled.py --help         # the BDA harness
+```
+
+> **The pair feature table has three generations** and results are not comparable across them:
+> no interaction features, seven of them, and eight (after adding complex co-membership). Each result
+> file's `runtime_fingerprint` records which one it used; the provenance guard refuses to resume across
+> a change, which is what forced the matched controls in the ablation. Check before comparing two rows.
 
 No arm code is tier-specific. A tier is selected entirely by `WADDINGTON_TRAINING_CSV`,
 `WADDINGTON_TRAINING_CSV_V3` and `WADDINGTON_EXTRA_DATASETS`, which every consumer now reads from
