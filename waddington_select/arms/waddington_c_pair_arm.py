@@ -26,6 +26,19 @@ them. This arm changes only how the two branches are combined -- not the branche
                 the pair_* columns) blended with the online ML score, rather than by the ML score
                 alone. Ranking the pool by that prior alone puts 182 hits in the top 640 against 117
                 for the online model, so it is the better source for the slots the LLM cannot fill.
+  complex_first the 445 pairs whose two genes share an EBI Complex Portal complex are taken ahead of
+                everything else. They hit at 34.4%, the highest precision of any signal measured here
+                -- above the LLM's own 32.9% per pick -- because two subunits of one complex is the
+                textbook buffering interaction. Coverage is only 0.44%, so it cannot fill a budget on
+                its own, and folding it into the rank sum dilutes it (196 hits in the top 640 against
+                216 when taken first). Same lesson as named-first: a high-precision, low-coverage
+                signal belongs in the ordering, not in a weighted sum.
+  cold_start    round 1 ranks by the interaction prior ALONE, and named-first begins at round 2.
+                Per-round measurement showed the LLM is the weaker source before it has seen any
+                feedback: round 1 hits at 22.9% where the prior's own top 128 hits at 28.9%, and the
+                LLM only overtakes it from round 3 (34%). Round 1 is also the round where the online
+                branch knows nothing, so blending it in would only add noise -- hence the prior alone
+                rather than the usual fill score.
 
 Both are on by default here and individually switchable, so their contributions can be attributed.
 The reported C-arm is untouched.
@@ -55,6 +68,12 @@ class WaddingtonCPairArm(WaddingtonCArm):
         super().__init__(dataset_name, batch_size, **kwargs)
         self._named_first = _flag("WADDINGTON_PAIR_NAMED_FIRST")
         self._prior_fill = _flag("WADDINGTON_PAIR_PRIOR_FILL")
+        # Opt-in: existing results stay reproducible with it off.
+        self._cold_start = _flag("WADDINGTON_PAIR_COLD_START", "0")
+        self._complex_first = _flag("WADDINGTON_PAIR_COMPLEX_FIRST", "0")
+        self._complex: set[str] = set()
+        if self._complex_first:
+            self._complex = self._load_complex_pairs(dataset_name)
         self._prior = self._build_interaction_prior(dataset_name) if self._prior_fill else {}
 
     def _build_interaction_prior(self, dataset_name: str) -> dict[str, float]:
@@ -76,6 +95,17 @@ class WaddingtonCPairArm(WaddingtonCArm):
         z /= max(len(cols), 1)
         return dict(zip(sub["gene"].tolist(), z.tolist()))
 
+    def _load_complex_pairs(self, dataset_name: str) -> set[str]:
+        """Candidates whose two genes share a curated complex. Label-free."""
+        csv, _ = _get_feature_config(dataset_name)
+        df = load_training_frame(csv, dataset_name)
+        df["gene"] = df["gene"].str.strip().str.upper()
+        sub = df[df["dataset"] == dataset_name]
+        col = "pair_complex_shared"
+        if col not in sub.columns:
+            return set()
+        return set(sub.loc[sub[col] > 0, "gene"].tolist())
+
     def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
         ml_scores = self._online.all_scores()
         padded = set(self._llm.select(round_idx, revealed))
@@ -86,6 +116,21 @@ class WaddingtonCPairArm(WaddingtonCArm):
 
         pool = [g for g in self._online._genes if g not in self._selected]
 
+        def _take(order: list[str], batch: list[str]) -> list[str]:
+            """Complex-sharing candidates first, then the given order."""
+            if not self._complex_first or not self._complex:
+                return (batch + order)[: self.batch_size]
+            seen = set(batch)
+            head = [g for g in order if g in self._complex and g not in seen]
+            tail = [g for g in order if g not in self._complex and g not in seen]
+            return (batch + head + tail)[: self.batch_size]
+
+        if self._cold_start and round_idx == 0 and self._prior:
+            # Cold start: no feedback exists yet, so neither the LLM nor the online model has anything
+            # this screen has taught it. Rank on the one source that is informative from the outset.
+            order = sorted(pool, key=lambda g: self._prior.get(g, 0.0), reverse=True)
+            return _take(order, [])
+
         def fill_score(g: str) -> float:
             ml = ml_scores.get(g, 0.0)
             if not self._prior_fill or not self._prior:
@@ -94,12 +139,11 @@ class WaddingtonCPairArm(WaddingtonCArm):
             return 0.5 * ml + 0.5 * self._prior.get(g, 0.0)
 
         if self._named_first:
-            head = sorted((g for g in pool if g in llm_set), key=fill_score, reverse=True)
-            batch = head[: self.batch_size]
-            if len(batch) < self.batch_size:
-                seen = set(batch)
-                tail = sorted((g for g in pool if g not in seen), key=fill_score, reverse=True)
-                batch += tail[: self.batch_size - len(batch)]
+            # Complex-sharing pairs outrank even the LLM: 34.4% vs its 32.9% per pick, and unlike the
+            # LLM this source never runs out mid-campaign because it is fixed in advance.
+            named = sorted((g for g in pool if g in llm_set), key=fill_score, reverse=True)
+            rest = sorted((g for g in pool if g not in llm_set), key=fill_score, reverse=True)
+            batch = _take(named + rest, [])
         else:
             combined = {g: self._w_ml * fill_score(g) + self._w_llm * (1.0 if g in llm_set else 0.0)
                         for g in pool}

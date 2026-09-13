@@ -24,6 +24,16 @@ say that directly, and each is a property of the PAIR that cannot be recovered f
   pair_reactome_shared  the same over Reactome pathway IDs
   pair_string_edge      STRING combined score of the direct a--b edge, 0 when no edge is reported
   pair_archs4_coexpr    ARCHS4 co-expression of b with a, where the cached top-200 list covers it
+  pair_complex_shared   number of EBI Complex Portal complexes both genes belong to. Very low coverage
+                        (0.44% of pairs) but the highest precision of any single signal measured here:
+                        those 445 pairs hit at 34.4%, 3.47x the 9.90% base rate and above even the
+                        LLM's per-pick rate. Two subunits of one complex is the textbook buffering
+                        interaction -- knocking out either already breaks the complex, so the second
+                        knockout adds little. Because of that precision/coverage shape it is meant to
+                        be consumed as a selection priority rather than as one more term in a rank
+                        sum: ranking with it as an 8th equal-weight feature gives 196 hits in the top
+                        640, while taking those 445 pairs first and filling the rest from the prior
+                        gives 216 (against 182 without it).
 
 A note on what this can and cannot fix
 --------------------------------------
@@ -70,7 +80,10 @@ OUT_CSV = HERE / "pair_interaction_features.csv"
 
 FEATURES = ["pair_coessential", "pair_kegg_shared", "pair_kegg_jaccard",
             "pair_reactome_shared", "pair_reactome_jaccard", "pair_string_edge",
-            "pair_archs4_coexpr"]
+            "pair_archs4_coexpr", "pair_complex_shared"]
+
+COMPLEX_TSV = REPO_ROOT / "workspace" / "data" / "complexes" / "complexportal_9606.tsv"
+UNIPROT_MAP = REPO_ROOT / "workspace" / "data" / "complexes" / "uniprot_to_symbol.json"
 
 
 def horlbeck_pairs() -> tuple[list[tuple[str, str]], list[str]]:
@@ -190,6 +203,59 @@ def string_edges(genes: list[str], offline: bool) -> dict[tuple[str, str], float
     return edges
 
 
+def complex_membership(genes: list[str], offline: bool) -> dict[str, set[int]]:
+    """{GENE: set of complex indices}, from EBI Complex Portal.
+
+    CORUM would be the conventional source but its host currently serves a certificate its own chain
+    cannot validate; Complex Portal is the same kind of curated assembly data over a working endpoint.
+    Members are listed as UniProt accessions, so we map our gene symbols to UniProt once (449 symbols,
+    one batched MyGene call) rather than mapping thousands of accessions the other way.
+    """
+    if not COMPLEX_TSV.exists():
+        print(f"  [NOTE] {COMPLEX_TSV.name} missing — complex co-membership will be 0 for every pair")
+        return {}
+    if UNIPROT_MAP.exists():
+        u2g = json.loads(UNIPROT_MAP.read_text())
+    elif offline:
+        print("  [--offline] no UniProt map cached — complex co-membership will be 0")
+        return {}
+    else:
+        u2g = {}
+        for i in range(0, len(genes), 200):
+            chunk = genes[i: i + 200]
+            body = json.dumps({"q": chunk, "scopes": "symbol",
+                               "fields": "uniprot.Swiss-Prot", "species": "human"}).encode()
+            req = urllib.request.Request("https://mygene.info/v3/query", data=body,
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            try:
+                for h in json.loads(urllib.request.urlopen(req, timeout=60).read()):
+                    up = h.get("uniprot", {}).get("Swiss-Prot")
+                    if isinstance(up, str):
+                        up = [up]
+                    for acc in (up or []):
+                        u2g[acc] = h.get("query", "").upper()
+            except Exception as exc:
+                print(f"    [WARN] UniProt mapping error: {exc}")
+            time.sleep(0.5)
+        UNIPROT_MAP.parent.mkdir(parents=True, exist_ok=True)
+        UNIPROT_MAP.write_text(json.dumps(u2g))
+
+    member: dict[str, set[int]] = {}
+    n = 0
+    for line in COMPLEX_TSV.read_text().split("\n")[1:]:
+        f = line.split("\t")
+        if len(f) < 5:
+            continue
+        sym = {u2g[m.split("(")[0]] for m in f[4].split("|") if m.split("(")[0] in u2g}
+        if len(sym) < 2:
+            continue
+        for g in sym:
+            member.setdefault(g, set()).add(n)
+        n += 1
+    print(f"  Complex Portal: {n} complexes with >=2 of these genes, covering {len(member)}/{len(genes)}")
+    return member
+
+
 def archs4_pairs(genes: list[str]) -> dict[str, dict[str, float]]:
     out = {}
     for g in genes:
@@ -213,6 +279,7 @@ def main(offline: bool = False) -> None:
     print("\nReactome"); reac = reactome_sets(genes, offline)
     print("\nSTRING");   edges = string_edges(genes, offline)
     print("\nARCHS4");   a4 = archs4_pairs(genes)
+    print("\nComplex Portal"); cx = complex_membership(genes, offline)
 
     print("\nAssembling ...")
     rows = []
@@ -220,11 +287,11 @@ def main(offline: bool = False) -> None:
         co = float(C[idx[a], idx[b]]) if a in idx and b in idx else 0.0
         ka, kb = kegg.get(a, set()), kegg.get(b, set())
         ra, rb = reac.get(a, set()), reac.get(b, set())
-        cx = 0.0
+        coexpr = 0.0
         if a in a4 and b in a4[a]:
-            cx = float(a4[a][b])
+            coexpr = float(a4[a][b])
         elif b in a4 and a in a4[b]:
-            cx = float(a4[b][a])
+            coexpr = float(a4[b][a])
         rows.append({
             "gene": pair_token(a, b),
             "pair_coessential": round(co, 5),
@@ -233,7 +300,8 @@ def main(offline: bool = False) -> None:
             "pair_reactome_shared": len(ra & rb),
             "pair_reactome_jaccard": round(len(ra & rb) / max(len(ra | rb), 1), 5),
             "pair_string_edge": round(edges.get((a, b), 0.0), 4),
-            "pair_archs4_coexpr": round(cx, 5),
+            "pair_archs4_coexpr": round(coexpr, 5),
+            "pair_complex_shared": len(cx.get(a, set()) & cx.get(b, set())),
         })
     out = pd.DataFrame(rows)
     out.to_csv(OUT_CSV, index=False)
