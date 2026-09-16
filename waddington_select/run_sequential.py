@@ -51,6 +51,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 from .oracle import BENCHMARK_DATASETS, BATCH_SIZES, TRAINING_DATA_CSV, DatasetOracle
 from .sequential_runner import RunResult, SequentialRunner
+from .config import task_prompt_protocol
+from .skills import SKILL_LIBRARY_PATH
+from .tables import PAIR_DATASETS
 
 # ── Paper arms ──────────────────────────────────────────────────────────────
 from .arms.random_arm import RandomArm
@@ -85,7 +88,7 @@ from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm, WaddingtonCLinearArm
 from .arms.waddington_c_ensemble_arm import WaddingtonCEnsembleArm
-from .arms.waddington_c_pair_arm import WaddingtonCPairArm
+from .arms.waddington_c_pair_arm import WaddingtonCPairArm, pair_selection_config
 from .arms.genedisco_arm import GeneDiscoArm, ACQUISITIONS as _GD_ACQ
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -253,6 +256,26 @@ def _runtime_fingerprint() -> dict:
     return {"sha256": aggregate, **payload}
 
 
+def _selection_config(datasets: list[str], arm_names: list[str]) -> dict:
+    """Selection settings not covered by code/data hashes, resolved exactly as the arms use them.
+
+    Hash skills only for arms that load them. Building an optional skill library between calibration
+    and the standard C-arm must not invalidate either stage's shared runtime fingerprint.
+    """
+    uses_skills = bool({"waddington_c_skills", "waddington_c_memskills"} & set(arm_names))
+    return {
+        "batch_sizes": {dataset: BATCH_SIZES[dataset] for dataset in datasets},
+        "pair_datasets": sorted(PAIR_DATASETS),
+        "pair_selection": pair_selection_config(),
+        "task_prompt_protocol": task_prompt_protocol(),
+        "skill_library_path": str(SKILL_LIBRARY_PATH) if uses_skills else None,
+        "skill_library_sha256": (
+            _file_sha256(SKILL_LIBRARY_PATH)
+            if uses_skills and SKILL_LIBRARY_PATH.is_file() else None
+        ),
+    }
+
+
 def _protocol_manifest(
     datasets: list[str], arm_names: list[str], n_rounds: int, n_repeats: int, seed_mode: str,
 ) -> dict:
@@ -273,6 +296,7 @@ def _protocol_manifest(
     legacy_router = os.environ.get("WADDINGTON_LEGACY_ROUTER") == "1"
     force_wllm = os.environ.get("WADDINGTON_FORCE_WLLM")
     return {
+        **_selection_config(datasets, arm_names),
         "datasets": datasets,
         "arms": arm_names,
         "rounds": n_rounds,

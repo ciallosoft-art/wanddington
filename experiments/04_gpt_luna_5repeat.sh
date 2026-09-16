@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # End-to-end GPT Waddington evaluation (five evaluation replicates).
 #
 # Stage 1 calibrates the four non-LLM comparators plus GPT-B on all nine screens. Stage 2 builds
@@ -14,7 +16,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 MODEL="openai-codex/gpt-5.6-luna"
-RESULT_DIR="workspace/results/gpt/gpt_5_6_luna_none"
+RESULT_DIR="${WADDINGTON_GPT_RESULT_DIR:-workspace/results/gpt/gpt_5_6_luna_none}"
 CALIBRATION_RESULT="$RESULT_DIR/calibration_5rep.json"
 MEMORY_PATH="$RESULT_DIR/experience_memory.json"
 C_RESULT="$RESULT_DIR/waddington_c_5rep.json"

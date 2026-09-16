@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # GeneDisco's acquisition functions on BDA's other two difficulty tiers.
 #
 # The headline tier's GeneDisco rows live in workspace/results/sequential/genedisco_ported.json

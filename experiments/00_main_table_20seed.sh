@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Preserve historical task wording and its matching memory for frozen reproduction.
+export WADDINGTON_LEGACY_TASK_PROMPTS=1
 # Reproduce the reported 20-seed headline comparison and its matched legacy-router control.
 # Requires a valid Anthropic API token (see setup_auth.py). This is a long-running API experiment.
 #

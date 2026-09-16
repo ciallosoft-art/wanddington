@@ -44,9 +44,10 @@ from __future__ import annotations
 import json
 import os
 import re
+import warnings
 from pathlib import Path
 
-from .config import ACTIVE_SKILL_LIBRARY_PATH
+from .config import ACTIVE_SKILL_LIBRARY_PATH, LEGACY_TASK_PROMPT_PROTOCOL, task_prompt_protocol
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILL_LIBRARY_PATH = ACTIVE_SKILL_LIBRARY_PATH
@@ -70,7 +71,18 @@ class SkillLibrary:
             return cls([])
         with open(path) as f:
             data = json.load(f)
-        return cls(data if isinstance(data, list) else [])
+        if not isinstance(data, list):
+            return cls([])
+        expected = task_prompt_protocol()
+        compatible = [sk for sk in data if (
+            sk.get("generator", {}).get("task_prompt_protocol") == expected
+            or (sk.get("generator", {}).get("task_prompt_protocol") is None
+                and expected == LEGACY_TASK_PROMPT_PROTOCOL)
+        )]
+        if len(compatible) != len(data):
+            warnings.warn(f"ignored skills from an incompatible task-prompt protocol at {path}; "
+                          "rebuild verified memory and the skill library", RuntimeWarning, stacklevel=2)
+        return cls(compatible)
 
     def __len__(self) -> int:
         return len(self._skills)

@@ -13,6 +13,14 @@ at `~/.waddington/agent/auth.json` — self-contained, no dependency on any othe
 **Terminal (CLI)** or **Web UI**. You chat in natural language; report wet-lab results and it adapts the
 next round. (Set `WADDINGTON_REUSE_FEYNMAN=1` to instead reuse an existing `~/.feynman` token store.)
 
+The Web UI listens on `127.0.0.1` only. Its page supplies a per-launch access token to local API
+requests, and the server rejects cross-origin requests. Reload an open page after restarting the
+server. Use file uploads in the Web UI; server-side file paths remain available in the CLI.
+
+Feedback is saved separately for each phenotype. Uploads preserve CSV/TSV/MAGeCK format; missing
+genes or measurements must be supplied before a campaign advances. If the next recommendation
+fails, the confirmed results stay saved and `commit` retries selection without counting them again.
+
 ## Design (why it looks like this)
 
 Three layers, **no agent tools in the loop**:

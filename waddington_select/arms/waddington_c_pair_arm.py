@@ -60,18 +60,29 @@ def _flag(name: str, default: str = "1") -> bool:
     return os.environ.get(name, default) == "1"
 
 
+def pair_selection_config() -> dict:
+    """Effective pair-arm settings, shared with provenance/resume validation."""
+    return {
+        "named_first": _flag("WADDINGTON_PAIR_NAMED_FIRST"),
+        "prior_fill": _flag("WADDINGTON_PAIR_PRIOR_FILL"),
+        "cold_start": _flag("WADDINGTON_PAIR_COLD_START", "0"),
+        "complex_first": _flag("WADDINGTON_PAIR_COMPLEX_FIRST", "0"),
+        "explore_frac": float(os.environ.get("WADDINGTON_PAIR_EXPLORE_FRAC", "0")),
+    }
+
+
 class WaddingtonCPairArm(WaddingtonCArm):
     """C-arm with named-first ordering and an interaction-prior filler."""
 
     def __init__(self, dataset_name: str, batch_size: int, **kwargs) -> None:
         kwargs.setdefault("name", "waddington_c_pair")
         super().__init__(dataset_name, batch_size, **kwargs)
-        self._named_first = _flag("WADDINGTON_PAIR_NAMED_FIRST")
-        self._prior_fill = _flag("WADDINGTON_PAIR_PRIOR_FILL")
-        # Opt-in: existing results stay reproducible with it off.
-        self._cold_start = _flag("WADDINGTON_PAIR_COLD_START", "0")
-        self._complex_first = _flag("WADDINGTON_PAIR_COMPLEX_FIRST", "0")
-        self._explore_frac = float(os.environ.get("WADDINGTON_PAIR_EXPLORE_FRAC", "0"))
+        config = pair_selection_config()
+        self._named_first = config["named_first"]
+        self._prior_fill = config["prior_fill"]
+        self._cold_start = config["cold_start"]
+        self._complex_first = config["complex_first"]
+        self._explore_frac = config["explore_frac"]
         self._complex: set[str] = set()
         if self._complex_first:
             self._complex = self._load_complex_pairs(dataset_name)

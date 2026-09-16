@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # Combinatorial tier WITH genuine interaction features x(g_a, g_b).
 #
 # The pair table built by build_horlbeck_pairs.py describes a pair only by symmetric functions of its

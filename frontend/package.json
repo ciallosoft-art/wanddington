@@ -8,7 +8,8 @@
     "waddington": "bin/waddington.js"
   },
   "scripts": {
-    "start": "node bin/waddington.js"
+    "start": "node bin/waddington.js",
+    "test": "node --experimental-vm-modules --test test/*.test.mjs"
   },
   "dependencies": {
     "@clack/prompts": "^1.2.0",

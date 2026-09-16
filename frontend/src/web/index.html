@@ -278,6 +278,8 @@
 
   <script>
     "use strict";
+    const WEB_TOKEN = "__WADDINGTON_WEB_TOKEN__";
+    const apiHeaders = () => ({ "content-type": "application/json", "x-waddington-token": WEB_TOKEN });
     // ---------------- DOM ----------------
     const app        = document.getElementById("app");
     const log        = document.getElementById("log");
@@ -299,6 +301,7 @@
     let current = null;    // active chat
     let appState = { dataset:null, hits:[], misses:[], campaign:null, onboarding:null };
     let staged = null;     // { name, content } pending composer attachment
+    const pendingChats = new Set();
 
     function loadChats() {
       try { chats = JSON.parse(localStorage.getItem(LS_KEY)) || []; }
@@ -490,12 +493,14 @@
       current = empty || { id:uid(), title:NEW_TITLE, msgs:[], state:freshState(), updatedAt:Date.now() };
       if (!empty) chats.unshift(current);
       appState = current.state || freshState();
+      clearStaged(); syncComposer();
       saveChats(); renderSidebar(); refreshView();
       closeNav(); q.focus();
     }
     function selectChat(id) {
       const c = chats.find(x => x.id === id); if (!c) return;
       current = c; appState = c.state || freshState();
+      clearStaged(); syncComposer();
       renderSidebar(); refreshView(); closeNav();
     }
     function deleteChat(id) {
@@ -510,41 +515,56 @@
       const t = (text || "").trim().replace(/\s+/g, " ");
       if (t) current.title = t.length > 42 ? t.slice(0, 42) + "…" : t;
     }
-    function pushMsg(m) {
-      current.msgs.push(m);
-      current.updatedAt = Date.now();
-      current.state = appState;
+    function pushMsg(m, chat = current) {
+      if (!chat || !chats.includes(chat)) return;
+      chat.msgs.push(m);
+      chat.updatedAt = Date.now();
+      if (chat === current) chat.state = appState;
       // bump to top of history
-      chats = [current, ...chats.filter(c => c.id !== current.id)];
+      chats = [chat, ...chats.filter(c => c.id !== chat.id)];
       saveChats(); renderSidebar();
     }
 
     // ---------------- network turn ----------------
-    function composerBusy(b) { send.disabled = b; }
+    function syncComposer() { send.disabled = !!current && pendingChats.has(current.id); }
+    function composerBusy(b, chat = current) {
+      if (b) pendingChats.add(chat.id); else pendingChats.delete(chat.id);
+      syncComposer();
+    }
     function addThinking() {
       const b = el("bubble"); b.innerHTML = `<span class="dots"><i></i><i></i><i></i></span>`;
       const row = turnRow("bot", b); clearHero(); log.appendChild(row); scrollDown();
       return row;
     }
 
-    async function ask(message, file) {
-      composerBusy(true);
-      const thinking = addThinking();
+    async function ask(message, file, chat = current) {
+      if (!chat || !chats.includes(chat) || pendingChats.has(chat.id)) return;
+      composerBusy(true, chat);
+      const thinking = chat === current ? addThinking() : null;
       try {
         const res = await fetch("/api/message", {
-          method:"POST", headers:{ "content-type":"application/json" },
-          body: JSON.stringify({ message, file, state: appState }),
+          method:"POST", headers:apiHeaders(),
+          body: JSON.stringify({ message, file, state: chat.state }),
         });
         const r = await res.json();
-        thinking.remove();
-        if (r.state) appState = r.state;
-        renderResult(r);
-        pushMsg({ role:"bot", result:r });
+        if (!res.ok) throw new Error(r.text || `Request failed (${res.status})`);
+        if (!chats.includes(chat)) return; // a deleted conversation stays deleted
+        if (r.state) chat.state = r.state;
+        if (chat === current) {
+          appState = chat.state;
+          renderResult(r);
+        }
+        pushMsg({ role:"bot", result:r }, chat);
       } catch (err) {
-        const b = thinking.querySelector(".bubble");
-        if (b) b.textContent = "[error] " + err.message;
+        const r = { kind:"error", text:err.message };
+        if (chats.includes(chat)) {
+          if (chat === current) renderResult(r);
+          pushMsg({ role:"bot", result:r }, chat);
+        }
       } finally {
-        composerBusy(false); q.focus();
+        thinking?.remove();
+        composerBusy(false, chat);
+        if (chat === current) q.focus();
       }
     }
 
@@ -597,11 +617,18 @@
 
     // Benchmark demo: a bundled screen's readout stands in as ground truth (EventSource / GET).
     function runDemo(dataset, rounds) {
+      const chat = current;
+      if (!chat || pendingChats.has(chat.id)) return;
       clearHero();
-      addYou(`Auto-run ${dataset} — retrospective evaluation (${rounds} rounds)`);
-      const tl = el("run-timeline"); addBot(tl); composerBusy(true);
-      const es = new EventSource(`/api/run-stream?dataset=${encodeURIComponent(dataset)}&rounds=${rounds}`);
-      const finish = () => { es.close(); composerBusy(false); q.focus(); };
+      const label = `Auto-run ${dataset} — retrospective evaluation (${rounds} rounds)`;
+      addYou(label); setTitleFrom(label); pushMsg({ role:"you", text:label }, chat);
+      const tl = el("run-timeline"); addBot(tl); composerBusy(true, chat);
+      const es = new EventSource(`/api/run-stream?dataset=${encodeURIComponent(dataset)}&rounds=${rounds}&token=${encodeURIComponent(WEB_TOKEN)}`);
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true; es.close(); composerBusy(false, chat); if (chat === current) q.focus();
+      };
       const h = makeRunHandler(tl, finish);
       es.onmessage = (ev) => { let e; try { e = JSON.parse(ev.data); } catch { return; } h(e); };
       es.onerror = () => { tl.appendChild(el("run-head", "⚠ connection closed")); finish(); };
@@ -609,17 +636,29 @@
 
     // Real production path: register a brand-new screen from the scientist's uploaded readout, then run
     // it — streamed over POST (the file body won't fit in a GET) and read from the fetch response stream.
-    async function runUpload({ name, content, fileName, task, rounds }) {
-      clearHero();
-      addYou(`📤 Upload & run "${name}" — register from my screen, then rank (${rounds} rounds)`);
-      const tl = el("run-timeline"); addBot(tl); composerBusy(true);
-      const finish = () => { composerBusy(false); q.focus(); };
+    async function runUpload({ name, content, fileName, task, rounds }, chat = current) {
+      if (!chat || !chats.includes(chat) || pendingChats.has(chat.id)) return;
+      const label = `📤 Upload & run "${name}" — register from my screen, then rank (${rounds} rounds)`;
+      if (chat === current) {
+        clearHero();
+        addYou(label); setTitleFrom(label);
+      }
+      pushMsg({ role:"you", text:label }, chat);
+      const tl = el("run-timeline");
+      if (chat === current) addBot(tl);
+      composerBusy(true, chat);
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true; composerBusy(false, chat); if (chat === current) q.focus();
+      };
       const h = makeRunHandler(tl, finish);
       try {
         const res = await fetch("/api/run-upload", {
-          method: "POST", headers: { "content-type": "application/json" },
+          method: "POST", headers: apiHeaders(),
           body: JSON.stringify({ name, readoutContent: content, readoutName: fileName, task, rounds }),
         });
+        if (!res.ok) throw new Error((await res.json()).text || `Request failed (${res.status})`);
         const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
         for (;;) {
           const { value, done } = await reader.read(); if (done) break;
@@ -637,18 +676,20 @@
 
     // "Upload & run my own screen" affordance: pick a readout, name it, one line on the phenotype, go.
     function startUploadRun() {
+      const chat = current;
       const inp = document.createElement("input");
       inp.type = "file"; inp.accept = ".csv,.txt,.tsv";
       inp.onchange = () => {
         const f = inp.files && inp.files[0]; if (!f) return;
         const reader = new FileReader();
         reader.onload = () => {
+          if (!chats.includes(chat)) return;
           const base = (f.name.replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9_]/g, "_").slice(0, 40)) || "MyScreen";
           let name = prompt("Name this screen (letters / digits / underscore):", base);
           if (name == null) return;
           name = name.replace(/[^A-Za-z0-9_]/g, "_") || base;
           const task = prompt("One line — what phenotype does this screen measure?", "") || "";
-          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5 });
+          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5 }, chat);
         };
         reader.readAsText(f);
       };
@@ -657,6 +698,7 @@
 
     // send a typed/clicked message (optionally with the staged composer file)
     function sendTurn(message) {
+      if (!current || pendingChats.has(current.id)) return;
       const text = (message || "").trim();
       const file = staged;
       if (!text && !file) return;
@@ -672,14 +714,17 @@
 
     // send a file chosen from an inline (contextual) file input
     function uploadFile(input) {
+      const chat = current;
+      if (!chat || pendingChats.has(chat.id)) return;
       const f = input.files && input.files[0];
       if (!f) return;
       const reader = new FileReader();
       reader.onload = () => {
+        if (!chats.includes(chat) || pendingChats.has(chat.id)) return;
         const label = `📎 uploaded ${f.name} (${(f.size / 1024).toFixed(1)} KB)`;
-        addYou(label);
-        pushMsg({ role:"you", text:label });
-        ask("", { name:f.name, content:String(reader.result) });
+        if (chat === current) addYou(label);
+        pushMsg({ role:"you", text:label }, chat);
+        ask("", { name:f.name, content:String(reader.result) }, chat);
       };
       reader.readAsText(f);
     }
@@ -688,10 +733,12 @@
     function clearStaged() { staged = null; fileInput.value = ""; attachChip.classList.remove("show"); }
     attachBtn.onclick = () => fileInput.click();
     fileInput.onchange = () => {
+      const chat = current;
       const f = fileInput.files && fileInput.files[0];
       if (!f) return;
       const reader = new FileReader();
       reader.onload = () => {
+        if (chat !== current || !chats.includes(chat)) return;
         staged = { name:f.name, content:String(reader.result) };
         attachName.textContent = `${f.name} (${(f.size / 1024).toFixed(1)} KB)`;
         attachChip.classList.add("show");

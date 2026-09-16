@@ -164,11 +164,30 @@ Environment variables (all optional; sensible defaults):
 | `WADDINGTON_PI_REASONING` | `none` | Codex reasoning effort |
 | `WADDINGTON_MEMORY_PATH` | `workspace/results/gpt/gpt_5_6_luna_none/experience_memory.json` | Active GPT-calibrated episodic memory |
 | `WADDINGTON_LEGACY_ROUTER` | `0` | `1` enables the legacy target-aware router (reads the realized hit rate; not the reported system) |
+| `WADDINGTON_LEGACY_TASK_PROMPTS` | `0` | `1` restores the historical Replogle fitness wording for frozen reproduction; active prompts describe the actual Perturb-seq transcriptomic readouts |
 | `WADDINGTON_LLM_NAMED_ONLY` | `1` | Fusion bonus only to model-named genes; frozen Claude scripts pin `0` to reproduce the historical padded vote |
 
 Active deployment and new experiments default to GPT; the historical reproduction scripts pin the
 `anthropic` backend, Claude model and frozen memory paths, and neither changes the provenance of the
 other.
+
+The Replogle task correction changes the prompt protocol. Active memory and optional skills must
+be rebuilt from calibration under the corrected prompts; older artifacts are skipped with a warning.
+The frozen scripts 00/02/03 explicitly retain the historical wording. Existing result files are
+unchanged, and strict resume rejects older protocols. To start a fresh active calibration without
+overwriting an old run, choose a new directory, for example:
+
+```bash
+WADDINGTON_GPT_RESULT_DIR=workspace/results/gpt/replogle_transcriptomics_v2 \
+  bash experiments/04_gpt_luna_5repeat.sh
+```
+
+Offline regression checks (no provider calls):
+
+```bash
+conda run -n waddington-bio python -m unittest discover -s tests -v
+npm --prefix frontend test
+```
 
 ---
 

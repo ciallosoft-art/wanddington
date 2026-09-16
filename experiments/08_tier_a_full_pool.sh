@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # BDA difficulty tier "easier": 1-gene selection over the FULL gene pool (essentials included).
 #
 # Identical protocol to 05_gpt_luna_20repeat.sh — same nine screens, same batch sizes, same task

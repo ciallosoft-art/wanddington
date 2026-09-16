@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # GPT-5.6 Luna honest-router variant base runs (three evaluation replicates each).
 #
 # Produces the four base C-arm runs that analysis/router_analysis.py needs to derive the honest

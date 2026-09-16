@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -38,10 +39,11 @@ SCORE_CANDIDATES = ["score", "log-fold-change", "lfc", "pos|lfc", "neg|lfc", "lo
 HIT_CANDIDATES = ["hit", "is_hit", "hits", "label", "hit_label"]
 
 _TRUE = {"1", "true", "yes", "y", "hit", "t"}
+_FALSE = {"0", "false", "no", "n", "miss", "f"}
 
 
 def _norm(genes) -> list[str]:
-    return [g.strip().upper() for g in (genes or []) if str(g).strip()]
+    return list(dict.fromkeys(str(g).strip().upper() for g in (genes or []) if str(g).strip()))
 
 
 def _pick(cols: list[str], candidates: list[str]) -> str | None:
@@ -54,13 +56,13 @@ def _pick(cols: list[str], candidates: list[str]) -> str | None:
 
 def _read_table(path: str) -> pd.DataFrame:
     """Read a screen file (.csv → comma; .txt/.tsv/MAGeCK gene_summary → tab) and add _GENE."""
-    if path.endswith(".csv"):
+    if Path(path).suffix.lower() == ".csv":
         df = pd.read_csv(path)
     else:
         df = pd.read_csv(path, sep="\t")
     id_col = _pick(list(df.columns), ID_CANDIDATES) or df.columns[0]
-    df["_GENE"] = df[id_col].astype(str).str.strip().str.upper()
-    return df
+    df["_GENE"] = df[id_col].astype("string").str.strip().str.upper()
+    return df.loc[df["_GENE"].notna() & df["_GENE"].ne("")].copy()
 
 
 def read_gene_pool(path: str) -> list[str]:
@@ -78,25 +80,48 @@ def derive_hits(
     top_ratio: float = 0.05,
     threshold: float | None = None,
 ) -> dict:
-    """Parse a screen readout file and label the tested `genes` as hit / non-hit."""
+    """Label observed genes; absent genes and missing measurements stay unknown."""
+    if not np.isfinite(top_ratio) or not 0 < top_ratio <= 1:
+        raise ValueError("top_ratio must be in (0, 1]")
+    if threshold is not None and not np.isfinite(threshold):
+        raise ValueError("threshold must be finite")
+    if method not in {"gaussian", "castle"}:
+        raise ValueError(f"Unknown hit derivation method: {method}")
     df = _read_table(path)
 
     # 1) explicit hit/label column wins
     hit_col = _pick(list(df.columns), HIT_CANDIDATES)
     if hit_col is not None:
-        is_hit = df[hit_col].astype(str).str.strip().str.lower().isin(_TRUE)
+        text = df[hit_col].astype("string").str.strip().str.lower()
+        numeric = pd.to_numeric(df[hit_col], errors="coerce")
+        is_hit = (text.isin(_TRUE) | numeric.eq(1)).fillna(False)
+        is_miss = (text.isin(_FALSE) | numeric.eq(0)).fillna(False)
+        missing = df[hit_col].isna() | text.eq("").fillna(False)
+        invalid = ~(is_hit | is_miss | missing)
+        if invalid.any():
+            raise ValueError(f"Unrecognised hit labels in {hit_col}: "
+                             f"{df.loc[invalid, hit_col].astype(str).unique()[:5].tolist()}")
         hitset = set(df.loc[is_hit, "_GENE"])
+        negative = set(df.loc[is_miss, "_GENE"])
+        if hitset & negative:
+            raise ValueError(f"Conflicting labels for genes: {', '.join(sorted(hitset & negative))}")
+        observed = hitset | negative
         used_method = f"label:{hit_col}"
         used_score = None
     else:
         sc = score_col or _pick(list(df.columns), SCORE_CANDIDATES)
         if sc is None:
-            raise SystemExit(
+            raise ValueError(
                 f"No score/hit column found. Columns: {list(df.columns)}. "
                 f"Pass --score-col explicitly."
             )
+        if sc not in df.columns:
+            raise ValueError(f"Score column {sc!r} is not in the readout")
         vals = pd.to_numeric(df[sc], errors="coerce").to_numpy(dtype=float)
         finite = np.isfinite(vals)
+        if not finite.any():
+            raise ValueError(f"No finite scores found in {sc!r}")
+        observed = set(df.loc[finite, "_GENE"])
         used_score = sc
         if threshold is not None:
             hit_idx = np.where(finite & (vals > threshold))[0]
@@ -106,7 +131,8 @@ def derive_hits(
             hit_idx = np.where(finite & (vals > thr))[0]
             used_method = "castle(>p95)"
         else:  # gaussian: top `top_ratio` by |score|
-            order = np.argsort(np.where(finite, np.abs(vals), -np.inf))[::-1]
+            valid_idx = np.flatnonzero(finite)
+            order = valid_idx[np.argsort(np.abs(vals[finite]))[::-1]]
             count = max(1, int(finite.sum() * top_ratio))
             hit_idx = order[:count]
             used_method = f"gaussian(top{top_ratio:g})"
@@ -114,8 +140,8 @@ def derive_hits(
 
     batch = _norm(genes)
     hits = [g for g in batch if g in hitset]
-    misses = [g for g in batch if g not in hitset]
-    unknown = [g for g in batch if g not in set(df["_GENE"])]
+    misses = [g for g in batch if g in observed and g not in hitset]
+    unknown = [g for g in batch if g not in observed]
     return {
         "tool": "ingest",
         "tested": len(batch),
@@ -140,11 +166,14 @@ def main() -> None:
     p.add_argument("--json", action="store_true", help="emit JSON only")
     args = p.parse_args()
 
-    res = derive_hits(
-        args.file, args.genes,
-        score_col=args.score_col, method=args.method,
-        top_ratio=args.top_ratio, threshold=args.threshold,
-    )
+    try:
+        res = derive_hits(
+            args.file, args.genes,
+            score_col=args.score_col, method=args.method,
+            top_ratio=args.top_ratio, threshold=args.threshold,
+        )
+    except ValueError as exc:
+        p.error(str(exc))
     if args.json:
         json.dump(res, sys.stdout)
         sys.stdout.write("\n")
@@ -152,7 +181,7 @@ def main() -> None:
     print(f"Screen readout: {args.file}  (method={res['method']}, score_col={res['score_col']})")
     print(f"Genome-wide hits: {res['total_hits']}")
     if res["unknown_genes"]:
-        print(f"[warn] not in file: {', '.join(res['unknown_genes'])}")
+        print(f"[warn] missing gene or measurement (not labelled): {', '.join(res['unknown_genes'])}")
     print(f"\nTested {res['tested']} genes → {res['n_hits']} hits:")
     print("  hits:   " + (", ".join(res["hits"]) or "(none)"))
     print("  misses: " + (", ".join(res["misses"]) or "(none)"))

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Preserve historical task wording and its matching memory for frozen reproduction.
+export WADDINGTON_LEGACY_TASK_PROMPTS=1
 # Reproduce Table 4: all four ablation experiments.
 # Each ablation is run paired against the full C arm (waddington_c)
 # so results are directly comparable within each run.

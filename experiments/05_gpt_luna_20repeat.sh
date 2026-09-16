@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # End-to-end GPT Waddington evaluation (twenty evaluation replicates).
 #
 # Stage 1 calibrates the four non-LLM comparators plus GPT-B on all nine screens. Stage 2 builds

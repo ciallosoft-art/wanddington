@@ -30,6 +30,7 @@ from pathlib import Path
 from .oracle import ALL_DATASETS
 from .memory_builder import MEMORY_PATH
 from .skills import SKILL_LIBRARY_PATH
+from .config import task_prompt_protocol
 from .llm_client import DEFAULT_PI_REASONING, LLMClient, default_model_for_backend
 
 MAX_VERIFY_RETRIES = 2
@@ -193,8 +194,8 @@ def _verify_skill(skill: dict, entries_by_ds: dict, client: LLMClient) -> tuple[
 
 
 def build_skills(n_skills: int = 12) -> list[dict]:
-    with open(MEMORY_PATH) as f:
-        entries = [e for e in json.load(f) if e.get("verified") is True]
+    from .arms.waddington_arm import _load_memory
+    entries = _load_memory(MEMORY_PATH, exclude_dataset="")
     if not entries:
         raise ValueError(f"no verified memory entries in {MEMORY_PATH}")
     entries_by_ds = {e["dataset"]: e for e in entries}
@@ -225,6 +226,7 @@ def build_skills(n_skills: int = 12) -> list[dict]:
             "marker_genes": [g.strip().upper() for g in cand.get("marker_genes", []) if g.strip()],
             "verified": valid,
             "generator": {
+                "task_prompt_protocol": task_prompt_protocol(),
                 "backend": client.backend,
                 "model": client.model,
                 "reasoning": (

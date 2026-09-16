@@ -7,6 +7,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { randomUUID } from "node:crypto";
 
 import { suggestGenes, revealBatch, ingestResults, REPO_ROOT } from "./brain.mjs";
 
@@ -64,6 +65,7 @@ export async function startCampaign(state, { dataset, rounds, batchSize, mode })
  */
 export async function commitRound(state) {
   const c = state.campaign;
+  if (c.stage === "recommendation_pending") return retryRecommendation(state);
   if (c.mode === "upload") {
     c.stage = "awaiting_results";
     return {
@@ -78,7 +80,11 @@ export async function commitRound(state) {
 /** Upload mode: the scientist provides this round's readout file → derive hits → advance. */
 export async function submitResults(state, { path, content, name, scoreCol, topRatio } = {}) {
   const c = state.campaign;
+  if (c.stage === "recommendation_pending") return retryRecommendation(state);
   const r = await ingestResults({ genes: c.pending, path, content, name, scoreCol, topRatio });
+  if (r.unknown?.length) {
+    throw new Error(`Results are missing tested genes: ${r.unknown.join(", ")}. Provide a complete readout before committing this round.`);
+  }
   const res = await advance(state, r.hits, r.totalHits);
   res.ingestMethod = r.method;
   res.unknown = r.unknown;
@@ -103,24 +109,50 @@ async function advance(state, revealedHits, total) {
   attachOutcome(c, revealedRound, roundHits);
 
   if (c.round < c.maxRounds) {
-    c.round += 1;
-    c.stage = "proposed";
-    const next = await suggestGenes({
+    // The outcome is durable before the next API call. A retry must only rank again,
+    // never reveal/upload the same batch twice or increment the round prematurely.
+    c.stage = "recommendation_pending";
+    c.pendingOutcome = { revealedRound, roundHits, cumulative, total, ratio };
+    return retryRecommendation(state);
+  }
+  return finish(state, { revealedRound, roundHits, cumulative, total, ratio });
+}
+
+/** Retry selection after a saved outcome, without replaying that round's results. */
+export async function retryRecommendation(state) {
+  const c = state.campaign;
+  const outcome = c.pendingOutcome;
+  let next;
+  try {
+    next = await suggestGenes({
       dataset: c.dataset,
       n: c.batchSize || undefined,
       testedHits: c.testedHits,
       testedMisses: c.testedMisses,
       trace: true,
     });
-    c.pending = next.genes;
-    pushDecision(c, next.info, c.round);
+  } catch (error) {
+    // Return state even on failure so the stateless Web transport can persist the
+    // confirmed outcomes. Both existing renderers already display an `await` turn.
     return {
-      kind: "campaign", stage: "revealed", done: false, mode: c.mode,
-      dataset: c.dataset, round: revealedRound, roundHits, cumulative, total, ratio,
-      nextRound: c.round, next: next.genes,
+      kind: "campaign", stage: "await", mode: c.mode, dataset: c.dataset,
+      round: c.round, roundHits: outcome.roundHits,
+      cumulative: outcome.cumulative, total: outcome.total, ratio: outcome.ratio,
+      text: `Round ${c.round}'s results are saved (${outcome.roundHits.length} hits; cumulative ${outcome.cumulative}). The next recommendation failed: ${error.message || error}. Type \`commit\` to retry, or \`stop\` to finish with the saved results.`,
     };
   }
-  return finish(state, { revealedRound, roundHits, cumulative, total, ratio });
+  c.round = outcome.revealedRound + 1;
+  c.stage = "proposed";
+  c.pending = next.genes;
+  pushDecision(c, next.info, c.round);
+  delete c.pendingOutcome;
+  return {
+    kind: "campaign", stage: "revealed", done: false, mode: c.mode,
+    dataset: c.dataset, round: outcome.revealedRound,
+    roundHits: outcome.roundHits, cumulative: outcome.cumulative,
+    total: outcome.total, ratio: outcome.ratio,
+    nextRound: c.round, next: next.genes,
+  };
 }
 
 /** End the campaign (natural end or user "stop"): summary + saved trace. */
@@ -149,8 +181,11 @@ export function finish(state, last = null) {
   try {
     const dir = join(REPO_ROOT, "workspace", "results", "campaigns");
     mkdirSync(dir, { recursive: true });
-    tracePath = join(dir, `${c.dataset}-${c.startedAt.replace(/[:.]/g, "-")}.json`);
-    writeFileSync(tracePath, JSON.stringify(trace, null, 2));
+    // Dataset and timestamps can arrive in client-supplied Web state. Keep them
+    // inside the artifact; neither may determine its filesystem location.
+    const destination = join(dir, `${randomUUID()}.json`);
+    writeFileSync(destination, JSON.stringify(trace, null, 2));
+    tracePath = destination;
   } catch {
     /* trace is best-effort */
   }

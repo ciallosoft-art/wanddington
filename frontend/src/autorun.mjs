@@ -15,7 +15,7 @@
 // Since we have no external dataset on hand, a benchmark screen's own readout
 // (workspace/data/bda_benchmark/ground_truth_<name>.csv) stands in for "the user's new dataset".
 
-import { join } from "node:path";
+import { join, extname } from "node:path";
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 
 import { suggestGenes, ingestResults, registerPhenotype, getDatasets, BENCHMARK_DATASETS, REPO_ROOT } from "./brain.mjs";
@@ -29,9 +29,20 @@ const USER_DIR = join(REPO_ROOT, "workspace", "data", "user_phenotypes");
 /**
  * Resolve a screen's readout file. For a benchmark screen it is the bundled ground-truth (demo
  * stand-in); for a scientist's REGISTERED phenotype it is the readout they uploaded, saved next to
- * the phenotype (workspace/data/user_phenotypes/<name>/readout.csv).
+ * the phenotype, preserving the CSV/TSV format recorded in readout.json.
  */
 export function readoutFor(dataset) {
+  if (!/^[A-Za-z0-9_]+$/.test(dataset)) return null;
+  const metadata = join(USER_DIR, dataset, "readout.json");
+  if (existsSync(metadata)) {
+    const { file } = JSON.parse(readFileSync(metadata, "utf8"));
+    if (!["readout.csv", "readout.tsv", "readout.txt"].includes(file)) {
+      throw new Error("Invalid stored readout filename");
+    }
+    const path = join(USER_DIR, dataset, file);
+    return existsSync(path) ? path : null;
+  }
+  // Compatibility with uploads saved before format metadata was added.
   const user = join(USER_DIR, dataset, "readout.csv");
   if (existsSync(user)) return user;
   const nm = READOUT_NAME[dataset] || dataset;
@@ -98,6 +109,9 @@ export async function autoRun({ dataset, readoutFile, rounds = 5, batchSize, top
 
     // Reveal outcomes from the uploaded readout (the real production reveal — not a hidden oracle).
     const ing = await ingestResults({ genes: sug.genes, path: readout, topRatio });
+    if (ing.unknown?.length) {
+      throw new Error(`Readout is missing genes or measurements for: ${ing.unknown.join(", ")}. Supply complete results before continuing.`);
+    }
     total = ing.totalHits;
     const nHits = ing.hits.length;
     cumulative += nHits;
@@ -137,11 +151,15 @@ export async function autoRunUpload({ name, readoutFile, readoutContent, readout
   if (!name || /[^A-Za-z0-9_]/.test(name)) throw new Error("upload run: a simple phenotype name (letters/digits/underscore only) is required");
   const content = readoutContent != null ? readoutContent : (readoutFile ? readFileSync(readoutFile, "utf8") : null);
   if (content == null) throw new Error("upload run: need a readout file (path or content)");
+  const ext = extname(readoutName || readoutFile || "readout.csv").toLowerCase();
+  if (![".csv", ".tsv", ".txt"].includes(ext)) throw new Error("upload run: use a CSV, TSV or TXT readout");
+  const filename = `readout${ext}`;
 
   // Save the uploaded readout as this phenotype's ground truth (also lets future runs find it).
   const dir = join(USER_DIR, name);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "readout.csv"), content);
+  writeFileSync(join(dir, filename), content);
+  writeFileSync(join(dir, "readout.json"), JSON.stringify({ file: filename }));
   emit({ type: "upload", name, bytes: content.length });
 
   // Register (build features) unless it is already rankable.
@@ -157,11 +175,11 @@ export async function autoRunUpload({ name, readoutFile, readoutContent, readout
     if (!anch.length) throw new Error("upload run: no anchor genes — pass anchors, or give a task the model can seed anchors from");
     emit({ type: "anchors", anchors: anch });
     emit({ type: "registering", name });
-    const reg = await registerPhenotype({ name, genesContent: content, genesName: readoutName || "readout.csv", anchors: anch, task: t, measurement: m, batchSize });
+    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize });
     emit({ type: "registered", name, nGenes: reg.n_genes, nWithFeatures: reg.n_genes_with_known_features, anchors: anch });
   } else {
     emit({ type: "already-registered", name });
   }
 
-  return autoRun({ dataset: name, readoutFile: join(dir, "readout.csv"), rounds, batchSize, topRatio, modelSpec, onStep });
+  return autoRun({ dataset: name, readoutFile: join(dir, filename), rounds, batchSize, topRatio, modelSpec, onStep });
 }

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # BDA difficulty tier "harder": 2-gene combinatorial selection (Horlbeck 2018 GI map, K562).
 #
 # Same protocol as the headline run — five rounds, batches of 128, twenty evaluation replicates, the

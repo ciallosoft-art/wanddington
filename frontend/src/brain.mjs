@@ -52,7 +52,7 @@ export async function registerPhenotype({ name, genesFile, genesContent, genesNa
   let poolFile = genesFile;
   if (!poolFile) {
     if (genesContent == null) throw new Error("registerPhenotype: need a gene-pool file path or content");
-    const ext = (genesName && extname(genesName)) || ".csv";
+    const ext = (genesName && extname(genesName).toLowerCase()) || ".csv";
     const dir = mkdtempSync(join(tmpdir(), "wadd-pool-"));
     poolFile = join(dir, `pool${ext}`);
     writeFileSync(poolFile, genesContent);
@@ -135,14 +135,14 @@ export async function ingestResults({ genes, path, content, name, scoreCol, topR
   let filePath = path;
   if (!filePath) {
     if (content == null) throw new Error("ingestResults: need a file path or content");
-    const ext = (name && extname(name)) || ".txt"; // .csv → comma, else tab (per ingest.py)
+    const ext = (name && extname(name).toLowerCase()) || ".txt"; // .csv → comma, else tab (per ingest.py)
     const dir = mkdtempSync(join(tmpdir(), "wadd-results-"));
     filePath = join(dir, `upload${ext}`);
     writeFileSync(filePath, content);
   }
   const args = ["-m", "waddington_select.ingest", "--file", filePath, "--genes", ...genes, "--json"];
   if (scoreCol) args.push("--score-col", scoreCol);
-  if (topRatio) args.push("--top-ratio", String(topRatio));
+  if (topRatio != null) args.push("--top-ratio", String(topRatio));
   const { stdout } = await run(args);
   const s = stdout.indexOf("{");
   const e = stdout.lastIndexOf("}");

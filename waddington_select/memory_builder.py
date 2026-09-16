@@ -35,7 +35,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 from .oracle import ALL_DATASETS, BATCH_SIZES, DatasetOracle
 from .arms.llm_reasoning_arm import _load_task
-from .config import ACTIVE_GPT_RESULT_DIR, ACTIVE_MEMORY_PATH
+from .config import (
+    ACTIVE_GPT_RESULT_DIR, ACTIVE_MEMORY_PATH, ACTIVE_TASK_PROMPT_PROTOCOL, task_prompt_protocol,
+)
 from .llm_client import (
     DEFAULT_BACKEND,
     DEFAULT_PI_REASONING,
@@ -85,7 +87,11 @@ def _load_calibration_performance(
     protocol = manifest.get("protocol") if isinstance(manifest, dict) else None
     if not isinstance(protocol, dict):
         raise ValueError(f"calibration manifest has no protocol object: {manifest_path}")
+    # Local import avoids adding the full experiment runner to module import time.
+    from .run_sequential import _runtime_fingerprint, _selection_config
     expected_protocol = {
+        **_selection_config(datasets, list(REQUIRED_PERFORMANCE_ARMS)),
+        "task_prompt_protocol": ACTIVE_TASK_PROMPT_PROTOCOL,
         "datasets": datasets,
         "arms": list(REQUIRED_PERFORMANCE_ARMS),
         "rounds": 5,
@@ -131,8 +137,6 @@ def _load_calibration_performance(
     }
     if mismatches:
         raise ValueError(f"calibration manifest mismatch: {json.dumps(mismatches, sort_keys=True)}")
-    # Import locally to avoid adding the full experiment runner to module import time.
-    from .run_sequential import _runtime_fingerprint
     if protocol.get("runtime_fingerprint") != _runtime_fingerprint():
         raise ValueError("runtime/input fingerprint changed since calibration; start a new calibration")
     protocol_sha256 = _sha256_bytes(
@@ -172,7 +176,8 @@ def _load_calibration_performance(
                     raise ValueError(f"non-contiguous repeat_index at {dataset}/{arm}/repeat {idx}")
                 finals.append(float(ratios[-1]))
                 batch_size = result.get("batch_size")
-                if not isinstance(batch_size, int) or batch_size <= 0:
+                if (isinstance(batch_size, bool) or not isinstance(batch_size, int)
+                        or batch_size != BATCH_SIZES[dataset]):
                     raise ValueError(f"invalid batch_size at {dataset}/{arm}/repeat {idx}")
                 if arm == "llm_reasoning":
                     fallback = result.get("llm_fallback_per_round")
@@ -515,6 +520,7 @@ def generate_memory_entry(
             "best_strategy": _expected_strategy(best_arm),
             "key_genes": parsed.get("key_genes", top_hits[:5]),
             "generator": {
+                "task_prompt_protocol": task_prompt_protocol(),
                 "backend": client.backend,
                 "model": client.model,
                 "reasoning": (
@@ -616,6 +622,7 @@ def main() -> None:
                 and e.get("generator", {}).get("backend") == client.backend
                 and e.get("generator", {}).get("model") == client.model
                 and e.get("generator", {}).get("reasoning") == expected_reasoning
+                and e.get("generator", {}).get("task_prompt_protocol") == task_prompt_protocol()
                 and e.get("generator", {}).get("performance_source", {}).get("sha256")
                     == performance_source["sha256"]
                 and e.get("generator", {}).get("performance_source", {}).get("protocol_sha256")

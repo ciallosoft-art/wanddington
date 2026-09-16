@@ -9,8 +9,9 @@ import json
 import os
 from pathlib import Path
 
-from .oracle import BENCHMARK_DATASETS
-from .run_sequential import _runtime_fingerprint
+from .config import ACTIVE_TASK_PROMPT_PROTOCOL
+from .oracle import BENCHMARK_DATASETS, BATCH_SIZES
+from .run_sequential import _runtime_fingerprint, _selection_config
 
 CALIBRATION_ARMS = (
     "random", "coreset", "static_ranker", "online_adaptive", "llm_reasoning",
@@ -66,6 +67,9 @@ def _validated_repeats(data: dict, dataset: str, arm: str, n: int = 5) -> list[d
             raise ValueError(f"{dataset}/{arm}: embedded identity mismatch at repeat {idx}")
         if result.get("repeat_index") != idx or result.get("n_rounds") != 5:
             raise ValueError(f"{dataset}/{arm}: invalid repeat {idx}")
+        if (isinstance(result.get("batch_size"), bool)
+                or result.get("batch_size") != BATCH_SIZES[dataset]):
+            raise ValueError(f"{dataset}/{arm}: batch_size differs from the protocol at repeat {idx}")
         if len(result.get("hit_ratio_per_round", [])) != 5:
             raise ValueError(f"{dataset}/{arm}: incomplete trajectory at repeat {idx}")
         for field in (
@@ -101,6 +105,8 @@ def _validated_repeats(data: dict, dataset: str, arm: str, n: int = 5) -> list[d
 def _validate_protocol(protocol: dict, expected_arms: tuple[str, ...], label: str,
                        expected_repeats: int = 5) -> None:
     expected = {
+        **_selection_config(list(BENCHMARK_DATASETS), list(expected_arms)),
+        "task_prompt_protocol": ACTIVE_TASK_PROMPT_PROTOCOL,
         "datasets": list(BENCHMARK_DATASETS),
         "arms": list(expected_arms),
         "rounds": 5,
@@ -169,6 +175,7 @@ def _validate_memory(
             raise ValueError(f"memory entry is not strictly verified: {dataset}")
         if (
             generator.get("backend") != "pi"
+            or generator.get("task_prompt_protocol") != ACTIVE_TASK_PROMPT_PROTOCOL
             or generator.get("model") != model
             or generator.get("reasoning") != reasoning
             or verifier.get("backend") != "pi"
@@ -214,6 +221,7 @@ def main() -> None:
         "llm_backend", "llm_model", "llm_reasoning", "codex_reasoning_effective",
         "runtime_fingerprint", "full_selected_context", "llm_vote_policy",
         "cross_experiment_split", "same_study_siblings_allowed",
+        "batch_sizes", "pair_datasets", "pair_selection", "task_prompt_protocol",
     ):
         if calibration_protocol.get(key) != carm_protocol.get(key):
             raise ValueError(f"cross-stage protocol mismatch for {key}")

@@ -6,7 +6,7 @@
 import { routeIntent } from "./intent.mjs";
 import { complete } from "./llm/complete.mjs";
 import { suggestGenes, simulateCampaign, getDatasets } from "./brain.mjs";
-import { startCampaign, commitRound, submitResults, finish, campaignCommand } from "./campaign.mjs";
+import { startCampaign, commitRound, submitResults, retryRecommendation, finish, campaignCommand } from "./campaign.mjs";
 import { startOnboarding, handleOnboarding } from "./onboard.mjs";
 
 function looksLikePath(s) {
@@ -17,6 +17,25 @@ function mergeUnique(existing, incoming) {
   const set = new Set(existing || []);
   for (const g of incoming || []) set.add(g);
   return [...set];
+}
+
+function saveFeedback(state, dataset = state.dataset) {
+  if (!dataset) return;
+  state.feedbackByDataset = {
+    ...state.feedbackByDataset,
+    [dataset]: { hits: [...(state.hits || [])], misses: [...(state.misses || [])] },
+  };
+}
+
+/** Keep the legacy hits/misses fields as the active phenotype's feedback only. */
+function selectDataset(state, dataset, previous = state.dataset) {
+  if (dataset === previous) return;
+  saveFeedback(state, previous);
+  const saved = Object.hasOwn(state.feedbackByDataset || {}, dataset)
+    ? state.feedbackByDataset[dataset] : null;
+  state.dataset = dataset;
+  state.hits = [...(saved?.hits || [])];
+  state.misses = [...(saved?.misses || [])];
 }
 
 async function narrateBatch(dataset, genes, modelSpec) {
@@ -48,12 +67,27 @@ async function defaultAsk() {
 export async function respond(message, state, modelSpec, opts = {}) {
   // Onboarding the scientist's own phenotype (describe → gene pool → anchors → build).
   if (state.onboarding?.active) {
-    return { ...(await handleOnboarding(state, message, opts, modelSpec)), state };
+    const previous = state.dataset;
+    const result = await handleOnboarding(state, message, opts, modelSpec);
+    selectDataset(state, state.dataset, previous);
+    return { ...result, state };
   }
 
   // Active experiment campaign: deterministic control (no LLM needed).
   if (state.campaign?.active) {
     const c = state.campaign;
+    if (c.stage === "recommendation_pending") {
+      const cmd = campaignCommand(message);
+      if (cmd === "stop") return { ...finish(state), state };
+      if (cmd === "commit" || opts.file?.content != null || looksLikePath((opts.path || message || "").trim())) {
+        return { ...(await retryRecommendation(state)), state };
+      }
+      return {
+        kind: "campaign", stage: "await", dataset: c.dataset,
+        text: `Round ${c.round}'s results are saved. Type \`commit\` to retry the next recommendation, or \`stop\` to end.`,
+        state,
+      };
+    }
     // Upload mode: awaiting the scientist's screen readout for the committed batch.
     if (c.stage === "awaiting_results") {
       if (campaignCommand(message) === "stop") return { ...finish(state), state };
@@ -84,9 +118,10 @@ export async function respond(message, state, modelSpec, opts = {}) {
   const intent = await routeIntent(message, state, modelSpec);
 
   const known = await getDatasets();
-  if (intent.dataset && known.includes(intent.dataset)) state.dataset = intent.dataset;
+  if (intent.dataset && known.includes(intent.dataset)) selectDataset(state, intent.dataset);
   state.hits = mergeUnique(state.hits, intent.new_hits);
   state.misses = mergeUnique(state.misses, intent.new_misses);
+  saveFeedback(state);
 
   // The scientist's own screen: build its features before anything can be ranked.
   if (intent.action === "register") {

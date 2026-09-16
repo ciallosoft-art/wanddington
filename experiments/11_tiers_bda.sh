@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # BioDiscoveryAgent's own agent, run on our benchmark and scored by our oracle, across BDA's tiers.
 #
 # The headline tier's controlled run already exists (workspace/results/bda_controlled/bda_gpt.json,

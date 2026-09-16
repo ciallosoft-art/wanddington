@@ -43,6 +43,7 @@ dist/
 # Build artifacts
 *.d.mts
 *.mjs
+!frontend/test/*.mjs
 
 # OS
 .DS_Store

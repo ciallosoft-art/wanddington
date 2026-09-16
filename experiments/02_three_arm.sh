@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Preserve historical task wording and its matching memory for frozen reproduction.
+export WADDINGTON_LEGACY_TASK_PROMPTS=1
 # Reproduce the supporting 5-seed three-arm comparison
 # (A=Coreset vs B=LLMReasoning vs C=Waddington).
 # Requires a valid Anthropic API token (see setup_auth.py).

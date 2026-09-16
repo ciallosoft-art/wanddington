@@ -29,6 +29,7 @@ import lightgbm as lgb
 from .base import BaseArm
 from ..skills import SkillLibrary, load_dataset_hits
 from ..llm_client import LLMClient, default_model_for_backend
+from ..config import LEGACY_TASK_PROMPT_PROTOCOL, task_prompt_protocol
 from ..features import load_training_frame
 from ..phenotype import task_prompt as _user_task_prompt
 
@@ -72,12 +73,12 @@ TASK_PROMPT_FILES: dict[str, Optional[str]] = {
 
 HARDCODED_TASKS: dict[str, dict[str, str]] = {
     "Replogle_K562_essential": {
-        "Task": "Identify essential genes required for the survival and proliferation of K562 chronic myelogenous leukemia (CML) cells",
-        "Measurement": "the fitness effect (depletion) of gene knockout as measured by sgRNA read count changes in a genome-wide CRISPR screen",
+        "Task": "Identify genes whose CRISPRi knockdown causes a strong transcriptomic response in K562 cells in the curated essential-gene Perturb-seq panel",
+        "Measurement": "L2 distance between the mean gene-expression vector of perturbed cells and the mean control expression vector; hits are the top 10% by this distance after excluding CEGv2 genes",
     },
     "Replogle_K562_gwps": {
-        "Task": "Identify genes whose knockout significantly affects the fitness (growth or survival) of K562 chronic myelogenous leukemia (CML) cells",
-        "Measurement": "log fold change in sgRNA abundance comparing post-selection to pre-selection timepoints in a genome-wide perturbation screen",
+        "Task": "Identify genes whose CRISPRi knockdown causes a strong transcriptomic response in the K562 genome-wide Perturb-seq screen",
+        "Measurement": "anderson_darling_counts: the number of expressed genes significantly shifted by the perturbation, taking the maximum across a gene's targeted transcription start sites; hits are the top 10% by this count after excluding CEGv2 genes",
     },
     # Reason-vs-recall validation: the Schmidt CRISPRa (gain-of-function) arm. Framed like Steinhart
     # ("upon activation ...") so the LLM knows it is an OVER-EXPRESSION screen, not knockdown — without
@@ -89,6 +90,19 @@ HARDCODED_TASKS: dict[str, dict[str, str]] = {
     "IFNG_crispra": {
         "Task": "identify genes that, when activated (over-expressed via CRISPRa), regulate the production of Interferon-gamma (IFN-gamma) in primary human T cells",
         "Measurement": "the log fold change in normalized sgRNA read counts between IFN-gamma-high and IFN-gamma-low sorting bins in a genome-wide CRISPR activation (CRISPRa) screen",
+    },
+}
+
+# Kept byte-for-byte for historical paper reproduction. Active prompts must follow the actual
+# label construction in workspace/evaluation/prep_replogle{,_gwps}.py, not essentiality/fitness.
+LEGACY_REPLOGLE_TASKS: dict[str, dict[str, str]] = {
+    "Replogle_K562_essential": {
+        "Task": "Identify essential genes required for the survival and proliferation of K562 chronic myelogenous leukemia (CML) cells",
+        "Measurement": "the fitness effect (depletion) of gene knockout as measured by sgRNA read count changes in a genome-wide CRISPR screen",
+    },
+    "Replogle_K562_gwps": {
+        "Task": "Identify genes whose knockout significantly affects the fitness (growth or survival) of K562 chronic myelogenous leukemia (CML) cells",
+        "Measurement": "log fold change in sgRNA abundance comparing post-selection to pre-selection timepoints in a genome-wide perturbation screen",
     },
 }
 
@@ -105,6 +119,9 @@ def _load_auth_token() -> str:
 
 
 def _load_task(dataset_name: str) -> dict[str, str]:
+    if (task_prompt_protocol() == LEGACY_TASK_PROMPT_PROTOCOL
+            and dataset_name in LEGACY_REPLOGLE_TASKS):
+        return LEGACY_REPLOGLE_TASKS[dataset_name]
     prompt_file = TASK_PROMPT_FILES.get(dataset_name)
     if prompt_file:
         path = TASK_PROMPTS_DIR / prompt_file

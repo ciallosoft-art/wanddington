@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # Raise the BioDiscoveryAgent two-gene baseline from three replicates to twenty.
 #
 # Three was a cost decision when each run was expected to be slow; with the real gene library injected

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # Attribute the combinatorial-tier fusion repair to its two independent parts.
 #
 # The reported C-arm scores Score(g) = 0.80*ml(g) + 0.20*1[g in named]. On Horlbeck that is the wrong

@@ -23,7 +23,7 @@ from pathlib import Path
 from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .llm_reasoning_arm import _load_task
-from ..config import ACTIVE_MEMORY_PATH
+from ..config import ACTIVE_MEMORY_PATH, LEGACY_TASK_PROMPT_PROTOCOL, task_prompt_protocol
 from ..llm_client import LLMClient, default_model_for_backend
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -47,10 +47,28 @@ def _load_memory(memory_path: Path, exclude_dataset: str) -> list[dict]:
         return []
     with open(memory_path) as f:
         all_entries = json.load(f)
-    # A failed verifier entry is retained on disk for auditability, but must never become model
-    # context. Historical files without the field predate the admission gate and remain compatible.
+    # Only the explicit frozen prompt protocol may consume pre-versioned memory. Active runs must
+    # rebuild calibration/memory after the Replogle phenotype correction, including cross-screen
+    # strategy summaries whose performance evidence used the old prompts.
+    expected = task_prompt_protocol()
+    compatible = []
+    skipped = 0
+    for entry in all_entries:
+        version = entry.get("generator", {}).get("task_prompt_protocol")
+        if version == expected or (version is None and expected == LEGACY_TASK_PROMPT_PROTOCOL):
+            compatible.append(entry)
+        elif entry.get("verified") is True and entry.get("dataset") != exclude_dataset:
+            skipped += 1
+    if skipped:
+        warnings.warn(
+            f"ignored {skipped} memory entries from an incompatible task-prompt protocol at "
+            f"{memory_path}; rebuild calibration and verified memory for {expected}",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+    # Failed verifier entries remain on disk for auditability but never enter model context.
     return [
-        e for e in all_entries
+        e for e in compatible
         if e.get("dataset") != exclude_dataset and e.get("verified") is True
     ]
 

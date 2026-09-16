@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Use task prompts matched to the actual Perturb-seq readout definitions.
+export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # GPT-5.6 Luna component ablations (twenty evaluation replicates).
 #
 # Re-runs the paired component ablation of the C-arm on the GPT backend, reusing the strictly verified
