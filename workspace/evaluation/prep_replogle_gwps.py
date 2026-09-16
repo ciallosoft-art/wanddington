@@ -7,12 +7,16 @@ Output: ground_truth_Replogle_K562_gwps.csv  (Gene, Score)
         topmovers_Replogle_K562_gwps.npy      (hit gene names)
 
 Data format (bulk h5ad, 11258 obs × 8248 vars):
-  Each obs = one perturbation condition (gene × guide combo)
-  Index: "{idx}_{GENE}_{guide}_{ENSEMBL}"
+  Each obs = one targeted TSS, NOT one sgRNA: the third index field is a promoter id
+  (P1, P1P2, ...), since CRISPRi targets transcription start sites and a gene with two
+  promoters is measured at each. 11258 rows -> 9867 genes; 789 genes have more than one
+  row (nearly all of them P1 and P2), and 585 rows are NON-TARGETING controls. Individual
+  guides were already collapsed upstream by Replogle et al.
+  Index: "{idx}_{GENE}_{TSS}_{ENSEMBL}"
   Key columns: anderson_darling_counts, energy_test_p_value, core_control
 
 Hit definition:
-  Score = max anderson_darling_counts across guides per gene.
+  Score = max anderson_darling_counts across a gene's TSSs (its strongest promoter).
   AD counts = number of expressed genes significantly shifted (A-D test).
   Top-10% by score = hit  (matches Replogle essential convention).
   CEGv2 filter applied (BDA convention).
@@ -44,7 +48,7 @@ def load_essential() -> set[str]:
 
 
 def parse_gene(idx: str) -> str:
-    """'{num}_{GENE}_{guide}_{ENSEMBL}' → GENE (uppercase)."""
+    """'{num}_{GENE}_{TSS}_{ENSEMBL}' → GENE (uppercase). The TSS field is a promoter id."""
     parts = idx.split("_")
     return parts[1].upper() if len(parts) >= 2 else idx.upper()
 
@@ -67,14 +71,14 @@ def main():
     obs = obs[~obs["core_control"].astype(bool)].copy()
     print(f"  Removed {n_ctrl} core_control rows → {len(obs)} perturbation rows")
 
-    # Per-gene: take best (max) AD counts across guides
+    # Per-gene: take best (max) AD counts across the gene's TSSs
     gene_df = (
         obs.groupby("gene")["anderson_darling_counts"]
         .max()
         .reset_index()
         .rename(columns={"anderson_darling_counts": "Score"})
     )
-    print(f"  Unique genes (after aggregating guides): {len(gene_df)}")
+    print(f"  Unique genes (after aggregating TSSs): {len(gene_df)}")
 
     # CEGv2 filter
     gene_df = gene_df[~gene_df["gene"].isin(essential)].reset_index(drop=True)
