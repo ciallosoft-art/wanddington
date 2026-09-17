@@ -32,6 +32,10 @@ back to the scientist, so choose genes that are textbook-certain for this biolog
 Return ONLY a JSON array of official human gene symbols, e.g. ["GPX4","SLC7A11","ACSL4"]`;
 
 const GENE_RE = /\b[A-Z][A-Z0-9-]{1,14}\b/g;
+// Whole-token validator. Deliberately NOT global: a /g regex carries lastIndex across .test()
+// calls, which silently drops every other gene when used in a filter. Anchored too, so a token
+// only passes if the WHOLE string is a symbol -- \b alone accepts "TP53 (tumour suppressor)".
+const GENE_TOKEN_RE = /^[A-Z][A-Z0-9-]{1,14}$/;
 const STOP = new Set([
   "YES", "NO", "OK", "OKAY", "USE", "THE", "AND", "OR", "GENES", "GENE", "ANCHORS", "ANCHOR",
   "CONFIRM", "INSTEAD", "ADD", "REMOVE", "DROP", "PLEASE", "CSV", "TSV", "TXT", "MAGECK", "I", "A",
@@ -77,6 +81,15 @@ export async function extractPhenotype(message, modelSpec) {
   }
 }
 
+/** Uppercase, de-duplicate and keep only well-formed gene symbols; at most 12. */
+export function normalizeAnchors(genes) {
+  return [...new Set(
+    (Array.isArray(genes) ? genes : [])
+      .map((g) => String(g).trim().toUpperCase())
+      .filter((g) => GENE_TOKEN_RE.test(g)),
+  )].slice(0, 12);
+}
+
 export async function proposeAnchors(task, measurement, modelSpec) {
   const raw = await complete({
     spec: modelSpec,
@@ -87,7 +100,7 @@ export async function proposeAnchors(task, measurement, modelSpec) {
   });
   const arr = parseJson(raw);
   const genes = Array.isArray(arr) ? arr : parseGenes(raw);
-  return [...new Set(genes.map((g) => String(g).trim().toUpperCase()).filter((g) => GENE_RE.test(g)))].slice(0, 12);
+  return normalizeAnchors(genes);
 }
 
 /** Begin onboarding; immediately advances to the first thing we actually need. */
