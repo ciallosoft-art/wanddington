@@ -16,7 +16,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 MODEL="openai-codex/gpt-5.6-luna"
-RESULT_DIR="workspace/results/gpt/gpt_5_6_luna_none_20rep"
+RESULT_DIR="${WADDINGTON_GPT_RESULT_DIR:-workspace/results/gpt/gpt_5_6_luna_none_20rep}"
 CALIBRATION_RESULT="$RESULT_DIR/calibration_20rep.json"
 MEMORY_PATH="$RESULT_DIR/experience_memory.json"
 C_RESULT="$RESULT_DIR/waddington_c_20rep.json"
@@ -62,9 +62,9 @@ if ! flock -n 9; then
   exit 1
 fi
 
-echo "=== Experiment 04: GPT-5.6 Luna / reasoning none ==="
+echo "=== Experiment 05: GPT-5.6 Luna / reasoning none (twenty replicates) ==="
 echo "Protocol: nine screens x twenty evaluation replicates x five rounds"
-echo "LLM calls: GPT-B 225 + memory generation/verification + GPT-C 225"
+echo "LLM calls: GPT-B 900 + memory generation/verification + GPT-C 900"
 echo "Checkpoint directory: $RESULT_DIR"
 echo
 
