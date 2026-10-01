@@ -32,7 +32,8 @@ case "$GROUP" in
   genept)  DET="genept_lr genept_lgbm";      SEEDED="" ;;
   acquisition) DET=""; SEEDED="" ;;  # explicit arm list below
   svm)     DET="svm_linear";                 SEEDED="" ;;  # svm_rbf runs screen-parallel below
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm]" >&2; exit 2 ;;
+  svm_rbf) DET="";                           SEEDED="" ;;  # only the screen-parallel svm_rbf part
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -48,9 +49,11 @@ if [ "$GROUP" = acquisition ]; then
   run "ml_acq_greedy ml_acq_ucb05 ml_acq_ucb1 ml_acq_thompson ml_acq_margin" 5 "$OUT/acquisition_seeded.json"
   echo "done -> $OUT"; exit 0
 fi
-echo "== $GROUP: deterministic engines ($DET), 2 replicates"
-run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
-if [ "$GROUP" = svm ]; then
+if [ -n "$DET" ]; then
+  echo "== $GROUP: deterministic engines ($DET), 2 replicates"
+  run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
+fi
+if [ "$GROUP" = svm ] || [ "$GROUP" = svm_rbf ]; then
   # The Nystroem-RBF SVM spends ~30 s per fit in single-threaded liblinear (200 landmarks). Screens are
   # independent, so run one single-threaded process per screen, three at a time: five at a time with
   # 500 landmarks contended for memory bandwidth and ran ~4x slower (see ml_engines/_aborted_svm_rbf_500).
