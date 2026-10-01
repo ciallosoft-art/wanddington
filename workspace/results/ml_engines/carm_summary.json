@@ -1,0 +1,89 @@
+{
+  "reference": {
+    "source": "workspace/results/gpt/replogle_transcriptomics_v2_20rep/main_table_20rep.json",
+    "per_screen": {
+      "IFNG": 0.184155,
+      "IL2": 0.336395,
+      "Sanchez21": 0.088235,
+      "Sanchez21_down": 0.09361000000000001,
+      "Carnevale22": 0.06515000000000001,
+      "Scharenberg22": 0.5051,
+      "Steinhart": 0.11548499999999999,
+      "Replogle_K562_essential": 0.60713,
+      "Replogle_K562_gwps": 0.34788500000000006
+    },
+    "mean": 0.26034944444444447
+  },
+  "arms": {
+    "waddington_c__gnn": {
+      "per_screen": {
+        "IFNG": 0.16508,
+        "IL2": 0.29897999999999997,
+        "Sanchez21": 0.07054,
+        "Sanchez21_down": 0.0868,
+        "Carnevale22": 0.06382,
+        "Scharenberg22": 0.5102,
+        "Steinhart": 0.11722000000000002,
+        "Replogle_K562_essential": 0.66032,
+        "Replogle_K562_gwps": 0.36386
+      },
+      "mean": 0.25964666666666664,
+      "replicates": 5,
+      "vs_reported_c": {
+        "delta": -0.0007027777777777774,
+        "ci95": [
+          -0.01533962500000001,
+          0.015235847222222227
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      },
+      "llm_contribution": {
+        "delta": 0.010853333333333331,
+        "ci95": [
+          -0.0029756666666667132,
+          0.025466999999999993
+        ],
+        "wins": 6,
+        "ties": 0,
+        "losses": 3
+      }
+    },
+    "waddington_c__mlp": {
+      "per_screen": {
+        "IFNG": 0.16409999999999997,
+        "IL2": 0.31104000000000004,
+        "Sanchez21": 0.06474,
+        "Sanchez21_down": 0.07854000000000001,
+        "Carnevale22": 0.06336,
+        "Scharenberg22": 0.53468,
+        "Steinhart": 0.12409999999999999,
+        "Replogle_K562_essential": 0.60634,
+        "Replogle_K562_gwps": 0.36147999999999997
+      },
+      "mean": 0.25648666666666664,
+      "replicates": 5,
+      "vs_reported_c": {
+        "delta": -0.0038627777777777783,
+        "ci95": [
+          -0.015113527777777792,
+          0.008151666666666677
+        ],
+        "wins": 3,
+        "ties": 0,
+        "losses": 6
+      },
+      "llm_contribution": {
+        "delta": 0.011173333333333348,
+        "ci95": [
+          -0.0010245555555555236,
+          0.024411611111111103
+        ],
+        "wins": 5,
+        "ties": 0,
+        "losses": 4
+      }
+    }
+  }
+}

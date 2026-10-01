@@ -203,6 +203,43 @@ def control(models: list[str] | None = None, seeds: tuple[int, ...] = (0, 1, 2))
     return out
 
 
+CARM_DIR = RES / "carm"
+CARM_REF = REPO / "workspace" / "results" / "gpt" / "replogle_transcriptomics_v2_20rep" / "main_table_20rep.json"
+
+
+def carm_summary() -> dict:
+    """Step 7: the full GPT C-arm with an alternative engine vs the reported C-arm of the corrected-prompt
+    20-replicate run (same code, memory and protocol), and vs the same engine without the LLM."""
+    ref_runs = json.loads(CARM_REF.read_text())
+    ref = {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in ref_runs[ds]["waddington_c"]])) for ds in BENCH}
+    ml_rows = json.loads(OUT.read_text())["rows"] if OUT.exists() else {}
+    out = {"reference": {"source": str(CARM_REF.relative_to(REPO)), "per_screen": ref,
+                         "mean": float(np.mean(list(ref.values())))}, "arms": {}}
+    arms: dict[str, dict[str, list[dict]]] = {}
+    for p in sorted(CARM_DIR.glob("*.json")):
+        if p.name.endswith(".manifest.json"):
+            continue
+        for ds, by_arm in json.loads(p.read_text()).items():
+            if isinstance(by_arm, dict):
+                for arm, runs in by_arm.items():
+                    if isinstance(runs, list) and arm.startswith("waddington_c__"):
+                        arms.setdefault(arm, {})[ds] = arms.get(arm, {}).get(ds, []) + runs
+    for arm, by_ds in sorted(arms.items()):
+        if not all(ds in by_ds for ds in BENCH):
+            continue
+        model = arm[len("waddington_c__"):]
+        ps = _per_screen(by_ds)
+        row = {"per_screen": ps, "mean": float(np.mean([ps[ds] for ds in BENCH])),
+               "replicates": min(len(v) for v in by_ds.values()),
+               "vs_reported_c": _paired(ps, ref)}
+        ml = ml_rows.get(f"ml_engine_{model}")
+        if ml:  # what the LLM fusion adds on top of this engine
+            row["llm_contribution"] = _paired(ps, ml["per_screen"])
+        out["arms"][arm] = row
+    (RES / "carm_summary.json").write_text(json.dumps(out, indent=2))
+    return out
+
+
 def figure(res: dict) -> Path:
     import matplotlib.pyplot as plt
     from . import style as S
@@ -274,3 +311,12 @@ if __name__ == "__main__":
     print("figure ->", figure(r))
     if "--control" in sys.argv:
         control()
+    if CARM_DIR.exists():
+        cs = carm_summary()
+        print(f"full GPT C-arm with a swapped engine (reference {cs['reference']['mean']:.4f}, "
+              f"{cs['reference']['source']}):")
+        for arm, v in cs["arms"].items():
+            d, l = v["vs_reported_c"], v.get("llm_contribution")
+            print(f"  {arm:20s} {v['mean']:.4f} (x{v['replicates']})  vs reported C {d['delta']:+.4f} "
+                  f"[{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}] {d['wins']}/{d['ties']}/{d['losses']}"
+                  + ("" if l is None else f"  | LLM adds {l['delta']:+.4f} [{l['ci95'][0]:+.4f}, {l['ci95'][1]:+.4f}]"))
