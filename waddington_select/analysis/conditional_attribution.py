@@ -6,16 +6,17 @@ at 46.5%, vs.14.7% for ML-only picks. A reviewer rightly asked whether that is a
 endorsement or a confound: agreement genes might simply be the ones with the highest ML score, so the
 LLM adds nothing once the ML score is held fixed.
 
-This probe controls for the ML score two ways, on the SELECTED genes of the eight weighted-route screens
-(the `two_stage` screen K562-GWPS is excluded: there the ML shortlists and the LLM picks from the
-shortlist, so the "would the ML have picked it" counterfactual — and therefore the source label — is
-degenerate and every pick is tagged llm_only):
+This probe controls for the ML score two ways, on the SELECTED genes of all nine screens. (The Claude
+predecessor's legacy router sent K562-GWPS through a `two_stage` policy, where the ML shortlists and the
+LLM picks from the shortlist, so the source label is degenerate and that screen had to be dropped. The
+GPT system runs the same weighted fusion on every screen, so nothing is excluded; the earlier
+eight-screen output is kept as conditional_attribution_eight_screens.json.)
 
-  1. Stratified: bin each screen's selected genes into ML-score deciles (within screen, so per-screen
-     model scale cancels), then within each decile compare the hit rate of LLM-endorsed vs. non-endorsed
-     genes. If endorsement helps at matched ML score, the endorsed hit rate exceeds the non-endorsed one
-     inside deciles, not just marginally.
-  2. Logistic regression: hit ~ ml_rank_pct + endorsed, pooled over the eight screens with screen fixed
+  1. Stratified: bin each screen's selected genes into ML-score deciles and tertiles (within screen, so
+     per-screen model scale cancels), then within each bin compare the hit rate of LLM-endorsed vs.
+     non-endorsed genes. If endorsement helps at matched ML score, the endorsed hit rate exceeds the
+     non-endorsed one inside bins, not just marginally.
+  2. Logistic regression: hit ~ ml_rank_pct + endorsed, pooled over the screens with screen fixed
      effects. The sign and magnitude of the `endorsed` coefficient is the ML-score-adjusted value of
      endorsement; we report it as a conditional odds ratio with a screen-clustered bootstrap CI.
 
@@ -33,8 +34,8 @@ REPO = Path(__file__).resolve().parents[2]
 ATTR = REPO / "workspace" / "results" / "attribution_9ds.json"
 OUT = REPO / "workspace" / "results" / "conditional_attribution.json"
 
-# two_stage screen: source attribution is degenerate (LLM picks from the ML shortlist), so drop it.
-EXCLUDE = {"Replogle_K562_gwps"}
+# Screens whose source labels are degenerate. Empty on GPT: no screen is routed two_stage (see docstring).
+EXCLUDE: set[str] = set()
 
 
 def _rows_from_pooled(attr: dict, screen_of_round: list[str]) -> list[dict]:
@@ -87,6 +88,34 @@ def _decile_table(rows: list[dict]) -> dict:
     return {"deciles": table}
 
 
+def _tertile_table(rows: list[dict]) -> dict:
+    """Within-screen ML-score tertiles (the paper's tab:cond_attrib), pooled and per screen. The per-screen
+    cells show whether a pooled tertile pattern is carried by one screen."""
+    by_screen: dict[str, list[dict]] = {}
+    for r in rows:
+        by_screen.setdefault(r["screen"], []).append(r)
+    for rs in by_screen.values():
+        rs.sort(key=lambda r: r["ml_score"])
+        n = len(rs)
+        for i, r in enumerate(rs):
+            r["tertile"] = min(2, int(3 * i / n))
+
+    def cells(rr):
+        out = []
+        for t, name in enumerate(("bottom", "middle", "top")):
+            e = [int(r["hit"]) for r in rr if r["tertile"] == t and r["endorsed"]]
+            ne = [int(r["hit"]) for r in rr if r["tertile"] == t and not r["endorsed"]]
+            er = sum(e) / len(e) if e else None
+            nr = sum(ne) / len(ne) if ne else None
+            out.append({"tertile": name, "endorsed_n": len(e), "endorsed_hits": sum(e), "endorsed_hit_rate": er,
+                        "not_endorsed_n": len(ne), "not_endorsed_hits": sum(ne), "not_endorsed_hit_rate": nr,
+                        "ratio": (er / nr) if er is not None and nr else None})
+        return out
+
+    return {"tertiles": cells(rows),
+            "tertiles_per_screen": {s: cells(rs) for s, rs in sorted(by_screen.items())}}
+
+
 def _irls(X, y, iters=50):
     """Newton/IRLS logistic fit; returns the coefficient vector. Pure numpy, no statsmodels dep."""
     b = np.zeros(X.shape[1])
@@ -119,7 +148,7 @@ def _design(rr, screens):
 
 
 def _or_jackknife(rows: list[dict]) -> dict:
-    """Leave-one-screen-out robustness for the endorsement OR: with only eight clusters, a single screen
+    """Leave-one-screen-out robustness for the endorsement OR: with only nine clusters, a single screen
     could drive the effect. Drop each screen, refit, and report the range of the adjusted OR."""
     all_screens = sorted({r["screen"] for r in rows})
     per = {}
@@ -178,6 +207,7 @@ def run() -> dict:
             "not_endorsed": _rate([r for r in rows if not r["endorsed"]]),
         },
         **_decile_table(rows),
+        **_tertile_table(rows),
         "logit": _logit_or(rows),
     }
     OUT.write_text(json.dumps(res, indent=2))
@@ -200,6 +230,10 @@ if __name__ == "__main__":
         e = f"{d['endorsed_hit_rate']*100:4.1f}% ({d['endorsed_n']})" if d["endorsed_hit_rate"] is not None else "   -   "
         ne = f"{d['not_endorsed_hit_rate']*100:4.1f}% ({d['not_endorsed_n']})" if d["not_endorsed_hit_rate"] is not None else "   -   "
         print(f"      {d['decile']:2d}        |  {e:18s} |  {ne}")
+    print("\nML-score tertile |  endorsed hit%(n)  |  not-endorsed hit%(n)  | ratio")
+    for t in r["tertiles"]:
+        print(f"  {t['tertile']:6s}         |  {t['endorsed_hit_rate']*100:4.1f}% ({t['endorsed_n']:4d})    |  "
+              f"{t['not_endorsed_hit_rate']*100:4.1f}% ({t['not_endorsed_n']:4d})        | {t['ratio']:.2f}x")
     lg = r["logit"]
     print(f"\nlogistic (hit ~ ml_rank + endorsed + screen FE):")
     print(f"  endorsed OR = {lg['endorsed_odds_ratio']:.2f}  "
