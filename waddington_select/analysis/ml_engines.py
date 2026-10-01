@@ -68,6 +68,37 @@ def _seed_spread(runs_by_ds: dict[str, list[dict]]) -> float | None:
     return float(np.std(means, ddof=1))
 
 
+LABEL_FREE_FEATURES = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm", "hub_score_norm",
+                       "ppi_score_sum", "string_degree_norm", "reactome_pathway_count_norm", "pli_score"]
+
+
+def label_free_baselines() -> dict[str, dict[str, float]]:
+    """No training at all: walk down a single gene-level feature from high to low (static, 5 rounds of B).
+    Post-hoc reference rows (added after the label-permutation control showed how predictive the raw
+    features are), not part of the pre-registered comparison. DepMap columns exist for every screen's
+    genes in the v3 table, so these run on all nine screens even where the C-arm's policy drops DepMap."""
+    import pandas as pd
+    from ..oracle import DatasetOracle
+    df = pd.read_csv(REPO / "workspace" / "evaluation" / "lgbm_training_data_v3.csv")
+    df["gene"] = df["gene"].str.strip().str.upper()
+    out = {}
+    for f in LABEL_FREE_FEATURES:
+        out[f] = {}
+        for ds in BENCH:
+            tf = df[df["dataset"] == ds]
+            o = DatasetOracle(ds)
+            top = tf.sort_values(f, ascending=False, kind="stable")["gene"].tolist()[: 5 * BATCH_SIZES[ds]]
+            out[f][ds] = sum(o.reveal(top).values()) / o.total_hits
+    return out
+
+
+def _c_reference() -> dict[str, float]:
+    """The reported full system (GPT C-arm, 20 replicates) per screen, for context only."""
+    main = json.loads((REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep"
+                       / "main_table_20rep.json").read_text())
+    return {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in main[ds]["waddington_c"]])) for ds in BENCH}
+
+
 def summarize() -> dict:
     arms = _load()
     complete = {a: v for a, v in arms.items() if all(ds in v for ds in BENCH)}
@@ -95,41 +126,66 @@ def summarize() -> dict:
             on["online_minus_static"] = _paired(on["per_screen"], st["per_screen"])
     online = [r for a, r in rows.items() if r["online"] and a != REF and r["probabilistic"]]
     candidates = [r["model"] for r in sorted(online, key=lambda r: -r["mean"])[:2]]
+    c_ref = _c_reference()
+    free = {}
+    for f, ps in label_free_baselines().items():
+        free[f] = {"per_screen": ps, "mean": float(np.mean([ps[ds] for ds in BENCH])),
+                   "ml_engine_minus_this": _paired(ref, ps), "c_minus_this": _paired(c_ref, ps)}
     res = {"rows": rows, "reference": REF, "stage_b_candidates": candidates,
-           "missing_engines": sorted(set(engine_names()) - {r["model"] for r in rows.values()})}
+           "missing_engines": sorted(set(engine_names()) - {r["model"] for r in rows.values()}),
+           "c_20rep_reference": {"per_screen": c_ref, "mean": float(np.mean(list(c_ref.values()))),
+                                 "c_minus_ml_engine": _paired(c_ref, ref)},
+           "label_free_post_hoc": free}
     OUT.write_text(json.dumps(res, indent=2))
     return res
 
 
-def control(models: list[str] | None = None, seed: int = 0) -> dict:
-    """Leakage control: train each engine's STATIC prior on labels permuted within every training screen
-    and check that the top-5B recall falls to the random expectation 5B/N. A leak of target labels into
-    the features or the pipeline would keep it high."""
+def control(models: list[str] | None = None, seeds: tuple[int, ...] = (0, 1, 2)) -> dict:
+    """Label-permutation controls on each engine's STATIC prior (top-5B recall vs the random 5B/N).
+
+    global  — permute the labels across ALL training rows. No label information survives, so the
+              recall must fall to the random expectation; staying high would mean target labels reach
+              the model through the features or the pipeline (the leakage null).
+    within  — permute labels inside each training screen only. Each screen keeps its hit RATE, and the
+              screens differ in composition (K562-Essential is 623 essential genes at a 10% hit rate,
+              the genome-wide screens are 4-5%), so a model can still learn "essential, central genes
+              are hits more often" from between-screen differences. Not a leak — it uses other screens'
+              labels only — but it measures how much of a prior is screen composition rather than
+              gene-level pattern. (A first version of this control used only this mode and was misread
+              as a leak; see docs/ml_engines_plan.md, step 5.)
+    """
     from ..arms.ml_engine_arm import MLEngineArm
     from ..oracle import DatasetOracle
     models = models or engine_names()
     out = {}
     for m in models:
-        rec = {}
-        for ds in BENCH:
-            bs = BATCH_SIZES[ds]
-            arm = MLEngineArm(ds, bs, model=m, online=False, seed=seed)
-            rng = np.random.default_rng(seed)
-            lab = arm._loo_train["label"].to_numpy().copy()
-            for d in arm._loo_train["dataset"].unique():
-                idx = np.flatnonzero(arm._loo_train["dataset"].to_numpy() == d)
-                lab[idx] = rng.permutation(lab[idx])
-            arm._loo_train["label"] = lab
-            arm._rebuild_ranking()
-            oracle = DatasetOracle(ds)
-            top = arm._ranking[: 5 * bs]
-            found = sum(oracle.reveal(top).values())
-            rec[ds] = {"recall": found / oracle.total_hits, "random": 5 * bs / oracle.n_genes}
-        out[m] = {"per_screen": rec,
-                  "mean_recall": float(np.mean([v["recall"] for v in rec.values()])),
-                  "mean_random": float(np.mean([v["random"] for v in rec.values()]))}
-        print(f"  {m:12s} shuffled-label static recall {out[m]['mean_recall']:.3f}  "
-              f"(random {out[m]['mean_random']:.3f})", flush=True)
+        out[m] = {}
+        for mode in ("global", "within"):
+            rec = {ds: [] for ds in BENCH}
+            for seed in seeds:
+                for ds in BENCH:
+                    bs = BATCH_SIZES[ds]
+                    arm = MLEngineArm(ds, bs, model=m, online=False, seed=seed)
+                    rng = np.random.default_rng(seed)
+                    lab = arm._loo_train["label"].to_numpy().copy()
+                    if mode == "global":
+                        lab = rng.permutation(lab)
+                    else:
+                        dsets = arm._loo_train["dataset"].to_numpy()
+                        for d in np.unique(dsets):
+                            idx = np.flatnonzero(dsets == d)
+                            lab[idx] = rng.permutation(lab[idx])
+                    arm._loo_train["label"] = lab
+                    arm._rebuild_ranking()
+                    oracle = DatasetOracle(ds)
+                    found = sum(oracle.reveal(arm._ranking[: 5 * bs]).values())
+                    rec[ds].append(found / oracle.total_hits)
+            per = {ds: float(np.mean(v)) for ds, v in rec.items()}
+            out[m][mode] = {"per_screen": per, "mean_recall": float(np.mean(list(per.values()))),
+                            "seeds": list(seeds)}
+        out[m]["random"] = float(np.mean([5 * BATCH_SIZES[ds] / DatasetOracle(ds).n_genes for ds in BENCH]))
+        print(f"  {m:12s} static recall with labels permuted globally {out[m]['global']['mean_recall']:.3f} | "
+              f"within screens {out[m]['within']['mean_recall']:.3f} | random {out[m]['random']:.3f}", flush=True)
     (RES / "control.json").write_text(json.dumps(out, indent=2))
     return out
 
@@ -188,6 +244,14 @@ if __name__ == "__main__":
                          f"{d['wins']}/{d['ties']}/{d['losses']}")
         print("  ".join(parts))
     print("stage-B candidates:", r["stage_b_candidates"], "| not yet run:", r["missing_engines"])
+    c = r["c_20rep_reference"]
+    print(f"full C (20-rep) {c['mean']:.4f}; C - ML engine {c['c_minus_ml_engine']['delta']:+.4f} "
+          f"[{c['c_minus_ml_engine']['ci95'][0]:+.4f}, {c['c_minus_ml_engine']['ci95'][1]:+.4f}]")
+    print("label-free single-feature rankings (post hoc, no training):")
+    for f, v in sorted(r["label_free_post_hoc"].items(), key=lambda kv: -kv[1]["mean"]):
+        d = v["c_minus_this"]
+        print(f"  {f:28s} {v['mean']:.4f}   C - this {d['delta']:+.4f} [{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}] "
+              f"{d['wins']}/{d['ties']}/{d['losses']}")
     print("figure ->", figure(r))
     if "--control" in sys.argv:
         control()
