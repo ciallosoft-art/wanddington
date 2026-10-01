@@ -102,6 +102,7 @@ def _c_reference() -> dict[str, float]:
 def summarize() -> dict:
     arms = _load()
     complete = {a: v for a, v in arms.items() if all(ds in v for ds in BENCH)}
+    acq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_acq_")}
     if REF not in complete:
         raise SystemExit(f"{REF} missing or incomplete; run experiments/15_ml_engines.sh tabular first")
     ref = _per_screen(complete[REF])
@@ -126,6 +127,17 @@ def summarize() -> dict:
             on["online_minus_static"] = _paired(on["per_screen"], st["per_screen"])
     online = [r for a, r in rows.items() if r["online"] and a != REF and r["probabilistic"]]
     candidates = [r["model"] for r in sorted(online, key=lambda r: -r["mean"])[:2]]
+    acq_rows = {}
+    if "ml_acq_greedy" in acq:  # step 6: rules compared on the same LightGBM ensemble
+        greedy = _per_screen(acq["ml_acq_greedy"])
+        for arm, by_ds in sorted(acq.items()):
+            ps = _per_screen(by_ds)
+            acq_rows[arm] = {"rule": arm[len("ml_acq_"):], "per_screen": ps,
+                             "mean": float(np.mean([ps[ds] for ds in BENCH])),
+                             "replicates": min(len(v) for v in by_ds.values()),
+                             "seed_sd_of_mean": _seed_spread(by_ds),
+                             "vs_ensemble_greedy": None if arm == "ml_acq_greedy" else _paired(ps, greedy),
+                             "vs_single_lightgbm": _paired(ps, ref)}
     c_ref = _c_reference()
     free = {}
     for f, ps in label_free_baselines().items():
@@ -135,7 +147,8 @@ def summarize() -> dict:
            "missing_engines": sorted(set(engine_names()) - {r["model"] for r in rows.values()}),
            "c_20rep_reference": {"per_screen": c_ref, "mean": float(np.mean(list(c_ref.values()))),
                                  "c_minus_ml_engine": _paired(c_ref, ref)},
-           "label_free_post_hoc": free}
+           "label_free_post_hoc": free,
+           "acquisition": acq_rows}
     OUT.write_text(json.dumps(res, indent=2))
     return res
 
@@ -247,6 +260,12 @@ if __name__ == "__main__":
     c = r["c_20rep_reference"]
     print(f"full C (20-rep) {c['mean']:.4f}; C - ML engine {c['c_minus_ml_engine']['delta']:+.4f} "
           f"[{c['c_minus_ml_engine']['ci95'][0]:+.4f}, {c['c_minus_ml_engine']['ci95'][1]:+.4f}]")
+    if r["acquisition"]:
+        print("acquisition rules (LightGBM 5-member bootstrap ensemble, 5 seeds):")
+        for arm, v in sorted(r["acquisition"].items(), key=lambda kv: -kv[1]["mean"]):
+            g, sgl = v["vs_ensemble_greedy"], v["vs_single_lightgbm"]
+            gtxt = "reference" if g is None else f"vs greedy {g['delta']:+.4f} [{g['ci95'][0]:+.4f}, {g['ci95'][1]:+.4f}] {g['wins']}/{g['ties']}/{g['losses']}"
+            print(f"  {v['rule']:9s} {v['mean']:.4f}  seed sd {v['seed_sd_of_mean']:.4f}  {gtxt}  | vs single LightGBM {sgl['delta']:+.4f}")
     print("label-free single-feature rankings (post hoc, no training):")
     for f, v in sorted(r["label_free_post_hoc"].items(), key=lambda kv: -kv[1]["mean"]):
         d = v["c_minus_this"]
