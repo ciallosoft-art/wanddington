@@ -33,6 +33,9 @@ import numpy as np
 REPO = Path(__file__).resolve().parents[2]
 ATTR = REPO / "workspace" / "results" / "attribution_9ds.json"
 OUT = REPO / "workspace" / "results" / "conditional_attribution.json"
+# The same analysis over the 20-replicate main run, replayed without LLM calls (replay_attribution.py).
+REPLAY = REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "attribution_replay_20rep.json"
+OUT_REPLAY = REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "conditional_attribution_20rep.json"
 
 # Screens whose source labels are degenerate. Empty on GPT: no screen is routed two_stage (see docstring).
 EXCLUDE: set[str] = set()
@@ -40,8 +43,11 @@ EXCLUDE: set[str] = set()
 
 def _rows_from_pooled(attr: dict, screen_of_round: list[str]) -> list[dict]:
     rows = []
-    for r, ds in zip(attr["pooled"]["rounds"], screen_of_round):
-        if ds in EXCLUDE:
+    for i, r in enumerate(attr["pooled"]["rounds"]):
+        # Rounds carry their screen; positional order is only a fallback. (A zip against a 5-per-screen
+        # order list would silently truncate the 900-round replay to its first 45 rounds.)
+        ds = r.get("dataset") or screen_of_round[i]
+        if ds in EXCLUDE or not r.get("verified", True):
             continue
         for g in r["genes"]:
             if "hit" not in g:
@@ -196,10 +202,11 @@ def _logit_or(rows: list[dict], n_boot: int = 2000, seed: int = 0) -> dict:
     }
 
 
-def run() -> dict:
-    attr = json.loads(ATTR.read_text())
+def run(source: Path = ATTR, out: Path = OUT) -> dict:
+    attr = json.loads(source.read_text())
     rows = _rows_from_pooled(attr, _screen_order(attr))
     res = {
+        "source": str(source.relative_to(REPO)),
         "n_rows": len(rows),
         "excluded": sorted(EXCLUDE),
         "marginal": {
@@ -210,7 +217,7 @@ def run() -> dict:
         **_tertile_table(rows),
         "logit": _logit_or(rows),
     }
-    OUT.write_text(json.dumps(res, indent=2))
+    out.write_text(json.dumps(res, indent=2))
     return res
 
 
@@ -219,8 +226,11 @@ def _rate(rr):
 
 
 if __name__ == "__main__":
-    r = run()
-    print(f"rows={r['n_rows']}  (excluded {r['excluded']})")
+    import sys
+    # --replay: the 20-replicate main run (replay_attribution.py) instead of the single traced campaign
+    src, OUT = (REPLAY, OUT_REPLAY) if "--replay" in sys.argv else (ATTR, OUT)
+    r = run(src, OUT)
+    print(f"rows={r['n_rows']}  (excluded {r['excluded']})  source={r['source']}")
     print(f"marginal: endorsed {r['marginal']['endorsed']['hit_rate']*100:.1f}% "
           f"(n={r['marginal']['endorsed']['n']})  vs  "
           f"not {r['marginal']['not_endorsed']['hit_rate']*100:.1f}% "

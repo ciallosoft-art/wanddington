@@ -1,0 +1,436 @@
+{
+  "source": "workspace/results/gpt/gpt_5_6_luna_none_20rep/attribution_replay_20rep.json",
+  "n_rows": 96000,
+  "excluded": [],
+  "marginal": {
+    "endorsed": {
+      "n": 17888,
+      "hit_rate": 0.22193649373881932
+    },
+    "not_endorsed": {
+      "n": 78112,
+      "hit_rate": 0.18419705038918477
+    }
+  },
+  "deciles": [
+    {
+      "decile": 0,
+      "endorsed_n": 9232,
+      "endorsed_hit_rate": 0.20851386481802425,
+      "not_endorsed_n": 368,
+      "not_endorsed_hit_rate": 0.16847826086956522
+    },
+    {
+      "decile": 1,
+      "endorsed_n": 3859,
+      "endorsed_hit_rate": 0.19927442342575796,
+      "not_endorsed_n": 5741,
+      "not_endorsed_hit_rate": 0.145096673053475
+    },
+    {
+      "decile": 2,
+      "endorsed_n": 1012,
+      "endorsed_hit_rate": 0.20059288537549408,
+      "not_endorsed_n": 8588,
+      "not_endorsed_hit_rate": 0.14462040055891942
+    },
+    {
+      "decile": 3,
+      "endorsed_n": 585,
+      "endorsed_hit_rate": 0.17606837606837608,
+      "not_endorsed_n": 9015,
+      "not_endorsed_hit_rate": 0.14353854686633388
+    },
+    {
+      "decile": 4,
+      "endorsed_n": 633,
+      "endorsed_hit_rate": 0.23222748815165878,
+      "not_endorsed_n": 8967,
+      "not_endorsed_hit_rate": 0.15746626519460244
+    },
+    {
+      "decile": 5,
+      "endorsed_n": 554,
+      "endorsed_hit_rate": 0.18411552346570398,
+      "not_endorsed_n": 9046,
+      "not_endorsed_hit_rate": 0.16139730267521557
+    },
+    {
+      "decile": 6,
+      "endorsed_n": 581,
+      "endorsed_hit_rate": 0.21514629948364888,
+      "not_endorsed_n": 9019,
+      "not_endorsed_hit_rate": 0.1960306020623129
+    },
+    {
+      "decile": 7,
+      "endorsed_n": 473,
+      "endorsed_hit_rate": 0.3150105708245243,
+      "not_endorsed_n": 9127,
+      "not_endorsed_hit_rate": 0.21080311164676235
+    },
+    {
+      "decile": 8,
+      "endorsed_n": 536,
+      "endorsed_hit_rate": 0.4123134328358209,
+      "not_endorsed_n": 9064,
+      "not_endorsed_hit_rate": 0.23753309796999117
+    },
+    {
+      "decile": 9,
+      "endorsed_n": 423,
+      "endorsed_hit_rate": 0.5342789598108747,
+      "not_endorsed_n": 9177,
+      "not_endorsed_hit_rate": 0.2440884820747521
+    }
+  ],
+  "tertiles": [
+    {
+      "tertile": "bottom",
+      "endorsed_n": 14370,
+      "endorsed_hits": 2963,
+      "endorsed_hit_rate": 0.20619345859429367,
+      "not_endorsed_n": 17633,
+      "not_endorsed_hits": 2559,
+      "not_endorsed_hit_rate": 0.14512561674133725,
+      "ratio": 1.4207929876487615
+    },
+    {
+      "tertile": "middle",
+      "endorsed_n": 1892,
+      "endorsed_hits": 386,
+      "endorsed_hit_rate": 0.2040169133192389,
+      "not_endorsed_n": 30111,
+      "not_endorsed_hits": 4897,
+      "not_endorsed_hit_rate": 0.1626315964265551,
+      "ratio": 1.25447279496745
+    },
+    {
+      "tertile": "top",
+      "endorsed_n": 1626,
+      "endorsed_hits": 621,
+      "endorsed_hit_rate": 0.38191881918819187,
+      "not_endorsed_n": 30368,
+      "not_endorsed_hits": 6932,
+      "not_endorsed_hit_rate": 0.22826659641728134,
+      "ratio": 1.6731261830794881
+    }
+  ],
+  "tertiles_per_screen": {
+    "Carnevale22": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 2103,
+        "endorsed_hits": 201,
+        "endorsed_hit_rate": 0.09557774607703282,
+        "not_endorsed_n": 2164,
+        "not_endorsed_hits": 135,
+        "not_endorsed_hit_rate": 0.062384473197781884,
+        "ratio": 1.5320758704496225
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 278,
+        "endorsed_hits": 14,
+        "endorsed_hit_rate": 0.050359712230215826,
+        "not_endorsed_n": 3989,
+        "not_endorsed_hits": 240,
+        "not_endorsed_hit_rate": 0.06016545500125345,
+        "ratio": 0.8370203836930455
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 172,
+        "endorsed_hits": 74,
+        "endorsed_hit_rate": 0.43023255813953487,
+        "not_endorsed_n": 4094,
+        "not_endorsed_hits": 482,
+        "not_endorsed_hit_rate": 0.11773326819736199,
+        "ratio": 3.6542989481810286
+      }
+    ],
+    "IFNG": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 1689,
+        "endorsed_hits": 654,
+        "endorsed_hit_rate": 0.3872113676731794,
+        "not_endorsed_n": 2578,
+        "not_endorsed_hits": 356,
+        "not_endorsed_hit_rate": 0.13809154383242825,
+        "ratio": 2.804019398487237
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 72,
+        "endorsed_hits": 29,
+        "endorsed_hit_rate": 0.4027777777777778,
+        "not_endorsed_n": 4195,
+        "not_endorsed_hits": 791,
+        "not_endorsed_hit_rate": 0.18855780691299165,
+        "ratio": 2.1360970641944097
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 87,
+        "endorsed_hits": 40,
+        "endorsed_hit_rate": 0.45977011494252873,
+        "not_endorsed_n": 4179,
+        "not_endorsed_hits": 1086,
+        "not_endorsed_hit_rate": 0.2598707824838478,
+        "ratio": 1.7692258842954214
+      }
+    ],
+    "IL2": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 2206,
+        "endorsed_hits": 605,
+        "endorsed_hit_rate": 0.2742520398912058,
+        "not_endorsed_n": 2061,
+        "not_endorsed_hits": 247,
+        "not_endorsed_hit_rate": 0.11984473556525958,
+        "ratio": 2.288394551480871
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 133,
+        "endorsed_hits": 49,
+        "endorsed_hit_rate": 0.3684210526315789,
+        "not_endorsed_n": 4134,
+        "not_endorsed_hits": 763,
+        "not_endorsed_hit_rate": 0.1845670053217223,
+        "ratio": 1.9961371318203767
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 108,
+        "endorsed_hits": 32,
+        "endorsed_hit_rate": 0.2962962962962963,
+        "not_endorsed_n": 4158,
+        "not_endorsed_hits": 1505,
+        "not_endorsed_hit_rate": 0.36195286195286197,
+        "ratio": 0.8186046511627906
+      }
+    ],
+    "Replogle_K562_essential": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 313,
+        "endorsed_hits": 108,
+        "endorsed_hit_rate": 0.3450479233226837,
+        "not_endorsed_n": 754,
+        "not_endorsed_hits": 79,
+        "not_endorsed_hit_rate": 0.10477453580901856,
+        "ratio": 3.29324220487726
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 137,
+        "endorsed_hits": 54,
+        "endorsed_hit_rate": 0.39416058394160586,
+        "not_endorsed_n": 930,
+        "not_endorsed_hits": 158,
+        "not_endorsed_hit_rate": 0.16989247311827957,
+        "ratio": 2.320059133327174
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 90,
+        "endorsed_hits": 31,
+        "endorsed_hit_rate": 0.34444444444444444,
+        "not_endorsed_n": 976,
+        "not_endorsed_hits": 330,
+        "not_endorsed_hit_rate": 0.33811475409836067,
+        "ratio": 1.0187205387205387
+      }
+    ],
+    "Replogle_K562_gwps": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 1548,
+        "endorsed_hits": 807,
+        "endorsed_hit_rate": 0.5213178294573644,
+        "not_endorsed_n": 2719,
+        "not_endorsed_hits": 938,
+        "not_endorsed_hit_rate": 0.3449797719749908,
+        "ratio": 1.5111547743012514
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 192,
+        "endorsed_hits": 116,
+        "endorsed_hit_rate": 0.6041666666666666,
+        "not_endorsed_n": 4075,
+        "not_endorsed_hits": 1836,
+        "not_endorsed_hit_rate": 0.4505521472392638,
+        "ratio": 1.3409472585330429
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 418,
+        "endorsed_hits": 347,
+        "endorsed_hit_rate": 0.8301435406698564,
+        "not_endorsed_n": 3848,
+        "not_endorsed_hits": 2212,
+        "not_endorsed_hit_rate": 0.5748440748440748,
+        "ratio": 1.4441195047457538
+      }
+    ],
+    "Sanchez21": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 1803,
+        "endorsed_hits": 182,
+        "endorsed_hit_rate": 0.100942872989462,
+        "not_endorsed_n": 2464,
+        "not_endorsed_hits": 271,
+        "not_endorsed_hit_rate": 0.10998376623376624,
+        "ratio": 0.9177979300591673
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 195,
+        "endorsed_hits": 59,
+        "endorsed_hit_rate": 0.30256410256410254,
+        "not_endorsed_n": 4072,
+        "not_endorsed_hits": 437,
+        "not_endorsed_hit_rate": 0.10731827111984282,
+        "ratio": 2.8193158481488
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 203,
+        "endorsed_hits": 31,
+        "endorsed_hit_rate": 0.15270935960591134,
+        "not_endorsed_n": 4063,
+        "not_endorsed_hits": 531,
+        "not_endorsed_hit_rate": 0.13069160718680778,
+        "ratio": 1.1684710509958902
+      }
+    ],
+    "Sanchez21_down": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 1433,
+        "endorsed_hits": 183,
+        "endorsed_hit_rate": 0.12770411723656663,
+        "not_endorsed_n": 2834,
+        "not_endorsed_hits": 425,
+        "not_endorsed_hit_rate": 0.14996471418489768,
+        "ratio": 0.8515611017610113
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 193,
+        "endorsed_hits": 34,
+        "endorsed_hit_rate": 0.17616580310880828,
+        "not_endorsed_n": 4074,
+        "not_endorsed_hits": 509,
+        "not_endorsed_hit_rate": 0.1249386352479136,
+        "ratio": 1.4100186284190273
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 153,
+        "endorsed_hits": 30,
+        "endorsed_hit_rate": 0.19607843137254902,
+        "not_endorsed_n": 4113,
+        "not_endorsed_hits": 512,
+        "not_endorsed_hit_rate": 0.12448334548991004,
+        "ratio": 1.5751378676470589
+      }
+    ],
+    "Scharenberg22": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 238,
+        "endorsed_hits": 39,
+        "endorsed_hit_rate": 0.1638655462184874,
+        "not_endorsed_n": 829,
+        "not_endorsed_hits": 90,
+        "not_endorsed_hit_rate": 0.10856453558504221,
+        "ratio": 1.5093837535014007
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 70,
+        "endorsed_hits": 11,
+        "endorsed_hit_rate": 0.15714285714285714,
+        "not_endorsed_n": 997,
+        "not_endorsed_hits": 126,
+        "not_endorsed_hit_rate": 0.12637913741223672,
+        "ratio": 1.243424036281179
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 57,
+        "endorsed_hits": 34,
+        "endorsed_hit_rate": 0.5964912280701754,
+        "not_endorsed_n": 1009,
+        "not_endorsed_hits": 200,
+        "not_endorsed_hit_rate": 0.19821605550049554,
+        "ratio": 3.009298245614035
+      }
+    ],
+    "Steinhart": [
+      {
+        "tertile": "bottom",
+        "endorsed_n": 3037,
+        "endorsed_hits": 184,
+        "endorsed_hit_rate": 0.060586104708594005,
+        "not_endorsed_n": 1230,
+        "not_endorsed_hits": 18,
+        "not_endorsed_hit_rate": 0.014634146341463415,
+        "ratio": 4.14005048842059
+      },
+      {
+        "tertile": "middle",
+        "endorsed_n": 622,
+        "endorsed_hits": 20,
+        "endorsed_hit_rate": 0.03215434083601286,
+        "not_endorsed_n": 3645,
+        "not_endorsed_hits": 37,
+        "not_endorsed_hit_rate": 0.010150891632373114,
+        "ratio": 3.167637090466672
+      },
+      {
+        "tertile": "top",
+        "endorsed_n": 338,
+        "endorsed_hits": 2,
+        "endorsed_hit_rate": 0.005917159763313609,
+        "not_endorsed_n": 3928,
+        "not_endorsed_hits": 74,
+        "not_endorsed_hit_rate": 0.01883910386965377,
+        "ratio": 0.3140892371661602
+      }
+    ]
+  },
+  "logit": {
+    "endorsed_logodds": 0.925511257906162,
+    "endorsed_odds_ratio": 2.5231579150895524,
+    "or_ci95": [
+      1.7998228153088738,
+      3.4460023464490517
+    ],
+    "leave_one_screen_out": {
+      "per_dropped_screen": {
+        "Carnevale22": 2.5045507836464336,
+        "IFNG": 2.2719018952244325,
+        "IL2": 2.4527111166100926,
+        "Replogle_K562_essential": 2.4732767659549393,
+        "Replogle_K562_gwps": 2.4599146207830995,
+        "Sanchez21": 2.7429640234356185,
+        "Sanchez21_down": 2.8509855550862113,
+        "Scharenberg22": 2.5262805699612905,
+        "Steinhart": 2.462999423289745
+      },
+      "or_min": 2.2719018952244325,
+      "or_max": 2.8509855550862113,
+      "all_above_1": true
+    },
+    "n_screens": 9,
+    "n_genes": 96000,
+    "note": "OR>1 with CI excluding 1 => LLM endorsement predicts hits after adjusting for ML rank."
+  }
+}

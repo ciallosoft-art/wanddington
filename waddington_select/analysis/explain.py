@@ -27,8 +27,12 @@ def _save(fig, out: Path, name: str) -> Path:
     return p
 
 
-def attribution(trace: dict, out: Path, tag: str = "") -> Path:
-    """Left: what each round's batch was made of. Right: which source actually finds hits."""
+def attribution(trace: dict, out: Path, tag: str = "", runs: int = 1) -> Path:
+    """Left: what each round's batch was made of. Right: which source actually finds hits.
+
+    `runs` > 1 for a trace pooling several replicate runs per screen: the left panel then shows the mean
+    batch composition of one run (summing replicates would scale the bars, not inform them); the right
+    panel's rates pool every pick."""
     rounds = trace["rounds"]
     S.apply()
     fig, (ax1, ax2) = plt.subplots(
@@ -48,18 +52,19 @@ def attribution(trace: dict, out: Path, tag: str = "") -> Path:
     bottom = np.zeros(len(x))
     biggest = max(sum(per_round[i].values()) for i in x)
     for s in SOURCES:
-        vals = np.array([per_round[i][s] for i in x], dtype=float)
+        vals = np.array([per_round[i][s] for i in x], dtype=float) / runs
         ax1.bar(x, vals, bottom=bottom, width=0.62, color=S.SOURCE_COLOR[s],
                 label=S.SOURCE_LABEL[s], zorder=3, linewidth=2, edgecolor=S.SURFACE)
         for xi, v, b in zip(x, vals, bottom):
-            if v >= 0.05 * biggest:  # only label segments with room, never every mark
-                ax1.text(xi, b + v / 2, f"{int(v)}", ha="center", va="center",
+            if v >= 0.05 * biggest / runs:  # only label segments with room, never every mark
+                ax1.text(xi, b + v / 2, f"{v:.0f}", ha="center", va="center",
                          fontsize=8, color=S.SURFACE if s == "both" else S.INK)
         bottom += vals
 
     ax1.set_xticks(x)
     ax1.set_xlabel("Round")
-    ax1.set_ylabel("Genes selected (all screens)")
+    ax1.set_ylabel("Genes selected (all screens)" if runs == 1
+                   else f"Genes selected per run (all screens,\nmean of {runs} replicates)")
     ax1.set_title("What each batch was made of", color=S.INK, fontsize=11, loc="left", pad=8)
     ax1.legend(fontsize=8.5, labelcolor=S.INK_2, loc="upper center", ncols=3,
                bbox_to_anchor=(0.5, -0.22))
@@ -147,12 +152,13 @@ def calibration(trace: dict, out: Path, tag: str = "") -> Path:
     per_bin = int(np.mean(ns))
     ax.set_xlabel(f"ML score of the gene — quintiles of the tested genes (n≈{per_bin} each)")
     ax.set_ylabel("Observed hit rate (%)")
-    # Say what the data actually shows: the extremes separate, the middle is flat. And note the
-    # selection effect — these are only genes the agent chose to test, so the score range is narrow.
+    # State only the numbers; the curve's shape belongs in the caption, where it is checked against the
+    # data (a hard-coded "flat in the middle" outlived the data it described). Note the selection effect —
+    # these are only genes the agent chose to test, so the score range is narrow.
     lo, hi = rates[0], rates[-1]
     ax.set_title(
         f"Calibration — top quintile hits {hi:.0f}% vs {lo:.0f}% at the bottom\n"
-        "(monotone at the extremes, flat in the middle; only tested genes, so the score range is narrow)",
+        "(only tested genes, so the score range is narrow)",
         color=S.INK, fontsize=10.5, loc="left", pad=10)
     ax.set_ylim(0, max(rates) * 1.30)
     return _save(fig, out, f"08_calibration{tag}.png")
