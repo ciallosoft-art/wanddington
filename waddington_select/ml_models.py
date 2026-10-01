@@ -550,13 +550,15 @@ class LinearSVMEngine:
 
 @register
 class RBFSVMEngine:
-    """RBF-kernel SVM via a Nystroem approximation (500 landmarks, gamma = 1/n_features on standardised
-    features), then a linear SVM; Platt-calibrated. The landmark draw depends on the seed."""
+    """RBF-kernel SVM via a Nystroem approximation (200 landmarks, gamma = 1/n_features on standardised
+    features), then a linear SVM; Platt-calibrated. The landmark draw depends on the seed. 200 landmarks
+    for a 10-dimensional input: 500 cost ~114 s per fit single-threaded and 4x more with five processes
+    contending for memory bandwidth (~7.5 h for the run); 200 cost ~32 s."""
 
     name = "svm_rbf"
     probabilistic = True
     stochastic = True
-    COMPONENTS = 500
+    COMPONENTS = 200
 
     def __init__(self, seed: int = 42) -> None:
         self.seed = seed

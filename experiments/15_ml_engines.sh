@@ -51,13 +51,14 @@ fi
 echo "== $GROUP: deterministic engines ($DET), 2 replicates"
 run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
 if [ "$GROUP" = svm ]; then
-  # The Nystroem-RBF SVM spends ~75 s per fit in single-threaded liblinear, ~4.5 h serially for five
-  # seeds. Screens are independent, so run one single-threaded process per screen, five at a time.
+  # The Nystroem-RBF SVM spends ~30 s per fit in single-threaded liblinear (200 landmarks). Screens are
+  # independent, so run one single-threaded process per screen, three at a time: five at a time with
+  # 500 landmarks contended for memory bandwidth and ran ~4x slower (see ml_engines/_aborted_svm_rbf_500).
   PY="$(conda run -n waddington-bio python3 -c 'import sys; print(sys.executable)')"
   echo "== svm: seeded engine (svm_rbf), 5 seeds, screen-parallel"
   printf '%s\n' IFNG IL2 Sanchez21 Sanchez21_down Carnevale22 Scharenberg22 Steinhart \
     Replogle_K562_essential Replogle_K562_gwps |
-    xargs -P 5 -I{} env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+    xargs -P 3 -I{} env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
       "$PY" -m waddington_select.run_sequential --datasets {} \
       --arms ml_engine_svm_rbf ml_static_svm_rbf --replicates 5 --seed-mode local --resume \
       --out "$OUT/svm_seeded_{}.json"
