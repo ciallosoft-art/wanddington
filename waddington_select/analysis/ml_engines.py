@@ -240,6 +240,11 @@ def carm_summary() -> dict:
     return out
 
 
+DISPLAY = {"lightgbm": "LightGBM (reported)", "gnn": "GraphSAGE on STRING", "mlp": "MLP",
+           "genept_lgbm": "LightGBM + GenePT", "logreg": "Logistic regression", "rf": "Random forest",
+           "rwr": "RWR on STRING", "lambdarank": "LambdaMART", "genept_lr": "GenePT + logistic"}
+
+
 def figure(res: dict) -> Path:
     import matplotlib.pyplot as plt
     from . import style as S
@@ -266,7 +271,7 @@ def figure(res: dict) -> Path:
             d = on.get("vs_lightgbm_online")
             tag = "reference" if d is None else f"{d['delta']:+.3f} [{d['ci95'][0]:+.3f}, {d['ci95'][1]:+.3f}]"
             ax.annotate(tag, (label_x, yi), va="center", fontsize=8, color=S.INK_2)
-    ax.set_yticks(y, models)
+    ax.set_yticks(y, [DISPLAY.get(m, m) for m in models])
     ax.set_xlabel("hit@R5, mean over the nine screens (ML only, no LLM)")
     ax.set_title("Swapping the ML engine: online vs LightGBM, paired Δ [screen-clustered 95% CI]",
                  color=S.INK, fontsize=10.5, loc="left", pad=10)
