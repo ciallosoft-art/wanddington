@@ -197,6 +197,30 @@ class AcquisitionTests(unittest.TestCase):
         self.assertIsNone(parse_acq_name("ml_acq_nonsense"))
 
 
+class CArmEngineTests(unittest.TestCase):
+    """The full C-arm with a swapped engine: built without provider calls, default path untouched."""
+
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+        self.enterContext(patch("waddington_select.llm_client.LLMClient.complete",
+                                side_effect=AssertionError("provider calls forbidden")))
+
+    def test_default_engine_is_the_reported_lightgbm(self):
+        from waddington_select.arms.ml_engine_arm import MLEngineArm
+        from waddington_select.arms.waddington_c_arm import WaddingtonCArm
+        c = WaddingtonCArm("Scharenberg22", 32)
+        self.assertEqual(c._online._model_name, "lightgbm")
+        self.assertEqual(c._online.all_scores(), MLEngineArm("Scharenberg22", 32, model="lightgbm").all_scores())
+
+    def test_swapped_engine_arms(self):
+        from waddington_select import run_sequential as R
+        self.assertIn("waddington_c__mlp", R._PAPER_ARMS)
+        self.assertNotIn("waddington_c__rwr", R._PAPER_ARMS)  # rank scores cannot take the 0.2 bonus
+        arm = R.make_arms("Scharenberg22", ["waddington_c__mlp"], local_seed=3)[0]
+        self.assertEqual((arm.name, arm._online._model_name, arm._online._seed), ("waddington_c__mlp", "mlp", 3))
+
+
 class LeakageTests(unittest.TestCase):
     """Every engine is fitted only on other screens' rows plus the target's REVEALED rows."""
 

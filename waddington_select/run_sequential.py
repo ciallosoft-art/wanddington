@@ -92,7 +92,7 @@ from .arms.waddington_c_pair_arm import WaddingtonCPairArm, pair_selection_confi
 from .arms.genedisco_arm import GeneDiscoArm, ACQUISITIONS as _GD_ACQ
 from .arms.ml_engine_arm import (MLEngineArm, AcquisitionArm, ACQUISITIONS as _ML_ACQ,
                                  parse_acq_name as _parse_acq, parse_arm_name as _parse_ml_arm)
-from .ml_models import engine_names as _ml_engine_names, is_stochastic as _ml_is_stochastic
+from .ml_models import ENGINES as _ML_ENGINES, engine_names as _ml_engine_names, is_stochastic as _ml_is_stochastic
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 
@@ -106,7 +106,10 @@ _PAPER_ARMS = {
     "waddington_c_pair",
 } | {f"genedisco_{a}" for a in _GD_ACQ} | {
     f"ml_{kind}_{m}" for kind in ("engine", "static") for m in _ml_engine_names()
-} | {f"ml_acq_{a}" for a in _ML_ACQ}
+} | {f"ml_acq_{a}" for a in _ML_ACQ} | {
+    # the C-arm's 0.8/0.2 fusion adds 0.2 to a probability, so only probabilistic engines qualify
+    f"waddington_c__{m}" for m in _ml_engine_names() if m != "lightgbm" and _ML_ENGINES[m].probabilistic
+}
 
 
 def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> list:
@@ -151,6 +154,9 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(WaddingtonCPairArm(dataset_name, bs))
         elif name == "waddington_c_ensemble":
             arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
+        elif name.startswith("waddington_c__"):  # the full C-arm with an alternative ML engine
+            model = name[len("waddington_c__"):]
+            arms.append(WaddingtonCArm(dataset_name, bs, name=name, ml_model=model, seed=local_seed))
         elif _parse_acq(name) is not None:
             arms.append(AcquisitionArm(dataset_name, bs, acquisition=_parse_acq(name), seed=local_seed))
         elif _parse_ml_arm(name) is not None:
@@ -439,7 +445,9 @@ def _run_one_repeat(ds: str, arm_name: str, repeat_idx: int, oracle, n_rounds: i
     _ml = _parse_ml_arm(arm_name)
     consumes_local_rng = (arm_name == "random" or arm_name.startswith("genedisco_")
                           or (_ml is not None and _ml_is_stochastic(_ml[0]))
-                          or _parse_acq(arm_name) is not None)
+                          or _parse_acq(arm_name) is not None
+                          or (arm_name.startswith("waddington_c__")
+                              and _ml_is_stochastic(arm_name[len("waddington_c__"):])))
     item["local_seed"] = local_seed if consumes_local_rng else None
     item["provider_seed"] = None if (
         arm_name == "llm_reasoning" or arm_name.startswith("waddington")

@@ -195,8 +195,13 @@ class WaddingtonCArm(BaseArm):
         name: str = "waddington_c",
         trace=None,
         reason_from_structure: bool | None = None,
+        ml_model: str = "lightgbm",
+        seed: int = 42,
     ) -> None:
         super().__init__(name, dataset_name, batch_size)
+        # The ML engine (docs/ml_engines_plan.md). "lightgbm" is the reported system and ignores `seed`;
+        # other engines come from waddington_select.ml_models, seeded per replicate.
+        self._ml_model = ml_model
         self._trace = trace  # optional analysis.trace.TraceRecorder; off by default
 
         # Opt-in mode: the LLM reasons over anonymized structural features instead of gene names.
@@ -244,6 +249,8 @@ class WaddingtonCArm(BaseArm):
             training_csv=training_csv,
             extra_feature_cols=extra_feats,
             drop_anchor_feats=drop_anchor,
+            model=ml_model,
+            seed=seed,
         )
 
         task = _load_task(dataset_name)
