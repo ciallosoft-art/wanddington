@@ -6,7 +6,8 @@
 # experience memory as the corrected-prompt 20-replicate run (replogle_transcriptomics_v2_20rep), whose
 # C-arm (0.2603) is the paired reference. Engines are the stage-B candidates of step 5.
 #
-#   experiments/16_ml_engines_carm.sh            # gnn mlp, 5 replicates
+#   experiments/16_ml_engines_carm.sh gnn        # one engine per run: GNN is capped at 3 parallel
+#   experiments/16_ml_engines_carm.sh mlp        # (GPU memory), MLP runs 6 wide on the CPU
 #   REPS=20 experiments/16_ml_engines_carm.sh gnn
 export WADDINGTON_LEGACY_TASK_PROMPTS=0
 set -euo pipefail
@@ -39,6 +40,12 @@ export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export WADDINGTON_PARALLEL="${WADDINGTON_PARALLEL:-6}"
+# Each concurrent GNN fit holds a dense ~1.7 GB neighbour matrix on the GPU (plus transients, ~2.3 GB);
+# six at once exhausted the 16 GB card on the first attempt, so GNN runs are capped at three.
+if [[ " $ENGINES " == *" gnn "* ]] && (( WADDINGTON_PARALLEL > 3 )); then
+  echo "note: capping WADDINGTON_PARALLEL at 3 for the GNN engine (GPU memory)"
+  export WADDINGTON_PARALLEL=3
+fi
 export WADDINGTON_MEMORY_PATH="$MEMORY_PATH"
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 
