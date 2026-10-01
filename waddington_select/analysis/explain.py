@@ -71,11 +71,14 @@ def attribution(trace: dict, out: Path, tag: str = "") -> Path:
     rates = [agg[s]["hit_rate"] * 100 for s in SOURCES]
     ax2.barh(y, rates, height=0.6, color=[S.SOURCE_COLOR[s] for s in SOURCES], zorder=3)
     for yi, s, v in zip(y, SOURCES, rates):
-        ax2.annotate(f"{v:.0f}%   (n={agg[s]['picked']})", (v, yi), xytext=(6, 0),
+        # hits/picked, not just n: a long bar can rest on very few genes, and readers otherwise take the
+        # bar for the bucket's share of all hits
+        ax2.annotate(f"{v:.0f}%   ({agg[s]['hits']}/{agg[s]['picked']})", (v, yi), xytext=(6, 0),
                      textcoords="offset points", va="center", fontsize=9, color=S.INK_2)
     ax2.set_yticks(y, [S.SOURCE_LABEL[s] for s in SOURCES], fontsize=9.5)
     ax2.set_xlabel("Hit rate of the picks (%)")
-    ax2.set_title("Agreement is the strongest signal", color=S.INK, fontsize=11, loc="left", pad=8)
+    # A neutral title on purpose: the pooled "agreement is strongest" reading is carried by one screen.
+    ax2.set_title("Hit rate within each source", color=S.INK, fontsize=11, loc="left", pad=8)
     ax2.set_xlim(0, max(rates) * 1.42 if max(rates) else 1)
     ax2.grid(axis="y", visible=False)
 
