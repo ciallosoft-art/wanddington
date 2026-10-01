@@ -1,5 +1,45 @@
 {
   "rows": {
+    "ml_engine_gnn": {
+      "model": "gnn",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.14362,
+        "IL2": 0.26942,
+        "Sanchez21": 0.07239999999999999,
+        "Sanchez21_down": 0.079,
+        "Carnevale22": 0.06384,
+        "Scharenberg22": 0.5387600000000001,
+        "Steinhart": 0.060719999999999996,
+        "Replogle_K562_essential": 0.6507799999999999,
+        "Replogle_K562_gwps": 0.36060000000000003
+      },
+      "mean": 0.2487933333333333,
+      "vs_lightgbm_online": {
+        "delta": 0.003771111111111125,
+        "ci95": [
+          -0.015055722222222222,
+          0.025351222222222247
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.004641144494865694,
+      "online_minus_static": {
+        "delta": 0.01585555555555555,
+        "ci95": [
+          0.00451083333333333,
+          0.0291773333333333
+        ],
+        "wins": 8,
+        "ties": 0,
+        "losses": 1
+      }
+    },
     "ml_engine_lambdarank": {
       "model": "lambdarank",
       "online": true,
@@ -191,6 +231,76 @@
         "losses": 2
       }
     },
+    "ml_engine_rwr": {
+      "model": "rwr",
+      "online": true,
+      "probabilistic": false,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1733,
+        "IL2": 0.3222,
+        "Sanchez21": 0.0861,
+        "Sanchez21_down": 0.0953,
+        "Carnevale22": 0.0634,
+        "Scharenberg22": 0.449,
+        "Steinhart": 0.0828,
+        "Replogle_K562_essential": 0.4444,
+        "Replogle_K562_gwps": 0.2922
+      },
+      "mean": 0.2231888888888889,
+      "vs_lightgbm_online": {
+        "delta": -0.021833333333333323,
+        "ci95": [
+          -0.06256777777777775,
+          0.005823055555555555
+        ],
+        "wins": 5,
+        "ties": 0,
+        "losses": 4
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.01693333333333334,
+        "ci95": [
+          0.0014886111111111287,
+          0.034811666666666664
+        ],
+        "wins": 5,
+        "ties": 2,
+        "losses": 2
+      }
+    },
+    "ml_static_gnn": {
+      "model": "gnn",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.14062000000000002,
+        "IL2": 0.25532,
+        "Sanchez21": 0.06846,
+        "Sanchez21_down": 0.07718,
+        "Carnevale22": 0.060160000000000005,
+        "Scharenberg22": 0.5142800000000001,
+        "Steinhart": 0.06486,
+        "Replogle_K562_essential": 0.6095,
+        "Replogle_K562_gwps": 0.30606
+      },
+      "mean": 0.2329377777777778,
+      "vs_lightgbm_online": {
+        "delta": -0.012084444444444422,
+        "ci95": [
+          -0.025965277777777764,
+          0.005331777777777801
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.0051751877165214484
+    },
     "ml_static_lambdarank": {
       "model": "lambdarank",
       "online": false,
@@ -340,12 +450,42 @@
       },
       "deterministic_check": null,
       "seed_sd_of_mean": 0.0009421409818225924
+    },
+    "ml_static_rwr": {
+      "model": "rwr",
+      "online": false,
+      "probabilistic": false,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1633,
+        "IL2": 0.2786,
+        "Sanchez21": 0.0861,
+        "Sanchez21_down": 0.0884,
+        "Carnevale22": 0.0657,
+        "Scharenberg22": 0.4082,
+        "Steinhart": 0.0828,
+        "Replogle_K562_essential": 0.4603,
+        "Replogle_K562_gwps": 0.2229
+      },
+      "mean": 0.20625555555555555,
+      "vs_lightgbm_online": {
+        "delta": -0.03876666666666666,
+        "ci95": [
+          -0.07730055555555557,
+          -0.005509444444444457
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
     }
   },
   "reference": "ml_engine_lightgbm",
   "stage_b_candidates": [
-    "mlp",
-    "logreg"
+    "gnn",
+    "mlp"
   ],
   "missing_engines": []
 }
