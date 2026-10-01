@@ -199,3 +199,192 @@ class LambdaRankEngine:
 
     def score(self, X, genes=None) -> np.ndarray:
         return _rank_percentile(self._m.predict(np.asarray(X)))
+
+
+@register
+class RWREngine:
+    """Network propagation (random walk with restart, restart 0.5) on STRING >= 700. Seeds are the hit
+    rows of the training data, each with its protocol weight: a gene's seed mass is the number of other
+    screens it is a hit in, plus 10 per hit revealed in this screen. Features and non-hits are unused —
+    guilt by association alone. Scores are rank percentiles; genes absent from STRING rank last."""
+
+    name = "rwr"
+    probabilistic = False
+    stochastic = False
+    needs_graph = True
+    RESTART = 0.5
+    ITERS = 100
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import scipy.sparse as sp
+        from .string_graph import string_graph
+        node_genes, A = string_graph()
+        self._index = {g: i for i, g in enumerate(node_genes)}
+        p0 = np.zeros(len(node_genes))
+        for g, yy, w in zip(genes, np.asarray(y), np.asarray(sample_weight, dtype=float)):
+            if yy == 1 and g in self._index:
+                p0[self._index[g]] += w
+        if p0.sum() == 0:
+            self._p = p0
+            return self
+        p0 /= p0.sum()
+        deg = np.asarray(A.sum(axis=0)).ravel()
+        W = A @ sp.diags(1.0 / np.maximum(deg, 1.0))  # column-stochastic transition matrix
+        p = p0.copy()
+        for _ in range(self.ITERS):
+            p_new = (1 - self.RESTART) * (W @ p) + self.RESTART * p0
+            done = np.abs(p_new - p).sum() < 1e-10
+            p = p_new
+            if done:
+                break
+        self._p = p
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        raw = np.array([self._p[self._index[g]] if g in self._index else -1.0 for g in genes])
+        return _rank_percentile(raw)
+
+
+_SAGE_CLS = None
+
+
+def _sage(d: int, h: int):
+    """Two-layer GraphSAGE (mean aggregator): [x || mean_N(x)] -> h -> [h || mean_N(h)] -> h -> logit.
+    `M` is the row-normalised adjacency, sparse on CPU or dense on GPU; `M @ x` is the neighbour mean."""
+    global _SAGE_CLS
+    import torch
+    if _SAGE_CLS is None:
+        class SAGE(torch.nn.Module):
+            def __init__(self, d, h):
+                super().__init__()
+                self.l1 = torch.nn.Linear(2 * d, h)
+                self.l2 = torch.nn.Linear(2 * h, h)
+                self.out = torch.nn.Linear(h, 1)
+                self.drop = torch.nn.Dropout(0.1)
+
+            def forward(self, x, M):
+                h = self.drop(torch.relu(self.l1(torch.cat([x, M @ x], 1))))
+                h = self.drop(torch.relu(self.l2(torch.cat([h, M @ h], 1))))
+                return self.out(h).squeeze(1)
+        _SAGE_CLS = SAGE
+    return _SAGE_CLS(d, h)
+
+
+@register
+class GraphSAGEEngine:
+    """GraphSAGE over STRING >= 700 with the same gene-level features as the tabular engines (they are
+    identical across screens for every non-anchor feature). A gene's loss is its labelled rows collapsed
+    onto its node: weighted hits k and non-hits n-k (protocol weights; hits x neg/pos), i.e. exactly the
+    row-level weighted BCE. Full-batch Adam, 200 epochs. On a GPU the neighbour mean is a dense matmul
+    (~1 GB for 16k genes): cuBLAS is reproducible, while sparse CUDA matmul accumulates with atomics and
+    drifted by up to 0.18 in a probability between identical-seed fits."""
+
+    name = "gnn"
+    probabilistic = True
+    stochastic = True
+    needs_graph = True
+    HIDDEN = 64
+    EPOCHS = 200
+    LR = 5e-3
+
+    def __init__(self, seed: int = 42, device: str | None = None) -> None:
+        import os
+        import torch
+        os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")  # before the first cuBLAS call
+        self.seed = seed
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+
+    def _adjacency(self, n_extra: int):
+        import scipy.sparse as sp
+        import torch
+        from .string_graph import string_graph
+        node_genes, A = string_graph()
+        if n_extra:
+            A = sp.block_diag([A, sp.csr_matrix((n_extra, n_extra))]).tocsr()
+        deg = np.asarray(A.sum(axis=1)).ravel()
+        M = (sp.diags(1.0 / np.maximum(deg, 1.0)) @ A).tocoo()
+        n = A.shape[0]
+        Mt = torch.sparse_coo_tensor(np.vstack([M.row, M.col]).astype(np.int64), M.data.astype(np.float32),
+                                     (n, n)).coalesce()
+        return Mt.to_dense().to(self.device) if self.device != "cpu" else Mt
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import torch
+        from .string_graph import string_graph
+        torch.manual_seed(self.seed)
+        X = np.asarray(X, dtype=np.float32)
+        y = np.asarray(y)
+        w = np.asarray(sample_weight, dtype=float)
+        node_genes = string_graph()[0]
+        in_graph = set(node_genes)
+        extra = [g for g in dict.fromkeys(genes) if g not in in_graph]  # labelled genes STRING lacks
+        names = list(node_genes) + extra
+        self._index = {g: i for i, g in enumerate(names)}
+        n, d = len(names), X.shape[1]
+        feats = np.zeros((n, d), dtype=np.float32)
+        has = np.zeros(n, dtype=bool)
+        k = np.zeros(n)
+        tot = np.zeros(n)
+        for row, g, yy, ww in zip(X, genes, y, w):
+            i = self._index[g]
+            if not has[i]:
+                feats[i], has[i] = row, True
+            tot[i] += ww
+            k[i] += ww * yy
+        self._mu = feats[has].mean(0)
+        self._sd = feats[has].std(0) + 1e-6
+        feats[~has] = self._mu  # STRING genes with no labelled row: average features (0 after scaling)
+        self._feats, self._has = feats, has
+        self._M = self._adjacency(len(extra))
+        dev = self.device
+        Xn = torch.tensor((feats - self._mu) / self._sd, device=dev)
+        kp = torch.tensor(k * pos_scale, dtype=torch.float32, device=dev)
+        kn = torch.tensor(tot - k, dtype=torch.float32, device=dev)
+        lab = torch.tensor(tot > 0, device=dev)
+        denom = (kp + kn)[lab].sum()
+        self._net = _sage(d, self.HIDDEN).to(dev)
+        opt = torch.optim.Adam(self._net.parameters(), lr=self.LR, weight_decay=1e-4)
+        ls = torch.nn.functional.logsigmoid
+        self._net.train()
+        for _ in range(self.EPOCHS):
+            opt.zero_grad()
+            z = self._net(Xn, self._M)
+            loss = -(kp * ls(z) + kn * ls(-z))[lab].sum() / denom
+            loss.backward()
+            opt.step()
+        self._net.eval()
+        with torch.no_grad():
+            self._z = self._net(Xn, self._M).cpu().numpy()
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        import torch
+        X = np.asarray(X, dtype=np.float32)
+        out = np.empty(len(genes))
+        refill, isolated = [], []
+        for j, g in enumerate(genes):
+            i = self._index.get(g)
+            if i is None:
+                isolated.append(j)   # in no training screen and not in STRING
+            elif not self._has[i]:
+                refill.append(j)     # in STRING; features first seen now
+            else:
+                out[j] = self._z[i]
+        if refill:
+            feats = self._feats.copy()
+            for j in refill:
+                feats[self._index[genes[j]]] = X[j]
+            with torch.no_grad():
+                z = self._net(torch.tensor((feats - self._mu) / self._sd, device=self.device),
+                              self._M).cpu().numpy()
+            for j in refill:
+                out[j] = z[self._index[genes[j]]]
+        if isolated:                 # no neighbours: the aggregation term is zero
+            xi = torch.tensor((X[isolated] - self._mu) / self._sd, device=self.device)
+            zero = torch.zeros((len(isolated), len(isolated)), device=self.device)
+            with torch.no_grad():
+                out[isolated] = self._net(xi, zero).cpu().numpy()
+        return 1.0 / (1.0 + np.exp(-out))

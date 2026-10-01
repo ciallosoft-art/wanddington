@@ -10,6 +10,8 @@ import numpy as np
 
 from waddington_select.ml_models import ENGINES, engine_names, is_stochastic, make_engine
 
+_TABULAR = [n for n, c in ENGINES.items() if not getattr(c, "needs_graph", False)]
+
 
 def _toy(n=1200, d=6, seed=0):
     """Separable-ish binary data with a ~5% positive rate, like a screen."""
@@ -26,7 +28,7 @@ class EngineContractTests(unittest.TestCase):
     def test_every_engine_scores_in_unit_interval_and_learns(self):
         X, y, genes, groups = _toy()
         pos_scale = (y == 0).sum() / (y == 1).sum()
-        for name in ENGINES:
+        for name in _TABULAR:
             with self.subTest(engine=name):
                 e = make_engine(name, seed=1).fit(X, y, np.ones(len(y)), pos_scale, genes=genes, groups=groups)
                 s = e.score(X, genes)
@@ -48,7 +50,7 @@ class EngineContractTests(unittest.TestCase):
 
     def test_determinism_and_seed_dependence(self):
         X, y, genes, groups = _toy()
-        for name in ENGINES:
+        for name in _TABULAR:
             with self.subTest(engine=name):
                 a = make_engine(name, seed=3).fit(X, y, np.ones(len(y)), 5.0, genes, groups).score(X, genes)
                 b = make_engine(name, seed=3).fit(X, y, np.ones(len(y)), 5.0, genes, groups).score(X, genes)
@@ -98,6 +100,89 @@ class MLEngineArmTests(unittest.TestCase):
         self.assertEqual(parse_arm_name("ml_engine_rf"), ("rf", True))
         self.assertEqual(parse_arm_name("ml_static_logreg"), ("logreg", False))
         self.assertIsNone(parse_arm_name("online_adaptive"))
+
+
+class GraphEngineTests(unittest.TestCase):
+    """RWR and GraphSAGE on the real STRING graph (cached under workspace/cache/)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from waddington_select.string_graph import string_graph
+        cls.genes, cls.A = string_graph()
+
+    def test_rwr_ranks_seed_neighbours_first_and_is_deterministic(self):
+        rng = np.random.default_rng(0)
+        seeds = list(rng.choice(len(self.genes), size=5, replace=False))
+        nbrs = set(np.concatenate([self.A[i].indices for i in seeds])) - set(seeds)
+        train_genes = [self.genes[i] for i in seeds]
+        e = make_engine("rwr").fit(None, np.ones(5, int), np.ones(5), 1.0, genes=train_genes)
+        rest = [i for i in range(len(self.genes)) if i not in seeds]
+        cand = [self.genes[i] for i in rest]
+        s = e.score(None, cand)
+        is_nbr = np.array([i in nbrs for i in rest])
+        self.assertGreater(s[is_nbr].mean(), s[~is_nbr].mean())
+        s2 = make_engine("rwr").fit(None, np.ones(5, int), np.ones(5), 1.0, genes=train_genes).score(None, cand)
+        np.testing.assert_array_equal(s, s2)
+        absent = e.score(None, ["NOT_A_GENE_XYZ", cand[0]])
+        self.assertEqual(absent[0], 0.0)  # absent from STRING ranks last
+
+    def test_gnn_learns_and_is_seed_reproducible(self):
+        from waddington_select.ml_models import GraphSAGEEngine
+
+        class Short(GraphSAGEEngine):
+            EPOCHS = 30
+
+        rng = np.random.default_rng(1)
+        genes = list(rng.choice(self.genes, size=3000, replace=False)) + ["ONLY_IN_TRAINING_1"]
+        X = rng.normal(size=(len(genes), 4)).astype(np.float32)
+        y = (X[:, 0] > 1.2).astype(int)
+        fit = lambda seed: Short(seed=seed, device="cpu").fit(X, y, np.ones(len(y)), 5.0, genes=genes)
+        a = fit(0).score(X, genes)
+        self.assertGreater(a[y == 1].mean(), a[y == 0].mean())
+        np.testing.assert_array_equal(a, fit(0).score(X, genes))
+        self.assertFalse(np.array_equal(a, fit(1).score(X, genes)))
+        unseen = fit(0).score(X[:1], ["NEVER_SEEN_GENE"])  # isolated node scored from its features alone
+        self.assertTrue(0.0 <= unseen[0] <= 1.0)
+
+
+class LeakageTests(unittest.TestCase):
+    """Every engine is fitted only on other screens' rows plus the target's REVEALED rows."""
+
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+
+    def test_engines_never_see_unrevealed_target_labels(self):
+        from waddington_select import ml_models
+        from waddington_select.arms.ml_engine_arm import MLEngineArm
+        seen = []
+
+        class Spy:
+            probabilistic, stochastic = True, False
+
+            def __init__(self, seed=42):
+                pass
+
+            def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+                seen.append((list(groups), list(genes), np.asarray(sample_weight)))
+                return self
+
+            def score(self, X, genes=None):
+                return np.linspace(1, 0, len(genes))
+
+        ds = "Scharenberg22"
+        with patch.dict(ml_models.ENGINES, {"spy": Spy}):
+            arm = MLEngineArm(ds, 32, model="spy")
+            groups, _, _ = seen[-1]
+            self.assertNotIn(ds, groups)
+            self.assertNotIn("__target__", groups)
+            batch = arm.select(0, {})
+            arm.update(0, {g: (i % 4 == 0) for i, g in enumerate(batch)})
+            groups, genes, w = seen[-1]
+            target_rows = [i for i, g in enumerate(groups) if g == "__target__"]
+            self.assertNotIn(ds, groups)
+            self.assertEqual(sorted(genes[i] for i in target_rows), sorted(batch))
+            self.assertTrue(np.all(w[target_rows] == 10.0))
 
 
 if __name__ == "__main__":

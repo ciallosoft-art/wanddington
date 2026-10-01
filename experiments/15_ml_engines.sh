@@ -17,6 +17,7 @@ unset WADDINGTON_LEGACY_ROUTER WADDINGTON_FORCE_WLLM WADDINGTON_FORCE_ROUTE WADD
 unset WADDINGTON_DROP_ANCHOR_FEATS WADDINGTON_HITFREQ_ONLY WADDINGTON_EXCLUDE_STUDY WADDINGTON_TRAINING_CSV
 unset WADDINGTON_REASON_FROM_STRUCTURE PYTHONOPTIMIZE
 export WADDINGTON_PARALLEL=1  # the engines already use every core; repeat-level threads would only contend
+export CUBLAS_WORKSPACE_CONFIG=:4096:8  # reproducible cuBLAS for the GNN (dense neighbour mean on the GPU)
 
 OUT=workspace/results/ml_engines
 mkdir -p "$OUT"
