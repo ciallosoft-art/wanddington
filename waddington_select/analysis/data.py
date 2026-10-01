@@ -18,6 +18,7 @@ RESULTS = REPO_ROOT / "workspace" / "results" / "sequential"
 # The final leakage-free 20-seed run of all six main-table arms (used for the principal figures 1-3);
 # the legacy three_arm.json waddington_c stays the reference for the component-ablation figure.
 FINAL_WADD = REPO_ROOT / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "main_table_20rep.json"
+GPT_RESULTS = REPO_ROOT / "workspace" / "results" / "gpt"
 
 # Which file each method's runs live in (baselines + the three-arm comparison).
 METHOD_FILES = {
@@ -36,8 +37,11 @@ ABLATIONS = {
     "waddington_c_shuffled_names": ("ablation_shuffled.json", "gene names shuffled"),
     "waddington_c_feature_reasoning": ("ablation_feature_reasoning.json", "anonymized + structural features"),
     "waddington_c_pool_only": ("ablation_feature_reasoning.json", "anonymized + ML pool, no features"),
-    "waddington_c_skills": ("skills_ablation.json", "+ skill library"),
-    "waddington_c_enrich": ("enrich_gated.json", "+ runtime enrichment"),
+    # The two augmentations were re-run on GPT-5.6 Luna; the July files of the same name under
+    # sequential/ are the Claude predecessor and must not be mixed into the GPT figure.
+    # (An absolute path here wins over RESULTS in load_ablation's join.)
+    "waddington_c_skills": (GPT_RESULTS / "skills_ablation.json", "+ skill library"),
+    "waddington_c_enrich": (GPT_RESULTS / "enrich_gated.json", "+ runtime enrichment"),
 }
 
 

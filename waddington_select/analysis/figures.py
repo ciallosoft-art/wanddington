@@ -156,9 +156,13 @@ def ablations(out: Path) -> Path:
 
     ax.set_yticks(y, df["label"], fontsize=9)
     # Colour states a fact about the VARIANT ("scored lower than the full arm"), not a verdict on the
-    # component: a red "− online ML" means removing online ML costs 0.012, i.e. it is the most valuable part.
+    # component: a red "−" variant marks the removed component as one the arm needs.
     ax.set_xlabel("Δ hit ratio @ R5   (variant − full C-arm)")
-    ax.set_title("Ablations: each variant vs the full C-arm\nremoving (−) the online ML costs the most; memory adds nothing",
+    # The headline is read off the data: a hard-coded one went stale when the model changed (the
+    # Claude-era "online ML costs the most" survived onto GPT bars where name shuffling is the loss).
+    worst = df.loc[df["delta"].idxmin()]
+    ax.set_title(f"Ablations: each variant vs the full C-arm\n"
+                 f"largest loss: {worst['label']} ({worst['delta']:+.3f})",
                  color=S.INK, fontsize=11.5, loc="left", pad=10)
     pad = max(abs(df["delta"])) * 0.42
     ax.set_xlim(min(df["delta"]) - pad, max(df["delta"]) + pad)
