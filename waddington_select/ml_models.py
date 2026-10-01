@@ -24,6 +24,8 @@ whose result depends on the seed, so replicates are seeded rather than repeated.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 
 ENGINES: dict[str, type] = {}
@@ -388,3 +390,96 @@ class GraphSAGEEngine:
             with torch.no_grad():
                 out[isolated] = self._net(xi, zero).cpu().numpy()
         return 1.0 / (1.0 + np.exp(-out))
+
+
+# ---------------------------------------------------------------------------------------------------
+# GenePT text embeddings (Chen & Zou 2024; Zenodo 10.5281/zenodo.10833191, CC-BY-4.0): ada-002 embeddings
+# of NCBI/UniProt gene summaries. Reduced once, label-free, to 64 principal components and cached under
+# the gitignored workspace/cache/genept/. Genes GenePT lacks get the zero vector (the PCA mean).
+# ---------------------------------------------------------------------------------------------------
+
+GENEPT_DIR = Path(__file__).resolve().parents[1] / "workspace" / "cache" / "genept"
+GENEPT_DIM = 64
+_GENEPT = None
+
+
+def genept_embedding() -> tuple[dict[str, int], np.ndarray]:
+    """(gene -> row, matrix[n_genes, GENEPT_DIM]) from the cached PCA of the GenePT ada embeddings."""
+    global _GENEPT
+    if _GENEPT is not None:
+        return _GENEPT
+    cache = GENEPT_DIR / f"genept_pca{GENEPT_DIM}.npz"
+    if not cache.exists():
+        import pickle
+        from sklearn.decomposition import PCA
+        pkl = next(GENEPT_DIR.rglob("GenePT_gene_embedding_ada_text.pickle"), None)
+        if pkl is None:
+            raise FileNotFoundError(f"GenePT embeddings not found under {GENEPT_DIR}; see docs/ml_engines_plan.md")
+        with open(pkl, "rb") as fh:
+            emb = pickle.load(fh)
+        # upper-casing merges a few hundred case variants of one symbol; keep one vector per symbol
+        raw = {str(g).strip().upper(): v for g, v in emb.items()}
+        genes = sorted(raw)
+        M = np.vstack([np.asarray(raw[g], dtype=np.float32) for g in genes])
+        Z = PCA(n_components=GENEPT_DIM, random_state=0).fit_transform(M).astype(np.float32)
+        np.savez_compressed(cache, genes=np.array(genes), Z=Z)
+    z = np.load(cache, allow_pickle=False)
+    _GENEPT = ({str(g): i for i, g in enumerate(z["genes"])}, z["Z"])
+    return _GENEPT
+
+
+def _genept_rows(genes) -> np.ndarray:
+    index, Z = genept_embedding()
+    out = np.zeros((len(genes), Z.shape[1]), dtype=np.float32)
+    for j, g in enumerate(genes):
+        i = index.get(g)
+        if i is not None:
+            out[j] = Z[i]
+    return out
+
+
+@register
+class GenePTLogRegEngine:
+    """GenePert-style: a linear model on the gene's text embedding alone (no tabular features)."""
+
+    name = "genept_lr"
+    probabilistic = True
+    stochastic = False
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.preprocessing import StandardScaler
+        E = _genept_rows(genes)
+        self._scaler = StandardScaler().fit(E)
+        self._m = LogisticRegression(C=1.0, max_iter=5000)
+        self._m.fit(self._scaler.transform(E), y, sample_weight=_class_weighted(y, sample_weight, pos_scale))
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return self._m.predict_proba(self._scaler.transform(_genept_rows(genes)))[:, 1]
+
+
+@register
+class GenePTLightGBMEngine:
+    """The reported LightGBM, same parameters, on the tabular features plus the 64 GenePT components."""
+
+    name = "genept_lgbm"
+    probabilistic = True
+    stochastic = False
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import lightgbm as lgb
+        from .arms.online_adaptive_arm import LGBM_PARAMS
+        self._m = lgb.LGBMClassifier(**LGBM_PARAMS, scale_pos_weight=pos_scale)
+        self._m.fit(np.hstack([np.asarray(X, dtype=np.float32), _genept_rows(genes)]), y,
+                    sample_weight=np.asarray(sample_weight, dtype=float))
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return self._m.predict_proba(np.hstack([np.asarray(X, dtype=np.float32), _genept_rows(genes)]))[:, 1]

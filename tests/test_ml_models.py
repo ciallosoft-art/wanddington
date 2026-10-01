@@ -10,7 +10,8 @@ import numpy as np
 
 from waddington_select.ml_models import ENGINES, engine_names, is_stochastic, make_engine
 
-_TABULAR = [n for n, c in ENGINES.items() if not getattr(c, "needs_graph", False)]
+_TABULAR = [n for n, c in ENGINES.items()
+            if not getattr(c, "needs_graph", False) and not n.startswith("genept")]
 
 
 def _toy(n=1200, d=6, seed=0):
@@ -143,6 +144,32 @@ class GraphEngineTests(unittest.TestCase):
         self.assertFalse(np.array_equal(a, fit(1).score(X, genes)))
         unseen = fit(0).score(X[:1], ["NEVER_SEEN_GENE"])  # isolated node scored from its features alone
         self.assertTrue(0.0 <= unseen[0] <= 1.0)
+
+
+class GenePTEngineTests(unittest.TestCase):
+    """GenePT engines on real gene symbols; skipped when the (gitignored) embeddings are absent."""
+
+    @classmethod
+    def setUpClass(cls):
+        from waddington_select.ml_models import GENEPT_DIR, genept_embedding
+        if not any(GENEPT_DIR.rglob("*.pickle")) and not (GENEPT_DIR / "genept_pca64.npz").exists():
+            raise unittest.SkipTest("GenePT embeddings not downloaded")
+        cls.index, cls.Z = genept_embedding()
+
+    def test_contract_learning_and_determinism(self):
+        rng = np.random.default_rng(0)
+        genes = list(rng.choice(sorted(self.index), size=3000, replace=False)) + ["NOT_IN_GENEPT_1"]
+        emb = np.vstack([self.Z[self.index[g]] if g in self.index else np.zeros(self.Z.shape[1])
+                         for g in genes])
+        y = (emb[:, 0] > np.quantile(emb[:, 0], 0.9)).astype(int)  # hits defined by the embedding
+        X = rng.normal(size=(len(genes), 3))                       # uninformative tabular features
+        for name in ("genept_lr", "genept_lgbm"):
+            with self.subTest(engine=name):
+                a = make_engine(name).fit(X, y, np.ones(len(y)), 9.0, genes=genes).score(X, genes)
+                self.assertTrue(np.all((a >= 0) & (a <= 1)))
+                self.assertGreater(a[y == 1].mean(), a[y == 0].mean())
+                b = make_engine(name).fit(X, y, np.ones(len(y)), 9.0, genes=genes).score(X, genes)
+                np.testing.assert_array_equal(a, b)
 
 
 class LeakageTests(unittest.TestCase):

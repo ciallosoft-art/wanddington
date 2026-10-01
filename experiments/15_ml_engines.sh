@@ -10,6 +10,7 @@
 #
 #   experiments/15_ml_engines.sh tabular   # lightgbm logreg lambdarank | rf mlp
 #   experiments/15_ml_engines.sh graph     # rwr | gnn
+#   experiments/15_ml_engines.sh genept    # genept_lr genept_lgbm (needs the GenePT download, plan step 4)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -26,7 +27,8 @@ GROUP="${1:-tabular}"
 case "$GROUP" in
   tabular) DET="lightgbm logreg lambdarank"; SEEDED="rf mlp" ;;
   graph)   DET="rwr";                        SEEDED="gnn" ;;
-  *) echo "usage: $0 [tabular|graph]" >&2; exit 2 ;;
+  genept)  DET="genept_lr genept_lgbm";      SEEDED="" ;;
+  *) echo "usage: $0 [tabular|graph|genept]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -38,6 +40,8 @@ run() {  # $1 = arm list, $2 = replicates, $3 = output file
 
 echo "== $GROUP: deterministic engines ($DET), 2 replicates"
 run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
-echo "== $GROUP: seeded engines ($SEEDED), 5 seeds"
-run "$(arms "$SEEDED")" 5 "$OUT/${GROUP}_seeded.json"
+if [ -n "$SEEDED" ]; then
+  echo "== $GROUP: seeded engines ($SEEDED), 5 seeds"
+  run "$(arms "$SEEDED")" 5 "$OUT/${GROUP}_seeded.json"
+fi
 echo "done -> $OUT"
