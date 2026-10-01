@@ -172,6 +172,31 @@ class GenePTEngineTests(unittest.TestCase):
                 np.testing.assert_array_equal(a, b)
 
 
+class AcquisitionTests(unittest.TestCase):
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+
+    def test_rules_run_reproducibly_and_thompson_orders_untested_genes(self):
+        from waddington_select.arms.ml_engine_arm import ACQUISITIONS, AcquisitionArm, parse_acq_name
+        ds, bs = "Scharenberg22", 32
+        for a in ACQUISITIONS:
+            with self.subTest(rule=a):
+                arm = AcquisitionArm(ds, bs, acquisition=a, seed=0)
+                b0 = arm.select(0, {})
+                self.assertEqual(len(b0), bs)
+                arm.update(0, {g: (i % 3 == 0) for i, g in enumerate(b0)})
+                b1 = arm.select(1, {})
+                self.assertTrue(set(b0).isdisjoint(b1))
+                again = AcquisitionArm(ds, bs, acquisition=a, seed=0)
+                self.assertEqual(again.select(0, {}), b0)
+                if a == "thompson":  # after the update the ordering covers exactly the untested rows
+                    # (row-wise: Scharenberg22's pool lists five genes twice)
+                    self.assertEqual(sorted(arm._ranking), sorted(g for g in arm._genes if g not in set(b0)))
+                self.assertEqual(parse_acq_name(f"ml_acq_{a}"), a)
+        self.assertIsNone(parse_acq_name("ml_acq_nonsense"))
+
+
 class LeakageTests(unittest.TestCase):
     """Every engine is fitted only on other screens' rows plus the target's REVEALED rows."""
 

@@ -46,3 +46,89 @@ def parse_arm_name(name: str) -> tuple[str, bool] | None:
         if name.startswith(prefix):
             return name[len(prefix):], online
     return None
+
+
+# ---------------------------------------------------------------------------------------------------
+# Acquisition rules (step 6 of docs/ml_engines_plan.md). The engine is held fixed at LightGBM — no
+# alternative engine beat it with a CI excluding 0 in steps 2-4 — and replaced by an ensemble of
+# ENSEMBLE_SIZE bootstrap members (rows resampled with replacement, protocol weights kept), so every rule
+# below ranks from the same ensemble and only the rule differs:
+#   greedy    mean probability (= Probability-of-Hit for binary labels; the reported rule, ensembled)
+#   ucb05/1   mean + beta * sd, beta fixed in advance at 0.5 and 1 (never tuned on a target screen)
+#   thompson  batch Thompson: each slot draws a member and takes its best gene not yet chosen
+#   margin    GeneDisco-style uncertainty: closest mean probability to 0.5 first (a contrast, not a bet)
+# ---------------------------------------------------------------------------------------------------
+
+ACQUISITIONS = ("greedy", "ucb05", "ucb1", "thompson", "margin")
+ENSEMBLE_SIZE = 5
+
+
+class AcquisitionArm(MLEngineArm):
+    def __init__(self, dataset_name: str, batch_size: int, acquisition: str = "greedy", seed: int = 0) -> None:
+        if acquisition not in ACQUISITIONS:
+            raise ValueError(f"unknown acquisition {acquisition!r}; known: {ACQUISITIONS}")
+        self._acquisition = acquisition
+        self._acq_seed = seed
+        super().__init__(dataset_name, batch_size, model="lightgbm", online=True, seed=seed)
+        self.name = f"ml_acq_{acquisition}"
+
+    def _rebuild_ranking(self) -> None:
+        import lightgbm as lgb
+        import numpy as np
+        import pandas as pd
+        from .online_adaptive_arm import IN_EXPERIMENT_WEIGHT, LGBM_PARAMS
+        train = self._loo_train
+        pos = (train["label"] == 1).sum()
+        scale_pos = (train["label"] == 0).sum() / pos if pos > 0 else 1.0
+        X = train[self._available_feats].values
+        y = train["label"].values
+        w = np.ones(len(train))
+        if self._revealed_records:
+            extra = pd.DataFrame(self._revealed_records)
+            X = np.vstack([X, extra[self._available_feats].values])
+            y = np.concatenate([y, extra["label"].values])
+            w = np.concatenate([w, np.full(len(extra), IN_EXPERIMENT_WEIGHT)])
+        # members differ by their bootstrap draw; the round index keeps successive rounds independent
+        rng = np.random.default_rng([self._acq_seed, len(self._revealed_records)])
+        Xt = self._test_frame[self._available_feats].values
+        P = []
+        for _ in range(ENSEMBLE_SIZE):
+            idx = rng.integers(0, len(y), size=len(y))
+            m = lgb.LGBMClassifier(**LGBM_PARAMS, scale_pos_weight=scale_pos)
+            m.fit(X[idx], y[idx], sample_weight=w[idx])
+            P.append(m.predict_proba(Xt)[:, 1])
+        P = np.vstack(P)
+        mean, sd = P.mean(0), P.std(0)
+        a = self._acquisition
+        if a == "thompson":  # built over untested genes only, so tested ones never consume a draw
+            order = self._thompson_order(P, rng, done=np.array([g in self._selected for g in self._genes]))
+        else:
+            key = {"greedy": mean, "ucb05": mean + 0.5 * sd, "ucb1": mean + 1.0 * sd,
+                   "margin": -np.abs(mean - 0.5)}[a]
+            order = np.argsort(-key, kind="stable")
+        self._model = None  # an ensemble; SHAP and the single-model hooks do not apply
+        self._ranking = [self._genes[i] for i in order]
+        self._scores = {self._genes[i]: float(mean[i]) for i in range(len(self._genes))}
+
+    @staticmethod
+    def _thompson_order(P, rng, done):
+        """An ordering of the untested genes built slot by slot: draw a member, append its best gene not
+        yet placed. Tested genes (`done`) are pre-placed so they never consume a draw."""
+        import numpy as np
+        ranks = [np.argsort(-p, kind="stable") for p in P]
+        ptr = [0] * len(P)
+        placed = done.copy()
+        order = []
+        while len(order) < int((~done).sum()):
+            k = int(rng.integers(len(P)))
+            while placed[ranks[k][ptr[k]]]:
+                ptr[k] += 1
+            g = ranks[k][ptr[k]]
+            placed[g] = True
+            order.append(g)
+        return order
+
+
+def parse_acq_name(name: str) -> str | None:
+    """'ml_acq_ucb1' -> 'ucb1'; anything else -> None."""
+    return name[len("ml_acq_"):] if name.startswith("ml_acq_") and name[len("ml_acq_"):] in ACQUISITIONS else None

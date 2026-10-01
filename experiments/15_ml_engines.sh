@@ -11,6 +11,7 @@
 #   experiments/15_ml_engines.sh tabular   # lightgbm logreg lambdarank | rf mlp
 #   experiments/15_ml_engines.sh graph     # rwr | gnn
 #   experiments/15_ml_engines.sh genept    # genept_lr genept_lgbm (needs the GenePT download, plan step 4)
+#   experiments/15_ml_engines.sh acquisition  # ml_acq_{greedy,ucb05,ucb1,thompson,margin} (plan step 6)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -28,7 +29,8 @@ case "$GROUP" in
   tabular) DET="lightgbm logreg lambdarank"; SEEDED="rf mlp" ;;
   graph)   DET="rwr";                        SEEDED="gnn" ;;
   genept)  DET="genept_lr genept_lgbm";      SEEDED="" ;;
-  *) echo "usage: $0 [tabular|graph|genept]" >&2; exit 2 ;;
+  acquisition) DET=""; SEEDED="" ;;  # explicit arm list below
+  *) echo "usage: $0 [tabular|graph|genept|acquisition]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -38,6 +40,12 @@ run() {  # $1 = arm list, $2 = replicates, $3 = output file
     --arms $1 --replicates "$2" --seed-mode local --out "$3" --resume
 }
 
+if [ "$GROUP" = acquisition ]; then
+  # step 6: LightGBM held fixed as a 5-member bootstrap ensemble; only the selection rule differs
+  echo "== acquisition rules, 5 seeds"
+  run "ml_acq_greedy ml_acq_ucb05 ml_acq_ucb1 ml_acq_thompson ml_acq_margin" 5 "$OUT/acquisition_seeded.json"
+  echo "done -> $OUT"; exit 0
+fi
 echo "== $GROUP: deterministic engines ($DET), 2 replicates"
 run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
 if [ -n "$SEEDED" ]; then
