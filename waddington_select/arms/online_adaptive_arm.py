@@ -78,8 +78,14 @@ class OnlineAdaptiveArm(BaseArm):
         training_csv: Path | None = None,
         extra_feature_cols: list[str] | None = None,
         drop_anchor_feats: bool | None = None,
+        model: str = "lightgbm",
+        seed: int = 42,
     ) -> None:
         super().__init__("online_adaptive", dataset_name, batch_size)
+        # The reported engine is LightGBM and keeps its original code path below, so its results stay
+        # bit-identical; any other name is built from the ml_models registry (same rows, weights, protocol).
+        self._model_name = model
+        self._seed = seed
         csv_path = training_csv if training_csv is not None else TRAINING_DATA_CSV
         df = load_training_frame(csv_path, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
@@ -128,7 +134,7 @@ class OnlineAdaptiveArm(BaseArm):
         # State updated each round
         self._ranking: list[str] = []
         self._revealed_records: list[dict] = []  # {gene, label, features...}
-        self._model: lgb.LGBMClassifier | None = None
+        self._model = None  # lgb.LGBMClassifier, or an ml_models engine
         self._scores: dict[str, float] = {}  # gene → current ML probability
 
         # Build initial LOO ranking (Round 0 prior)
@@ -141,8 +147,10 @@ class OnlineAdaptiveArm(BaseArm):
         self._scores = {}
         self._rebuild_ranking()
 
-    def _train_model(self, extra_records: list[dict]) -> lgb.LGBMClassifier:
-        """Train LightGBM on LOO data + in-experiment revealed samples."""
+    def _train_model(self, extra_records: list[dict]):
+        """Train the engine on LOO data + in-experiment revealed samples."""
+        if self._model_name != "lightgbm":
+            return self._train_engine(extra_records)
         train = self._loo_train.copy()
 
         pos = (train["label"] == 1).sum()
@@ -169,12 +177,39 @@ class OnlineAdaptiveArm(BaseArm):
         )
         return model
 
+    def _train_engine(self, extra_records: list[dict]):
+        """Same rows and weights as the LightGBM path, handed to an ml_models engine."""
+        from ..ml_models import make_engine
+        hist = self._loo_train
+        pos = (hist["label"] == 1).sum()
+        neg = (hist["label"] == 0).sum()
+        X = hist[self._available_feats].values
+        y = hist["label"].values
+        w = [1.0] * len(hist)
+        genes = hist["gene"].tolist()
+        groups = hist["dataset"].tolist()
+        if extra_records:
+            extra_df = pd.DataFrame(extra_records)
+            for col in self._available_feats:
+                if col not in extra_df.columns:
+                    extra_df[col] = 0.0
+            X = np.vstack([X, extra_df[self._available_feats].values])
+            y = np.concatenate([y, extra_df["label"].values])
+            w += [IN_EXPERIMENT_WEIGHT] * len(extra_records)
+            genes += extra_df["gene"].tolist()
+            groups += ["__target__"] * len(extra_records)
+        engine = make_engine(self._model_name, seed=self._seed)
+        return engine.fit(X, y, w, neg / pos if pos > 0 else 1.0, genes=genes, groups=groups)
+
+    def _predict(self, frame: pd.DataFrame) -> np.ndarray:
+        if self._model_name == "lightgbm":
+            return self._model.predict_proba(frame[self._available_feats].values)[:, 1]
+        return self._model.score(frame[self._available_feats].values, frame["gene"].tolist())
+
     def _rebuild_ranking(self) -> None:
         """Retrain model and rerank all test genes."""
         self._model = self._train_model(self._revealed_records)
-        scores = self._model.predict_proba(
-            self._test_frame[self._available_feats].values
-        )[:, 1]
+        scores = self._predict(self._test_frame)
         order = np.argsort(-scores)
         self._ranking = [self._genes[i] for i in order]
         self._scores = {self._genes[i]: float(scores[i]) for i in range(len(self._genes))}
@@ -187,9 +222,9 @@ class OnlineAdaptiveArm(BaseArm):
         """Mean |SHAP| per feature over `genes` — which features drove this batch's ML score.
 
         Uses LightGBM's native contribution output (`pred_contrib=True`), so no `shap` dependency.
-        The last column is the base value (bias) and is dropped.
+        The last column is the base value (bias) and is dropped. LightGBM only; other engines return {}.
         """
-        if self._model is None:
+        if self._model is None or self._model_name != "lightgbm":
             return {}
         want = set(genes)
         idx = [i for i, g in enumerate(self._genes) if g in want]
@@ -208,9 +243,7 @@ class OnlineAdaptiveArm(BaseArm):
         """Return top-n unselected genes with their current ML confidence scores."""
         if self._model is None:
             return []
-        scores = self._model.predict_proba(
-            self._test_frame[self._available_feats].values
-        )[:, 1]
+        scores = self._predict(self._test_frame)
         order = np.argsort(-scores)
         result: list[tuple[str, float]] = []
         for i in order:
@@ -234,6 +267,7 @@ class OnlineAdaptiveArm(BaseArm):
                 row = gene_to_row[gene]
                 record = {col: row[col] for col in self._available_feats}
                 record["label"] = int(is_hit)
+                record["gene"] = gene  # graph engines need the identity; the LightGBM path ignores it
                 self._revealed_records.append(record)
 
         # Retrain only when enough data has accumulated
