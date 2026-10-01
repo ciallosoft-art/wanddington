@@ -483,3 +483,87 @@ class GenePTLightGBMEngine:
 
     def score(self, X, genes=None) -> np.ndarray:
         return self._m.predict_proba(np.hstack([np.asarray(X, dtype=np.float32), _genept_rows(genes)]))[:, 1]
+
+
+# ---------------------------------------------------------------------------------------------------
+# Support vector machines. An exact RBF-kernel SVM is O(n^2)-O(n^3) in the ~100k training rows, hours per
+# fit, so the kernel is approximated with Nystroem features (the standard large-sample route); the linear
+# SVM is fitted directly. SVMs output margins, not probabilities, so both are Platt-calibrated: a sigmoid
+# fitted on 3-fold out-of-fold margins, applied to one SVM refitted on all rows (ensemble=False), which
+# keeps the ranking exactly that SVM's while giving the probabilities the C-arm's fusion needs.
+# ---------------------------------------------------------------------------------------------------
+
+
+class _CalibratedSVM:
+    """Standardise (and optionally map through Nystroem features) outside the calibrator, so the LinearSVC
+    itself receives the sample weights: wrapping a Pipeline instead makes CalibratedClassifierCV drop
+    them with only a warning, silently losing the class balance and the x10 in-experiment weighting.
+    Both transforms are label-free, fitted on the training rows."""
+
+    def __init__(self, seed: int, nystroem_components: int | None = None) -> None:
+        self.seed = seed
+        self.components = nystroem_components
+
+    def fit(self, X, y, w):
+        from sklearn.calibration import CalibratedClassifierCV
+        from sklearn.preprocessing import StandardScaler
+        from sklearn.svm import LinearSVC
+        X = np.asarray(X, dtype=float)
+        self._scaler = StandardScaler().fit(X)
+        Z = self._scaler.transform(X)
+        self._nys = None
+        if self.components:
+            from sklearn.kernel_approximation import Nystroem
+            self._nys = Nystroem(kernel="rbf", gamma=1.0 / X.shape[1], n_components=self.components,
+                                 random_state=self.seed).fit(Z)
+            Z = self._nys.transform(Z)
+        svm = LinearSVC(C=1.0, dual=False, max_iter=5000, random_state=self.seed)
+        self._cal = CalibratedClassifierCV(svm, method="sigmoid", cv=3, ensemble=False)
+        self._cal.fit(Z, np.asarray(y), sample_weight=w)
+        return self
+
+    def predict_proba(self, X):
+        Z = self._scaler.transform(np.asarray(X, dtype=float))
+        if self._nys is not None:
+            Z = self._nys.transform(Z)
+        return self._cal.predict_proba(Z)
+
+
+@register
+class LinearSVMEngine:
+    """Linear SVM (hinge loss, L2, C=1) on standardised features; Platt-calibrated."""
+
+    name = "svm_linear"
+    probabilistic = True
+    stochastic = False
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        self._m = _CalibratedSVM(self.seed).fit(X, y, _class_weighted(y, sample_weight, pos_scale))
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return self._m.predict_proba(X)[:, 1]
+
+
+@register
+class RBFSVMEngine:
+    """RBF-kernel SVM via a Nystroem approximation (500 landmarks, gamma = 1/n_features on standardised
+    features), then a linear SVM; Platt-calibrated. The landmark draw depends on the seed."""
+
+    name = "svm_rbf"
+    probabilistic = True
+    stochastic = True
+    COMPONENTS = 500
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        self._m = _CalibratedSVM(self.seed, self.COMPONENTS).fit(X, y, _class_weighted(y, sample_weight, pos_scale))
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return self._m.predict_proba(X)[:, 1]

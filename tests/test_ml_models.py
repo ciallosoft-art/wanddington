@@ -43,7 +43,7 @@ class EngineContractTests(unittest.TestCase):
         w1 = np.ones(len(y))
         w10 = w1.copy()
         w10[:100] = 10.0  # like revealed in-experiment rows
-        for name in ("logreg", "lambdarank"):
+        for name in ("logreg", "lambdarank", "svm_linear", "svm_rbf"):
             with self.subTest(engine=name):
                 a = make_engine(name).fit(X, y, w1, 5.0, genes=genes, groups=groups).score(X, genes)
                 b = make_engine(name).fit(X, y, w10, 5.0, genes=genes, groups=groups).score(X, genes)

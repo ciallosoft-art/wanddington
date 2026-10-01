@@ -12,6 +12,7 @@
 #   experiments/15_ml_engines.sh graph     # rwr | gnn
 #   experiments/15_ml_engines.sh genept    # genept_lr genept_lgbm (needs the GenePT download, plan step 4)
 #   experiments/15_ml_engines.sh acquisition  # ml_acq_{greedy,ucb05,ucb1,thompson,margin} (plan step 6)
+#   experiments/15_ml_engines.sh svm       # svm_linear | svm_rbf (Nystroem), added after the first report
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -30,7 +31,8 @@ case "$GROUP" in
   graph)   DET="rwr";                        SEEDED="gnn" ;;
   genept)  DET="genept_lr genept_lgbm";      SEEDED="" ;;
   acquisition) DET=""; SEEDED="" ;;  # explicit arm list below
-  *) echo "usage: $0 [tabular|graph|genept|acquisition]" >&2; exit 2 ;;
+  svm)     DET="svm_linear";                 SEEDED="" ;;  # svm_rbf runs screen-parallel below
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -48,6 +50,19 @@ if [ "$GROUP" = acquisition ]; then
 fi
 echo "== $GROUP: deterministic engines ($DET), 2 replicates"
 run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
+if [ "$GROUP" = svm ]; then
+  # The Nystroem-RBF SVM spends ~75 s per fit in single-threaded liblinear, ~4.5 h serially for five
+  # seeds. Screens are independent, so run one single-threaded process per screen, five at a time.
+  PY="$(conda run -n waddington-bio python3 -c 'import sys; print(sys.executable)')"
+  echo "== svm: seeded engine (svm_rbf), 5 seeds, screen-parallel"
+  printf '%s\n' IFNG IL2 Sanchez21 Sanchez21_down Carnevale22 Scharenberg22 Steinhart \
+    Replogle_K562_essential Replogle_K562_gwps |
+    xargs -P 5 -I{} env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+      "$PY" -m waddington_select.run_sequential --datasets {} \
+      --arms ml_engine_svm_rbf ml_static_svm_rbf --replicates 5 --seed-mode local --resume \
+      --out "$OUT/svm_seeded_{}.json"
+  echo "done -> $OUT"; exit 0
+fi
 if [ -n "$SEEDED" ]; then
   echo "== $GROUP: seeded engines ($SEEDED), 5 seeds"
   run "$(arms "$SEEDED")" 5 "$OUT/${GROUP}_seeded.json"
