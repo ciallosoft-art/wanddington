@@ -569,3 +569,52 @@ class RBFSVMEngine:
 
     def score(self, X, genes=None) -> np.ndarray:
         return self._m.predict_proba(X)[:, 1]
+
+
+# ---------------------------------------------------------------------------------------------------
+# Learning from the continuous screen score instead of the hit label (phase 2, item 1; GeneDisco regresses
+# the score). The same LightGBM on the same rows with the same protocol weights — positives still up-weighted
+# by neg/pos, as scale_pos_weight does for the classifier — so only the target changes: each training
+# screen's hit-aligned score percentile (screen_scores.score_targets). The target screen's scores are never
+# read; its revealed genes keep their binary labels, put on the same scale as E[target | label].
+# ---------------------------------------------------------------------------------------------------
+
+
+class _LGBMScoreEngine:
+    probabilistic = False  # a predicted score percentile, not P(hit)
+    stochastic = False
+    needs_scores = True  # groups must be real screen names with a BDA ground-truth file
+    objective = ""
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import lightgbm as lgb
+        from .arms.online_adaptive_arm import LGBM_PARAMS
+        from .screen_scores import score_targets
+        target, self.target_info = score_targets(y, groups, genes)
+        params = {**LGBM_PARAMS, "objective": self.objective, "metric": self.objective}
+        self._m = lgb.LGBMRegressor(**params)
+        self._m.fit(np.asarray(X, dtype=float), target, sample_weight=_class_weighted(y, sample_weight, pos_scale))
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return _rank_percentile(self._m.predict(np.asarray(X, dtype=float)))
+
+
+@register
+class LGBMScoreEngine(_LGBMScoreEngine):
+    """LightGBM least-squares regression on the hit-aligned score percentile."""
+
+    name = "lgbm_score"
+    objective = "regression"
+
+
+@register
+class LGBMScoreXentEngine(_LGBMScoreEngine):
+    """LightGBM cross-entropy on the same target read as a soft label in [0, 1] (the classifier's loss with
+    graded instead of 0/1 targets)."""
+
+    name = "lgbm_score_xent"
+    objective = "cross_entropy"

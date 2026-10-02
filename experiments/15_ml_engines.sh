@@ -13,6 +13,8 @@
 #   experiments/15_ml_engines.sh genept    # genept_lr genept_lgbm (needs the GenePT download, plan step 4)
 #   experiments/15_ml_engines.sh acquisition  # ml_acq_{greedy,ucb05,ucb1,thompson,margin} (plan step 6)
 #   experiments/15_ml_engines.sh svm       # svm_linear | svm_rbf (Nystroem), added after the first report
+#   experiments/15_ml_engines.sh score     # lgbm_score lgbm_score_xent: learn from training screens' continuous
+#                                          # scores instead of their hit labels (phase 2, item 1)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -33,7 +35,8 @@ case "$GROUP" in
   acquisition) DET=""; SEEDED="" ;;  # explicit arm list below
   svm)     DET="svm_linear";                 SEEDED="" ;;  # svm_rbf runs screen-parallel below
   svm_rbf) DET="";                           SEEDED="" ;;  # only the screen-parallel svm_rbf part
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf]" >&2; exit 2 ;;
+  score)   DET="lgbm_score lgbm_score_xent"; SEEDED="" ;;
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }

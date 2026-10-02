@@ -10,8 +10,8 @@ import numpy as np
 
 from waddington_select.ml_models import ENGINES, engine_names, is_stochastic, make_engine
 
-_TABULAR = [n for n, c in ENGINES.items()
-            if not getattr(c, "needs_graph", False) and not n.startswith("genept")]
+_TABULAR = [n for n, c in ENGINES.items() if not getattr(c, "needs_scores", False)
+            and not getattr(c, "needs_graph", False) and not n.startswith("genept")]
 
 
 def _toy(n=1200, d=6, seed=0):
@@ -259,6 +259,61 @@ class LeakageTests(unittest.TestCase):
             self.assertNotIn(ds, groups)
             self.assertEqual(sorted(genes[i] for i in target_rows), sorted(batch))
             self.assertTrue(np.all(w[target_rows] == 10.0))
+
+
+class ScoreTargetTests(unittest.TestCase):
+    """Phase 2 item 1: score targets are hit-aligned, read only training screens, and keep revealed rows binary."""
+
+    def test_transform_follows_each_screens_hits(self):
+        from waddington_select.features import load_training_frame
+        from waddington_select.screen_scores import aligned_target
+        from waddington_select.tables import TRAINING_DATA_CSV
+        df = load_training_frame(TRAINING_DATA_CSV, "IFNG")
+        df["gene"] = df["gene"].str.strip().str.upper()
+        want = {"IFNG": "|s|", "Sanchez21_down": "-s", "Steinhart": "s", "Scharenberg22": "s"}
+        for ds, tf in want.items():
+            with self.subTest(screen=ds):
+                rows = df[df["dataset"] == ds]
+                t, info = aligned_target(ds, rows["gene"], rows["label"])
+                self.assertEqual(info["transform"], tf)
+                self.assertEqual(info["coverage"], 1.0)
+                self.assertTrue(t.min() >= 0.0 and t.max() <= 1.0)
+                # every hit sits above every non-hit: the target reproduces the screen's threshold
+                self.assertGreater(t[rows["label"].values == 1].min(), t[rows["label"].values == 0].max())
+        rows = df[df["dataset"] == "Sanchez21"]  # hit list unrelated to the shipped score
+        t, info = aligned_target("Sanchez21", rows["gene"], rows["label"])
+        self.assertIsNone(t)
+        self.assertLess(info["auc"], 0.9)
+
+    def test_target_and_revealed_rows_use_labels_only(self):
+        from waddington_select import screen_scores
+        y = np.array([1, 0, 0, 1, 0, 1, 0])
+        groups = ["Steinhart"] * 4 + ["__target__"] * 3
+        genes = ["A1BG", "A1CF", "A2M", "A2ML1", "X1", "X2", "X3"]
+        read = []
+        real = screen_scores.load_scores.__wrapped__
+
+        def spy(ds):
+            read.append(ds)
+            return real(ds)
+
+        with patch.object(screen_scores, "load_scores", spy):
+            t, info = screen_scores.score_targets(y, groups, genes)
+        self.assertEqual(read, ["Steinhart"])  # never the target screen
+        np.testing.assert_allclose(t[4:], [info["imputed"][0], info["imputed"][1], info["imputed"][0]])
+        self.assertEqual(info["n_imputed"], 3)
+
+    def test_score_engine_fits_on_real_screens(self):
+        from waddington_select.arms.ml_engine_arm import MLEngineArm
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        with patch.dict(os.environ, env, clear=True):
+            arm = MLEngineArm("Scharenberg22", 32, model="lgbm_score")
+        info = arm._model.target_info
+        self.assertNotIn("Scharenberg22", info["screens"])
+        self.assertLess(info["screens"]["Sanchez21"]["auc"], 0.9)  # its rows fall back to the label
+        self.assertGreaterEqual(info["n_imputed"], 17807)
+        s = list(arm.all_scores().values())
+        self.assertTrue(min(s) >= 0.0 and max(s) <= 1.0)
 
 
 if __name__ == "__main__":
