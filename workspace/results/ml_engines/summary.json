@@ -1,5 +1,45 @@
 {
   "rows": {
+    "ml_engine_bnn": {
+      "model": "bnn",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.12918000000000002,
+        "IL2": 0.28442,
+        "Sanchez21": 0.07170000000000001,
+        "Sanchez21_down": 0.07276,
+        "Carnevale22": 0.060860000000000004,
+        "Scharenberg22": 0.5224399999999999,
+        "Steinhart": 0.07038,
+        "Replogle_K562_essential": 0.5746,
+        "Replogle_K562_gwps": 0.37402
+      },
+      "mean": 0.24003999999999998,
+      "vs_lightgbm_online": {
+        "delta": -0.004982222222222218,
+        "ci95": [
+          -0.023274833333333328,
+          0.015929499999999975
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.0038904964931179287,
+      "online_minus_static": {
+        "delta": 0.009268888888888877,
+        "ci95": [
+          -0.0022912777777778187,
+          0.02233705555555551
+        ],
+        "wins": 7,
+        "ties": 0,
+        "losses": 2
+      }
+    },
     "ml_engine_genept_lgbm": {
       "model": "genept_lgbm",
       "online": true,
@@ -710,6 +750,36 @@
         "ties": 0,
         "losses": 3
       }
+    },
+    "ml_static_bnn": {
+      "model": "bnn",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.1287,
+        "IL2": 0.27734000000000003,
+        "Sanchez21": 0.07239999999999999,
+        "Sanchez21_down": 0.07164,
+        "Carnevale22": 0.05926,
+        "Scharenberg22": 0.47756,
+        "Steinhart": 0.06348000000000001,
+        "Replogle_K562_essential": 0.5936600000000001,
+        "Replogle_K562_gwps": 0.3329
+      },
+      "mean": 0.23077111111111115,
+      "vs_lightgbm_online": {
+        "delta": -0.014251111111111096,
+        "ci95": [
+          -0.02274016666666664,
+          -0.005444055555555553
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.0016440051965914625
     },
     "ml_static_genept_lgbm": {
       "model": "genept_lgbm",
@@ -1736,6 +1806,1292 @@
         "ties": 0,
         "losses": 5
       }
+    }
+  },
+  "bnn_acquisition": {
+    "ml_bnnacq_badge": {
+      "rule": "badge",
+      "per_screen": {
+        "IFNG": 0.05286,
+        "IL2": 0.06986,
+        "Sanchez21": 0.03772,
+        "Sanchez21_down": 0.048,
+        "Carnevale22": 0.038939999999999995,
+        "Scharenberg22": 0.17962,
+        "Steinhart": 0.048299999999999996,
+        "Replogle_K562_essential": 0.19998,
+        "Replogle_K562_gwps": 0.09784000000000001
+      },
+      "mean": 0.08590222222222223,
+      "replicates": 5,
+      "seed_sd_of_mean": 0.00772928693627102,
+      "vs_bnn_greedy": {
+        "delta": -0.15413777777777776,
+        "ci95": [
+          -0.24987399999999993,
+          -0.06666844444444445
+        ],
+        "wins": 0,
+        "ties": 0,
+        "losses": 9
+      },
+      "vs_lightgbm_online": {
+        "delta": -0.15912,
+        "ci95": [
+          -0.25098466666666663,
+          -0.07707477777777778
+        ],
+        "wins": 0,
+        "ties": 0,
+        "losses": 9
+      }
+    },
+    "ml_bnnacq_bald": {
+      "rule": "bald",
+      "per_screen": {
+        "IFNG": 0.12618,
+        "IL2": 0.27648,
+        "Sanchez21": 0.06312,
+        "Sanchez21_down": 0.07096,
+        "Carnevale22": 0.05532,
+        "Scharenberg22": 0.43266,
+        "Steinhart": 0.05658,
+        "Replogle_K562_essential": 0.5968,
+        "Replogle_K562_gwps": 0.36148
+      },
+      "mean": 0.22662,
+      "replicates": 5,
+      "seed_sd_of_mean": 0.008725347635368167,
+      "vs_bnn_greedy": {
+        "delta": -0.013419999999999996,
+        "ci95": [
+          -0.03501777777777776,
+          0.0018048888888888782
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      },
+      "vs_lightgbm_online": {
+        "delta": -0.018402222222222216,
+        "ci95": [
+          -0.02820505555555555,
+          -0.004919611111111107
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      }
+    },
+    "ml_bnnacq_kmeans_embedding": {
+      "rule": "kmeans_embedding",
+      "per_screen": {
+        "IFNG": 0.07332,
+        "IL2": 0.1131,
+        "Sanchez21": 0.04772,
+        "Sanchez21_down": 0.05788,
+        "Carnevale22": 0.05045999999999999,
+        "Scharenberg22": 0.27346,
+        "Steinhart": 0.05382,
+        "Replogle_K562_essential": 0.39366,
+        "Replogle_K562_gwps": 0.1738
+      },
+      "mean": 0.1374688888888889,
+      "replicates": 5,
+      "seed_sd_of_mean": 0.009009783434182232,
+      "vs_bnn_greedy": {
+        "delta": -0.10257111111111111,
+        "ci95": [
+          -0.1647028333333333,
+          -0.044400000000000044
+        ],
+        "wins": 0,
+        "ties": 0,
+        "losses": 9
+      },
+      "vs_lightgbm_online": {
+        "delta": -0.10755333333333332,
+        "ci95": [
+          -0.1611248888888889,
+          -0.05559977777777779
+        ],
+        "wins": 0,
+        "ties": 0,
+        "losses": 9
+      }
+    },
+    "ml_bnnacq_ucb1": {
+      "rule": "ucb1",
+      "per_screen": {
+        "IFNG": 0.12918000000000002,
+        "IL2": 0.28484,
+        "Sanchez21": 0.07008,
+        "Sanchez21_down": 0.07208,
+        "Carnevale22": 0.060160000000000005,
+        "Scharenberg22": 0.5224400000000001,
+        "Steinhart": 0.06899999999999999,
+        "Replogle_K562_essential": 0.58414,
+        "Replogle_K562_gwps": 0.37206
+      },
+      "mean": 0.24044222222222222,
+      "replicates": 5,
+      "seed_sd_of_mean": 0.007674900570393847,
+      "vs_bnn_greedy": {
+        "delta": 0.0004022222222222398,
+        "ci95": [
+          -0.0011333333333333187,
+          0.002846666666666713
+        ],
+        "wins": 2,
+        "ties": 2,
+        "losses": 5
+      },
+      "vs_lightgbm_online": {
+        "delta": -0.004579999999999979,
+        "ci95": [
+          -0.021886888888888886,
+          0.01561827777777784
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      }
+    }
+  },
+  "genedisco_faithful": {
+    "rows": {
+      "gdf_achilles_bnn_adversarialBIM": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "adversarialBIM",
+        "per_screen": {
+          "Carnevale22": 0.03594000000000001,
+          "IFNG": 0.03492,
+          "IL2": 0.03950000000000001,
+          "Replogle_K562_essential": 0.18094000000000002,
+          "Sanchez21": 0.03842,
+          "Sanchez21_down": 0.0349,
+          "Steinhart": 0.034499999999999996,
+          "Replogle_K562_gwps": 0.07424,
+          "Scharenberg22": 0.06528
+        },
+        "mean": 0.05984888888888889,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.0076803163515091755,
+        "vs_random": {
+          "delta": -0.010271111111111111,
+          "ci95": [
+            -0.026899999999999997,
+            0.002660277777777776
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.10874,
+          "ci95": [
+            -0.2115492777777778,
+            -0.028396500000000047
+          ],
+          "wins": 3,
+          "ties": 0,
+          "losses": 6
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.18517333333333333,
+          "ci95": [
+            -0.28990661111111105,
+            -0.09120311111111112
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_bnn_badge": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "badge",
+        "per_screen": {
+          "Carnevale22": 0.0438,
+          "IFNG": 0.06509999999999999,
+          "IL2": 0.09232,
+          "Replogle_K562_essential": 0.33331999999999995,
+          "Sanchez21": 0.045160000000000006,
+          "Sanchez21_down": 0.050039999999999994,
+          "Steinhart": 0.033120000000000004,
+          "Replogle_K562_gwps": 0.19283999999999998,
+          "Scharenberg22": 0.35102
+        },
+        "mean": 0.13407999999999998,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.01769255161688244,
+        "vs_random": {
+          "delta": 0.06395999999999999,
+          "ci95": [
+            0.022237777777777766,
+            0.11545094444444438
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.0345088888888889,
+          "ci95": [
+            -0.11618938888888893,
+            0.0299316111111111
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.11094222222222222,
+          "ci95": [
+            -0.16963111111111112,
+            -0.05984649999999999
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_bnn_coreset": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "coreset",
+        "per_screen": {
+          "Carnevale22": 0.05344,
+          "IFNG": 0.10500000000000001,
+          "IL2": 0.16466,
+          "Replogle_K562_essential": 0.35558,
+          "Sanchez21": 0.07333999999999999,
+          "Sanchez21_down": 0.08130000000000001,
+          "Steinhart": 0.05796,
+          "Replogle_K562_gwps": 0.2197,
+          "Scharenberg22": 0.42858
+        },
+        "mean": 0.17106222222222223,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.00854752725776422,
+        "vs_random": {
+          "delta": 0.10094222222222222,
+          "ci95": [
+            0.05113472222222223,
+            0.1620184444444444
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.0024733333333333304,
+          "ci95": [
+            -0.08554027777777778,
+            0.07679349999999997
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.07395999999999997,
+          "ci95": [
+            -0.13135444444444444,
+            -0.02843988888888888
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_bnn_kmeans_embedding": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "kmeans_embedding",
+        "per_screen": {
+          "Carnevale22": 0.047,
+          "IFNG": 0.0606,
+          "IL2": 0.11765999999999999,
+          "Replogle_K562_essential": 0.39679999999999993,
+          "Sanchez21": 0.042600000000000006,
+          "Sanchez21_down": 0.04223999999999999,
+          "Steinhart": 0.031740000000000004,
+          "Replogle_K562_gwps": 0.1738,
+          "Scharenberg22": 0.34284
+        },
+        "mean": 0.13947555555555555,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.004813922709376612,
+        "vs_random": {
+          "delta": 0.06935555555555555,
+          "ci95": [
+            0.02364177777777778,
+            0.1240878333333333
+          ],
+          "wins": 8,
+          "ties": 1,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.02911333333333335,
+          "ci95": [
+            -0.09462172222222226,
+            0.027440388888888844
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.10554666666666666,
+          "ci95": [
+            -0.1520148888888889,
+            -0.062397333333333325
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_bnn_marginsample": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "marginsample",
+        "per_screen": {
+          "Carnevale22": 0.044020000000000004,
+          "IFNG": 0.06408,
+          "IL2": 0.15136,
+          "Replogle_K562_essential": 0.45397999999999994,
+          "Sanchez21": 0.05588,
+          "Sanchez21_down": 0.0776,
+          "Steinhart": 0.04278,
+          "Replogle_K562_gwps": 0.31536,
+          "Scharenberg22": 0.47756
+        },
+        "mean": 0.18695777777777778,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.0074518015056100504,
+        "vs_random": {
+          "delta": 0.11683777777777775,
+          "ci95": [
+            0.04233322222222222,
+            0.2017081666666666
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.01836888888888887,
+          "ci95": [
+            -0.05068766666666669,
+            0.09432483333333332
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.058064444444444446,
+          "ci95": [
+            -0.09986683333333335,
+            -0.021858333333333355
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
+      },
+      "gdf_achilles_bnn_softuncertain": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "softuncertain",
+        "per_screen": {
+          "Carnevale22": 0.03802,
+          "IFNG": 0.039400000000000004,
+          "IL2": 0.04036000000000001,
+          "Replogle_K562_essential": 0.4159,
+          "Sanchez21": 0.03888,
+          "Sanchez21_down": 0.0335,
+          "Steinhart": 0.03726,
+          "Replogle_K562_gwps": 0.06926,
+          "Scharenberg22": 0.35916000000000003
+        },
+        "mean": 0.11908222222222224,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.007113899626873765,
+        "vs_random": {
+          "delta": 0.04896222222222222,
+          "ci95": [
+            0.00108427777777778,
+            0.11669061111111109
+          ],
+          "wins": 7,
+          "ties": 0,
+          "losses": 2
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.049506666666666664,
+          "ci95": [
+            -0.11952505555555556,
+            0.018603166666666664
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.12594,
+          "ci95": [
+            -0.18659316666666664,
+            -0.07085500000000002
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_bnn_topuncertain": {
+        "features": "achilles",
+        "model": "bnn",
+        "rule": "topuncertain",
+        "per_screen": {
+          "Carnevale22": 0.04562,
+          "IFNG": 0.07205999999999999,
+          "IL2": 0.17382,
+          "Replogle_K562_essential": 0.45397999999999994,
+          "Replogle_K562_gwps": 0.31536,
+          "Sanchez21": 0.05262,
+          "Sanchez21_down": 0.07348000000000002,
+          "Scharenberg22": 0.47756,
+          "Steinhart": 0.04002
+        },
+        "mean": 0.18939111111111112,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.005604712523326747,
+        "vs_random": {
+          "delta": 0.11927111111111108,
+          "ci95": [
+            0.04453483333333333,
+            0.20368766666666657
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.0208022222222222,
+          "ci95": [
+            -0.04897083333333336,
+            0.09584788888888886
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.05563111111111111,
+          "ci95": [
+            -0.09445422222222222,
+            -0.022449888888888908
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
+      },
+      "gdf_achilles_kmeans_data": {
+        "features": "achilles",
+        "model": null,
+        "rule": "kmeans_data",
+        "per_screen": {
+          "Carnevale22": 0.04562000000000001,
+          "IFNG": 0.07254000000000001,
+          "IL2": 0.13555999999999999,
+          "Replogle_K562_essential": 0.40952,
+          "Replogle_K562_gwps": 0.22686,
+          "Sanchez21": 0.05216,
+          "Sanchez21_down": 0.0503,
+          "Scharenberg22": 0.449,
+          "Steinhart": 0.04692
+        },
+        "mean": 0.16538666666666668,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.004360806075673353,
+        "vs_random": {
+          "delta": 0.09526666666666667,
+          "ci95": [
+            0.0345,
+            0.16892022222222222
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.0032022222222222244,
+          "ci95": [
+            -0.0790647777777778,
+            0.07192577777777773
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.07963555555555554,
+          "ci95": [
+            -0.12460255555555555,
+            -0.039584444444444436
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_rf_marginsample": {
+        "features": "achilles",
+        "model": "rf",
+        "rule": "marginsample",
+        "per_screen": {
+          "Carnevale22": 0.04053999999999999,
+          "IFNG": 0.05933999999999999,
+          "IL2": 0.10726,
+          "Replogle_K562_essential": 0.41906,
+          "Replogle_K562_gwps": 0.30910000000000004,
+          "Sanchez21": 0.05032,
+          "Sanchez21_down": 0.05624,
+          "Scharenberg22": 0.55102,
+          "Steinhart": 0.031740000000000004
+        },
+        "mean": 0.1805133333333333,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.034694551996986574,
+        "vs_random": {
+          "delta": 0.11039333333333333,
+          "ci95": [
+            0.029467222222222218,
+            0.20937777777777777
+          ],
+          "wins": 8,
+          "ties": 1,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.011924444444444435,
+          "ci95": [
+            -0.07111005555555557,
+            0.10920572222222213
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.0645088888888889,
+          "ci95": [
+            -0.12079794444444444,
+            -0.012270722222222264
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
+      },
+      "gdf_achilles_rf_softuncertain": {
+        "features": "achilles",
+        "model": "rf",
+        "rule": "softuncertain",
+        "per_screen": {
+          "Carnevale22": 0.03477999999999999,
+          "IFNG": 0.0379,
+          "IL2": 0.0316,
+          "Replogle_K562_essential": 0.28888,
+          "Replogle_K562_gwps": 0.06948000000000001,
+          "Sanchez21": 0.042620000000000005,
+          "Sanchez21_down": 0.049159999999999995,
+          "Scharenberg22": 0.18778,
+          "Steinhart": 0.031740000000000004
+        },
+        "mean": 0.08599333333333332,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.004082623521072551,
+        "vs_random": {
+          "delta": 0.015873333333333337,
+          "ci95": [
+            0.0007286666666666748,
+            0.035500055555555556
+          ],
+          "wins": 5,
+          "ties": 1,
+          "losses": 3
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.08259555555555556,
+          "ci95": [
+            -0.16531394444444444,
+            -0.01717294444444445
+          ],
+          "wins": 3,
+          "ties": 0,
+          "losses": 6
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.15902888888888886,
+          "ci95": [
+            -0.2393022222222222,
+            -0.0836013333333334
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_achilles_rf_topuncertain": {
+        "features": "achilles",
+        "model": "rf",
+        "rule": "topuncertain",
+        "per_screen": {
+          "Carnevale22": 0.042879999999999995,
+          "IFNG": 0.07632,
+          "IL2": 0.19336,
+          "Replogle_K562_essential": 0.30158,
+          "Replogle_K562_gwps": 0.18616000000000002,
+          "Sanchez21": 0.05332,
+          "Sanchez21_down": 0.07048,
+          "Scharenberg22": 0.40815999999999997,
+          "Steinhart": 0.042780000000000006
+        },
+        "mean": 0.15278222222222224,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.018285732142848416,
+        "vs_random": {
+          "delta": 0.08266222222222222,
+          "ci95": [
+            0.033359999999999994,
+            0.14434938888888887
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.015806666666666674,
+          "ci95": [
+            -0.11159372222222222,
+            0.061559833333333286
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.09223999999999999,
+          "ci95": [
+            -0.1561831111111111,
+            -0.043977444444444444
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_adversarialBIM": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "adversarialBIM",
+        "per_screen": {
+          "Carnevale22": 0.03594000000000001,
+          "IFNG": 0.03492,
+          "IL2": 0.03950000000000001,
+          "Replogle_K562_essential": 0.21903999999999998,
+          "Sanchez21": 0.03842,
+          "Sanchez21_down": 0.0349,
+          "Steinhart": 0.034499999999999996,
+          "Replogle_K562_gwps": 0.07424,
+          "Scharenberg22": 0.06938
+        },
+        "mean": 0.06453777777777776,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.009180869804673758,
+        "vs_random": {
+          "delta": -0.005582222222222225,
+          "ci95": [
+            -0.019499000000000016,
+            0.003193388888888894
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.10405111111111112,
+          "ci95": [
+            -0.1989657222222222,
+            -0.028021611111111115
+          ],
+          "wins": 3,
+          "ties": 0,
+          "losses": 6
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.18048444444444442,
+          "ci95": [
+            -0.28102577777777776,
+            -0.08996188888888891
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_badge": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "badge",
+        "per_screen": {
+          "Carnevale22": 0.04630000000000001,
+          "IFNG": 0.05911999999999999,
+          "IL2": 0.09522,
+          "Replogle_K562_essential": 0.3651,
+          "Sanchez21": 0.043320000000000004,
+          "Sanchez21_down": 0.052579999999999995,
+          "Steinhart": 0.04278,
+          "Replogle_K562_gwps": 0.13616,
+          "Scharenberg22": 0.25714000000000004
+        },
+        "mean": 0.12196888888888889,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.017591428538486907,
+        "vs_random": {
+          "delta": 0.051848888888888896,
+          "ci95": [
+            0.022378333333333337,
+            0.08686044444444443
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.04662000000000001,
+          "ci95": [
+            -0.11590083333333336,
+            0.00569411111111111
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.1230533333333333,
+          "ci95": [
+            -0.18267444444444442,
+            -0.06641027777777789
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_coreset": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "coreset",
+        "per_screen": {
+          "Carnevale22": 0.05184,
+          "IFNG": 0.09128,
+          "IL2": 0.14388,
+          "Replogle_K562_essential": 0.32382,
+          "Sanchez21": 0.03958,
+          "Sanchez21_down": 0.06522,
+          "Steinhart": 0.06348,
+          "Replogle_K562_gwps": 0.17421999999999999,
+          "Scharenberg22": 0.32652000000000003
+        },
+        "mean": 0.14220444444444447,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.004642141906650573,
+        "vs_random": {
+          "delta": 0.07208444444444445,
+          "ci95": [
+            0.036699499999999996,
+            0.1144772222222222
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.026384444444444446,
+          "ci95": [
+            -0.1103377777777778,
+            0.03414944444444441
+          ],
+          "wins": 5,
+          "ties": 0,
+          "losses": 4
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.10281777777777776,
+          "ci95": [
+            -0.16409416666666665,
+            -0.04943316666666667
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_kmeans_embedding": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "kmeans_embedding",
+        "per_screen": {
+          "Carnevale22": 0.0486,
+          "IFNG": 0.05911999999999999,
+          "IL2": 0.10064,
+          "Replogle_K562_essential": 0.35237999999999997,
+          "Sanchez21": 0.044020000000000004,
+          "Sanchez21_down": 0.050980000000000004,
+          "Steinhart": 0.06348000000000001,
+          "Replogle_K562_gwps": 0.14394,
+          "Scharenberg22": 0.29386
+        },
+        "mean": 0.12855777777777777,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.008659531963516312,
+        "vs_random": {
+          "delta": 0.058437777777777776,
+          "ci95": [
+            0.025667388888888892,
+            0.09759838888888886
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.040031111111111115,
+          "ci95": [
+            -0.11404427777777781,
+            0.017817777777777783
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.11646444444444443,
+          "ci95": [
+            -0.17632211111111112,
+            -0.059852277777777824
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_marginsample": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "marginsample",
+        "per_screen": {
+          "Carnevale22": 0.05045999999999999,
+          "IFNG": 0.07258,
+          "IL2": 0.1393,
+          "Replogle_K562_essential": 0.50158,
+          "Sanchez21": 0.052860000000000004,
+          "Sanchez21_down": 0.06888,
+          "Steinhart": 0.045540000000000004,
+          "Replogle_K562_gwps": 0.26516,
+          "Scharenberg22": 0.38776
+        },
+        "mean": 0.17601333333333335,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.009023677359392895,
+        "vs_random": {
+          "delta": 0.10589333333333334,
+          "ci95": [
+            0.04134288888888889,
+            0.17927422222222217
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.007424444444444444,
+          "ci95": [
+            -0.042281166666666675,
+            0.0580553333333333
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.06900888888888888,
+          "ci95": [
+            -0.10164966666666664,
+            -0.040128111111111114
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_softuncertain": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "softuncertain",
+        "per_screen": {
+          "Carnevale22": 0.038020000000000005,
+          "IFNG": 0.04014,
+          "IL2": 0.03452000000000001,
+          "Replogle_K562_essential": 0.35237999999999997,
+          "Sanchez21": 0.040279999999999996,
+          "Sanchez21_down": 0.03626,
+          "Steinhart": 0.044160000000000005,
+          "Replogle_K562_gwps": 0.15218,
+          "Scharenberg22": 0.32652000000000003
+        },
+        "mean": 0.11827333333333333,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.01107759277679023,
+        "vs_random": {
+          "delta": 0.04815333333333333,
+          "ci95": [
+            0.005019333333333332,
+            0.09829355555555552
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.05031555555555556,
+          "ci95": [
+            -0.12623772222222224,
+            0.01455588888888889
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.12674888888888888,
+          "ci95": [
+            -0.1887305,
+            -0.07036888888888888
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_bnn_topuncertain": {
+        "features": "ours",
+        "model": "bnn",
+        "rule": "topuncertain",
+        "per_screen": {
+          "Carnevale22": 0.049519999999999995,
+          "IFNG": 0.07505999999999999,
+          "IL2": 0.15634,
+          "Replogle_K562_essential": 0.48256,
+          "Sanchez21": 0.05494000000000001,
+          "Sanchez21_down": 0.06866,
+          "Steinhart": 0.042780000000000006,
+          "Replogle_K562_gwps": 0.26496,
+          "Scharenberg22": 0.38776
+        },
+        "mean": 0.17584222222222223,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.010283366048330215,
+        "vs_random": {
+          "delta": 0.10572222222222222,
+          "ci95": [
+            0.042932166666666674,
+            0.1763106111111111
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.007253333333333324,
+          "ci95": [
+            -0.04655183333333335,
+            0.05953288888888886
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.06917999999999999,
+          "ci95": [
+            -0.10049777777777777,
+            -0.04040572222222226
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_kmeans_data": {
+        "features": "ours",
+        "model": null,
+        "rule": "kmeans_data",
+        "per_screen": {
+          "Carnevale22": 0.05068,
+          "IFNG": 0.062340000000000007,
+          "IL2": 0.0923,
+          "Replogle_K562_essential": 0.39366,
+          "Sanchez21": 0.045380000000000004,
+          "Sanchez21_down": 0.0519,
+          "Steinhart": 0.05382,
+          "Replogle_K562_gwps": 0.15066,
+          "Scharenberg22": 0.23266
+        },
+        "mean": 0.12593333333333334,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.003857468305559374,
+        "vs_random": {
+          "delta": 0.05581333333333333,
+          "ci95": [
+            0.025065,
+            0.09277049999999998
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.04265555555555556,
+          "ci95": [
+            -0.10497661111111112,
+            0.004981166666666652
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.11908888888888887,
+          "ci95": [
+            -0.17909655555555554,
+            -0.061774277777777796
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_rf_marginsample": {
+        "features": "ours",
+        "model": "rf",
+        "rule": "marginsample",
+        "per_screen": {
+          "Carnevale22": 0.037340000000000005,
+          "IFNG": 0.06183999999999999,
+          "IL2": 0.10686,
+          "Replogle_K562_essential": 0.4476,
+          "Sanchez21": 0.03816,
+          "Sanchez21_down": 0.06381999999999999,
+          "Steinhart": 0.033120000000000004,
+          "Replogle_K562_gwps": 0.27384000000000003,
+          "Scharenberg22": 0.4857
+        },
+        "mean": 0.17203111111111113,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.034569030420269695,
+        "vs_random": {
+          "delta": 0.10191111111111112,
+          "ci95": [
+            0.029017111111111115,
+            0.1884141111111111
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": 0.0034422222222222198,
+          "ci95": [
+            -0.06585561111111114,
+            0.08475777777777777
+          ],
+          "wins": 6,
+          "ties": 0,
+          "losses": 3
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.07299111111111109,
+          "ci95": [
+            -0.11904266666666664,
+            -0.03245555555555555
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
+      },
+      "gdf_ours_rf_softuncertain": {
+        "features": "ours",
+        "model": "rf",
+        "rule": "softuncertain",
+        "per_screen": {
+          "Carnevale22": 0.04146,
+          "IFNG": 0.03763999999999999,
+          "IL2": 0.0366,
+          "Replogle_K562_essential": 0.29524,
+          "Sanchez21": 0.035859999999999996,
+          "Sanchez21_down": 0.059919999999999994,
+          "Steinhart": 0.0207,
+          "Replogle_K562_gwps": 0.06992000000000001,
+          "Scharenberg22": 0.16326000000000002
+        },
+        "mean": 0.0845111111111111,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.008093866752816337,
+        "vs_random": {
+          "delta": 0.014391111111111111,
+          "ci95": [
+            0.000555166666666669,
+            0.03176499999999999
+          ],
+          "wins": 7,
+          "ties": 0,
+          "losses": 2
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.08407777777777778,
+          "ci95": [
+            -0.1642022777777778,
+            -0.0199376666666667
+          ],
+          "wins": 4,
+          "ties": 0,
+          "losses": 5
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.1605111111111111,
+          "ci95": [
+            -0.24096816666666665,
+            -0.08368822222222222
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_ours_rf_topuncertain": {
+        "features": "ours",
+        "model": "rf",
+        "rule": "topuncertain",
+        "per_screen": {
+          "Carnevale22": 0.04516,
+          "IFNG": 0.07655999999999999,
+          "IL2": 0.16632,
+          "Replogle_K562_essential": 0.32698,
+          "Sanchez21": 0.04564,
+          "Sanchez21_down": 0.06611999999999998,
+          "Steinhart": 0.0483,
+          "Replogle_K562_gwps": 0.23290000000000002,
+          "Scharenberg22": 0.29388000000000003
+        },
+        "mean": 0.14465111111111115,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.014277389964469383,
+        "vs_random": {
+          "delta": 0.07453111111111112,
+          "ci95": [
+            0.034887611111111105,
+            0.11748522222222221
+          ],
+          "wins": 9,
+          "ties": 0,
+          "losses": 0
+        },
+        "vs_ported_marginsample": {
+          "delta": -0.023937777777777777,
+          "ci95": [
+            -0.10376233333333336,
+            0.026742777777777744
+          ],
+          "wins": 5,
+          "ties": 0,
+          "losses": 4
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.1003711111111111,
+          "ci95": [
+            -0.16039644444444442,
+            -0.05037288888888889
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      },
+      "gdf_random": {
+        "features": null,
+        "model": null,
+        "rule": "random",
+        "per_screen": {
+          "Carnevale22": 0.035960000000000006,
+          "IFNG": 0.0409,
+          "IL2": 0.03491999999999999,
+          "Replogle_K562_essential": 0.22222,
+          "Replogle_K562_gwps": 0.06581999999999999,
+          "Sanchez21": 0.033740000000000006,
+          "Sanchez21_down": 0.03926,
+          "Scharenberg22": 0.12652000000000002,
+          "Steinhart": 0.031740000000000004
+        },
+        "mean": 0.07012000000000002,
+        "replicates": 5,
+        "seed_sd_of_mean": 0.005987896227772144,
+        "vs_random": null,
+        "vs_ported_marginsample": {
+          "delta": -0.09846888888888888,
+          "ci95": [
+            -0.1942566111111111,
+            -0.025936222222222236
+          ],
+          "wins": 2,
+          "ties": 0,
+          "losses": 7
+        },
+        "vs_lightgbm_online": {
+          "delta": -0.17490222222222218,
+          "ci95": [
+            -0.2678277222222222,
+            -0.08931077777777782
+          ],
+          "wins": 0,
+          "ties": 0,
+          "losses": 9
+        }
+      }
+    },
+    "ported_marginsample": {
+      "per_screen": {
+        "IFNG": 0.0923,
+        "IL2": 0.1767,
+        "Sanchez21": 0.0338,
+        "Sanchez21_down": 0.0551,
+        "Carnevale22": 0.0311,
+        "Scharenberg22": 0.2245,
+        "Steinhart": 0.0138,
+        "Replogle_K562_essential": 0.6508,
+        "Replogle_K562_gwps": 0.2392
+      },
+      "mean": 0.16858888888888893
     }
   }
 }
