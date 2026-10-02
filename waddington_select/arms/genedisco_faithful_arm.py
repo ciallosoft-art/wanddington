@@ -145,7 +145,9 @@ class GeneDiscoFaithfulArm(BaseArm):
             if self.rule == "marginsample":
                 return cand[np.argsort(-(S.max(0) - S.min(0)), kind="stable")[:k]]
             from scipy.special import softmax
-            p = softmax(np.exp(np.log(1e-7 + S.std(0) ** 2) / 0.9))
+            # float64 throughout: the MLP's samples are float32, where the 1e-300 floor below underflows
+            # back to 0 and screens with count-scale scores (Scharenberg22, K562-GWPS) run out of genes
+            p = softmax(np.exp(np.log(1e-7 + S.std(0).astype(np.float64) ** 2) / 0.9))
             p = np.maximum(p, 1e-300)  # underflowed zeros would make sampling without replacement fail
             return self._rng.choice(cand, size=k, replace=False, p=p / p.sum())
         if self.rule == "kmeans_embedding":

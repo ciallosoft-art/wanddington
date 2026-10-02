@@ -20,6 +20,8 @@
 #                                          # STRING eigenmap descriptors (phase 2, item 2)
 #   experiments/15_ml_engines.sh bnn       # GeneDisco's Bayesian MLP in our protocol + bald/ucb1/badge/kmeans_embedding
 #   experiments/15_ml_engines.sh gdf       # faithful GeneDisco baseline (gdf_* arms), screen-parallel (phase 2, item 3)
+#   experiments/15_ml_engines.sh gdf_rerun # after the float32 softuncertain fix: re-run the BNN softuncertain arms on
+#                                          # every screen and the arms the crash never reached (-> *.rerun.json)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -45,7 +47,8 @@ case "$GROUP" in
   desc)    DET="lgbm_depmap_pca lgbm_string_emb lgbm_desc"; SEEDED="" ;;
   bnn)     DET="";                           SEEDED="" ;;  # explicit arm list below
   gdf)     DET="";                           SEEDED="" ;;  # screen-parallel below
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf]" >&2; exit 2 ;;
+  gdf_rerun) DET="";                         SEEDED="" ;;  # screen-parallel below
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -80,6 +83,24 @@ if [ "$GROUP" = gdf ]; then
     xargs -P 3 -I{} env OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
       "$PY" -m waddington_select.run_sequential --datasets {} \
       --arms $ARMS --replicates 5 --seed-mode local --resume --out "$OUT/gdf_seeded_{}.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = gdf_rerun ]; then
+  # The first gdf run crashed on Scharenberg22 and K562-GWPS in gdf_achilles_bnn_softuncertain (float32
+  # underflow of the sampling floor; fixed in genedisco_faithful_arm). Re-run that rule for both feature sets
+  # on every screen, and on the two crashed screens every arm after the last completed one
+  # (gdf_achilles_bnn_topuncertain). Outputs are new *.rerun.json files; the originals are kept.
+  PY="$(conda run -n waddington-bio python3 -c 'import sys; print(sys.executable)')"
+  SOFT="gdf_achilles_bnn_softuncertain gdf_ours_bnn_softuncertain"
+  REST="$(conda run -n waddington-bio python3 -c \
+    'from waddington_select.arms.genedisco_faithful_arm import arm_names as a; n = a(); i = n.index("gdf_achilles_bnn_softuncertain"); print(" ".join(x for x in n[i + 1:] if x != "gdf_ours_bnn_softuncertain"))')"
+  for ds in IFNG IL2 Sanchez21 Sanchez21_down Carnevale22 Steinhart Replogle_K562_essential; do echo "$ds $SOFT"; done > /tmp/gdf_rerun_jobs.$$
+  for ds in Scharenberg22 Replogle_K562_gwps; do echo "$ds $SOFT $REST"; done >> /tmp/gdf_rerun_jobs.$$
+  echo "== faithful GeneDisco re-run"; cat /tmp/gdf_rerun_jobs.$$
+  xargs -P 3 -L 1 sh -c 'ds=$0; env OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
+      '"$PY"' -m waddington_select.run_sequential --datasets "$ds" --arms "$@" --replicates 5 \
+      --seed-mode local --resume --out '"$OUT"'/gdf_seeded_"$ds".rerun.json' < /tmp/gdf_rerun_jobs.$$
+  rm -f /tmp/gdf_rerun_jobs.$$
   echo "done -> $OUT"; exit 0
 fi
 if [ -n "$DET" ]; then

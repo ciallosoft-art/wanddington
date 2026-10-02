@@ -398,6 +398,17 @@ class GeneDiscoFaithfulTests(unittest.TestCase):
                     self.assertEqual(picks[0], picks[1])
         self.assertTrue(fitted_rows and all(n == B for n in fitted_rows))  # only the revealed genes
 
+    def test_softuncertain_survives_count_scale_scores(self):
+        """Regression: float32 MC samples underflowed the probability floor on count-scale scores."""
+        from waddington_select.arms.genedisco_faithful_arm import GeneDiscoFaithfulArm
+        from waddington_select.oracle import DatasetOracle
+        ds = "Scharenberg22"
+        arm = GeneDiscoFaithfulArm(ds, 32, name="gdf_achilles_bnn_softuncertain", seed=0)
+        arm._score = arm._score * 1000.0  # spread the MLP's samples far beyond float32's softmax range
+        b1 = arm.select(0, {})
+        arm.update(0, DatasetOracle(ds).reveal(b1))
+        self.assertEqual(len(set(arm.select(1, {})) - set(b1)), 32)
+
     def test_bnn_acquisition_arms(self):
         from waddington_select.arms.ml_engine_arm import BNN_ACQUISITIONS, BNNAcquisitionArm
         for rule in BNN_ACQUISITIONS:
