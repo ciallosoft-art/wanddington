@@ -302,6 +302,9 @@ class ScoreTargetTests(unittest.TestCase):
         self.assertEqual(read, ["Steinhart"])  # never the target screen
         np.testing.assert_allclose(t[4:], [info["imputed"][0], info["imputed"][1], info["imputed"][0]])
         self.assertEqual(info["n_imputed"], 3)
+        h, _ = screen_scores.score_targets(y, groups, genes, revealed="hard")
+        np.testing.assert_array_equal(h[4:], [0.0, 1.0, 0.0])
+        np.testing.assert_array_equal(h[:4], t[:4])  # training-screen rows are unchanged
 
     def test_score_engine_fits_on_real_screens(self):
         from waddington_select.arms.ml_engine_arm import MLEngineArm

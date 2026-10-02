@@ -585,6 +585,7 @@ class _LGBMScoreEngine:
     stochastic = False
     needs_scores = True  # groups must be real screen names with a BDA ground-truth file
     objective = ""
+    revealed = "imputed"  # how the target screen's revealed genes enter (screen_scores.score_targets)
 
     def __init__(self, seed: int = 42) -> None:
         self.seed = seed
@@ -593,7 +594,7 @@ class _LGBMScoreEngine:
         import lightgbm as lgb
         from .arms.online_adaptive_arm import LGBM_PARAMS
         from .screen_scores import score_targets
-        target, self.target_info = score_targets(y, groups, genes)
+        target, self.target_info = score_targets(y, groups, genes, self.revealed)
         params = {**LGBM_PARAMS, "objective": self.objective, "metric": self.objective}
         self._m = lgb.LGBMRegressor(**params)
         self._m.fit(np.asarray(X, dtype=float), target, sample_weight=_class_weighted(y, sample_weight, pos_scale))
@@ -618,3 +619,23 @@ class LGBMScoreXentEngine(_LGBMScoreEngine):
 
     name = "lgbm_score_xent"
     objective = "cross_entropy"
+
+
+# Post-hoc mechanism check, added after the first score run: the score engines' prior beat the classifier's
+# but gained little or nothing from online retraining. Same engines, revealed genes on hard 0/1 targets.
+
+
+@register
+class LGBMScoreHardEngine(LGBMScoreEngine):
+    """lgbm_score with the target screen's revealed genes on hard 0/1 targets (post hoc)."""
+
+    name = "lgbm_score_hard"
+    revealed = "hard"
+
+
+@register
+class LGBMScoreXentHardEngine(LGBMScoreXentEngine):
+    """lgbm_score_xent with the target screen's revealed genes on hard 0/1 targets (post hoc)."""
+
+    name = "lgbm_score_xent_hard"
+    revealed = "hard"

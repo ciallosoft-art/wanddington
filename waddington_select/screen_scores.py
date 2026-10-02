@@ -65,13 +65,17 @@ def aligned_target(dataset: str, genes, labels) -> tuple[np.ndarray | None, dict
     return out, info
 
 
-def score_targets(y, groups, genes) -> tuple[np.ndarray, dict]:
+def score_targets(y, groups, genes, revealed: str = "imputed") -> tuple[np.ndarray, dict]:
     """Per-row regression target for an engine's training rows.
 
     Rows of score-defined training screens get their hit-aligned percentile. Everything else — the target
     screen's revealed genes (group "__target__"), screens whose score does not define their hits, and rows
     without a score — gets E[target | label], estimated on the score-defined rows, so a label sits on the
     same scale as a score. Returns (target, info) with per-screen transform/AUC and the two imputed values.
+
+    revealed="hard" instead gives the target screen's revealed genes their bare label (0 or 1): a post-hoc
+    mechanism check, since E[target | non-hit] ~0.48 makes a revealed non-hit a much weaker negative than
+    the classifier's 0.
     """
     y = np.asarray(y).astype(int)
     groups = np.asarray(groups, dtype=object)
@@ -93,4 +97,9 @@ def score_targets(y, groups, genes) -> tuple[np.ndarray, dict]:
                for lab in (0, 1)}
     fill = ~scored
     target[fill] = np.where(y[fill] == 1, imputed[1], imputed[0])
-    return target, {"screens": screens, "imputed": imputed, "n_imputed": int(fill.sum())}
+    if revealed == "hard":
+        tgt = groups == "__target__"
+        target[tgt] = y[tgt]
+    elif revealed != "imputed":
+        raise ValueError(f"revealed must be 'imputed' or 'hard', not {revealed!r}")
+    return target, {"screens": screens, "imputed": imputed, "n_imputed": int(fill.sum()), "revealed": revealed}

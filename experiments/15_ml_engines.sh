@@ -15,6 +15,7 @@
 #   experiments/15_ml_engines.sh svm       # svm_linear | svm_rbf (Nystroem), added after the first report
 #   experiments/15_ml_engines.sh score     # lgbm_score lgbm_score_xent: learn from training screens' continuous
 #                                          # scores instead of their hit labels (phase 2, item 1)
+#   experiments/15_ml_engines.sh score_hard  # the same with revealed genes on hard 0/1 targets (post hoc)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -36,7 +37,8 @@ case "$GROUP" in
   svm)     DET="svm_linear";                 SEEDED="" ;;  # svm_rbf runs screen-parallel below
   svm_rbf) DET="";                           SEEDED="" ;;  # only the screen-parallel svm_rbf part
   score)   DET="lgbm_score lgbm_score_xent"; SEEDED="" ;;
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score]" >&2; exit 2 ;;
+  score_hard) DET="lgbm_score_hard lgbm_score_xent_hard"; SEEDED="" ;;
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
