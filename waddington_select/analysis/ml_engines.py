@@ -199,7 +199,10 @@ def control(models: list[str] | None = None, seeds: tuple[int, ...] = (0, 1, 2))
         out[m]["random"] = float(np.mean([5 * BATCH_SIZES[ds] / DatasetOracle(ds).n_genes for ds in BENCH]))
         print(f"  {m:12s} static recall with labels permuted globally {out[m]['global']['mean_recall']:.3f} | "
               f"within screens {out[m]['within']['mean_recall']:.3f} | random {out[m]['random']:.3f}", flush=True)
-    (RES / "control.json").write_text(json.dumps(out, indent=2))
+    path = RES / "control.json"  # merge, so a later run for new engines keeps the earlier ones
+    merged = json.loads(path.read_text()) if path.exists() else {}
+    merged.update(out)
+    path.write_text(json.dumps(merged, indent=2))
     return out
 
 
