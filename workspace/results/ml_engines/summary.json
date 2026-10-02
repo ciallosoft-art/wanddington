@@ -200,6 +200,46 @@
         "losses": 3
       }
     },
+    "ml_engine_lgbm_score_hard": {
+      "model": "lgbm_score_hard",
+      "online": true,
+      "probabilistic": false,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1608,
+        "IL2": 0.3098,
+        "Sanchez21": 0.092,
+        "Sanchez21_down": 0.0964,
+        "Carnevale22": 0.0657,
+        "Scharenberg22": 0.4694,
+        "Steinhart": 0.0897,
+        "Replogle_K562_essential": 0.619,
+        "Replogle_K562_gwps": 0.3452
+      },
+      "mean": 0.2497777777777778,
+      "vs_lightgbm_online": {
+        "delta": 0.004755555555555563,
+        "ci95": [
+          0.0016661111111111128,
+          0.008177777777777789
+        ],
+        "wins": 6,
+        "ties": 3,
+        "losses": 0
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.007600000000000008,
+        "ci95": [
+          -0.012934166666666651,
+          0.022967499999999995
+        ],
+        "wins": 7,
+        "ties": 0,
+        "losses": 2
+      }
+    },
     "ml_engine_lgbm_score_xent": {
       "model": "lgbm_score_xent",
       "online": true,
@@ -238,6 +278,46 @@
         "wins": 5,
         "ties": 0,
         "losses": 4
+      }
+    },
+    "ml_engine_lgbm_score_xent_hard": {
+      "model": "lgbm_score_xent_hard",
+      "online": true,
+      "probabilistic": false,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1733,
+        "IL2": 0.3243,
+        "Sanchez21": 0.0931,
+        "Sanchez21_down": 0.1079,
+        "Carnevale22": 0.0576,
+        "Scharenberg22": 0.449,
+        "Steinhart": 0.0552,
+        "Replogle_K562_essential": 0.6349,
+        "Replogle_K562_gwps": 0.3377
+      },
+      "mean": 0.24811111111111112,
+      "vs_lightgbm_online": {
+        "delta": 0.003088888888888898,
+        "ci95": [
+          -0.00662222222222221,
+          0.011800000000000005
+        ],
+        "wins": 6,
+        "ties": 0,
+        "losses": 3
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.002311111111111122,
+        "ci95": [
+          -0.02257833333333332,
+          0.020533611111111124
+        ],
+        "wins": 6,
+        "ties": 0,
+        "losses": 3
       }
     },
     "ml_engine_lightgbm": {
@@ -661,8 +741,68 @@
       "deterministic_check": true,
       "seed_sd_of_mean": null
     },
+    "ml_static_lgbm_score_hard": {
+      "model": "lgbm_score_hard",
+      "online": false,
+      "probabilistic": false,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1434,
+        "IL2": 0.3181,
+        "Sanchez21": 0.0722,
+        "Sanchez21_down": 0.0873,
+        "Carnevale22": 0.0622,
+        "Scharenberg22": 0.5306,
+        "Steinhart": 0.0552,
+        "Replogle_K562_essential": 0.6032,
+        "Replogle_K562_gwps": 0.3074
+      },
+      "mean": 0.24217777777777774,
+      "vs_lightgbm_online": {
+        "delta": -0.002844444444444446,
+        "ci95": [
+          -0.01613333333333334,
+          0.01570083333333332
+        ],
+        "wins": 2,
+        "ties": 1,
+        "losses": 6
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
     "ml_static_lgbm_score_xent": {
       "model": "lgbm_score_xent",
+      "online": false,
+      "probabilistic": false,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1546,
+        "IL2": 0.3139,
+        "Sanchez21": 0.0838,
+        "Sanchez21_down": 0.0896,
+        "Carnevale22": 0.0645,
+        "Scharenberg22": 0.5306,
+        "Steinhart": 0.069,
+        "Replogle_K562_essential": 0.6032,
+        "Replogle_K562_gwps": 0.303
+      },
+      "mean": 0.24579999999999996,
+      "vs_lightgbm_online": {
+        "delta": 0.0007777777777777753,
+        "ci95": [
+          -0.012278333333333339,
+          0.017956944444444414
+        ],
+        "wins": 3,
+        "ties": 1,
+        "losses": 5
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
+    "ml_static_lgbm_score_xent_hard": {
+      "model": "lgbm_score_xent_hard",
       "online": false,
       "probabilistic": false,
       "replicates": 2,
