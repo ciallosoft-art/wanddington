@@ -242,7 +242,8 @@ def carm_summary() -> dict:
 
 DISPLAY = {"lightgbm": "LightGBM (reported)", "gnn": "GraphSAGE on STRING", "mlp": "MLP",
            "genept_lgbm": "LightGBM + GenePT", "logreg": "Logistic regression", "rf": "Random forest",
-           "rwr": "RWR on STRING", "lambdarank": "LambdaMART", "genept_lr": "GenePT + logistic"}
+           "rwr": "RWR on STRING", "lambdarank": "LambdaMART", "genept_lr": "GenePT + logistic",
+           "svm_linear": "Linear SVM", "svm_rbf": "RBF SVM (Nystroem)"}
 
 
 def figure(res: dict) -> Path:

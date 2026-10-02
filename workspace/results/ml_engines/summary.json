@@ -351,6 +351,86 @@
         "losses": 2
       }
     },
+    "ml_engine_svm_linear": {
+      "model": "svm_linear",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1259,
+        "IL2": 0.2765,
+        "Sanchez21": 0.0733,
+        "Sanchez21_down": 0.0792,
+        "Carnevale22": 0.0565,
+        "Scharenberg22": 0.4898,
+        "Steinhart": 0.0966,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.3593
+      },
+      "mean": 0.23826666666666668,
+      "vs_lightgbm_online": {
+        "delta": -0.006755555555555535,
+        "ci95": [
+          -0.021300555555555524,
+          0.008200555555555572
+        ],
+        "wins": 3,
+        "ties": 0,
+        "losses": 6
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.009888888888888895,
+        "ci95": [
+          0.0020333333333333366,
+          0.02033361111111111
+        ],
+        "wins": 5,
+        "ties": 3,
+        "losses": 1
+      }
+    },
+    "ml_engine_svm_rbf": {
+      "model": "svm_rbf",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "Carnevale22": 0.06106,
+        "IFNG": 0.12768,
+        "IL2": 0.26694,
+        "Replogle_K562_essential": 0.49207999999999996,
+        "Replogle_K562_gwps": 0.32380000000000003,
+        "Sanchez21": 0.06404,
+        "Sanchez21_down": 0.07714,
+        "Scharenberg22": 0.4694,
+        "Steinhart": 0.06624
+      },
+      "mean": 0.21648666666666666,
+      "vs_lightgbm_online": {
+        "delta": -0.02853555555555555,
+        "ci95": [
+          -0.05554666666666667,
+          -0.010010833333333328
+        ],
+        "wins": 0,
+        "ties": 1,
+        "losses": 8
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.004422580945807798,
+      "online_minus_static": {
+        "delta": 0.008553333333333342,
+        "ci95": [
+          -0.0030094444444444435,
+          0.021144944444444452
+        ],
+        "wins": 6,
+        "ties": 0,
+        "losses": 3
+      }
+    },
     "ml_static_genept_lgbm": {
       "model": "genept_lgbm",
       "online": false,
@@ -620,6 +700,66 @@
       },
       "deterministic_check": true,
       "seed_sd_of_mean": null
+    },
+    "ml_static_svm_linear": {
+      "model": "svm_linear",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1259,
+        "IL2": 0.2661,
+        "Sanchez21": 0.0698,
+        "Sanchez21_down": 0.0792,
+        "Carnevale22": 0.0576,
+        "Scharenberg22": 0.4898,
+        "Steinhart": 0.0828,
+        "Replogle_K562_essential": 0.5714,
+        "Replogle_K562_gwps": 0.3128
+      },
+      "mean": 0.2283777777777778,
+      "vs_lightgbm_online": {
+        "delta": -0.016644444444444427,
+        "ci95": [
+          -0.029967499999999987,
+          -0.002952222222222252
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
+    "ml_static_svm_rbf": {
+      "model": "svm_rbf",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "Carnevale22": 0.053660000000000006,
+        "IFNG": 0.12267999999999998,
+        "IL2": 0.2345,
+        "Replogle_K562_essential": 0.4698399999999999,
+        "Replogle_K562_gwps": 0.28314000000000006,
+        "Sanchez21": 0.06704,
+        "Sanchez21_down": 0.07346,
+        "Scharenberg22": 0.48979999999999996,
+        "Steinhart": 0.07727999999999999
+      },
+      "mean": 0.20793333333333333,
+      "vs_lightgbm_online": {
+        "delta": -0.03708888888888889,
+        "ci95": [
+          -0.07016722222222224,
+          -0.0098638888888889
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.006187921328715358
     }
   },
   "reference": "ml_engine_lightgbm",
