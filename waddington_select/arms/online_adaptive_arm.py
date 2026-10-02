@@ -199,6 +199,8 @@ class OnlineAdaptiveArm(BaseArm):
             genes += extra_df["gene"].tolist()
             groups += ["__target__"] * len(extra_records)
         engine = make_engine(self._model_name, seed=self._seed)
+        # Descriptor engines add the DepMap profile only where this arm's feature policy keeps DepMap.
+        engine.depmap_allowed = any(c.startswith("depmap_") for c in self._available_feats)
         return engine.fit(X, y, w, neg / pos if pos > 0 else 1.0, genes=genes, groups=groups)
 
     def _predict(self, frame: pd.DataFrame) -> np.ndarray:

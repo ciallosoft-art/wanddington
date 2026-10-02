@@ -319,5 +319,32 @@ class ScoreTargetTests(unittest.TestCase):
         self.assertTrue(min(s) >= 0.0 and max(s) <= 1.0)
 
 
+class DescriptorEngineTests(unittest.TestCase):
+    """Phase 2 item 2: descriptor engines follow the DepMap policy and reduce to LightGBM where it is off."""
+
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+
+    def test_descriptors_are_label_free_lookups(self):
+        from waddington_select import descriptors as D
+        for name in ("depmap_pca", "string_spectral"):
+            with self.subTest(descriptor=name):
+                r = D.rows(name, ["TP53", "tp53", "NOT_A_GENE"])
+                self.assertEqual(r.shape, (3, D.DIM))
+                np.testing.assert_array_equal(r[0], r[1])  # case-insensitive
+                self.assertTrue(np.isnan(r[2]).all())
+
+    def test_depmap_descriptor_follows_policy(self):
+        from waddington_select.arms.ml_engine_arm import MLEngineArm
+        off = MLEngineArm("Replogle_K562_essential", 32, model="lgbm_depmap_pca", online=False)
+        ref = MLEngineArm("Replogle_K562_essential", 32, model="lightgbm", online=False)
+        self.assertFalse(off._model.depmap_allowed)
+        self.assertEqual(off._ranking, ref._ranking)  # policy "none": exactly the reported engine
+        on = MLEngineArm("Scharenberg22", 32, model="lgbm_depmap_pca", online=False)
+        self.assertTrue(on._model.depmap_allowed)
+        self.assertEqual(on._model._m.n_features_in_, len(on._available_feats) + 32)
+
+
 if __name__ == "__main__":
     unittest.main()

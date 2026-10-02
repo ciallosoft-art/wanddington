@@ -639,3 +639,62 @@ class LGBMScoreXentHardEngine(LGBMScoreXentEngine):
 
     name = "lgbm_score_xent_hard"
     revealed = "hard"
+
+
+
+# ---------------------------------------------------------------------------------------------------
+# High-dimensional descriptors (phase 2, item 2; GeneDisco's Achilles and STRING-embedding inputs). The
+# reported LightGBM, same parameters, on the tabular features plus DIM-dimensional label-free descriptors
+# (descriptors.py); genes a descriptor does not cover are NaN, which LightGBM routes natively. The DepMap
+# profile obeys the arm's feature policy: OnlineAdaptiveArm sets `depmap_allowed`, False where the
+# metadata policy drops DepMap (CRISPRa, curated essentials), so those screens get the plain LightGBM.
+# ---------------------------------------------------------------------------------------------------
+
+
+class _DescriptorLGBM:
+    probabilistic = True
+    stochastic = False
+    descriptors: tuple[str, ...] = ()
+    depmap_allowed = True  # overwritten by OnlineAdaptiveArm before fit
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def _X(self, X, genes) -> np.ndarray:
+        from .descriptors import rows
+        use = [d for d in self.descriptors if d != "depmap_pca" or self.depmap_allowed]
+        return np.hstack([np.asarray(X, dtype=np.float32)] + [rows(d, genes) for d in use])
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import lightgbm as lgb
+        from .arms.online_adaptive_arm import LGBM_PARAMS
+        self._m = lgb.LGBMClassifier(**LGBM_PARAMS, scale_pos_weight=pos_scale)
+        self._m.fit(self._X(X, genes), y, sample_weight=np.asarray(sample_weight, dtype=float))
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return self._m.predict_proba(self._X(X, genes))[:, 1]
+
+
+@register
+class DepMapPCALGBMEngine(_DescriptorLGBM):
+    """LightGBM + the 32-dim PCA of each gene's DepMap dependency profile (where policy keeps DepMap)."""
+
+    name = "lgbm_depmap_pca"
+    descriptors = ("depmap_pca",)
+
+
+@register
+class StringSpectralLGBMEngine(_DescriptorLGBM):
+    """LightGBM + a 32-dim Laplacian eigenmap of the STRING >= 700 graph."""
+
+    name = "lgbm_string_emb"
+    descriptors = ("string_spectral",)
+
+
+@register
+class DescriptorLGBMEngine(_DescriptorLGBM):
+    """LightGBM + both descriptors."""
+
+    name = "lgbm_desc"
+    descriptors = ("depmap_pca", "string_spectral")
