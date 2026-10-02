@@ -105,6 +105,8 @@ def summarize() -> dict:
     arms = _load()
     complete = {a: v for a, v in arms.items() if all(ds in v for ds in BENCH)}
     acq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_acq_")}
+    bnnacq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_bnnacq_")}
+    gdf = {a: complete.pop(a) for a in list(complete) if a.startswith("gdf_")}
     if REF not in complete:
         raise SystemExit(f"{REF} missing or incomplete; run experiments/15_ml_engines.sh tabular first")
     ref = _per_screen(complete[REF])
@@ -144,6 +146,16 @@ def summarize() -> dict:
                              "seed_sd_of_mean": _seed_spread(by_ds),
                              "vs_ensemble_greedy": None if arm == "ml_acq_greedy" else _paired(ps, greedy),
                              "vs_single_lightgbm": _paired(ps, ref)}
+    bnn_rows = {}
+    if bnnacq and "ml_engine_bnn" in complete:  # phase 2 item 3b: rules on the same Bayesian MLP
+        bnn_greedy = _per_screen(complete["ml_engine_bnn"])
+        for arm, by_ds in sorted(bnnacq.items()):
+            ps = _per_screen(by_ds)
+            bnn_rows[arm] = {"rule": arm[len("ml_bnnacq_"):], "per_screen": ps,
+                             "mean": float(np.mean([ps[ds] for ds in BENCH])),
+                             "replicates": min(len(v) for v in by_ds.values()),
+                             "seed_sd_of_mean": _seed_spread(by_ds),
+                             "vs_bnn_greedy": _paired(ps, bnn_greedy), "vs_lightgbm_online": _paired(ps, ref)}
     c_ref = _c_reference()
     free = {}
     for f, ps in label_free_baselines().items():
@@ -155,9 +167,34 @@ def summarize() -> dict:
            "c_20rep_reference": {"per_screen": c_ref, "mean": float(np.mean(list(c_ref.values()))),
                                  "c_minus_ml_engine": _paired(c_ref, ref)},
            "label_free_post_hoc": free,
-           "acquisition": acq_rows}
+           "acquisition": acq_rows,
+           "bnn_acquisition": bnn_rows,
+           "genedisco_faithful": _genedisco_faithful(gdf, ref) if gdf else {}}
     OUT.write_text(json.dumps(res, indent=2))
     return res
+
+
+PORTED = REPO / "workspace" / "results" / "sequential" / "genedisco_ported.json"
+
+
+def _genedisco_faithful(gdf: dict, ref: dict) -> dict:
+    """Phase 2 item 3a: GeneDisco with its own models, target, loop and (optionally) features, against
+    random, the paper's port (its marginsample rule on our LightGBM, 0.169) and our ML engine."""
+    from ..arms.genedisco_faithful_arm import parse_name
+    ported = json.loads(PORTED.read_text())
+    port = {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in ported[ds]["genedisco_marginsample"]]))
+            for ds in BENCH}
+    rand = _per_screen(gdf["gdf_random"]) if "gdf_random" in gdf else None
+    rows = {}
+    for arm, by_ds in sorted(gdf.items()):
+        feats, model, rule = parse_name(arm)
+        ps = _per_screen(by_ds)
+        rows[arm] = {"features": feats, "model": model, "rule": rule, "per_screen": ps,
+                     "mean": float(np.mean([ps[ds] for ds in BENCH])),
+                     "replicates": min(len(v) for v in by_ds.values()), "seed_sd_of_mean": _seed_spread(by_ds),
+                     "vs_random": None if rand is None or arm == "gdf_random" else _paired(ps, rand),
+                     "vs_ported_marginsample": _paired(ps, port), "vs_lightgbm_online": _paired(ps, ref)}
+    return {"rows": rows, "ported_marginsample": {"per_screen": port, "mean": float(np.mean(list(port.values())))}}
 
 
 def control(models: list[str] | None = None, seeds: tuple[int, ...] = (0, 1, 2)) -> dict:
@@ -260,7 +297,7 @@ def figure(res: dict) -> Path:
     import matplotlib.pyplot as plt
     from . import style as S
     rows = res["rows"]
-    models = sorted({r["model"] for r in rows.values()},
+    models = sorted({r["model"] for r in rows.values() if r["model"] in PHASE1 | {"lightgbm"}},  # the paper figure
                     key=lambda m: -rows.get(f"ml_engine_{m}", {"mean": 0})["mean"])
     S.apply()
     fig, ax = plt.subplots(figsize=(7.2, 0.42 * len(models) + 1.8))
@@ -319,6 +356,19 @@ if __name__ == "__main__":
             g, sgl = v["vs_ensemble_greedy"], v["vs_single_lightgbm"]
             gtxt = "reference" if g is None else f"vs greedy {g['delta']:+.4f} [{g['ci95'][0]:+.4f}, {g['ci95'][1]:+.4f}] {g['wins']}/{g['ties']}/{g['losses']}"
             print(f"  {v['rule']:9s} {v['mean']:.4f}  seed sd {v['seed_sd_of_mean']:.4f}  {gtxt}  | vs single LightGBM {sgl['delta']:+.4f}")
+    if r["bnn_acquisition"]:
+        print("acquisition rules on the Bayesian MLP (5 seeds; reference = ml_engine_bnn, greedy):")
+        for arm, v in sorted(r["bnn_acquisition"].items(), key=lambda kv: -kv[1]["mean"]):
+            g, l = v["vs_bnn_greedy"], v["vs_lightgbm_online"]
+            print(f"  {v['rule']:17s} {v['mean']:.4f}  vs bnn greedy {g['delta']:+.4f} [{g['ci95'][0]:+.4f}, "
+                  f"{g['ci95'][1]:+.4f}] {g['wins']}/{g['ties']}/{g['losses']}  | vs LightGBM {l['delta']:+.4f}")
+    if r["genedisco_faithful"]:
+        gf = r["genedisco_faithful"]
+        print(f"faithful GeneDisco (5 seeds; paper's port, marginsample = {gf['ported_marginsample']['mean']:.4f}):")
+        for arm, v in sorted(gf["rows"].items(), key=lambda kv: -kv[1]["mean"]):
+            p, l = v["vs_ported_marginsample"], v["vs_lightgbm_online"]
+            print(f"  {arm:34s} {v['mean']:.4f}  vs port {p['delta']:+.4f} [{p['ci95'][0]:+.4f}, {p['ci95'][1]:+.4f}]"
+                  f"  | vs LightGBM {l['delta']:+.4f}")
     print("label-free single-feature rankings (post hoc, no training):")
     for f, v in sorted(r["label_free_post_hoc"].items(), key=lambda kv: -kv[1]["mean"]):
         d = v["c_minus_this"]

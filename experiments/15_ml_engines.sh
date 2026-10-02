@@ -18,6 +18,8 @@
 #   experiments/15_ml_engines.sh score_hard  # the same with revealed genes on hard 0/1 targets (post hoc)
 #   experiments/15_ml_engines.sh desc      # lgbm_depmap_pca lgbm_string_emb lgbm_desc: + 32-dim DepMap profile /
 #                                          # STRING eigenmap descriptors (phase 2, item 2)
+#   experiments/15_ml_engines.sh bnn       # GeneDisco's Bayesian MLP in our protocol + bald/ucb1/badge/kmeans_embedding
+#   experiments/15_ml_engines.sh gdf       # faithful GeneDisco baseline (gdf_* arms), screen-parallel (phase 2, item 3)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -41,7 +43,9 @@ case "$GROUP" in
   score)   DET="lgbm_score lgbm_score_xent"; SEEDED="" ;;
   score_hard) DET="lgbm_score_hard lgbm_score_xent_hard"; SEEDED="" ;;
   desc)    DET="lgbm_depmap_pca lgbm_string_emb lgbm_desc"; SEEDED="" ;;
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc]" >&2; exit 2 ;;
+  bnn)     DET="";                           SEEDED="" ;;  # explicit arm list below
+  gdf)     DET="";                           SEEDED="" ;;  # screen-parallel below
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -55,6 +59,27 @@ if [ "$GROUP" = acquisition ]; then
   # step 6: LightGBM held fixed as a 5-member bootstrap ensemble; only the selection rule differs
   echo "== acquisition rules, 5 seeds"
   run "ml_acq_greedy ml_acq_ucb05 ml_acq_ucb1 ml_acq_thompson ml_acq_margin" 5 "$OUT/acquisition_seeded.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = bnn ]; then
+  # phase 2 item 3b: the Bayesian MLP engine (greedy on its MC mean, online and static) and four rules on it
+  echo "== bnn engine and acquisition rules, 5 seeds"
+  run "ml_engine_bnn ml_static_bnn ml_bnnacq_bald ml_bnnacq_ucb1 ml_bnnacq_badge ml_bnnacq_kmeans_embedding" 5 \
+    "$OUT/bnn_seeded.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = gdf ]; then
+  # phase 2 item 3a: every faithful-GeneDisco arm, 5 seeds. k-means on the 1,178-dim Achilles profile takes
+  # ~25 s per round on a full screen, so screens run three at a time with their threads capped.
+  PY="$(conda run -n waddington-bio python3 -c 'import sys; print(sys.executable)')"
+  ARMS="$(conda run -n waddington-bio python3 -c \
+    'from waddington_select.arms.genedisco_faithful_arm import arm_names; print(" ".join(arm_names()))')"
+  echo "== faithful GeneDisco: $ARMS"
+  printf '%s\n' IFNG IL2 Sanchez21 Sanchez21_down Carnevale22 Scharenberg22 Steinhart \
+    Replogle_K562_essential Replogle_K562_gwps |
+    xargs -P 3 -I{} env OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
+      "$PY" -m waddington_select.run_sequential --datasets {} \
+      --arms $ARMS --replicates 5 --seed-mode local --resume --out "$OUT/gdf_seeded_{}.json"
   echo "done -> $OUT"; exit 0
 fi
 if [ -n "$DET" ]; then

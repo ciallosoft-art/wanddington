@@ -698,3 +698,41 @@ class DescriptorLGBMEngine(_DescriptorLGBM):
 
     name = "lgbm_desc"
     descriptors = ("depmap_pca", "string_spectral")
+
+
+@register
+class BNNEngine:
+    """GeneDisco's Bayesian MLP (bnn.py: 16 hidden units, consistent MC dropout p=0.5) in our protocol (phase 2,
+    item 3b): weighted BCE on hit labels with the `mlp` engine's budget (20 epochs, batch 1024, Adam 1e-3) on
+    standardised features; score = mean P(hit) over 100 MC-dropout samples with seeded masks."""
+
+    name = "bnn"
+    probabilistic = True
+    stochastic = True
+    EPOCHS = 20
+    BATCH = 1024
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        from sklearn.preprocessing import StandardScaler
+        from . import bnn
+        self._scaler = StandardScaler().fit(X)
+        self._net = bnn.fit(self._scaler.transform(X), np.asarray(y, dtype=float),
+                            _class_weighted(y, sample_weight, pos_scale), loss="bce",
+                            epochs=self.EPOCHS, batch=self.BATCH, seed=self.seed)
+        return self
+
+    def mc(self, X) -> np.ndarray:
+        """(K, N) sampled P(hit)."""
+        from . import bnn
+        z = bnn.mc_predict(self._net, self._scaler.transform(X), seed=self.seed)
+        return 1.0 / (1.0 + np.exp(-z))
+
+    def embedding(self, X) -> np.ndarray:
+        from . import bnn
+        return bnn.embedding(self._net, self._scaler.transform(X))
+
+    def score(self, X, genes=None) -> np.ndarray:
+        return self.mc(X).mean(0).astype(float)

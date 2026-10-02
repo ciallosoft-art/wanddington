@@ -25,15 +25,37 @@ DIM = 32
 _LOADED: dict[str, tuple[dict[str, int], np.ndarray]] = {}
 
 
-def _depmap_pca() -> tuple[list[str], np.ndarray]:
+def _depmap_matrix():
+    """genes x cell lines CRISPR gene effect; a gene's missing lines filled with its own mean."""
     import pandas as pd
-    from sklearn.decomposition import PCA
     d = pd.read_csv(DEPMAP_CSV, index_col=0)  # cell lines x "SYMBOL (entrez)"
     d.columns = [c.split(" (")[0].strip().upper() for c in d.columns]
     d = d.T.groupby(level=0).mean()  # genes x cell lines; merges the odd duplicated symbol
-    d = d.apply(lambda r: r.fillna(r.mean()), axis=1).dropna()  # a gene's missing lines -> its own mean
+    return d.apply(lambda r: r.fillna(r.mean()), axis=1).dropna()
+
+
+def _depmap_pca() -> tuple[list[str], np.ndarray]:
+    from sklearn.decomposition import PCA
+    d = _depmap_matrix()
     Z = PCA(n_components=DIM, svd_solver="full").fit_transform(d.to_numpy(dtype=np.float64))
     return list(d.index), Z.astype(np.float32)
+
+
+def achilles_profile() -> tuple[dict[str, int], np.ndarray]:
+    """The full profile (17,916 genes x 1,178 lines), GeneDisco's Achilles feature set on a newer DepMap
+    release (theirs had 808 lines). Cached alongside the reduced descriptors."""
+    if "achilles" in _LOADED:
+        return _LOADED["achilles"]
+    cache = CACHE_DIR / "achilles_profile.npy"
+    names = CACHE_DIR / "achilles_genes.txt"
+    if not cache.exists():
+        d = _depmap_matrix()
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        np.save(cache, d.to_numpy(dtype=np.float32))
+        names.write_text("\n".join(d.index))
+    genes = names.read_text().split("\n")
+    _LOADED["achilles"] = ({g: i for i, g in enumerate(genes)}, np.load(cache, mmap_mode="r"))
+    return _LOADED["achilles"]
 
 
 def _string_spectral() -> tuple[list[str], np.ndarray]:

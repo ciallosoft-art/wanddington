@@ -132,3 +132,69 @@ class AcquisitionArm(MLEngineArm):
 def parse_acq_name(name: str) -> str | None:
     """'ml_acq_ucb1' -> 'ucb1'; anything else -> None."""
     return name[len("ml_acq_"):] if name.startswith("ml_acq_") and name[len("ml_acq_"):] in ACQUISITIONS else None
+
+
+# ---------------------------------------------------------------------------------------------------
+# Acquisition rules on GeneDisco's Bayesian MLP in our protocol (phase 2, item 3b). The engine is the `bnn`
+# engine with the same seed, so `ml_engine_bnn` (greedy on the MC mean) is the paired reference:
+#   bald              mutual information H[mean p] - mean_k H[p_k] over the 100 MC samples
+#   ucb1              mean + 1 * sd over the MC samples
+#   badge             BADGE (Ash et al.): k-means++ seeding on gradient embeddings (p - y_hat) * h, where
+#                     y_hat = 1[p >= 0.5] and h the hidden layer (GeneDisco's regression port scales h by
+#                     noise instead; a classifier has the real gradient)
+#   kmeans_embedding  k-means on the hidden layer, the gene nearest each centre
+# The set rules pick this round's batch among untested genes; the other genes follow by MC mean.
+# ---------------------------------------------------------------------------------------------------
+
+BNN_ACQUISITIONS = ("bald", "ucb1", "badge", "kmeans_embedding")
+
+
+class BNNAcquisitionArm(MLEngineArm):
+    def __init__(self, dataset_name: str, batch_size: int, acquisition: str = "bald", seed: int = 0) -> None:
+        if acquisition not in BNN_ACQUISITIONS:
+            raise ValueError(f"unknown acquisition {acquisition!r}; known: {BNN_ACQUISITIONS}")
+        self._acquisition = acquisition
+        self._acq_seed = seed
+        super().__init__(dataset_name, batch_size, model="bnn", online=True, seed=seed)
+        self.name = f"ml_bnnacq_{acquisition}"
+
+    def _rebuild_ranking(self) -> None:
+        import numpy as np
+        from .. import bnn
+        self._model = self._train_model(self._revealed_records)
+        Xt = self._test_frame[self._available_feats].values
+        P = self._model.mc(Xt)
+        mean = P.mean(0)
+        a = self._acquisition
+        if a in ("bald", "ucb1"):
+            if a == "ucb1":
+                key = mean + P.std(0)
+            else:
+                def H(p):
+                    p = np.clip(p, 1e-12, 1 - 1e-12)
+                    return -(p * np.log(p) + (1 - p) * np.log(1 - p))
+                key = H(mean) - H(P).mean(0)
+            order = list(np.argsort(-key, kind="stable"))
+        else:
+            rng = np.random.default_rng([self._acq_seed, len(self._revealed_records)])
+            untested = np.array([i for i, g in enumerate(self._genes) if g not in self._selected])
+            k = min(self.batch_size, len(untested))
+            if a == "kmeans_embedding":
+                picked = bnn.kmeans_closest(self._model.embedding(Xt[untested]), k,
+                                            self._acq_seed * 1000 + len(self._revealed_records), rng)
+            else:
+                h = np.maximum(self._model.embedding(Xt[untested]), 0.0)
+                p = mean[untested]
+                picked = bnn.kmeanspp_seeds((p - (p >= 0.5))[:, None] * h, k, rng)
+            first = [int(untested[j]) for j in picked]
+            placed = set(first)
+            rest = [i for i in np.argsort(-mean, kind="stable") if i not in placed]
+            order = first + rest
+        self._ranking = [self._genes[i] for i in order]
+        self._scores = {self._genes[i]: float(mean[i]) for i in range(len(self._genes))}
+
+
+def parse_bnn_acq_name(name: str) -> str | None:
+    """'ml_bnnacq_bald' -> 'bald'; anything else -> None."""
+    rule = name[len("ml_bnnacq_"):] if name.startswith("ml_bnnacq_") else None
+    return rule if rule in BNN_ACQUISITIONS else None

@@ -346,5 +346,67 @@ class DescriptorEngineTests(unittest.TestCase):
         self.assertEqual(on._model._m.n_features_in_, len(on._available_feats) + 32)
 
 
+class GeneDiscoFaithfulTests(unittest.TestCase):
+    """Phase 2 item 3: GeneDisco's Bayesian MLP, the faithful GeneDisco arms, and BNN acquisition arms."""
+
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+
+    def test_bnn_is_seed_reproducible_and_consistent(self):
+        from waddington_select import bnn
+        X, y, _, _ = _toy(n=400)
+        a = bnn.mc_predict(bnn.fit(X, y.astype(float), seed=1, epochs=5), X, seed=7)
+        b = bnn.mc_predict(bnn.fit(X, y.astype(float), seed=1, epochs=5), X, seed=7)
+        np.testing.assert_array_equal(a, b)
+        self.assertEqual(a.shape, (bnn.MC_SAMPLES, 400))
+        self.assertGreater(a.std(0).mean(), 0.0)  # dropout makes the samples differ
+
+    def test_our_features_match_the_c_arm_engine(self):
+        from waddington_select.arms.genedisco_faithful_arm import our_features
+        from waddington_select.arms.ml_engine_arm import MLEngineArm
+        for ds in ("Scharenberg22", "Steinhart", "Replogle_K562_gwps"):
+            with self.subTest(screen=ds):
+                _, feats, _ = our_features(ds)
+                self.assertEqual(feats, MLEngineArm(ds, 32, model="logreg", online=False)._available_feats)
+
+    def test_faithful_arms_run_reproducibly_on_revealed_scores_only(self):
+        from waddington_select import bnn
+        from waddington_select.arms.genedisco_faithful_arm import GeneDiscoFaithfulArm, arm_names
+        from waddington_select.oracle import DatasetOracle
+        ds, B = "Scharenberg22", 32
+        oracle = DatasetOracle(ds)
+        fitted_rows = []
+        real_fit = bnn.fit
+
+        def spy(X, target, *a, **k):
+            fitted_rows.append(len(X))
+            return real_fit(X, target, *a, **{**k, "epochs": 3})
+
+        names = [n for n in arm_names() if "_rf_" not in n or n.endswith("topuncertain")]
+        with patch.object(bnn, "fit", spy):
+            for name in names:
+                with self.subTest(arm=name):
+                    picks = []
+                    for _ in range(2):
+                        arm = GeneDiscoFaithfulArm(ds, B, name=name, seed=3)
+                        b1 = arm.select(0, {})
+                        arm.update(0, oracle.reveal(b1))
+                        b2 = arm.select(1, {})
+                        picks.append((b1, b2))
+                        self.assertEqual(len(set(b1) | set(b2)), 2 * B)  # full, disjoint batches
+                    self.assertEqual(picks[0], picks[1])
+        self.assertTrue(fitted_rows and all(n == B for n in fitted_rows))  # only the revealed genes
+
+    def test_bnn_acquisition_arms(self):
+        from waddington_select.arms.ml_engine_arm import BNN_ACQUISITIONS, BNNAcquisitionArm
+        for rule in BNN_ACQUISITIONS:
+            with self.subTest(rule=rule):
+                a = BNNAcquisitionArm("Scharenberg22", 32, acquisition=rule, seed=2).select(0, {})
+                b = BNNAcquisitionArm("Scharenberg22", 32, acquisition=rule, seed=2).select(0, {})
+                self.assertEqual(a, b)
+                self.assertEqual(len(set(a)), 32)
+
+
 if __name__ == "__main__":
     unittest.main()
