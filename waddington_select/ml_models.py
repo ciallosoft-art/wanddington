@@ -221,28 +221,14 @@ class RWREngine:
         self.seed = seed
 
     def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
-        import scipy.sparse as sp
         from .string_graph import string_graph
-        node_genes, A = string_graph()
+        node_genes, _ = string_graph()
         self._index = {g: i for i, g in enumerate(node_genes)}
         p0 = np.zeros(len(node_genes))
         for g, yy, w in zip(genes, np.asarray(y), np.asarray(sample_weight, dtype=float)):
             if yy == 1 and g in self._index:
                 p0[self._index[g]] += w
-        if p0.sum() == 0:
-            self._p = p0
-            return self
-        p0 /= p0.sum()
-        deg = np.asarray(A.sum(axis=0)).ravel()
-        W = A @ sp.diags(1.0 / np.maximum(deg, 1.0))  # column-stochastic transition matrix
-        p = p0.copy()
-        for _ in range(self.ITERS):
-            p_new = (1 - self.RESTART) * (W @ p) + self.RESTART * p0
-            done = np.abs(p_new - p).sum() < 1e-10
-            p = p_new
-            if done:
-                break
-        self._p = p
+        self._p = _rwr_propagate(p0, self.RESTART, self.ITERS)
         return self
 
     def score(self, X, genes=None) -> np.ndarray:
@@ -736,3 +722,261 @@ class BNNEngine:
 
     def score(self, X, genes=None) -> np.ndarray:
         return self.mc(X).mean(0).astype(float)
+
+
+# ---------------------------------------------------------------------------------------------------
+# Beyond GeneDisco (phase 2, item 4). All three keep our protocol: leave-one-screen-out rows, x10 revealed
+# rows, positives up-weighted by neg/pos.
+# ---------------------------------------------------------------------------------------------------
+
+
+@register
+class MultiTaskMFEngine:
+    """Multi-task logistic matrix factorisation across screens (4a):
+        logit(g, s) = b_s + w_s . x_g + u_g . v_s
+    x_g the standardised features, u_g a RANK-dim latent factor per gene (shared by every screen the gene is
+    in), (b_s, w_s, v_s) per screen. The target screen's parameters carry a hierarchical Gaussian prior
+    centred on the training screens' mean, with their across-screen variance: in round 0 the target is the
+    "average screen", and revealed genes then move it. MAP fit, weighted BCE summed over rows (weights are
+    pseudo-counts), unit Gaussian priors on u, v and w, full-batch Adam, on the CPU from a seed."""
+
+    name = "mf"
+    probabilistic = True
+    stochastic = True
+    RANK = 3
+    STEPS = 400
+    LR = 0.05
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import torch
+        from sklearn.preprocessing import StandardScaler
+        torch.manual_seed(self.seed)
+        self._scaler = StandardScaler().fit(X)
+        Xt = torch.tensor(self._scaler.transform(X), dtype=torch.float32)
+        yt = torch.tensor(np.asarray(y), dtype=torch.float32)
+        wt = torch.tensor(_class_weighted(y, sample_weight, pos_scale), dtype=torch.float32)
+        screens = sorted({g for g in groups if g != "__target__"})
+        S = len(screens)  # the target is screen index S
+        s_of = {s: i for i, s in enumerate(screens)} | {"__target__": S}
+        st = torch.tensor([s_of[g] for g in groups])
+        self._gene_index = {g: i for i, g in enumerate(dict.fromkeys(genes))}
+        gt = torch.tensor([self._gene_index[g] for g in genes])
+        d, k, n_genes = Xt.shape[1], self.RANK, len(self._gene_index)
+        U = (0.1 * torch.randn(n_genes, k)).requires_grad_()
+        V = (0.1 * torch.randn(S + 1, k)).requires_grad_()
+        W = torch.zeros(S + 1, d, requires_grad=True)
+        B = torch.zeros(S + 1, requires_grad=True)
+        opt = torch.optim.Adam([U, V, W, B], lr=self.LR)
+        bce = torch.nn.BCEWithLogitsLoss(reduction="none")
+        total = wt.sum()
+        for _ in range(self.STEPS):
+            opt.zero_grad()
+            logit = B[st] + (Xt * W[st]).sum(1) + (U[gt] * V[st]).sum(1)
+            nll = (bce(logit, yt) * wt).sum()
+            prior = 0.5 * ((U ** 2).sum() + (V[:S] ** 2).sum() + (W[:S] ** 2).sum())
+            # hierarchical prior on the target screen: N(mean over training screens, their variance),
+            # held fixed (detached) so the training screens are never pulled toward the target
+            theta = torch.cat([B[:S, None], W[:S], V[:S]], dim=1).detach()
+            mu, var = theta.mean(0), theta.var(0) + 1e-3
+            target = torch.cat([B[S:], W[S], V[S]])
+            prior = prior + 0.5 * (((target - mu) ** 2) / var).sum()
+            ((nll + prior) / total).backward()
+            opt.step()
+        self._U, self._v, self._w, self._b = U.detach(), V[S].detach(), W[S].detach(), B[S].detach()
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        import torch
+        Xt = torch.tensor(self._scaler.transform(X), dtype=torch.float32)
+        u = torch.zeros(len(genes), self.RANK)
+        for j, g in enumerate(genes):  # genes never seen in training have no latent factor
+            i = self._gene_index.get(g)
+            if i is not None:
+                u[j] = self._U[i]
+        logit = self._b + Xt @ self._w + u @ self._v
+        return torch.sigmoid(logit).numpy().astype(float)
+
+
+@register
+class SparseGPEngine:
+    """Sparse variational Gaussian-process classifier (4b; plain torch, no gpytorch): ARD-RBF kernel,
+    INDUCING inducing points initialised by k-means on a seeded 20,000-row subsample, whitened variational
+    posterior, Bernoulli-logit likelihood integrated by 20-point Gauss-Hermite quadrature, weighted ELBO
+    (weights as pseudo-counts), Adam, minibatch 1024, 20 epochs, on the CPU from a seed.
+    score = predictive P(hit), i.e. the Probability-of-Hit rule of Many Needles; `latent` gives the latent
+    mean and sd for UCB."""
+
+    name = "svgp"
+    probabilistic = True
+    stochastic = True
+    INDUCING = 256
+    EPOCHS = 20
+    BATCH = 1024
+    LR = 0.01
+    JITTER = 1e-4
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def _k(self, A, Bm):
+        import torch
+        ls = torch.exp(self._log_ls)
+        return torch.exp(self._log_os) * torch.exp(-0.5 * torch.cdist(A / ls, Bm / ls) ** 2)
+
+    def _f(self, Xt):
+        """Latent predictive mean and variance at Xt."""
+        import torch
+        M = self.INDUCING
+        Kmm = self._k(self._Z, self._Z) + self.JITTER * torch.eye(M)
+        Lmm = torch.linalg.cholesky(Kmm)
+        A = torch.linalg.solve_triangular(Lmm, self._k(self._Z, Xt), upper=False)  # (M, n)
+        L = torch.tril(self._qL)
+        mean = A.T @ self._qm
+        var = torch.exp(self._log_os) - (A ** 2).sum(0) + ((L.T @ A) ** 2).sum(0)
+        return mean, var.clamp_min(1e-8)
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import torch
+        from sklearn.cluster import KMeans
+        from sklearn.preprocessing import StandardScaler
+        torch.manual_seed(self.seed)
+        rng = np.random.default_rng(self.seed)
+        self._scaler = StandardScaler().fit(X)
+        Xs = self._scaler.transform(X)
+        sub = Xs[rng.choice(len(Xs), size=min(20000, len(Xs)), replace=False)]
+        Z0 = KMeans(n_clusters=self.INDUCING, n_init=1, random_state=self.seed).fit(sub).cluster_centers_
+        d, M = Xs.shape[1], self.INDUCING
+        self._Z = torch.tensor(Z0, dtype=torch.float32).requires_grad_()
+        self._log_ls = torch.zeros(d, requires_grad=True)
+        self._log_os = torch.zeros((), requires_grad=True)
+        self._qm = torch.zeros(M, requires_grad=True)
+        self._qL = torch.eye(M).requires_grad_()
+        gh_x, gh_w = np.polynomial.hermite.hermgauss(20)
+        gx = torch.tensor(gh_x, dtype=torch.float32)
+        gw = torch.tensor(gh_w / np.sqrt(np.pi), dtype=torch.float32)
+        Xt = torch.tensor(Xs, dtype=torch.float32)
+        sgn = torch.tensor(2.0 * np.asarray(y) - 1.0, dtype=torch.float32)  # +1 hit, -1 non-hit
+        wt = torch.tensor(_class_weighted(y, sample_weight, pos_scale), dtype=torch.float32)
+        total = wt.sum()
+        opt = torch.optim.Adam([self._Z, self._log_ls, self._log_os, self._qm, self._qL], lr=self.LR)
+        n = len(Xt)
+        for _ in range(self.EPOCHS):
+            perm = torch.as_tensor(rng.permutation(n))
+            for s in range(0, n, self.BATCH):
+                idx = perm[s:s + self.BATCH]
+                opt.zero_grad()
+                mean, var = self._f(Xt[idx])
+                f = mean[:, None] + torch.sqrt(2.0 * var)[:, None] * gx[None, :]
+                ell = (torch.nn.functional.logsigmoid(sgn[idx, None] * f) * gw).sum(1)
+                L = torch.tril(self._qL)
+                kl = 0.5 * ((L ** 2).sum() + (self._qm ** 2).sum() - M
+                            - 2.0 * torch.log(torch.diagonal(L).abs() + 1e-12).sum())
+                # weighted expected log-likelihood scaled to the full data, minus KL; per unit weight
+                loss = -((ell * wt[idx]).sum() * (total / wt[idx].sum()) - kl) / total
+                loss.backward()
+                opt.step()
+        self._gh = (gx, gw)
+        return self
+
+    def latent(self, X) -> tuple[np.ndarray, np.ndarray]:
+        import torch
+        with torch.no_grad():
+            mean, var = self._f(torch.tensor(self._scaler.transform(X), dtype=torch.float32))
+        return mean.numpy().astype(float), np.sqrt(var.numpy()).astype(float)
+
+    def score(self, X, genes=None) -> np.ndarray:
+        import torch
+        gx, gw = self._gh
+        with torch.no_grad():
+            mean, var = self._f(torch.tensor(self._scaler.transform(X), dtype=torch.float32))
+            f = mean[:, None] + torch.sqrt(2.0 * var)[:, None] * gx[None, :]
+            return (torch.sigmoid(f) * gw).sum(1).numpy().astype(float)
+
+
+def _rwr_propagate(p0: np.ndarray, restart: float = 0.5, iters: int = 100) -> np.ndarray:
+    """Random walk with restart from seed mass p0 (any scale) on STRING >= 700."""
+    import scipy.sparse as sp
+    from .string_graph import string_graph
+    _, A = string_graph()
+    if p0.sum() == 0:
+        return p0
+    p0 = p0 / p0.sum()
+    deg = np.asarray(A.sum(axis=0)).ravel()
+    W = A @ sp.diags(1.0 / np.maximum(deg, 1.0))  # column-stochastic transition matrix
+    p = p0.copy()
+    for _ in range(iters):
+        p_new = (1 - restart) * (W @ p) + restart * p0
+        done = np.abs(p_new - p).sum() < 1e-10
+        p = p_new
+        if done:
+            break
+    return p
+
+
+@register
+class LGBMRWREngine:
+    """The reported LightGBM plus one feature: the gene's network-propagation score (4c; exploratory, added
+    after RWR proved complementary to LightGBM screen by screen). The feature never carries a row's own label:
+      training screen s's rows   seeds = hits of the other training screens (not s, not the target)
+      revealed target rows       seeds = hits of all training screens
+      target genes being scored  seeds = hits of all training screens + this screen's revealed hits (x10)
+    Each propagation is rank-normalised over the graph; genes off the graph are NaN."""
+
+    name = "lgbm_rwr"
+    probabilistic = True
+    stochastic = False
+    needs_graph = True
+
+    def __init__(self, seed: int = 42) -> None:
+        self.seed = seed
+
+    def _feature(self, seeds: dict[str, float]) -> np.ndarray:
+        """Rank percentile over graph nodes of the propagation from {gene: seed mass}."""
+        from .string_graph import string_graph
+        node_genes, _ = string_graph()
+        self._index = {g: i for i, g in enumerate(node_genes)}
+        p0 = np.zeros(len(node_genes))
+        for g, m in seeds.items():
+            i = self._index.get(g)
+            if i is not None:
+                p0[i] += m
+        return _rank_percentile(_rwr_propagate(p0))
+
+    def _lookup(self, vec: np.ndarray, genes) -> np.ndarray:
+        return np.array([vec[self._index[g]] if g in self._index else np.nan for g in genes], dtype=float)
+
+    def fit(self, X, y, sample_weight, pos_scale, genes=None, groups=None):
+        import lightgbm as lgb
+        from .arms.online_adaptive_arm import LGBM_PARAMS
+        y = np.asarray(y)
+        groups = np.asarray(groups, dtype=object)
+        genes = np.asarray(genes, dtype=object)
+        w = np.asarray(sample_weight, dtype=float)
+        screens = sorted({g for g in groups if g != "__target__"})
+
+        def hits(keep):  # seed mass per gene from the hit rows in `keep`
+            out: dict[str, float] = {}
+            for g, wi in zip(genes[keep & (y == 1)], w[keep & (y == 1)]):
+                out[g] = out.get(g, 0.0) + wi
+            return out
+
+        is_train = groups != "__target__"
+        col = np.full(len(y), np.nan)
+        for s in screens:
+            rows = groups == s
+            col[rows] = self._lookup(self._feature(hits(is_train & ~rows)), genes[rows])
+        tgt = ~is_train
+        if tgt.any():
+            col[tgt] = self._lookup(self._feature(hits(is_train)), genes[tgt])
+        self._score_vec = self._feature(hits(np.ones(len(y), dtype=bool)))
+        self.train_feature = col  # kept for the leakage test
+        self._m = lgb.LGBMClassifier(**LGBM_PARAMS, scale_pos_weight=pos_scale)
+        self._m.fit(np.column_stack([np.asarray(X, dtype=float), col]), y, sample_weight=w)
+        return self
+
+    def score(self, X, genes=None) -> np.ndarray:
+        col = self._lookup(self._score_vec, genes)
+        return self._m.predict_proba(np.column_stack([np.asarray(X, dtype=float), col]))[:, 1]

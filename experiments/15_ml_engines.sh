@@ -20,6 +20,7 @@
 #                                          # STRING eigenmap descriptors (phase 2, item 2)
 #   experiments/15_ml_engines.sh bnn       # GeneDisco's Bayesian MLP in our protocol + bald/ucb1/badge/kmeans_embedding
 #   experiments/15_ml_engines.sh gdf       # faithful GeneDisco baseline (gdf_* arms), screen-parallel (phase 2, item 3)
+#   experiments/15_ml_engines.sh beyond    # lgbm_rwr | mf svgp + ml_svgpacq_ucb1 (phase 2, item 4)
 #   experiments/15_ml_engines.sh gdf_rerun # after the float32 softuncertain fix: re-run the BNN softuncertain arms on
 #                                          # every screen and the arms the crash never reached (-> *.rerun.json)
 set -euo pipefail
@@ -48,7 +49,8 @@ case "$GROUP" in
   bnn)     DET="";                           SEEDED="" ;;  # explicit arm list below
   gdf)     DET="";                           SEEDED="" ;;  # screen-parallel below
   gdf_rerun) DET="";                         SEEDED="" ;;  # screen-parallel below
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun]" >&2; exit 2 ;;
+  beyond)  DET="lgbm_rwr";                   SEEDED="mf svgp"; EXTRA_SEEDED="ml_svgpacq_ucb1" ;;
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -123,6 +125,6 @@ if [ "$GROUP" = svm ] || [ "$GROUP" = svm_rbf ]; then
 fi
 if [ -n "$SEEDED" ]; then
   echo "== $GROUP: seeded engines ($SEEDED), 5 seeds"
-  run "$(arms "$SEEDED")" 5 "$OUT/${GROUP}_seeded.json"
+  run "$(arms "$SEEDED") ${EXTRA_SEEDED:-}" 5 "$OUT/${GROUP}_seeded.json"
 fi
 echo "done -> $OUT"

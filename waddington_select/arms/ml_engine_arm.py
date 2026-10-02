@@ -198,3 +198,26 @@ def parse_bnn_acq_name(name: str) -> str | None:
     """'ml_bnnacq_bald' -> 'bald'; anything else -> None."""
     rule = name[len("ml_bnnacq_"):] if name.startswith("ml_bnnacq_") else None
     return rule if rule in BNN_ACQUISITIONS else None
+
+
+# ---------------------------------------------------------------------------------------------------
+# UCB on the sparse GP (phase 2, item 4b): rank by the latent function's mean + 1 * sd instead of by
+# P(hit). The engine is `svgp` with the same seed, so `ml_engine_svgp` (Probability-of-Hit) is the paired
+# reference.
+# ---------------------------------------------------------------------------------------------------
+
+
+class SVGPUCBArm(MLEngineArm):
+    def __init__(self, dataset_name: str, batch_size: int, seed: int = 0) -> None:
+        super().__init__(dataset_name, batch_size, model="svgp", online=True, seed=seed)
+        self.name = "ml_svgpacq_ucb1"
+
+    def _rebuild_ranking(self) -> None:
+        import numpy as np
+        self._model = self._train_model(self._revealed_records)
+        Xt = self._test_frame[self._available_feats].values
+        mean, sd = self._model.latent(Xt)
+        order = np.argsort(-(mean + sd), kind="stable")
+        p = self._model.score(Xt)
+        self._ranking = [self._genes[i] for i in order]
+        self._scores = {self._genes[i]: float(p[i]) for i in range(len(self._genes))}

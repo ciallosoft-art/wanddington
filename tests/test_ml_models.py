@@ -419,5 +419,42 @@ class GeneDiscoFaithfulTests(unittest.TestCase):
                 self.assertEqual(len(set(a)), 32)
 
 
+class BeyondGeneDiscoTests(unittest.TestCase):
+    """Phase 2 item 4: multi-task MF, sparse GP (+UCB arm), LightGBM + RWR feature."""
+
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+
+    def test_rwr_feature_never_carries_a_rows_own_label(self):
+        from waddington_select.string_graph import string_graph
+        genes, _ = string_graph()
+        rng = np.random.default_rng(0)
+        g = list(np.array(genes)[rng.choice(len(genes), 1500, replace=False)])
+        groups = ["S1"] * 500 + ["S2"] * 500 + ["S3"] * 400 + ["__target__"] * 100
+        y = (rng.random(1500) < 0.1).astype(int)
+        X = rng.normal(size=(1500, 3))
+        w = np.where(np.array(groups) == "__target__", 10.0, 1.0)
+        fit = lambda labels: make_engine("lgbm_rwr").fit(X, labels, w, 9.0, genes=g, groups=groups)
+        a = fit(y)
+        y_s1 = y.copy()
+        y_s1[:500] = 1 - y_s1[:500]  # flip S1's own labels
+        b = fit(y_s1)
+        np.testing.assert_array_equal(a.train_feature[:500], b.train_feature[:500])  # S1 rows: unchanged
+        self.assertFalse(np.array_equal(a.train_feature[500:1000], b.train_feature[500:1000]))  # S2 sees S1
+        y_t = y.copy()
+        y_t[1400:] = 1 - y_t[1400:]  # flip the revealed target labels
+        c = fit(y_t)
+        np.testing.assert_array_equal(a.train_feature, c.train_feature)  # no training row sees them...
+        self.assertFalse(np.array_equal(a._score_vec, c._score_vec))  # ...only the genes being scored do
+
+    def test_svgp_ucb_arm(self):
+        from waddington_select.arms.ml_engine_arm import SVGPUCBArm
+        a = SVGPUCBArm("Scharenberg22", 32, seed=1).select(0, {})
+        b = SVGPUCBArm("Scharenberg22", 32, seed=1).select(0, {})
+        self.assertEqual(a, b)
+        self.assertEqual(len(set(a)), 32)
+
+
 if __name__ == "__main__":
     unittest.main()
