@@ -160,6 +160,86 @@
         "losses": 4
       }
     },
+    "ml_engine_lgbm_depmap_pca": {
+      "model": "lgbm_depmap_pca",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1721,
+        "IL2": 0.3056,
+        "Sanchez21": 0.1036,
+        "Sanchez21_down": 0.101,
+        "Carnevale22": 0.0599,
+        "Scharenberg22": 0.4898,
+        "Steinhart": 0.0759,
+        "Replogle_K562_essential": 0.619,
+        "Replogle_K562_gwps": 0.3182
+      },
+      "mean": 0.24945555555555554,
+      "vs_lightgbm_online": {
+        "delta": 0.004433333333333339,
+        "ci95": [
+          -0.0025116666666666642,
+          0.011355555555555561
+        ],
+        "wins": 4,
+        "ties": 3,
+        "losses": 2
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.017644444444444442,
+        "ci95": [
+          0.005888611111111106,
+          0.031233333333333342
+        ],
+        "wins": 6,
+        "ties": 2,
+        "losses": 1
+      }
+    },
+    "ml_engine_lgbm_desc": {
+      "model": "lgbm_desc",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1683,
+        "IL2": 0.2994,
+        "Sanchez21": 0.1036,
+        "Sanchez21_down": 0.0964,
+        "Carnevale22": 0.0576,
+        "Scharenberg22": 0.449,
+        "Steinhart": 0.0552,
+        "Replogle_K562_essential": 0.5556,
+        "Replogle_K562_gwps": 0.329
+      },
+      "mean": 0.2349,
+      "vs_lightgbm_online": {
+        "delta": -0.010122222222222213,
+        "ci95": [
+          -0.025555555555555547,
+          0.0030669444444444477
+        ],
+        "wins": 2,
+        "ties": 1,
+        "losses": 6
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.003988888888888879,
+        "ci95": [
+          -0.008001111111111132,
+          0.016545833333333308
+        ],
+        "wins": 6,
+        "ties": 1,
+        "losses": 2
+      }
+    },
     "ml_engine_lgbm_score": {
       "model": "lgbm_score",
       "online": true,
@@ -318,6 +398,46 @@
         "wins": 6,
         "ties": 0,
         "losses": 3
+      }
+    },
+    "ml_engine_lgbm_string_emb": {
+      "model": "lgbm_string_emb",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1733,
+        "IL2": 0.2911,
+        "Sanchez21": 0.0896,
+        "Sanchez21_down": 0.0941,
+        "Carnevale22": 0.0634,
+        "Scharenberg22": 0.5714,
+        "Steinhart": 0.0552,
+        "Replogle_K562_essential": 0.5556,
+        "Replogle_K562_gwps": 0.3452
+      },
+      "mean": 0.2487666666666667,
+      "vs_lightgbm_online": {
+        "delta": 0.003744444444444458,
+        "ci95": [
+          -0.020499999999999994,
+          0.03290194444444443
+        ],
+        "wins": 5,
+        "ties": 0,
+        "losses": 4
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.01407777777777778,
+        "ci95": [
+          -0.002388888888888898,
+          0.031589166666666675
+        ],
+        "wins": 7,
+        "ties": 0,
+        "losses": 2
       }
     },
     "ml_engine_lightgbm": {
@@ -711,6 +831,66 @@
       "deterministic_check": true,
       "seed_sd_of_mean": null
     },
+    "ml_static_lgbm_depmap_pca": {
+      "model": "lgbm_depmap_pca",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1721,
+        "IL2": 0.2931,
+        "Sanchez21": 0.0931,
+        "Sanchez21_down": 0.0815,
+        "Carnevale22": 0.0634,
+        "Scharenberg22": 0.4898,
+        "Steinhart": 0.0552,
+        "Replogle_K562_essential": 0.5556,
+        "Replogle_K562_gwps": 0.2825
+      },
+      "mean": 0.23181111111111116,
+      "vs_lightgbm_online": {
+        "delta": -0.013211111111111102,
+        "ci95": [
+          -0.03105555555555555,
+          0.003355833333333345
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
+    "ml_static_lgbm_desc": {
+      "model": "lgbm_desc",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1608,
+        "IL2": 0.2952,
+        "Sanchez21": 0.0955,
+        "Sanchez21_down": 0.0884,
+        "Carnevale22": 0.0691,
+        "Scharenberg22": 0.449,
+        "Steinhart": 0.0483,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.2846
+      },
+      "mean": 0.23091111111111115,
+      "vs_lightgbm_online": {
+        "delta": -0.014111111111111093,
+        "ci95": [
+          -0.02645583333333331,
+          -0.0019886111111111046
+        ],
+        "wins": 3,
+        "ties": 0,
+        "losses": 6
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
     "ml_static_lgbm_score": {
       "model": "lgbm_score",
       "online": false,
@@ -827,6 +1007,36 @@
         "wins": 3,
         "ties": 1,
         "losses": 5
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
+    "ml_static_lgbm_string_emb": {
+      "model": "lgbm_string_emb",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1496,
+        "IL2": 0.289,
+        "Sanchez21": 0.085,
+        "Sanchez21_down": 0.0838,
+        "Carnevale22": 0.0657,
+        "Scharenberg22": 0.5102,
+        "Steinhart": 0.0483,
+        "Replogle_K562_essential": 0.5873,
+        "Replogle_K562_gwps": 0.2933
+      },
+      "mean": 0.2346888888888889,
+      "vs_lightgbm_online": {
+        "delta": -0.010333333333333323,
+        "ci95": [
+          -0.023667499999999984,
+          0.005481388888888842
+        ],
+        "wins": 3,
+        "ties": 0,
+        "losses": 6
       },
       "deterministic_check": true,
       "seed_sd_of_mean": null
@@ -1046,6 +1256,10 @@
   "stage_b_candidates": [
     "gnn",
     "mlp"
+  ],
+  "phase2_top_probabilistic": [
+    "lgbm_depmap_pca",
+    "lgbm_string_emb"
   ],
   "missing_engines": [],
   "c_20rep_reference": {

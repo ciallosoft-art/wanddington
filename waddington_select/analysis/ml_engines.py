@@ -28,6 +28,8 @@ RES = REPO / "workspace" / "results" / "ml_engines"
 OUT = RES / "summary.json"
 FIG = REPO / "workspace" / "results" / "figures" / "09_ml_engines.png"
 REF = "ml_engine_lightgbm"
+# Engines of the first comparison (steps 2-4 of the plan); everything registered later is phase 2.
+PHASE1 = {"logreg", "rf", "mlp", "lambdarank", "rwr", "gnn", "genept_lr", "genept_lgbm", "svm_linear", "svm_rbf"}
 
 
 def _load() -> dict[str, dict[str, list[dict]]]:
@@ -126,7 +128,11 @@ def summarize() -> dict:
         if on and st:
             on["online_minus_static"] = _paired(on["per_screen"], st["per_screen"])
     online = [r for a, r in rows.items() if r["online"] and a != REF and r["probabilistic"]]
-    candidates = [r["model"] for r in sorted(online, key=lambda r: -r["mean"])[:2]]
+    ranked = sorted(online, key=lambda r: -r["mean"])
+    # The pre-registered stage-B pick is over the phase-1 engines it was made for (GNN, MLP were run in
+    # the C-arm); phase-2 engines are ranked separately so adding them never rewrites that record.
+    candidates = [r["model"] for r in ranked if r["model"] in PHASE1][:2]
+    phase2_top = [r["model"] for r in ranked if r["model"] not in PHASE1][:2]
     acq_rows = {}
     if "ml_acq_greedy" in acq:  # step 6: rules compared on the same LightGBM ensemble
         greedy = _per_screen(acq["ml_acq_greedy"])
@@ -144,6 +150,7 @@ def summarize() -> dict:
         free[f] = {"per_screen": ps, "mean": float(np.mean([ps[ds] for ds in BENCH])),
                    "ml_engine_minus_this": _paired(ref, ps), "c_minus_this": _paired(c_ref, ps)}
     res = {"rows": rows, "reference": REF, "stage_b_candidates": candidates,
+           "phase2_top_probabilistic": phase2_top,
            "missing_engines": sorted(set(engine_names()) - {r["model"] for r in rows.values()}),
            "c_20rep_reference": {"per_screen": c_ref, "mean": float(np.mean(list(c_ref.values()))),
                                  "c_minus_ml_engine": _paired(c_ref, ref)},
