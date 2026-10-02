@@ -280,6 +280,46 @@
         "losses": 2
       }
     },
+    "ml_engine_lgbm_rwr": {
+      "model": "lgbm_rwr",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1471,
+        "IL2": 0.2703,
+        "Sanchez21": 0.0815,
+        "Sanchez21_down": 0.0896,
+        "Carnevale22": 0.053,
+        "Scharenberg22": 0.551,
+        "Steinhart": 0.0759,
+        "Replogle_K562_essential": 0.5714,
+        "Replogle_K562_gwps": 0.3149
+      },
+      "mean": 0.23941111111111113,
+      "vs_lightgbm_online": {
+        "delta": -0.005611111111111096,
+        "ci95": [
+          -0.02448972222222221,
+          0.019466944444444464
+        ],
+        "wins": 1,
+        "ties": 1,
+        "losses": 7
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null,
+      "online_minus_static": {
+        "delta": 0.02493333333333334,
+        "ci95": [
+          -0.0015380555555555395,
+          0.053813611111111076
+        ],
+        "wins": 7,
+        "ties": 0,
+        "losses": 2
+      }
+    },
     "ml_engine_lgbm_score": {
       "model": "lgbm_score",
       "online": true,
@@ -551,6 +591,46 @@
         "losses": 1
       }
     },
+    "ml_engine_mf": {
+      "model": "mf",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.1055,
+        "IL2": 0.19166,
+        "Sanchez21": 0.07076,
+        "Sanchez21_down": 0.08104,
+        "Carnevale22": 0.04192,
+        "Scharenberg22": 0.39593999999999996,
+        "Steinhart": 0.06072000000000001,
+        "Replogle_K562_essential": 0.35874,
+        "Replogle_K562_gwps": 0.21147999999999997
+      },
+      "mean": 0.16863999999999998,
+      "vs_lightgbm_online": {
+        "delta": -0.07638222222222221,
+        "ci95": [
+          -0.1310188888888889,
+          -0.033397666666666666
+        ],
+        "wins": 0,
+        "ties": 0,
+        "losses": 9
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.011884790570875886,
+      "online_minus_static": {
+        "delta": -0.004326666666666671,
+        "ci95": [
+          -0.020164444444444454,
+          0.010613666666666662
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      }
+    },
     "ml_engine_mlp": {
       "model": "mlp",
       "online": true,
@@ -668,6 +748,46 @@
         ],
         "wins": 5,
         "ties": 2,
+        "losses": 2
+      }
+    },
+    "ml_engine_svgp": {
+      "model": "svgp",
+      "online": true,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.13191999999999998,
+        "IL2": 0.27399999999999997,
+        "Sanchez21": 0.07498,
+        "Sanchez21_down": 0.07646,
+        "Carnevale22": 0.0643,
+        "Scharenberg22": 0.5509999999999999,
+        "Steinhart": 0.08142,
+        "Replogle_K562_essential": 0.56826,
+        "Replogle_K562_gwps": 0.36689999999999995
+      },
+      "mean": 0.24324888888888888,
+      "vs_lightgbm_online": {
+        "delta": -0.001773333333333346,
+        "ci95": [
+          -0.02405022222222223,
+          0.024535666666666643
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.004470082994230493,
+      "online_minus_static": {
+        "delta": 0.010435555555555556,
+        "ci95": [
+          0.0015998888888889137,
+          0.022000222222222192
+        ],
+        "wins": 7,
+        "ties": 0,
         "losses": 2
       }
     },
@@ -961,6 +1081,36 @@
       "deterministic_check": true,
       "seed_sd_of_mean": null
     },
+    "ml_static_lgbm_rwr": {
+      "model": "lgbm_rwr",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 2,
+      "per_screen": {
+        "IFNG": 0.1322,
+        "IL2": 0.2121,
+        "Sanchez21": 0.0722,
+        "Sanchez21_down": 0.085,
+        "Carnevale22": 0.0588,
+        "Scharenberg22": 0.5918,
+        "Steinhart": 0.069,
+        "Replogle_K562_essential": 0.4603,
+        "Replogle_K562_gwps": 0.2489
+      },
+      "mean": 0.21447777777777777,
+      "vs_lightgbm_online": {
+        "delta": -0.030544444444444437,
+        "ci95": [
+          -0.07787805555555556,
+          0.018267777777777765
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      },
+      "deterministic_check": true,
+      "seed_sd_of_mean": null
+    },
     "ml_static_lgbm_score": {
       "model": "lgbm_score",
       "online": false,
@@ -1171,6 +1321,36 @@
       "deterministic_check": true,
       "seed_sd_of_mean": null
     },
+    "ml_static_mf": {
+      "model": "mf",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.1359,
+        "IL2": 0.15968,
+        "Sanchez21": 0.07914,
+        "Sanchez21_down": 0.0698,
+        "Carnevale22": 0.053680000000000005,
+        "Scharenberg22": 0.37961999999999996,
+        "Steinhart": 0.0676,
+        "Replogle_K562_essential": 0.40954000000000007,
+        "Replogle_K562_gwps": 0.20173999999999997
+      },
+      "mean": 0.17296666666666666,
+      "vs_lightgbm_online": {
+        "delta": -0.07205555555555555,
+        "ci95": [
+          -0.12101466666666666,
+          -0.029425777777777794
+        ],
+        "wins": 0,
+        "ties": 0,
+        "losses": 9
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.009869156342544183
+    },
     "ml_static_mlp": {
       "model": "mlp",
       "online": false,
@@ -1260,6 +1440,36 @@
       },
       "deterministic_check": true,
       "seed_sd_of_mean": null
+    },
+    "ml_static_svgp": {
+      "model": "svgp",
+      "online": false,
+      "probabilistic": true,
+      "replicates": 5,
+      "per_screen": {
+        "IFNG": 0.13341999999999998,
+        "IL2": 0.26154,
+        "Sanchez21": 0.06102,
+        "Sanchez21_down": 0.07347999999999999,
+        "Carnevale22": 0.06061999999999999,
+        "Scharenberg22": 0.5387599999999999,
+        "Steinhart": 0.07314,
+        "Replogle_K562_essential": 0.5777599999999999,
+        "Replogle_K562_gwps": 0.31558
+      },
+      "mean": 0.23281333333333334,
+      "vs_lightgbm_online": {
+        "delta": -0.012208888888888901,
+        "ci95": [
+          -0.02942288888888889,
+          0.011460666666666624
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      },
+      "deterministic_check": null,
+      "seed_sd_of_mean": 0.001167655665462401
     },
     "ml_static_svm_linear": {
       "model": "svm_linear",
@@ -1955,6 +2165,45 @@
         "wins": 2,
         "ties": 0,
         "losses": 7
+      }
+    }
+  },
+  "svgp_acquisition": {
+    "ml_svgpacq_ucb1": {
+      "rule": "ucb1",
+      "per_screen": {
+        "IFNG": 0.13917999999999997,
+        "IL2": 0.27774,
+        "Sanchez21": 0.06754,
+        "Sanchez21_down": 0.07370000000000002,
+        "Carnevale22": 0.065,
+        "Scharenberg22": 0.53468,
+        "Steinhart": 0.08829999999999999,
+        "Replogle_K562_essential": 0.58098,
+        "Replogle_K562_gwps": 0.35738000000000003
+      },
+      "mean": 0.2427222222222222,
+      "replicates": 5,
+      "seed_sd_of_mean": 0.002971656228560228,
+      "vs_svgp_greedy": {
+        "delta": -0.0005266666666666367,
+        "ci95": [
+          -0.006326777777777709,
+          0.004944555555555571
+        ],
+        "wins": 5,
+        "ties": 0,
+        "losses": 4
+      },
+      "vs_lightgbm_online": {
+        "delta": -0.0022999999999999826,
+        "ci95": [
+          -0.02064938888888888,
+          0.019304611111111137
+        ],
+        "wins": 4,
+        "ties": 0,
+        "losses": 5
       }
     }
   },

@@ -108,6 +108,7 @@ def summarize() -> dict:
     complete = {a: v for a, v in arms.items() if all(ds in v for ds in BENCH)}
     acq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_acq_")}
     bnnacq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_bnnacq_")}
+    svgpacq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_svgpacq_")}
     gdf = {a: complete.pop(a) for a in list(complete) if a.startswith("gdf_")}
     if REF not in complete:
         raise SystemExit(f"{REF} missing or incomplete; run experiments/15_ml_engines.sh tabular first")
@@ -158,6 +159,16 @@ def summarize() -> dict:
                              "replicates": min(len(v) for v in by_ds.values()),
                              "seed_sd_of_mean": _seed_spread(by_ds),
                              "vs_bnn_greedy": _paired(ps, bnn_greedy), "vs_lightgbm_online": _paired(ps, ref)}
+    svgp_rows = {}
+    if svgpacq and "ml_engine_svgp" in complete:  # phase 2 item 4b: UCB vs Probability-of-Hit on one GP
+        svgp_greedy = _per_screen(complete["ml_engine_svgp"])
+        for arm, by_ds in sorted(svgpacq.items()):
+            ps = _per_screen(by_ds)
+            svgp_rows[arm] = {"rule": arm[len("ml_svgpacq_"):], "per_screen": ps,
+                              "mean": float(np.mean([ps[ds] for ds in BENCH])),
+                              "replicates": min(len(v) for v in by_ds.values()),
+                              "seed_sd_of_mean": _seed_spread(by_ds),
+                              "vs_svgp_greedy": _paired(ps, svgp_greedy), "vs_lightgbm_online": _paired(ps, ref)}
     c_ref = _c_reference()
     free = {}
     for f, ps in label_free_baselines().items():
@@ -171,6 +182,7 @@ def summarize() -> dict:
            "label_free_post_hoc": free,
            "acquisition": acq_rows,
            "bnn_acquisition": bnn_rows,
+           "svgp_acquisition": svgp_rows,
            "genedisco_faithful": _genedisco_faithful(gdf, ref) if gdf else {}}
     OUT.write_text(json.dumps(res, indent=2))
     return res
@@ -364,6 +376,10 @@ if __name__ == "__main__":
             g, l = v["vs_bnn_greedy"], v["vs_lightgbm_online"]
             print(f"  {v['rule']:17s} {v['mean']:.4f}  vs bnn greedy {g['delta']:+.4f} [{g['ci95'][0]:+.4f}, "
                   f"{g['ci95'][1]:+.4f}] {g['wins']}/{g['ties']}/{g['losses']}  | vs LightGBM {l['delta']:+.4f}")
+    for arm, v in r["svgp_acquisition"].items():
+        g, l = v["vs_svgp_greedy"], v["vs_lightgbm_online"]
+        print(f"sparse GP, {v['rule']} {v['mean']:.4f}  vs PoH {g['delta']:+.4f} [{g['ci95'][0]:+.4f}, "
+              f"{g['ci95'][1]:+.4f}] {g['wins']}/{g['ties']}/{g['losses']}  | vs LightGBM {l['delta']:+.4f}")
     if r["genedisco_faithful"]:
         gf = r["genedisco_faithful"]
         print(f"faithful GeneDisco (5 seeds; paper's port, marginsample = {gf['ported_marginsample']['mean']:.4f}):")
