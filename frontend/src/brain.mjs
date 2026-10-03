@@ -1,7 +1,7 @@
 // brain.mjs — the gene-selection "brain" seam.
 //
 // The conversational shell never decides genes itself. It shells out to the Python-orchestrated
-// C-arm pipeline (the benchmark system, reported 20-seed leakage-free hit@R5 = 0.253), the pattern the archived
+// C-arm pipeline (the benchmark system: GPT-5.6 Luna, 20-replicate leakage-free hit@R5 = 0.260), the pattern the archived
 // app used (execFile → a Python ranker) — but re-pointed from the old System-1 static ranker to the
 // current `waddington_select.suggest` / `.simulate`; GPT-backed proposals can vary across calls.
 

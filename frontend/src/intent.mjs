@@ -1,9 +1,11 @@
 // intent.mjs — turn a scientist's natural-language message into a structured action.
 //
-// This is the ONLY place the conversation LLM is used, and it is used tool-lessly: it reads the
-// message + session state and returns a small JSON object. It never selects genes — that is the
-// Python C-arm's job (brain.mjs). Keeping the LLM to intent-parsing + narration is exactly the
-// "remove the tools" finding (matched legacy 5-seed diagnostic: agent 0.209 vs pipeline 0.256).
+// Intent parsing is one of three places the conversation LLM is used, always tool-lessly; the others are
+// narration (converse.mjs) and onboarding a new screen (onboard.mjs: extract its description, propose
+// seed genes for the scientist to vet). Here it reads the message + session state and returns a small
+// JSON object. It never selects genes — that is the Python C-arm's job (brain.mjs). Keeping the LLM to
+// intake + narration is the "remove the tools" finding (GPT: free tool-using agent 0.230 vs pipeline
+// 0.260; Claude predecessor, legacy 5-seed diagnostic: 0.209 vs 0.256).
 
 import { complete } from "./llm/complete.mjs";
 import { getDatasets } from "./brain.mjs";
