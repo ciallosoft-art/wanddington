@@ -21,6 +21,7 @@
 #   experiments/15_ml_engines.sh bnn       # GeneDisco's Bayesian MLP in our protocol + bald/ucb1/badge/kmeans_embedding
 #   experiments/15_ml_engines.sh gdf       # faithful GeneDisco baseline (gdf_* arms), screen-parallel (phase 2, item 3)
 #   experiments/15_ml_engines.sh beyond    # lgbm_rwr | mf svgp + ml_svgpacq_ucb1 (phase 2, item 4)
+#   experiments/15_ml_engines.sh gdf_binary  # faithful GeneDisco with equal information: 0/1 feedback (item 3c)
 #   experiments/15_ml_engines.sh gdf_rerun # after the float32 softuncertain fix: re-run the BNN softuncertain arms on
 #                                          # every screen and the arms the crash never reached (-> *.rerun.json)
 set -euo pipefail
@@ -49,8 +50,9 @@ case "$GROUP" in
   bnn)     DET="";                           SEEDED="" ;;  # explicit arm list below
   gdf)     DET="";                           SEEDED="" ;;  # screen-parallel below
   gdf_rerun) DET="";                         SEEDED="" ;;  # screen-parallel below
+  gdf_binary) DET="";                        SEEDED="" ;;  # screen-parallel below
   beyond)  DET="lgbm_rwr";                   SEEDED="mf svgp"; EXTRA_SEEDED="ml_svgpacq_ucb1" ;;
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond]" >&2; exit 2 ;;
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -85,6 +87,20 @@ if [ "$GROUP" = gdf ]; then
     xargs -P 3 -I{} env OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
       "$PY" -m waddington_select.run_sequential --datasets {} \
       --arms $ARMS --replicates 5 --seed-mode local --resume --out "$OUT/gdf_seeded_{}.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = gdf_binary ]; then
+  # item 3c: the gdf arms with a model, fed the revealed genes' 0/1 labels instead of their scores. The
+  # model-free arms (random, kmeans_data) read no labels, so their gdf results stand for both settings.
+  PY="$(conda run -n waddington-bio python3 -c 'import sys; print(sys.executable)')"
+  ARMS="$(conda run -n waddington-bio python3 -c \
+    'from waddington_select.arms.genedisco_faithful_arm import binary_arm_names; print(" ".join(binary_arm_names()))')"
+  echo "== faithful GeneDisco, equal information: $ARMS"
+  printf '%s\n' IFNG IL2 Sanchez21 Sanchez21_down Carnevale22 Scharenberg22 Steinhart \
+    Replogle_K562_essential Replogle_K562_gwps |
+    xargs -P 3 -I{} env OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
+      "$PY" -m waddington_select.run_sequential --datasets {} \
+      --arms $ARMS --replicates 5 --seed-mode local --resume --out "$OUT/gdfb_seeded_{}.json"
   echo "done -> $OUT"; exit 0
 fi
 if [ "$GROUP" = gdf_rerun ]; then

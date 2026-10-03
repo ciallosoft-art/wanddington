@@ -110,6 +110,7 @@ def summarize() -> dict:
     bnnacq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_bnnacq_")}
     svgpacq = {a: complete.pop(a) for a in list(complete) if a.startswith("ml_svgpacq_")}
     gdf = {a: complete.pop(a) for a in list(complete) if a.startswith("gdf_")}
+    gdfb = {a: complete.pop(a) for a in list(complete) if a.startswith("gdfb_")}
     if REF not in complete:
         raise SystemExit(f"{REF} missing or incomplete; run experiments/15_ml_engines.sh tabular first")
     ref = _per_screen(complete[REF])
@@ -183,7 +184,7 @@ def summarize() -> dict:
            "acquisition": acq_rows,
            "bnn_acquisition": bnn_rows,
            "svgp_acquisition": svgp_rows,
-           "genedisco_faithful": _genedisco_faithful(gdf, ref) if gdf else {}}
+           "genedisco_faithful": _genedisco_faithful(gdf, ref, gdfb) if gdf else {}}
     OUT.write_text(json.dumps(res, indent=2))
     return res
 
@@ -191,10 +192,15 @@ def summarize() -> dict:
 PORTED = REPO / "workspace" / "results" / "sequential" / "genedisco_ported.json"
 
 
-def _genedisco_faithful(gdf: dict, ref: dict) -> dict:
+SIX_SHARED = ["IFNG", "IL2", "Sanchez21", "Carnevale22", "Scharenberg22", "Steinhart"]  # Table external
+
+
+def _genedisco_faithful(gdf: dict, ref: dict, gdfb: dict | None = None) -> dict:
     """Phase 2 item 3a: GeneDisco with its own models, target, loop and (optionally) features, against
-    random, the paper's port (its marginsample rule on our LightGBM, 0.169) and our ML engine."""
+    random, the paper's port (its marginsample rule on our LightGBM, 0.169) and our ML engine.
+    Item 3c: the equal-information arms (gdfb_*, 0/1 feedback), each also paired with its score twin."""
     from ..arms.genedisco_faithful_arm import parse_name
+    gdf = {**gdf, **(gdfb or {})}
     ported = json.loads(PORTED.read_text())
     port = {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in ported[ds]["genedisco_marginsample"]]))
             for ds in BENCH}
@@ -207,8 +213,33 @@ def _genedisco_faithful(gdf: dict, ref: dict) -> dict:
                      "mean": float(np.mean([ps[ds] for ds in BENCH])),
                      "replicates": min(len(v) for v in by_ds.values()), "seed_sd_of_mean": _seed_spread(by_ds),
                      "vs_random": None if rand is None or arm == "gdf_random" else _paired(ps, rand),
-                     "vs_ported_marginsample": _paired(ps, port), "vs_lightgbm_online": _paired(ps, ref)}
-    return {"rows": rows, "ported_marginsample": {"per_screen": port, "mean": float(np.mean(list(port.values())))}}
+                     "vs_ported_marginsample": _paired(ps, port), "vs_lightgbm_online": _paired(ps, ref),
+                     "information": arm.split("_", 1)[0] == "gdf" and "score" or "binary",
+                     "mean_six_shared": float(np.mean([ps[ds] for ds in SIX_SHARED]))}
+    for arm, row in rows.items():  # binary minus score, same model, features and rule
+        twin = "gdf_" + arm[len("gdfb_"):]
+        if row["information"] == "binary" and twin in rows:
+            row["minus_score_twin"] = _paired(row["per_screen"], rows[twin]["per_screen"])
+    six = {}
+    for info in ("score", "binary"):
+        for feats in ("achilles", "ours", "both"):
+            # model-free k-means reads no labels, so it belongs to both settings
+            fam = [a for a, r in rows.items() if r["rule"] != "random"
+                   and (feats == "both" or r["features"] == feats)
+                   and (r["information"] == info or r["model"] is None)]
+            if not fam:
+                continue
+            best = max(fam, key=lambda a: rows[a]["mean_six_shared"])
+            six[f"{info}_{feats}"] = {
+                "rules": len(fam), "best_rule": best, "best_rule_mean": rows[best]["mean_six_shared"],
+                "per_screen_oracle": float(np.mean([max(rows[a]["per_screen"][ds] for a in fam)
+                                                    for ds in SIX_SHARED]))}
+    port_ported = json.loads(PORTED.read_text())
+    port_best = float(np.mean([max(np.mean([r["hit_ratio_per_round"][-1] for r in port_ported[ds][a]])
+                                   for a in port_ported[ds] if isinstance(port_ported[ds][a], list))
+                               for ds in SIX_SHARED]))
+    return {"rows": rows, "ported_marginsample": {"per_screen": port, "mean": float(np.mean(list(port.values())))},
+            "six_shared": six, "ported_best_per_screen_six": port_best}
 
 
 def control(models: list[str] | None = None, seeds: tuple[int, ...] = (0, 1, 2)) -> dict:

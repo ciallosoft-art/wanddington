@@ -409,6 +409,49 @@ class GeneDiscoFaithfulTests(unittest.TestCase):
         arm.update(0, DatasetOracle(ds).reveal(b1))
         self.assertEqual(len(set(arm.select(1, {})) - set(b1)), 32)
 
+    def test_equal_information_arms_learn_from_labels_only(self):
+        from waddington_select import bnn
+        from waddington_select.arms import genedisco_faithful_arm as gdf
+        from waddington_select.oracle import DatasetOracle
+        ds, B = "Scharenberg22", 32
+        oracle = DatasetOracle(ds)
+        self.assertEqual(len(gdf.binary_arm_names()), 20)  # every arm with a model, both feature sets
+        targets = []
+        real_fit = bnn.fit
+
+        def spy(X, target, *a, **k):
+            targets.append(np.asarray(target))
+            return real_fit(X, target, *a, **{**k, "epochs": 3})
+
+        def no_scores(*a, **k):
+            raise AssertionError("an equal-information arm read the target screen's scores")
+
+        with patch.object(gdf, "load_scores", no_scores), patch.object(bnn, "fit", spy):
+            for name in ("gdfb_ours_bnn_topuncertain", "gdfb_achilles_rf_marginsample"):
+                with self.subTest(arm=name):
+                    arm = gdf.GeneDiscoFaithfulArm(ds, B, name=name, seed=0)
+                    b1 = arm.select(0, {})
+                    rev = oracle.reveal(b1)
+                    arm.update(0, rev)
+                    b2 = arm.select(1, {})
+                    self.assertEqual(len(set(b1) | set(b2)), 2 * B)
+                    if len(set(rev.values())) == 1:
+                        continue  # single-class fallback, covered below
+        for t in targets:
+            self.assertTrue(set(np.unique(t)) <= {0.0, 1.0})
+
+    def test_equal_information_single_class_falls_back_to_random(self):
+        from waddington_select.arms.genedisco_faithful_arm import GeneDiscoFaithfulArm
+        arm = GeneDiscoFaithfulArm("Scharenberg22", 32, name="gdfb_ours_bnn_badge", seed=0)
+        b1 = arm.select(0, {})
+        arm.update(0, {g: False for g in b1})
+
+        def no_fit():
+            raise AssertionError("fitted a model on single-class labels")
+
+        arm._fit = no_fit
+        self.assertEqual(len(set(arm.select(1, {})) - set(b1)), 32)
+
     def test_bnn_acquisition_arms(self):
         from waddington_select.arms.ml_engine_arm import BNN_ACQUISITIONS, BNNAcquisitionArm
         for rule in BNN_ACQUISITIONS:

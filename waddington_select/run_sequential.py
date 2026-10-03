@@ -94,7 +94,8 @@ from .arms.ml_engine_arm import (MLEngineArm, AcquisitionArm, ACQUISITIONS as _M
                                  parse_acq_name as _parse_acq, parse_arm_name as _parse_ml_arm,
                                  BNNAcquisitionArm, BNN_ACQUISITIONS as _BNN_ACQ,
                                  parse_bnn_acq_name as _parse_bnn_acq, SVGPUCBArm)
-from .arms.genedisco_faithful_arm import GeneDiscoFaithfulArm, arm_names as _gdf_arm_names
+from .arms.genedisco_faithful_arm import (GeneDiscoFaithfulArm, arm_names as _gdf_arm_names,
+                                          binary_arm_names as _gdfb_arm_names)
 from .ml_models import ENGINES as _ML_ENGINES, engine_names as _ml_engine_names, is_stochastic as _ml_is_stochastic
 
 RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
@@ -109,7 +110,7 @@ _PAPER_ARMS = {
     "waddington_c_pair",
 } | {f"genedisco_{a}" for a in _GD_ACQ} | {
     f"ml_{kind}_{m}" for kind in ("engine", "static") for m in _ml_engine_names()
-} | {f"ml_acq_{a}" for a in _ML_ACQ} | {f"ml_bnnacq_{a}" for a in _BNN_ACQ} | set(_gdf_arm_names()) | {"ml_svgpacq_ucb1"} | {
+} | {f"ml_acq_{a}" for a in _ML_ACQ} | {f"ml_bnnacq_{a}" for a in _BNN_ACQ} | set(_gdf_arm_names()) | set(_gdfb_arm_names()) | {"ml_svgpacq_ucb1"} | {
     # the C-arm's 0.8/0.2 fusion adds 0.2 to a probability, so only probabilistic engines qualify
     f"waddington_c__{m}" for m in _ml_engine_names() if m != "lightgbm" and _ML_ENGINES[m].probabilistic
 }
@@ -166,7 +167,7 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(BNNAcquisitionArm(dataset_name, bs, acquisition=_parse_bnn_acq(name), seed=local_seed))
         elif name == "ml_svgpacq_ucb1":
             arms.append(SVGPUCBArm(dataset_name, bs, seed=local_seed))
-        elif name.startswith("gdf_"):
+        elif name.startswith(("gdf_", "gdfb_")):
             arms.append(GeneDiscoFaithfulArm(dataset_name, bs, name=name, seed=local_seed))
         elif _parse_ml_arm(name) is not None:
             model, online = _parse_ml_arm(name)
@@ -455,7 +456,7 @@ def _run_one_repeat(ds: str, arm_name: str, repeat_idx: int, oracle, n_rounds: i
     consumes_local_rng = (arm_name == "random" or arm_name.startswith("genedisco_")
                           or (_ml is not None and _ml_is_stochastic(_ml[0]))
                           or _parse_acq(arm_name) is not None
-                          or _parse_bnn_acq(arm_name) is not None or arm_name.startswith("gdf_")
+                          or _parse_bnn_acq(arm_name) is not None or arm_name.startswith(("gdf_", "gdfb_"))
                           or arm_name == "ml_svgpacq_ucb1"
                           or (arm_name.startswith("waddington_c__")
                               and _ml_is_stochastic(arm_name[len("waddington_c__"):])))

@@ -2256,7 +2256,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.041426666666666674
       },
       "gdf_achilles_bnn_badge": {
         "features": "achilles",
@@ -2305,7 +2307,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.10508666666666668
       },
       "gdf_achilles_bnn_coreset": {
         "features": "achilles",
@@ -2354,7 +2358,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.14716333333333334
       },
       "gdf_achilles_bnn_kmeans_embedding": {
         "features": "achilles",
@@ -2403,7 +2409,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.10707333333333334
       },
       "gdf_achilles_bnn_marginsample": {
         "features": "achilles",
@@ -2452,7 +2460,9 @@
           "wins": 1,
           "ties": 0,
           "losses": 8
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.13928
       },
       "gdf_achilles_bnn_softuncertain": {
         "features": "achilles",
@@ -2501,7 +2511,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.09218
       },
       "gdf_achilles_bnn_topuncertain": {
         "features": "achilles",
@@ -2550,7 +2562,9 @@
           "wins": 1,
           "ties": 0,
           "losses": 8
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.14361666666666664
       },
       "gdf_achilles_kmeans_data": {
         "features": "achilles",
@@ -2599,7 +2613,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.13363333333333333
       },
       "gdf_achilles_rf_marginsample": {
         "features": "achilles",
@@ -2648,7 +2664,9 @@
           "wins": 1,
           "ties": 0,
           "losses": 8
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.14003666666666664
       },
       "gdf_achilles_rf_softuncertain": {
         "features": "achilles",
@@ -2697,7 +2715,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.06106999999999999
       },
       "gdf_achilles_rf_topuncertain": {
         "features": "achilles",
@@ -2746,7 +2766,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.13613666666666666
       },
       "gdf_ours_bnn_adversarialBIM": {
         "features": "ours",
@@ -2795,7 +2817,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.04211
       },
       "gdf_ours_bnn_badge": {
         "features": "ours",
@@ -2844,7 +2868,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.09064666666666667
       },
       "gdf_ours_bnn_coreset": {
         "features": "ours",
@@ -2893,7 +2919,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.11943
       },
       "gdf_ours_bnn_kmeans_embedding": {
         "features": "ours",
@@ -2942,7 +2970,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.10162
       },
       "gdf_ours_bnn_marginsample": {
         "features": "ours",
@@ -2991,7 +3021,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.12475000000000001
       },
       "gdf_ours_bnn_softuncertain": {
         "features": "ours",
@@ -3040,7 +3072,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.08727333333333333
       },
       "gdf_ours_bnn_topuncertain": {
         "features": "ours",
@@ -3089,7 +3123,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.12773333333333334
       },
       "gdf_ours_kmeans_data": {
         "features": "ours",
@@ -3138,7 +3174,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.08953
       },
       "gdf_ours_rf_marginsample": {
         "features": "ours",
@@ -3187,7 +3225,9 @@
           "wins": 1,
           "ties": 0,
           "losses": 8
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.12717
       },
       "gdf_ours_rf_softuncertain": {
         "features": "ours",
@@ -3236,7 +3276,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.05592
       },
       "gdf_ours_rf_topuncertain": {
         "features": "ours",
@@ -3285,7 +3327,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.11264333333333333
       },
       "gdf_random": {
         "features": null,
@@ -3325,7 +3369,9 @@
           "wins": 0,
           "ties": 0,
           "losses": 9
-        }
+        },
+        "information": "score",
+        "mean_six_shared": 0.05063000000000001
       }
     },
     "ported_marginsample": {
@@ -3341,6 +3387,45 @@
         "Replogle_K562_gwps": 0.2392
       },
       "mean": 0.16858888888888893
-    }
+    },
+    "six_shared": {
+      "score_achilles": {
+        "rules": 11,
+        "best_rule": "gdf_achilles_bnn_coreset",
+        "best_rule_mean": 0.14716333333333334,
+        "per_screen_oracle": 0.17235333333333333
+      },
+      "score_ours": {
+        "rules": 11,
+        "best_rule": "gdf_ours_bnn_topuncertain",
+        "best_rule_mean": 0.12773333333333334,
+        "per_screen_oracle": 0.15225999999999998
+      },
+      "score_both": {
+        "rules": 22,
+        "best_rule": "gdf_achilles_bnn_coreset",
+        "best_rule_mean": 0.14716333333333334,
+        "per_screen_oracle": 0.1732733333333333
+      },
+      "binary_achilles": {
+        "rules": 1,
+        "best_rule": "gdf_achilles_kmeans_data",
+        "best_rule_mean": 0.13363333333333333,
+        "per_screen_oracle": 0.13363333333333333
+      },
+      "binary_ours": {
+        "rules": 1,
+        "best_rule": "gdf_ours_kmeans_data",
+        "best_rule_mean": 0.08953,
+        "per_screen_oracle": 0.08953
+      },
+      "binary_both": {
+        "rules": 2,
+        "best_rule": "gdf_achilles_kmeans_data",
+        "best_rule_mean": 0.13363333333333333,
+        "per_screen_oracle": 0.13562666666666667
+      }
+    },
+    "ported_best_per_screen_six": 0.11265000000000001
   }
 }
