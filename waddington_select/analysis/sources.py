@@ -8,7 +8,8 @@ corrected (`replogle_transcriptomics_v2`, docs/fix_impact_map.md) and the whole 
 re-run (replogle_transcriptomics_v2_20rep, 2026-09-18). That re-run is what the current code reproduces,
 so it is the reported run. The first run, and the supporting GPT analyses run before the correction
 (the legacy-consistent ablations, the router-variant and reasoning grids under gpt/router/, the tiers'
-memory used by the combinatorial experiments), are kept on disk and cited as such.
+memory used by the combinatorial experiments, read from tier_a_full_pool_20rep), are kept on disk and
+cited as such.
 """
 
 from __future__ import annotations
@@ -23,6 +24,8 @@ REPORTED_RUN_DIR = GPT / "replogle_transcriptomics_v2_20rep"
 REPORTED_RUN = REPORTED_RUN_DIR / "main_table_20rep.json"
 # the same protocol at five replicates (the repeat-count robustness table)
 REPORTED_RUN_5REP = GPT / "replogle_transcriptomics_v2" / "main_table_5rep.json"
+# BDA's easier tier (full pool, essentials restored), same protocol and corrected prompts (experiment 08)
+REPORTED_TIER_A_RUN = GPT / "tier_a_full_pool_v2_20rep" / "main_table_20rep.json"
 
 # before the prompt correction (kept, cited as such)
 FIRST_GPT_RUN_DIR = GPT / "gpt_5_6_luna_none_20rep"
