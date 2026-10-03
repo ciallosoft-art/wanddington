@@ -16,7 +16,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 MODEL="openai-codex/gpt-5.6-luna"
-RESULT_DIR="workspace/results/gpt/tier_a_full_pool_20rep"
+# Corrected Replogle prompts (analysis/sources.py). The first run of this tier, under the earlier prompts,
+# stays in tier_a_full_pool_20rep: its memory is the one the combinatorial experiments (09/12/13) read.
+RESULT_DIR="${WADDINGTON_TIER_A_RESULT_DIR:-workspace/results/gpt/tier_a_full_pool_v2_20rep}"
 CALIBRATION_RESULT="$RESULT_DIR/calibration_20rep.json"
 MEMORY_PATH="$RESULT_DIR/experience_memory.json"
 C_RESULT="$RESULT_DIR/waddington_c_20rep.json"

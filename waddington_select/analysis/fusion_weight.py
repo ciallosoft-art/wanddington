@@ -25,7 +25,7 @@ from .final_system_stats import BENCH, _paired
 
 REPO = Path(__file__).resolve().parents[2]
 RES = REPO / "workspace" / "results" / "fusion_weight"
-REF = REPO / "workspace" / "results" / "gpt" / "replogle_transcriptomics_v2_20rep" / "main_table_20rep.json"
+from .sources import REPORTED_RUN as REF  # noqa: E402
 ML_SUMMARY = REPO / "workspace" / "results" / "ml_engines" / "summary.json"
 FIG = REPO / "workspace" / "results" / "figures" / "10_fusion_weight.png"
 GRID = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]

@@ -1,0 +1,377 @@
+{
+  "source": "workspace/results/gpt/replogle_transcriptomics_v2_20rep/main_table_20rep.json",
+  "final_mean": 0.26034944444444447,
+  "per_screen": {
+    "final": {
+      "IFNG": 0.184155,
+      "IL2": 0.336395,
+      "Sanchez21": 0.088235,
+      "Sanchez21_down": 0.09361000000000001,
+      "Carnevale22": 0.06515000000000001,
+      "Scharenberg22": 0.5051,
+      "Steinhart": 0.11548499999999999,
+      "Replogle_K562_essential": 0.60713,
+      "Replogle_K562_gwps": 0.34788500000000006
+    },
+    "LOO": {
+      "IFNG": 0.16829999999999998,
+      "IL2": 0.3056,
+      "Sanchez21": 0.0768,
+      "Sanchez21_down": 0.0907,
+      "Carnevale22": 0.0484,
+      "Scharenberg22": 0.449,
+      "Steinhart": 0.07590000000000001,
+      "Replogle_K562_essential": 0.4921000000000001,
+      "Replogle_K562_gwps": 0.24680000000000005
+    },
+    "online": {
+      "IFNG": 0.1833,
+      "IL2": 0.31390000000000007,
+      "Sanchez21": 0.08729999999999999,
+      "Sanchez21_down": 0.101,
+      "Carnevale22": 0.047200000000000006,
+      "Scharenberg22": 0.449,
+      "Steinhart": 0.08970000000000003,
+      "Replogle_K562_essential": 0.47620000000000007,
+      "Replogle_K562_gwps": 0.27270000000000005
+    },
+    "llm": {
+      "IFNG": 0.16875999999999997,
+      "IL2": 0.24023,
+      "Sanchez21": 0.05850999999999999,
+      "Sanchez21_down": 0.05580500000000001,
+      "Carnevale22": 0.058125,
+      "Scharenberg22": 0.44083999999999995,
+      "Steinhart": 0.14618000000000003,
+      "Replogle_K562_essential": 0.5277749999999999,
+      "Replogle_K562_gwps": 0.21033
+    },
+    "coreset": {
+      "IFNG": 0.09980000000000003,
+      "IL2": 0.1393,
+      "Sanchez21": 0.0314,
+      "Sanchez21_down": 0.07810000000000002,
+      "Carnevale22": 0.0541,
+      "Scharenberg22": 0.28570000000000007,
+      "Steinhart": 0.08970000000000003,
+      "Replogle_K562_essential": 0.2698,
+      "Replogle_K562_gwps": 0.15580000000000002
+    },
+    "random": {
+      "IFNG": 0.033735,
+      "IL2": 0.034925,
+      "Sanchez21": 0.034699999999999995,
+      "Sanchez21_down": 0.038114999999999996,
+      "Carnevale22": 0.034155000000000005,
+      "Scharenberg22": 0.15306999999999998,
+      "Steinhart": 0.040365,
+      "Replogle_K562_essential": 0.25476499999999996,
+      "Replogle_K562_gwps": 0.06894499999999999
+    }
+  },
+  "matched_loo": {
+    "per_screen": {
+      "IFNG": 0.14588528678304238,
+      "IL2": 0.30145530145530147,
+      "Sanchez21": 0.08032596041909197,
+      "Sanchez21_down": 0.08036739380022963,
+      "Carnevale22": 0.06912442396313365,
+      "Scharenberg22": 0.4897959183673469,
+      "Steinhart": 0.05517241379310345,
+      "Replogle_K562_essential": 0.5555555555555556,
+      "Replogle_K562_gwps": 0.2976190476190476
+    },
+    "mean": 0.23058903352842808,
+    "final_vs_matched_loo": {
+      "delta": 0.02976041091601637,
+      "ci95": [
+        0.01603616784041408,
+        0.043581584414598355
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    }
+  },
+  "final_paired": {
+    "vs_LOO_baseline": {
+      "delta": 0.04328277777777777,
+      "ci95": [
+        0.020081111111111126,
+        0.06947222222222217
+      ],
+      "wins": 9,
+      "ties": 0,
+      "losses": 0
+    },
+    "vs_online_ml": {
+      "delta": 0.03587166666666665,
+      "ci95": [
+        0.01113105555555555,
+        0.06618186111111107
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    },
+    "vs_llm_branch": {
+      "delta": 0.04851000000000002,
+      "ci95": [
+        0.018563000000000007,
+        0.07970691666666667
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    },
+    "vs_coreset": {
+      "delta": 0.12660499999999997,
+      "ci95": [
+        0.06072993055555555,
+        0.20149895833333323
+      ],
+      "wins": 9,
+      "ties": 0,
+      "losses": 0
+    },
+    "means": {
+      "final": 0.26034944444444447,
+      "LOO": 0.21706666666666669,
+      "online": 0.2244777777777778,
+      "llm": 0.21183944444444439,
+      "coreset": 0.13374444444444444,
+      "random": 0.07697499999999999
+    }
+  },
+  "marginal_ci": {
+    "final": {
+      "mean": 0.26034944444444447,
+      "ci95": [
+        0.1448294861111111,
+        0.3857594444444444
+      ]
+    },
+    "LOO": {
+      "mean": 0.21706666666666669,
+      "ci95": [
+        0.12073972222222222,
+        0.3233247222222222
+      ]
+    },
+    "online": {
+      "mean": 0.2244777777777778,
+      "ci95": [
+        0.12986083333333334,
+        0.3258141666666663
+      ]
+    }
+  },
+  "legacy_routed": {
+    "mean": 0.2528727777777778,
+    "per_screen": {
+      "IFNG": 0.19053500000000004,
+      "IL2": 0.344075,
+      "Sanchez21": 0.09401,
+      "Sanchez21_down": 0.09936,
+      "Carnevale22": 0.057550000000000004,
+      "Scharenberg22": 0.49693999999999994,
+      "Steinhart": 0.13755500000000004,
+      "Replogle_K562_essential": 0.5126999999999999,
+      "Replogle_K562_gwps": 0.34313000000000005
+    },
+    "final_minus_legacy": {
+      "delta": 0.007476666666666667,
+      "ci95": [
+        -0.007450486111111123,
+        0.030335638888888884
+      ],
+      "wins": 4,
+      "ties": 0,
+      "losses": 5
+    }
+  },
+  "claude_predecessor": {
+    "mean": 0.25279999999999997,
+    "gpt_minus_claude": {
+      "delta": 0.007549444444444458,
+      "ci95": [
+        -0.0007712361111110919,
+        0.01706098611111112
+      ],
+      "wins": 6,
+      "ties": 0,
+      "losses": 3
+    },
+    "claude_vs_matched_loo": {
+      "delta": 0.022210966471571916,
+      "ci95": [
+        0.011869445327777407,
+        0.035630928450704376
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    }
+  },
+  "five_replicates": {
+    "per_screen": {
+      "final": {
+        "IFNG": 0.18453999999999998,
+        "IL2": 0.32932,
+        "Sanchez21": 0.08662,
+        "Sanchez21_down": 0.09412000000000001,
+        "Carnevale22": 0.0643,
+        "Scharenberg22": 0.50204,
+        "Steinhart": 0.11444000000000001,
+        "Replogle_K562_essential": 0.5999800000000001,
+        "Replogle_K562_gwps": 0.34414
+      },
+      "LOO": {
+        "IFNG": 0.1683,
+        "IL2": 0.3056,
+        "Sanchez21": 0.0768,
+        "Sanchez21_down": 0.0907,
+        "Carnevale22": 0.0484,
+        "Scharenberg22": 0.449,
+        "Steinhart": 0.0759,
+        "Replogle_K562_essential": 0.4920999999999999,
+        "Replogle_K562_gwps": 0.2468
+      },
+      "online": {
+        "IFNG": 0.1833,
+        "IL2": 0.3139,
+        "Sanchez21": 0.0873,
+        "Sanchez21_down": 0.101,
+        "Carnevale22": 0.0472,
+        "Scharenberg22": 0.449,
+        "Steinhart": 0.0897,
+        "Replogle_K562_essential": 0.47620000000000007,
+        "Replogle_K562_gwps": 0.2727
+      },
+      "llm": {
+        "IFNG": 0.17056,
+        "IL2": 0.25572,
+        "Sanchez21": 0.05564,
+        "Sanchez21_down": 0.05558,
+        "Carnevale22": 0.057600000000000005,
+        "Scharenberg22": 0.4530799999999999,
+        "Steinhart": 0.13928000000000001,
+        "Replogle_K562_essential": 0.5238,
+        "Replogle_K562_gwps": 0.20823999999999998
+      },
+      "coreset": {
+        "IFNG": 0.0998,
+        "IL2": 0.1393,
+        "Sanchez21": 0.0314,
+        "Sanchez21_down": 0.0781,
+        "Carnevale22": 0.0541,
+        "Scharenberg22": 0.2857,
+        "Steinhart": 0.0897,
+        "Replogle_K562_essential": 0.2698,
+        "Replogle_K562_gwps": 0.1558
+      },
+      "random": {
+        "IFNG": 0.029679999999999995,
+        "IL2": 0.03992,
+        "Sanchez21": 0.03564,
+        "Sanchez21_down": 0.0388,
+        "Carnevale22": 0.029259999999999998,
+        "Scharenberg22": 0.12653999999999999,
+        "Steinhart": 0.03726,
+        "Replogle_K562_essential": 0.26666,
+        "Replogle_K562_gwps": 0.07100000000000001
+      }
+    },
+    "means": {
+      "final": 0.25772222222222224,
+      "LOO": 0.21706666666666663,
+      "online": 0.2244777777777778,
+      "llm": 0.2132777777777778,
+      "coreset": 0.13374444444444444,
+      "random": 0.07497333333333334
+    },
+    "final_vs_matched_loo": {
+      "delta": 0.02713318869379416,
+      "ci95": [
+        0.014039298411855734,
+        0.040468964799670874
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    },
+    "secondary": {
+      "LOO": {
+        "delta": 0.040655555555555584,
+        "ci95": [
+          0.01850850000000001,
+          0.06558922222222226
+        ],
+        "wins": 9,
+        "ties": 0,
+        "losses": 0
+      },
+      "online": {
+        "delta": 0.033244444444444445,
+        "ci95": [
+          0.009703777777777782,
+          0.06207488888888883
+        ],
+        "wins": 7,
+        "ties": 0,
+        "losses": 2
+      },
+      "llm": {
+        "delta": 0.04444444444444446,
+        "ci95": [
+          0.017674944444444445,
+          0.0736077222222222
+        ],
+        "wins": 8,
+        "ties": 0,
+        "losses": 1
+      },
+      "coreset": {
+        "delta": 0.1239777777777778,
+        "ci95": [
+          0.05949927777777779,
+          0.19703722222222222
+        ],
+        "wins": 9,
+        "ties": 0,
+        "losses": 0
+      }
+    }
+  },
+  "novel_hit": {
+    "macro": {
+      "waddington_novel": 0.07800291907695504,
+      "feature_loo_novel": 0.10453022893266758,
+      "waddington_recurrent": 0.4740614322743563,
+      "feature_loo_recurrent": 0.43873400929749784,
+      "hit_frequency_novel": 0.0,
+      "hit_frequency_recurrent": 0.4948572051770131,
+      "novel_share": 0.6455946266297906
+    },
+    "paired_novel_wadd_minus_loo": {
+      "delta": -0.02652730985571254,
+      "ci95": [
+        -0.0853325922886643,
+        0.008391836616379348
+      ],
+      "wins": 3,
+      "ties": 0,
+      "losses": 6
+    },
+    "paired_recurrent_wadd_minus_loo": {
+      "delta": 0.03532742297685837,
+      "ci95": [
+        -0.002018099805570465,
+        0.07201926285762017
+      ],
+      "wins": 7,
+      "ties": 0,
+      "losses": 2
+    }
+  }
+}

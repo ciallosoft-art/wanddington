@@ -34,8 +34,9 @@ REPO = Path(__file__).resolve().parents[2]
 ATTR = REPO / "workspace" / "results" / "attribution_9ds.json"
 OUT = REPO / "workspace" / "results" / "conditional_attribution.json"
 # The same analysis over the 20-replicate main run, replayed without LLM calls (replay_attribution.py).
-REPLAY = REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "attribution_replay_20rep.json"
-OUT_REPLAY = REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "conditional_attribution_20rep.json"
+from .sources import REPORTED_RUN_DIR  # noqa: E402  (the reported run; analysis/sources.py)
+REPLAY = REPORTED_RUN_DIR / "attribution_replay_20rep.json"
+OUT_REPLAY = REPORTED_RUN_DIR / "conditional_attribution_20rep.json"
 
 # Screens whose source labels are degenerate. Empty on GPT: no screen is routed two_stage (see docstring).
 EXCLUDE: set[str] = set()

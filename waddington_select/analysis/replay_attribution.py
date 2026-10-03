@@ -30,7 +30,7 @@ from ..oracle import BATCH_SIZES, DatasetOracle
 from .trace import hit_rate_by_source
 
 REPO = Path(__file__).resolve().parents[2]
-RUN_DIR = REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep"
+from .sources import REPORTED_RUN_DIR as RUN_DIR  # noqa: E402  (the reported run; analysis/sources.py)
 RUN = RUN_DIR / "main_table_20rep.json"
 MANIFEST = RUN_DIR / "waddington_c_20rep.manifest.json"
 OUT = RUN_DIR / "attribution_replay_20rep.json"

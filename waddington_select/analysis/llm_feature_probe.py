@@ -29,7 +29,8 @@ from ..oracle import BENCHMARK_DATASETS
 from .prior_probes import _load, LGBM, INTRINSIC, DEPMAP
 
 REPO = Path(__file__).resolve().parents[2]
-RUN = REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "waddington_c_20rep.json"
+from .sources import REPORTED_RUN_DIR  # noqa: E402  (the reported run; analysis/sources.py)
+RUN = REPORTED_RUN_DIR / "waddington_c_20rep.json"
 OUT = REPO / "workspace" / "results" / "llm_feature_probe.json"
 FEATS = INTRINSIC + DEPMAP  # no-anchor reported configuration
 

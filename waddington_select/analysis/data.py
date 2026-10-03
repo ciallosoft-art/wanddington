@@ -17,9 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULTS = REPO_ROOT / "workspace" / "results" / "sequential"
 # the external GeneDisco reference (docs/ml_engines_plan.md, P2-6): equal information, best single rule
 GENEDISCO_ARM = "gdfb_achilles_bnn_coreset"
-# The final leakage-free 20-seed run of all six main-table arms (used for the principal figures 1-3);
-# the legacy three_arm.json waddington_c stays the reference for the component-ablation figure.
-FINAL_WADD = REPO_ROOT / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "main_table_20rep.json"
+# The reported run of all six main-table arms (figures 1-3; analysis/sources.py); the legacy
+# three_arm.json waddington_c stays the reference for the component-ablation figure.
+from .sources import REPORTED_RUN as FINAL_WADD  # noqa: E402
 GPT_RESULTS = REPO_ROOT / "workspace" / "results" / "gpt"
 
 # Which file each method's runs live in (baselines + the three-arm comparison).

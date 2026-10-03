@@ -32,6 +32,10 @@ from ..router_protocol import SCREEN_METADATA, BENCH, CANDIDATE_WLLM, study_grou
 REPO = Path(__file__).resolve().parents[2]
 ROUTER = REPO / "workspace" / "results" / "router"
 SEQ = REPO / "workspace" / "results" / "sequential"
+# Default: the GPT grids under gpt/router/ (run before the Replogle prompt correction; analysis/sources.py),
+# with the legacy-consistent routed GPT C-arm as the "C" reference. `--claude` restores the predecessor's
+# files and writes router/router_analysis.json as before.
+CLAUDE_ROUTER, CLAUDE_OUT = ROUTER, ROUTER / "router_analysis.json"
 OUT = ROUTER / "router_analysis.json"
 N_BOOT = 5000
 SEED = 0
@@ -51,9 +55,18 @@ def _weight_means() -> dict:
     return W
 
 
+C_REF = SEQ / "three_arm.json"  # set to the GPT legacy-consistent run by use_gpt()
+
+
+def use_gpt() -> None:
+    global ROUTER, OUT, C_REF
+    from .sources import GPT_ROUTER, LEGACY_GPT_ABLATIONS
+    ROUTER, OUT, C_REF = GPT_ROUTER, GPT_ROUTER / "router_analysis.json", LEGACY_GPT_ABLATIONS
+
+
 def _refs() -> tuple[dict, dict]:
     loo = json.loads((SEQ / "baselines.json").read_text())
-    cc = json.loads((SEQ / "three_arm.json").read_text())
+    cc = json.loads(C_REF.read_text())
     LOO = {s: _mean_last(loo[s]["static_ranker"]) for s in BENCH}
     C = {s: _mean_last(cc[s]["waddington_c"]) for s in BENCH}
     return LOO, C
@@ -163,6 +176,9 @@ def _fmt_choice(name, ch):
 
 
 if __name__ == "__main__":
+    import sys
+    if "--claude" not in sys.argv:
+        use_gpt()
     r = run()
     print(f"refs:  LOO mean={r['refs']['LOO_mean']:.3f}   current C mean={r['refs']['C_current_mean']:.3f}\n")
     print("per-screen weight means (hit@R5) at each global w_llm:")

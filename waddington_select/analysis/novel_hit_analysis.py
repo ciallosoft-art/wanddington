@@ -31,8 +31,13 @@ from ..oracle import BATCH_SIZES, BENCHMARK_DATASETS
 from .prior_probes import _load, LGBM, ALLF
 
 REPO = Path(__file__).resolve().parents[2]
-WADD_RUN = REPO / "workspace" / "results" / "router" / "clean_headline_w0.2_5seed.json"
-OUT = REPO / "workspace" / "results" / "novel_hit_analysis.json"
+# The reported run (analysis/sources.py); `--claude` reproduces the predecessor's 5-seed analysis into the
+# original file (workspace/results/novel_hit_analysis.json).
+from .sources import REPORTED_RUN, REPORTED_RUN_DIR  # noqa: E402
+WADD_RUN = REPORTED_RUN
+OUT = REPORTED_RUN_DIR / "novel_hit_analysis.json"
+CLAUDE_WADD_RUN = REPO / "workspace" / "results" / "router" / "clean_headline_w0.2_5seed.json"
+CLAUDE_OUT = REPO / "workspace" / "results" / "novel_hit_analysis.json"
 
 
 def _hitsets(df):
@@ -116,6 +121,9 @@ def run() -> dict:
 
 
 if __name__ == "__main__":
+    import sys
+    if "--claude" in sys.argv:
+        WADD_RUN, OUT = CLAUDE_WADD_RUN, CLAUDE_OUT
     r = run()
     t = r["totals"]
     print(f"hits: {t['recurrent']} recurrent, {t['novel']} novel "

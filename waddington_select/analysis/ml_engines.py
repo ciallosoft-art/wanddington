@@ -98,8 +98,8 @@ def label_free_baselines() -> dict[str, dict[str, float]]:
 
 def _c_reference() -> dict[str, float]:
     """The reported full system (GPT C-arm, 20 replicates) per screen, for context only."""
-    main = json.loads((REPO / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep"
-                       / "main_table_20rep.json").read_text())
+    from .sources import REPORTED_RUN
+    main = json.loads(REPORTED_RUN.read_text())
     return {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in main[ds]["waddington_c"]])) for ds in BENCH}
 
 
@@ -298,7 +298,7 @@ def control(models: list[str] | None = None, seeds: tuple[int, ...] = (0, 1, 2))
 
 
 CARM_DIR = RES / "carm"
-CARM_REF = REPO / "workspace" / "results" / "gpt" / "replogle_transcriptomics_v2_20rep" / "main_table_20rep.json"
+from .sources import REPORTED_RUN as CARM_REF  # noqa: E402
 
 
 def carm_summary() -> dict:
