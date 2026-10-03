@@ -29,7 +29,7 @@ import lightgbm as lgb
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances
 
-from .base import BaseArm
+from .base import BaseArm, label_free_order
 from .llm_reasoning_arm import FEATURE_COLS, LGBM_PARAMS
 from .waddington_c_arm import _get_feature_config
 from ..features import load_training_frame
@@ -59,6 +59,9 @@ class GeneDiscoArm(BaseArm):
         df = load_training_frame(training_csv, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
         sub = df[df["dataset"] == dataset_name].reset_index(drop=True)
+        # Every rule here can tie (a surrogate fitted on a few hundred genes outputs few distinct
+        # probabilities), so the pool's row order decides ties; make it label-free (see label_free_order).
+        sub = sub.iloc[label_free_order(sub["gene"], seed)].reset_index(drop=True)
         self._genes: list[str] = sub["gene"].tolist()
         # with_pair_spread is a no-op on the single-gene tables; on the combinatorial one it adds the
         # |x(a)-x(b)| columns, so GeneDisco's acquisition rules see exactly the same representation as

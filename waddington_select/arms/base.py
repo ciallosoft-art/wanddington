@@ -4,6 +4,20 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+import numpy as np
+
+
+def label_free_order(genes, seed: int) -> np.ndarray:
+    """A row order for a candidate pool that carries no label information.
+
+    The training table stores some screens' hits first (Scharenberg22, K562-Essential, K562-GWPS), so an
+    arm that breaks score ties by row order reads labels (analysis/order_audit.py). Sorting by gene name
+    discards the stored order; a permutation drawn from the seed alone then breaks ties at random,
+    differently in each replicate. The result is identical however the table happens to be stored.
+    """
+    by_name = np.argsort(np.asarray([str(g) for g in genes]), kind="stable")
+    return by_name[np.random.default_rng([int(seed), 0x5EED]).permutation(len(by_name))]
+
 
 class BaseArm(ABC):
     """

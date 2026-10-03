@@ -1,7 +1,5 @@
 """order_audit.py — does a method's result depend on the order of the target screen's candidate rows?
 
-Order audit: does a method's result depend on the order of the target screen's candidate rows?
-
 The training CSV lists some screens' hits first (Scharenberg22, K562-Essential, K562-GWPS; IL2 partly). A
 method that breaks score ties by row order then reads labels. Each (arm, screen, replicate) is run twice
 with the same seed: rows as stored, and the target screen's rows sorted alphabetically (label-free). The

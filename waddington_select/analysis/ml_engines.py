@@ -189,7 +189,9 @@ def summarize() -> dict:
     return res
 
 
-PORTED = REPO / "workspace" / "results" / "sequential" / "genedisco_ported.json"
+# The paper's GeneDisco port, re-run after the row-order fix (the original sequential/genedisco_ported.json
+# broke ties by the stored row order, which lists some screens' hits first; see analysis/order_audit.py)
+PORTED = RES / "port" / "genedisco_port_seeded.json"
 
 
 SIX_SHARED = ["IFNG", "IL2", "Sanchez21", "Carnevale22", "Scharenberg22", "Steinhart"]  # Table external

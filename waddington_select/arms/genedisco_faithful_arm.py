@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .base import BaseArm
+from .base import BaseArm, label_free_order
 from .online_adaptive_arm import FEATURE_COLS
 from .waddington_c_arm import _drop_anchor_default, _get_feature_config
 from .. import bnn
@@ -108,6 +108,10 @@ class GeneDiscoFaithfulArm(BaseArm):
         self._seed = seed
         self._rng = np.random.default_rng(seed)
         genes, _, X = our_features(dataset_name)
+        # GeneDisco's rules tie often (a forest fitted to 0/1 labels has sample spreads of only 0 or 1),
+        # so the pool's row order decides ties; make it label-free (see label_free_order)
+        order = label_free_order(genes, seed)
+        genes, X = [genes[i] for i in order], X[order]
         self._genes = genes
         self._idx = {g: i for i, g in enumerate(genes)}
         if self.features == "achilles":

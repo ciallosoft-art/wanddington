@@ -499,5 +499,49 @@ class BeyondGeneDiscoTests(unittest.TestCase):
         self.assertEqual(len(set(a)), 32)
 
 
+class RowOrderTests(unittest.TestCase):
+    """GeneDisco-style arms must not depend on how the target screen's rows are stored: the training table
+    lists some screens' hits first, and tie-breaking by row order would read them."""
+
+    def setUp(self):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("WADDINGTON_")}
+        self.enterContext(patch.dict(os.environ, env, clear=True))
+
+    def test_selections_identical_under_a_label_free_reordering(self):
+        import pandas as pd
+        import waddington_select.features as F
+        from waddington_select.arms import genedisco_arm, genedisco_faithful_arm
+        from waddington_select.oracle import DatasetOracle
+        orig = F.load_training_frame
+
+        def alpha(csv_path, ds):
+            df = orig(csv_path, ds)
+            tgt = df["dataset"] == ds
+            key = df.loc[tgt, "gene"].astype(str).str.strip().str.upper().to_numpy()
+            return pd.concat([df[~tgt], df[tgt].iloc[np.argsort(key, kind="stable")]], ignore_index=True)
+
+        def run(make, ds, B):
+            arm, oracle, picks = make(), DatasetOracle(ds), []
+            for r in range(3):
+                b = arm.select(r, {})
+                arm.update(r, oracle.reveal(b))
+                picks.append(b)
+            return picks
+
+        cases = [("Replogle_K562_essential", 32, lambda ds, B: genedisco_arm.GeneDiscoArm(ds, B, "marginsample", seed=1)),
+                 ("Scharenberg22", 32, lambda ds, B: genedisco_arm.GeneDiscoArm(ds, B, "topuncertain", seed=1)),
+                 ("Scharenberg22", 32, lambda ds, B: genedisco_faithful_arm.GeneDiscoFaithfulArm(
+                     ds, B, name="gdfb_ours_rf_marginsample", seed=1)),
+                 ("Replogle_K562_essential", 32, lambda ds, B: genedisco_faithful_arm.GeneDiscoFaithfulArm(
+                     ds, B, name="gdf_ours_rf_marginsample", seed=1))]
+        for ds, B, make in cases:
+            with self.subTest(screen=ds, arm=make(ds, B).name):
+                a = run(lambda: make(ds, B), ds, B)
+                with patch.object(genedisco_arm, "load_training_frame", alpha), \
+                     patch.object(genedisco_faithful_arm, "load_training_frame", alpha):
+                    b = run(lambda: make(ds, B), ds, B)
+                self.assertEqual(a, b)
+
+
 if __name__ == "__main__":
     unittest.main()
