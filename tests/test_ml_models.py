@@ -213,6 +213,32 @@ class CArmEngineTests(unittest.TestCase):
         self.assertEqual(c._online._model_name, "lightgbm")
         self.assertEqual(c._online.all_scores(), MLEngineArm("Scharenberg22", 32, model="lightgbm").all_scores())
 
+    def test_fusion_weight_zero_is_the_ml_engine(self):
+        """docs/fusion_weight_plan.md: at w_llm = 0 the C-arm must select exactly what its own online ML
+        engine selects, whatever the LLM names, so the grid's w = 0 point needs no GPT run."""
+        from waddington_select.arms.ml_engine_arm import MLEngineArm
+        from waddington_select.arms.waddington_c_arm import WaddingtonCArm
+        from waddington_select.oracle import DatasetOracle
+        ds, B = "Scharenberg22", 32
+        with patch.dict(os.environ, {"WADDINGTON_FORCE_WLLM": "0", "WADDINGTON_LLM_NAMED_ONLY": "1"}):
+            c = WaddingtonCArm(ds, B)
+        rng = np.random.default_rng(0)
+
+        def fake_llm(round_idx, revealed):  # names arbitrary untested genes, as an LLM might
+            pool = [g for g in c._online._genes if g not in c._selected]
+            c._llm._llm_named = list(rng.choice(pool, size=B, replace=False))
+            return c._llm._llm_named
+
+        c._llm.select = fake_llm
+        ml = MLEngineArm(ds, B, model="lightgbm")
+        oracle = DatasetOracle(ds)
+        for r in range(5):
+            a, b = c.select(r, {}), ml.select(r, {})
+            self.assertEqual(sorted(a), sorted(b))
+            rev = oracle.reveal(a)
+            c.update(r, rev)
+            ml.update(r, rev)
+
     def test_swapped_engine_arms(self):
         from waddington_select import run_sequential as R
         self.assertIn("waddington_c__mlp", R._PAPER_ARMS)
