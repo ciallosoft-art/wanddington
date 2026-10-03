@@ -1,0 +1,74 @@
+{
+  "n_norman_pairs": 130,
+  "n_norman_hits": 14,
+  "n_horlbeck_pairs": 100576,
+  "n_horlbeck_hits": 9959,
+  "features": [
+    "pair_coessential",
+    "pair_kegg_shared",
+    "pair_kegg_jaccard",
+    "pair_reactome_shared",
+    "pair_reactome_jaccard",
+    "pair_string_edge",
+    "pair_archs4_coexpr",
+    "pair_complex_shared"
+  ],
+  "rows": {
+    "norman_classifier": {
+      "trained_on": "130 Norman pairs, 14 hits",
+      "auc": 0.4745456382202487,
+      "hits_top160": 17,
+      "hits_top640": 58
+    },
+    "norman_regressor": {
+      "trained_on": "130 Norman pairs, |GI|",
+      "auc": 0.4937549015133228,
+      "hits_top160": 13,
+      "hits_top640": 70
+    },
+    "static_loo_prior": {
+      "trained_on": "nine single-gene screens",
+      "auc": 0.49896161990525967,
+      "hits_top160": 20,
+      "hits_top640": 58
+    },
+    "equal_weight_rank_sum": {
+      "trained_on": "nothing",
+      "auc": 0.5328005498797872,
+      "hits_top160": 65,
+      "hits_top640": 196
+    },
+    "random": {
+      "trained_on": "-",
+      "auc": 0.5,
+      "hits_top160": 15.84314349347757,
+      "hits_top640": 63.37257397391028
+    }
+  },
+  "sensitivity": {
+    "norman_lightgbm_carm_params": {
+      "trained_on": "130 Norman pairs",
+      "auc": 0.4844354603579478,
+      "hits_top160": 21,
+      "hits_top640": 69
+    },
+    "norman_logreg_balanced": {
+      "trained_on": "130 Norman pairs",
+      "auc": 0.48236576368088363,
+      "hits_top160": 55,
+      "hits_top640": 115
+    }
+  },
+  "diagnostic_loo_all_features": {
+    "auc": 0.4958591184825373,
+    "hits_top640": 50,
+    "random_top640": 63.37257397391028,
+    "max_abs_r": 0.036366087489594384,
+    "n_train_rows": 122830,
+    "solo_effect": {
+      "n_negative_control_pairs": 448,
+      "auc": 0.5368637827718828,
+      "hits_top640": 61
+    }
+  }
+}

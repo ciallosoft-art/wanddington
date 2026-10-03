@@ -7,8 +7,8 @@ Why this exists
 The combinatorial tier has exactly one dataset in the whole benchmark -- Horlbeck -- and every claim
 we make about it rests on that single screen. It also has a structural gap: the cross-experiment
 prior is trained on nine SINGLE-gene screens, which contain no pair interactions at all, so the
-static prior sits at chance (AUC 0.4959) no matter how the features are engineered. A second
-combinatorial screen is the only thing that can close either gap.
+leave-one-phenotype-out prior sits at chance (AUC 0.4959; the static_ranker arm 0.4990) no matter how the
+features are engineered. A second combinatorial screen is the only thing that can close either gap.
 
 Norman et al.'s Perturb-seq is not a hit list; it is an expression matrix. Turning it into the same
 shape as Horlbeck requires defining a phenotype and a hit rule, and those choices are OURS, not
