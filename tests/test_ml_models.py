@@ -510,7 +510,7 @@ class RowOrderTests(unittest.TestCase):
     def test_selections_identical_under_a_label_free_reordering(self):
         import pandas as pd
         import waddington_select.features as F
-        from waddington_select.arms import genedisco_arm, genedisco_faithful_arm
+        from waddington_select.arms import genedisco_arm, genedisco_faithful_arm, ml_engine_arm, online_adaptive_arm
         from waddington_select.oracle import DatasetOracle
         orig = F.load_training_frame
 
@@ -533,12 +533,14 @@ class RowOrderTests(unittest.TestCase):
                  ("Scharenberg22", 32, lambda ds, B: genedisco_faithful_arm.GeneDiscoFaithfulArm(
                      ds, B, name="gdfb_ours_rf_marginsample", seed=1)),
                  ("Replogle_K562_essential", 32, lambda ds, B: genedisco_faithful_arm.GeneDiscoFaithfulArm(
-                     ds, B, name="gdf_ours_rf_marginsample", seed=1))]
+                     ds, B, name="gdf_ours_rf_marginsample", seed=1)),
+                 ("Scharenberg22", 32, lambda ds, B: ml_engine_arm.BNNAcquisitionArm(ds, B, "badge", seed=1))]
         for ds, B, make in cases:
             with self.subTest(screen=ds, arm=make(ds, B).name):
                 a = run(lambda: make(ds, B), ds, B)
                 with patch.object(genedisco_arm, "load_training_frame", alpha), \
-                     patch.object(genedisco_faithful_arm, "load_training_frame", alpha):
+                     patch.object(genedisco_faithful_arm, "load_training_frame", alpha), \
+                     patch.object(online_adaptive_arm, "load_training_frame", alpha):
                     b = run(lambda: make(ds, B), ds, B)
                 self.assertEqual(a, b)
 

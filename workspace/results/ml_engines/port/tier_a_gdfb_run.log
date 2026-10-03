@@ -1,0 +1,127 @@
+== equal-information GeneDisco (Achilles, BNN, coreset) on the full-pool tier, 5 seeds
+[manifest] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.manifest.json
+
+============================================================
+Dataset: IFNG  (batch=128, rounds=5)
+============================================================
+  Genes: 18418, Hits: 920
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.006  R2=0.027  R3=0.049  R4=0.074  R5=0.098  AUC_norm=0.122  hits=90/920
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: IL2  (batch=128, rounds=5)
+============================================================
+  Genes: 18939, Hits: 654
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.005  R2=0.050  R3=0.089  R4=0.136  R5=0.174  AUC_norm=0.155  hits=114/654
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Sanchez21  (batch=128, rounds=5)
+============================================================
+  Genes: 18469, Hits: 924
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.004  R2=0.019  R3=0.032  R4=0.046  R5=0.058  AUC_norm=0.077  hits=54/924
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Sanchez21_down  (batch=128, rounds=5)
+============================================================
+  Genes: 18469, Hits: 924
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.007  R2=0.021  R3=0.041  R4=0.056  R5=0.071  AUC_norm=0.094  hits=66/924
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Carnevale22  (batch=128, rounds=5)
+============================================================
+  Genes: 18861, Hits: 943
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.007  R2=0.023  R3=0.034  R4=0.047  R5=0.061  AUC_norm=0.084  hits=57/943
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Scharenberg22  (batch=32, rounds=5)
+============================================================
+  Genes: 1061, Hits: 53
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.045  R2=0.143  R3=0.238  R4=0.336  R5=0.449  AUC_norm=0.263  hits=24/53
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Steinhart  (batch=128, rounds=5)
+============================================================
+  Genes: 18797, Hits: 149
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.007  R2=0.015  R3=0.021  R4=0.029  R5=0.042  AUC_norm=0.024  hits=6/149
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Replogle_K562_essential  (batch=32, rounds=5)
+============================================================
+  Genes: 623, Hits: 63
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.041  R2=0.143  R3=0.200  R4=0.273  R5=0.352  AUC_norm=0.224  hits=22/63
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+Dataset: Replogle_K562_gwps  (batch=128, rounds=5)
+============================================================
+  Genes: 9193, Hits: 924
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 1/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 2/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 3/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 4/5
+    [checkpoint] gdfb_achilles_bnn_coreset repeat 5/5
+  gdfb_achilles_bnn_coreset       R1=0.015  R2=0.071  R3=0.121  R4=0.175  R5=0.228  AUC_norm=0.294  hits=211/924
+  [dataset complete] workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+
+============================================================
+SUMMARY  (hit_ratio @ final round, avg across repeated runs)
+============================================================
+Dataset                       gdfb_achilles_bnn_coreset
+IFNG                                           0.098
+IL2                                            0.174
+Sanchez21                                      0.058
+Sanchez21_down                                 0.071
+Carnevale22                                    0.061
+Scharenberg22                                  0.449
+Steinhart                                      0.042
+Replogle_K562_essential                        0.352
+Replogle_K562_gwps                             0.228
+
+Results saved to workspace/results/ml_engines/port/tier_a_gdfb_coreset_seeded.json
+done -> workspace/results/ml_engines/port

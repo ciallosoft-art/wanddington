@@ -24,6 +24,9 @@
 #   experiments/15_ml_engines.sh gdf_binary  # faithful GeneDisco with equal information: 0/1 feedback (item 3c)
 #   experiments/15_ml_engines.sh gd_port   # the paper's GeneDisco port (GeneDiscoArm), re-run after the row-order fix
 #   experiments/15_ml_engines.sh gd_port_tier_a  # the same on BDA's full-pool tier (Table tiers)
+#   experiments/15_ml_engines.sh bnn_setrules  # BADGE / k-means-embedding on the BNN, re-run with a label-free order
+#   experiments/15_ml_engines.sh gdfb_tier_a  # the equal-information GeneDisco rule chosen on the headline tier,
+#                                             # applied unchanged to the full-pool tier
 #   (gdf_rerun is historical: it patched the first gdf run, which the row-order fix superseded entirely)
 #   experiments/15_ml_engines.sh gdf_rerun # after the float32 softuncertain fix: re-run the BNN softuncertain arms on
 #                                          # every screen and the arms the crash never reached (-> *.rerun.json)
@@ -55,8 +58,10 @@ case "$GROUP" in
   gdf_rerun) DET="";                         SEEDED="" ;;  # screen-parallel below
   gdf_binary) DET="";                        SEEDED="" ;;  # screen-parallel below
   gd_port|gd_port_tier_a) DET="";            SEEDED="" ;;  # explicit arm list below
+  gdfb_tier_a) DET="";                       SEEDED="" ;;  # explicit arm list below
+  bnn_setrules) DET="";                      SEEDED="" ;;  # explicit arm list below
   beyond)  DET="lgbm_rwr";                   SEEDED="mf svgp"; EXTRA_SEEDED="ml_svgpacq_ucb1" ;;
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a]" >&2; exit 2 ;;
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a|gdfb_tier_a|bnn_setrules]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -92,6 +97,23 @@ if [ "$GROUP" = gdf ]; then
       "$PY" -m waddington_select.run_sequential --datasets {} \
       --arms $ARMS --replicates 5 --seed-mode local --resume --out "$OUT/gdf_seeded_{}.json"
   echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = bnn_setrules ]; then
+  # The BNN set rules took untested genes in stored row order; they now take them in a label-free order.
+  # Re-run into bnn_seeded.rerun.json, which the analysis loads after bnn_seeded.json.
+  echo "== bnn set rules, 5 seeds"
+  run "ml_bnnacq_badge ml_bnnacq_kmeans_embedding" 5 "$OUT/bnn_seeded.rerun.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = gdfb_tier_a ]; then
+  # Table tiers needs the same GeneDisco baseline on the full-pool tier. The rule is the best equal-
+  # information rule on the headline tier (gdfb_achilles_bnn_coreset), not re-selected on this tier.
+  mkdir -p "$OUT/port"
+  echo "== equal-information GeneDisco (Achilles, BNN, coreset) on the full-pool tier, 5 seeds"
+  WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv" \
+  WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv" \
+    run "gdfb_achilles_bnn_coreset" 5 "$OUT/port/tier_a_gdfb_coreset_seeded.json"
+  echo "done -> $OUT/port"; exit 0
 fi
 if [ "$GROUP" = gd_port ] || [ "$GROUP" = gd_port_tier_a ]; then
   # The port used in the paper's external comparison (GeneDisco's rules on our LightGBM, binary labels),

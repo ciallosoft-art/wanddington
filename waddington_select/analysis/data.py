@@ -15,6 +15,8 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULTS = REPO_ROOT / "workspace" / "results" / "sequential"
+# the external GeneDisco reference (docs/ml_engines_plan.md, P2-6): equal information, best single rule
+GENEDISCO_ARM = "gdfb_achilles_bnn_coreset"
 # The final leakage-free 20-seed run of all six main-table arms (used for the principal figures 1-3);
 # the legacy three_arm.json waddington_c stays the reference for the component-ablation figure.
 FINAL_WADD = REPO_ROOT / "workspace" / "results" / "gpt" / "gpt_5_6_luna_none_20rep" / "main_table_20rep.json"
@@ -132,8 +134,11 @@ def load_external() -> pd.DataFrame:
     """The two external prior methods on the full nine-screen benchmark, as tidy rows (round 5, seed 0)
     so they append to the method frame for the comparison figures (Fig.~2 bars, Fig.~3 heatmap):
       * ``bda``       — BioDiscoveryAgent's no-tools agent on GPT-5.6 Luna, our-oracle hit@R5 per screen.
-      * ``genedisco`` — GeneDisco's strongest single acquisition rule (marginsample), ported onto our
-                        features; per-screen final-round hit@R5 (mean over its seeds).
+      * ``genedisco`` — GeneDisco run with its own models and rules but our system's 0/1 feedback (equal
+                        information), its strongest single rule (Achilles features, Bayesian MLP,
+                        core-set); per-screen hit@R5 per round, mean over its five seeds. The earlier
+                        port (sequential/genedisco_ported.json) broke ties by a row order that lists some
+                        screens' hits first and is no longer used (analysis/order_audit.py).
     Both carry the caveats spelled out in the external-comparison tables; they are shown in neutral grey.
     """
     rows = []
@@ -145,11 +150,14 @@ def load_external() -> pd.DataFrame:
                 rows.append({"dataset": ds, "arm": "bda", "seed": 0, "round": i + 1,
                              "hit_ratio": float(hr), "cumulative_hits": float("nan"),
                              "total_hits": v["total_hits"], "auc": float("nan")})
-    gd_p = RESULTS / "genedisco_ported.json"
-    if gd_p.exists():
+    for gd_p in sorted((REPO_ROOT / "workspace" / "results" / "ml_engines").glob("gdfb_seeded_*.json")):
+        if gd_p.name.endswith(".manifest.json"):
+            continue
         gd = json.loads(gd_p.read_text())
         for ds, arms in gd.items():
-            seeds = arms.get("genedisco_marginsample")
+            if not isinstance(arms, dict):
+                continue
+            seeds = arms.get(GENEDISCO_ARM)
             if seeds:
                 nr = len(seeds[0]["hit_ratio_per_round"])
                 for i in range(nr):

@@ -13,7 +13,7 @@ model differs (`waddington_select.ml_models`). Two variants per engine:
 
 from __future__ import annotations
 
-from .base import BaseArm
+from .base import BaseArm, label_free_order
 from .online_adaptive_arm import OnlineAdaptiveArm
 from .waddington_c_arm import _drop_anchor_default, _get_feature_config
 
@@ -178,6 +178,8 @@ class BNNAcquisitionArm(MLEngineArm):
         else:
             rng = np.random.default_rng([self._acq_seed, len(self._revealed_records)])
             untested = np.array([i for i, g in enumerate(self._genes) if g not in self._selected])
+            # positions feed k-means / D^2 sampling, so take them in a label-free order (base.label_free_order)
+            untested = untested[label_free_order([self._genes[i] for i in untested], self._acq_seed)]
             k = min(self.batch_size, len(untested))
             if a == "kmeans_embedding":
                 picked = bnn.kmeans_closest(self._model.embedding(Xt[untested]), k,
