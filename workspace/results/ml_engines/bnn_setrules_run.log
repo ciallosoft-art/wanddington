@@ -1,0 +1,181 @@
+== bnn set rules, 5 seeds
+[manifest] workspace/results/ml_engines/bnn_seeded.rerun.manifest.json
+
+============================================================
+Dataset: IFNG  (batch=128, rounds=5)
+============================================================
+  Genes: 17785, Hits: 802
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.012  R2=0.025  R3=0.035  R4=0.046  R5=0.058  AUC_norm=0.074  hits=47/802
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.018  R2=0.029  R3=0.043  R4=0.060  R5=0.074  AUC_norm=0.093  hits=59/802
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: IL2  (batch=128, rounds=5)
+============================================================
+  Genes: 18273, Hits: 481
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.014  R2=0.027  R3=0.041  R4=0.055  R5=0.065  AUC_norm=0.056  hits=31/481
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.028  R2=0.049  R3=0.070  R4=0.092  R5=0.114  AUC_norm=0.098  hits=55/481
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Sanchez21  (batch=128, rounds=5)
+============================================================
+  Genes: 17807, Hits: 859
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.007  R2=0.013  R3=0.024  R4=0.033  R5=0.044  AUC_norm=0.055  hits=38/859
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.011  R2=0.017  R3=0.025  R4=0.035  R5=0.044  AUC_norm=0.059  hits=38/859
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Sanchez21_down  (batch=128, rounds=5)
+============================================================
+  Genes: 17807, Hits: 871
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.010  R2=0.022  R3=0.033  R4=0.044  R5=0.058  AUC_norm=0.076  hits=50/871
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.011  R2=0.025  R3=0.038  R4=0.050  R5=0.062  AUC_norm=0.084  hits=54/871
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Carnevale22  (batch=128, rounds=5)
+============================================================
+  Genes: 18224, Hits: 868
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.008  R2=0.018  R3=0.024  R4=0.035  R5=0.046  AUC_norm=0.060  hits=40/868
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.011  R2=0.020  R3=0.030  R4=0.042  R5=0.052  AUC_norm=0.070  hits=45/868
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Scharenberg22  (batch=32, rounds=5)
+============================================================
+  Genes: 1029, Hits: 49
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.057  R2=0.086  R3=0.118  R4=0.163  R5=0.225  AUC_norm=0.140  hits=11/49
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.041  R2=0.094  R3=0.155  R4=0.188  R5=0.253  AUC_norm=0.157  hits=12/49
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Steinhart  (batch=128, rounds=5)
+============================================================
+  Genes: 18144, Hits: 145
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.012  R2=0.019  R3=0.026  R4=0.041  R5=0.055  AUC_norm=0.032  hits=8/145
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.011  R2=0.022  R3=0.032  R4=0.043  R5=0.052  AUC_norm=0.033  hits=8/145
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Replogle_K562_essential  (batch=32, rounds=5)
+============================================================
+  Genes: 623, Hits: 63
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.051  R2=0.092  R3=0.162  R4=0.206  R5=0.248  AUC_norm=0.168  hits=16/63
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.083  R2=0.181  R3=0.260  R4=0.352  R5=0.422  AUC_norm=0.288  hits=27/63
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+Dataset: Replogle_K562_gwps  (batch=128, rounds=5)
+============================================================
+  Genes: 9193, Hits: 924
+    [checkpoint] ml_bnnacq_badge repeat 1/5
+    [checkpoint] ml_bnnacq_badge repeat 2/5
+    [checkpoint] ml_bnnacq_badge repeat 3/5
+    [checkpoint] ml_bnnacq_badge repeat 4/5
+    [checkpoint] ml_bnnacq_badge repeat 5/5
+  ml_bnnacq_badge                 R1=0.020  R2=0.043  R3=0.062  R4=0.081  R5=0.101  AUC_norm=0.147  hits=93/924
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 1/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 2/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 3/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 4/5
+    [checkpoint] ml_bnnacq_kmeans_embedding repeat 5/5
+  ml_bnnacq_kmeans_embedding      R1=0.033  R2=0.070  R3=0.105  R4=0.139  R5=0.171  AUC_norm=0.249  hits=158/924
+  [dataset complete] workspace/results/ml_engines/bnn_seeded.rerun.json
+
+============================================================
+SUMMARY  (hit_ratio @ final round, avg across repeated runs)
+============================================================
+Dataset                              ml_bnnacq_badge  ml_bnnacq_kmeans_embedding
+IFNG                                           0.058                   0.074
+IL2                                            0.065                   0.114
+Sanchez21                                      0.044                   0.044
+Sanchez21_down                                 0.058                   0.062
+Carnevale22                                    0.047                   0.052
+Scharenberg22                                  0.225                   0.253
+Steinhart                                      0.055                   0.052
+Replogle_K562_essential                        0.248                   0.422
+Replogle_K562_gwps                             0.101                   0.171
+
+Results saved to workspace/results/ml_engines/bnn_seeded.rerun.json
+done -> workspace/results/ml_engines
