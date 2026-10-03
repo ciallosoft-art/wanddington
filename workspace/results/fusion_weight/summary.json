@@ -1,0 +1,294 @@
+{
+  "replicates": {
+    "0.0": 2,
+    "0.2": 20,
+    "0.1": 5
+  },
+  "missing": [
+    "0.3",
+    "0.4",
+    "0.5"
+  ],
+  "grid": [
+    0.0,
+    0.1,
+    0.2
+  ],
+  "curve": {
+    "0.0": {
+      "mean": 0.24502222222222222,
+      "per_screen": {
+        "IFNG": 0.1596,
+        "IL2": 0.3056,
+        "Sanchez21": 0.0838,
+        "Sanchez21_down": 0.0964,
+        "Carnevale22": 0.0622,
+        "Scharenberg22": 0.4694,
+        "Steinhart": 0.0759,
+        "Replogle_K562_essential": 0.619,
+        "Replogle_K562_gwps": 0.3333
+      },
+      "vs_reference": {
+        "delta": -0.015327222222222233,
+        "ci95": [
+          -0.026204222222222254,
+          -0.004073430555555571
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      }
+    },
+    "0.1": {
+      "mean": 0.25581111111111116,
+      "per_screen": {
+        "IFNG": 0.17834,
+        "IL2": 0.32764000000000004,
+        "Sanchez21": 0.09708000000000001,
+        "Sanchez21_down": 0.09572,
+        "Carnevale22": 0.06476,
+        "Scharenberg22": 0.49388000000000004,
+        "Steinhart": 0.09518000000000001,
+        "Replogle_K562_essential": 0.6031799999999998,
+        "Replogle_K562_gwps": 0.34652
+      },
+      "vs_reference": {
+        "delta": -0.004538333333333343,
+        "ci95": [
+          -0.009757319444444454,
+          0.000594222222222203
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      }
+    },
+    "0.2": {
+      "mean": 0.26034944444444447,
+      "per_screen": {
+        "IFNG": 0.184155,
+        "IL2": 0.336395,
+        "Sanchez21": 0.088235,
+        "Sanchez21_down": 0.09361000000000001,
+        "Carnevale22": 0.06515000000000001,
+        "Scharenberg22": 0.5051,
+        "Steinhart": 0.11548499999999999,
+        "Replogle_K562_essential": 0.60713,
+        "Replogle_K562_gwps": 0.34788500000000006
+      },
+      "vs_reference": null
+    }
+  },
+  "loo_selection": {
+    "chosen_w": {
+      "IFNG": 0.2,
+      "IL2": 0.2,
+      "Sanchez21": 0.2,
+      "Sanchez21_down": 0.2,
+      "Carnevale22": 0.2,
+      "Scharenberg22": 0.2,
+      "Steinhart": 0.2,
+      "Replogle_K562_essential": 0.2,
+      "Replogle_K562_gwps": 0.2
+    },
+    "per_screen": {
+      "IFNG": 0.184155,
+      "IL2": 0.336395,
+      "Sanchez21": 0.088235,
+      "Sanchez21_down": 0.09361000000000001,
+      "Carnevale22": 0.06515000000000001,
+      "Scharenberg22": 0.5051,
+      "Steinhart": 0.11548499999999999,
+      "Replogle_K562_essential": 0.60713,
+      "Replogle_K562_gwps": 0.34788500000000006
+    },
+    "mean": 0.26034944444444447,
+    "vs_reference": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "wins": 0,
+      "ties": 9,
+      "losses": 0
+    }
+  },
+  "per_screen_oracle": {
+    "best_w": {
+      "IFNG": 0.2,
+      "IL2": 0.2,
+      "Sanchez21": 0.1,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.2,
+      "Scharenberg22": 0.2,
+      "Steinhart": 0.2,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": 0.2
+    },
+    "per_screen": {
+      "IFNG": 0.184155,
+      "IL2": 0.336395,
+      "Sanchez21": 0.09708000000000001,
+      "Sanchez21_down": 0.0964,
+      "Carnevale22": 0.06515000000000001,
+      "Scharenberg22": 0.5051,
+      "Steinhart": 0.11548499999999999,
+      "Replogle_K562_essential": 0.619,
+      "Replogle_K562_gwps": 0.34788500000000006
+    },
+    "mean": 0.26296111111111115,
+    "vs_reference": {
+      "delta": 0.0026116666666666727,
+      "ci95": [
+        0.0,
+        0.005585569444444464
+      ],
+      "wins": 3,
+      "ties": 6,
+      "losses": 0
+    }
+  },
+  "reference_first5": {
+    "grid": [
+      0.0,
+      0.1,
+      0.2
+    ],
+    "curve": {
+      "0.0": {
+        "mean": 0.24502222222222222,
+        "per_screen": {
+          "IFNG": 0.1596,
+          "IL2": 0.3056,
+          "Sanchez21": 0.0838,
+          "Sanchez21_down": 0.0964,
+          "Carnevale22": 0.0622,
+          "Scharenberg22": 0.4694,
+          "Steinhart": 0.0759,
+          "Replogle_K562_essential": 0.619,
+          "Replogle_K562_gwps": 0.3333
+        },
+        "vs_reference": {
+          "delta": -0.01726222222222222,
+          "ci95": [
+            -0.027871722222222194,
+            -0.006788055555555577
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
+      },
+      "0.1": {
+        "mean": 0.25581111111111116,
+        "per_screen": {
+          "IFNG": 0.17834,
+          "IL2": 0.32764000000000004,
+          "Sanchez21": 0.09708000000000001,
+          "Sanchez21_down": 0.09572,
+          "Carnevale22": 0.06476,
+          "Scharenberg22": 0.49388000000000004,
+          "Steinhart": 0.09518000000000001,
+          "Replogle_K562_essential": 0.6031799999999998,
+          "Replogle_K562_gwps": 0.34652
+        },
+        "vs_reference": {
+          "delta": -0.006473333333333333,
+          "ci95": [
+            -0.012742611111111104,
+            6.0666666666668875e-05
+          ],
+          "wins": 3,
+          "ties": 0,
+          "losses": 6
+        }
+      },
+      "0.2": {
+        "mean": 0.2622844444444444,
+        "per_screen": {
+          "IFNG": 0.18525999999999998,
+          "IL2": 0.33848,
+          "Sanchez21": 0.08592000000000001,
+          "Sanchez21_down": 0.0955,
+          "Carnevale22": 0.06408,
+          "Scharenberg22": 0.5061199999999999,
+          "Steinhart": 0.11857999999999999,
+          "Replogle_K562_essential": 0.61902,
+          "Replogle_K562_gwps": 0.3476
+        },
+        "vs_reference": null
+      }
+    },
+    "loo_selection": {
+      "chosen_w": {
+        "IFNG": 0.2,
+        "IL2": 0.2,
+        "Sanchez21": 0.2,
+        "Sanchez21_down": 0.2,
+        "Carnevale22": 0.2,
+        "Scharenberg22": 0.2,
+        "Steinhart": 0.2,
+        "Replogle_K562_essential": 0.2,
+        "Replogle_K562_gwps": 0.2
+      },
+      "per_screen": {
+        "IFNG": 0.18525999999999998,
+        "IL2": 0.33848,
+        "Sanchez21": 0.08592000000000001,
+        "Sanchez21_down": 0.0955,
+        "Carnevale22": 0.06408,
+        "Scharenberg22": 0.5061199999999999,
+        "Steinhart": 0.11857999999999999,
+        "Replogle_K562_essential": 0.61902,
+        "Replogle_K562_gwps": 0.3476
+      },
+      "mean": 0.2622844444444444,
+      "vs_reference": {
+        "delta": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "wins": 0,
+        "ties": 9,
+        "losses": 0
+      }
+    },
+    "per_screen_oracle": {
+      "best_w": {
+        "IFNG": 0.2,
+        "IL2": 0.2,
+        "Sanchez21": 0.1,
+        "Sanchez21_down": 0.0,
+        "Carnevale22": 0.1,
+        "Scharenberg22": 0.2,
+        "Steinhart": 0.2,
+        "Replogle_K562_essential": 0.2,
+        "Replogle_K562_gwps": 0.2
+      },
+      "per_screen": {
+        "IFNG": 0.18525999999999998,
+        "IL2": 0.33848,
+        "Sanchez21": 0.09708000000000001,
+        "Sanchez21_down": 0.0964,
+        "Carnevale22": 0.06476,
+        "Scharenberg22": 0.5061199999999999,
+        "Steinhart": 0.11857999999999999,
+        "Replogle_K562_essential": 0.61902,
+        "Replogle_K562_gwps": 0.3476
+      },
+      "mean": 0.26369999999999993,
+      "vs_reference": {
+        "delta": 0.0014155555555555558,
+        "ci95": [
+          0.0,
+          0.003920000000000001
+        ],
+        "wins": 3,
+        "ties": 6,
+        "losses": 0
+      }
+    }
+  }
+}
