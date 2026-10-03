@@ -23,6 +23,7 @@
 #   experiments/15_ml_engines.sh beyond    # lgbm_rwr | mf svgp + ml_svgpacq_ucb1 (phase 2, item 4)
 #   experiments/15_ml_engines.sh gdf_binary  # faithful GeneDisco with equal information: 0/1 feedback (item 3c)
 #   experiments/15_ml_engines.sh gd_port   # the paper's GeneDisco port (GeneDiscoArm), re-run after the row-order fix
+#   experiments/15_ml_engines.sh gd_port_tier_a  # the same on BDA's full-pool tier (Table tiers)
 #   (gdf_rerun is historical: it patched the first gdf run, which the row-order fix superseded entirely)
 #   experiments/15_ml_engines.sh gdf_rerun # after the float32 softuncertain fix: re-run the BNN softuncertain arms on
 #                                          # every screen and the arms the crash never reached (-> *.rerun.json)
@@ -53,9 +54,9 @@ case "$GROUP" in
   gdf)     DET="";                           SEEDED="" ;;  # screen-parallel below
   gdf_rerun) DET="";                         SEEDED="" ;;  # screen-parallel below
   gdf_binary) DET="";                        SEEDED="" ;;  # screen-parallel below
-  gd_port) DET="";                           SEEDED="" ;;  # explicit arm list below
+  gd_port|gd_port_tier_a) DET="";            SEEDED="" ;;  # explicit arm list below
   beyond)  DET="lgbm_rwr";                   SEEDED="mf svgp"; EXTRA_SEEDED="ml_svgpacq_ucb1" ;;
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port]" >&2; exit 2 ;;
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a]" >&2; exit 2 ;;
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
@@ -92,13 +93,22 @@ if [ "$GROUP" = gdf ]; then
       --arms $ARMS --replicates 5 --seed-mode local --resume --out "$OUT/gdf_seeded_{}.json"
   echo "done -> $OUT"; exit 0
 fi
-if [ "$GROUP" = gd_port ]; then
+if [ "$GROUP" = gd_port ] || [ "$GROUP" = gd_port_tier_a ]; then
   # The port used in the paper's external comparison (GeneDisco's rules on our LightGBM, binary labels),
   # re-run with the label-free pool order; kept in port/ so the engine summary does not mix it in.
+  # Run it alone: its LightGBM and the forests elsewhere use n_jobs=-1 (every core, whatever
+  # OMP_NUM_THREADS says), and next to other jobs the tiny fits stall in OpenMP spin-waits.
   mkdir -p "$OUT/port"
-  echo "== GeneDisco port, 5 rules, 5 seeds"
-  run "genedisco_topuncertain genedisco_softuncertain genedisco_marginsample genedisco_coreset genedisco_kmeans_data" \
-    5 "$OUT/port/genedisco_port_seeded.json"
+  GD_ARMS="genedisco_topuncertain genedisco_softuncertain genedisco_marginsample genedisco_coreset genedisco_kmeans_data"
+  if [ "$GROUP" = gd_port ]; then
+    echo "== GeneDisco port, 5 rules, 5 seeds"
+    run "$GD_ARMS" 5 "$OUT/port/genedisco_port_seeded.json"
+  else
+    echo "== GeneDisco port on the full-pool tier, 5 rules, 5 seeds"
+    WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv" \
+    WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv" \
+      run "$GD_ARMS" 5 "$OUT/port/tier_a_genedisco_seeded.json"
+  fi
   echo "done -> $OUT/port"; exit 0
 fi
 if [ "$GROUP" = gdf_binary ]; then

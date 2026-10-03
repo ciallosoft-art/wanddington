@@ -1,0 +1,1363 @@
+== GeneDisco port, 5 rules, 5 seeds
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[manifest] workspace/results/ml_engines/port/genedisco_port_seeded.manifest.json
+
+============================================================
+Dataset: IFNG  (batch=128, rounds=5)
+============================================================
+  Genes: 17785, Hits: 802
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.005  R2=0.018  R3=0.038  R4=0.063  R5=0.086  AUC_norm=0.088  hits=69/802
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.005  R2=0.011  R3=0.019  R4=0.026  R5=0.032  AUC_norm=0.040  hits=26/802
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.005  R2=0.018  R3=0.036  R4=0.058  R5=0.082  AUC_norm=0.084  hits=66/802
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.005  R2=0.032  R3=0.059  R4=0.080  R5=0.095  AUC_norm=0.113  hits=76/802
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.005  R2=0.023  R3=0.040  R4=0.052  R5=0.066  AUC_norm=0.078  hits=53/802
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: IL2  (batch=128, rounds=5)
+============================================================
+  Genes: 18273, Hits: 481
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.008  R2=0.037  R3=0.083  R4=0.142  R5=0.201  AUC_norm=0.131  hits=97/481
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.008  R2=0.015  R3=0.019  R4=0.025  R5=0.032  AUC_norm=0.028  hits=15/481
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.008  R2=0.036  R3=0.078  R4=0.140  R5=0.198  AUC_norm=0.128  hits=95/481
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.008  R2=0.044  R3=0.079  R4=0.112  R5=0.144  AUC_norm=0.107  hits=69/481
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.008  R2=0.035  R3=0.065  R4=0.084  R5=0.106  AUC_norm=0.083  hits=51/481
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Sanchez21  (batch=128, rounds=5)
+============================================================
+  Genes: 17807, Hits: 859
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.006  R2=0.013  R3=0.024  R4=0.035  R5=0.044  AUC_norm=0.055  hits=38/859
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.006  R2=0.015  R3=0.023  R4=0.030  R5=0.038  AUC_norm=0.051  hits=33/859
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.006  R2=0.013  R3=0.024  R4=0.035  R5=0.044  AUC_norm=0.055  hits=38/859
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.006  R2=0.014  R3=0.021  R4=0.026  R5=0.035  AUC_norm=0.046  hits=30/859
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.006  R2=0.017  R3=0.028  R4=0.037  R5=0.045  AUC_norm=0.059  hits=38/859
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Sanchez21_down  (batch=128, rounds=5)
+============================================================
+  Genes: 17807, Hits: 871
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.010  R2=0.021  R3=0.033  R4=0.048  R5=0.060  AUC_norm=0.078  hits=52/871
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.010  R2=0.015  R3=0.022  R4=0.029  R5=0.035  AUC_norm=0.050  hits=31/871
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.010  R2=0.021  R3=0.033  R4=0.047  R5=0.060  AUC_norm=0.078  hits=52/871
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.010  R2=0.028  R3=0.045  R4=0.060  R5=0.075  AUC_norm=0.098  hits=65/871
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.010  R2=0.023  R3=0.036  R4=0.047  R5=0.058  AUC_norm=0.079  hits=50/871
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Carnevale22  (batch=128, rounds=5)
+============================================================
+  Genes: 18224, Hits: 868
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.007  R2=0.014  R3=0.025  R4=0.031  R5=0.039  AUC_norm=0.052  hits=34/868
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.007  R2=0.015  R3=0.021  R4=0.027  R5=0.033  AUC_norm=0.046  hits=28/868
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.007  R2=0.014  R3=0.024  R4=0.030  R5=0.038  AUC_norm=0.051  hits=33/868
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.007  R2=0.018  R3=0.032  R4=0.043  R5=0.058  AUC_norm=0.071  hits=50/868
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.007  R2=0.018  R3=0.029  R4=0.040  R5=0.049  AUC_norm=0.065  hits=43/868
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Scharenberg22  (batch=32, rounds=5)
+============================================================
+  Genes: 1029, Hits: 49
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.008  R2=0.045  R3=0.147  R4=0.249  R5=0.335  AUC_norm=0.168  hits=16/49
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.008  R2=0.037  R3=0.082  R4=0.118  R5=0.151  AUC_norm=0.085  hits=7/49
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.008  R2=0.041  R3=0.147  R4=0.241  R5=0.331  AUC_norm=0.165  hits=16/49
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.008  R2=0.045  R3=0.098  R4=0.212  R5=0.331  AUC_norm=0.149  hits=16/49
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.008  R2=0.049  R3=0.102  R4=0.155  R5=0.200  AUC_norm=0.111  hits=10/49
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Steinhart  (batch=128, rounds=5)
+============================================================
+  Genes: 18144, Hits: 145
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.005  R2=0.008  R3=0.015  R4=0.028  R5=0.041  AUC_norm=0.020  hits=6/145
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.005  R2=0.008  R3=0.011  R4=0.019  R5=0.026  AUC_norm=0.014  hits=4/145
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.005  R2=0.008  R3=0.018  R4=0.030  R5=0.044  AUC_norm=0.022  hits=6/145
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.005  R2=0.015  R3=0.025  R4=0.035  R5=0.055  AUC_norm=0.028  hits=8/145
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.005  R2=0.015  R3=0.024  R4=0.040  R5=0.051  AUC_norm=0.028  hits=7/145
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Replogle_K562_essential  (batch=32, rounds=5)
+============================================================
+  Genes: 623, Hits: 63
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.041  R2=0.073  R3=0.162  R4=0.254  R5=0.359  AUC_norm=0.197  hits=23/63
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.041  R2=0.095  R3=0.130  R4=0.197  R5=0.254  AUC_norm=0.159  hits=16/63
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.041  R2=0.083  R3=0.159  R4=0.257  R5=0.346  AUC_norm=0.197  hits=22/63
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.041  R2=0.111  R3=0.143  R4=0.203  R5=0.305  AUC_norm=0.178  hits=19/63
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_kmeans_data           R1=0.041  R2=0.159  R3=0.254  R4=0.311  R5=0.349  AUC_norm=0.247  hits=22/63
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+Dataset: Replogle_K562_gwps  (batch=128, rounds=5)
+============================================================
+  Genes: 9193, Hits: 924
+    [checkpoint] genedisco_topuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_topuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_topuncertain          R1=0.015  R2=0.042  R3=0.101  R4=0.160  R5=0.220  AUC_norm=0.258  hits=203/924
+    [checkpoint] genedisco_softuncertain repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_softuncertain repeat 5/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  genedisco_softuncertain         R1=0.015  R2=0.030  R3=0.044  R4=0.055  R5=0.071  AUC_norm=0.103  hits=66/924
+    [checkpoint] genedisco_marginsample repeat 1/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 2/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 3/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 4/5
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/duanyu/anaconda3/envs/waddington-bio/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+    [checkpoint] genedisco_marginsample repeat 5/5
+  genedisco_marginsample          R1=0.015  R2=0.041  R3=0.098  R4=0.155  R5=0.214  AUC_norm=0.252  hits=198/924
+    [checkpoint] genedisco_coreset repeat 1/5
+    [checkpoint] genedisco_coreset repeat 2/5
+    [checkpoint] genedisco_coreset repeat 3/5
+    [checkpoint] genedisco_coreset repeat 4/5
+    [checkpoint] genedisco_coreset repeat 5/5
+  genedisco_coreset               R1=0.015  R2=0.049  R3=0.088  R4=0.127  R5=0.166  AUC_norm=0.214  hits=154/924
+    [checkpoint] genedisco_kmeans_data repeat 1/5
+    [checkpoint] genedisco_kmeans_data repeat 2/5
+    [checkpoint] genedisco_kmeans_data repeat 3/5
+    [checkpoint] genedisco_kmeans_data repeat 4/5
+    [checkpoint] genedisco_kmeans_data repeat 5/5
+  genedisco_kmeans_data           R1=0.015  R2=0.050  R3=0.084  R4=0.116  R5=0.149  AUC_norm=0.199  hits=138/924
+  [dataset complete] workspace/results/ml_engines/port/genedisco_port_seeded.json
+
+============================================================
+SUMMARY  (hit_ratio @ final round, avg across repeated runs)
+============================================================
+Dataset                       genedisco_topuncertain  genedisco_softuncertain  genedisco_marginsample       genedisco_coreset   genedisco_kmeans_data
+IFNG                                           0.086                   0.032                   0.082                   0.095                   0.066
+IL2                                            0.201                   0.032                   0.198                   0.144                   0.106
+Sanchez21                                      0.044                   0.038                   0.044                   0.035                   0.045
+Sanchez21_down                                 0.060                   0.035                   0.060                   0.075                   0.058
+Carnevale22                                    0.039                   0.032                   0.038                   0.058                   0.049
+Scharenberg22                                  0.335                   0.151                   0.331                   0.331                   0.200
+Steinhart                                      0.041                   0.026                   0.044                   0.055                   0.051
+Replogle_K562_essential                        0.359                   0.254                   0.346                   0.305                   0.349
+Replogle_K562_gwps                             0.219                   0.071                   0.214                   0.166                   0.149
+
+Results saved to workspace/results/ml_engines/port/genedisco_port_seeded.json
+done -> workspace/results/ml_engines/port
