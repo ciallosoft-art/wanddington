@@ -2,17 +2,19 @@
   "replicates": {
     "0.0": 2,
     "0.2": 20,
-    "0.1": 5
+    "0.1": 5,
+    "0.3": 5,
+    "0.4": 5,
+    "0.5": 5
   },
-  "missing": [
-    "0.3",
-    "0.4",
-    "0.5"
-  ],
+  "missing": [],
   "grid": [
     0.0,
     0.1,
-    0.2
+    0.2,
+    0.3,
+    0.4,
+    0.5
   ],
   "curve": {
     "0.0": {
@@ -77,6 +79,78 @@
         "Replogle_K562_gwps": 0.34788500000000006
       },
       "vs_reference": null
+    },
+    "0.3": {
+      "mean": 0.25852444444444445,
+      "per_screen": {
+        "IFNG": 0.18602,
+        "IL2": 0.33598,
+        "Sanchez21": 0.0829,
+        "Sanchez21_down": 0.08177999999999999,
+        "Carnevale22": 0.06452,
+        "Scharenberg22": 0.48572,
+        "Steinhart": 0.13513999999999998,
+        "Replogle_K562_essential": 0.6127,
+        "Replogle_K562_gwps": 0.34196
+      },
+      "vs_reference": {
+        "delta": -0.0018250000000000072,
+        "ci95": [
+          -0.008392013888888912,
+          0.005077499999999996
+        ],
+        "wins": 3,
+        "ties": 0,
+        "losses": 6
+      }
+    },
+    "0.4": {
+      "mean": 0.24660888888888888,
+      "per_screen": {
+        "IFNG": 0.17708,
+        "IL2": 0.30810000000000004,
+        "Sanchez21": 0.06216000000000001,
+        "Sanchez21_down": 0.06726000000000001,
+        "Carnevale22": 0.06083999999999999,
+        "Scharenberg22": 0.4694,
+        "Steinhart": 0.131,
+        "Replogle_K562_essential": 0.6031599999999999,
+        "Replogle_K562_gwps": 0.34048
+      },
+      "vs_reference": {
+        "delta": -0.013740555555555563,
+        "ci95": [
+          -0.023650569444444453,
+          -0.0035859861111111283
+        ],
+        "wins": 1,
+        "ties": 0,
+        "losses": 8
+      }
+    },
+    "0.5": {
+      "mean": 0.24928666666666668,
+      "per_screen": {
+        "IFNG": 0.17854,
+        "IL2": 0.28734000000000004,
+        "Sanchez21": 0.06284,
+        "Sanchez21_down": 0.06934,
+        "Carnevale22": 0.0606,
+        "Scharenberg22": 0.48572000000000004,
+        "Steinhart": 0.1448,
+        "Replogle_K562_essential": 0.61586,
+        "Replogle_K562_gwps": 0.33854
+      },
+      "vs_reference": {
+        "delta": -0.011062777777777774,
+        "ci95": [
+          -0.024535708333333312,
+          0.0026516666666666655
+        ],
+        "wins": 2,
+        "ties": 0,
+        "losses": 7
+      }
     }
   },
   "loo_selection": {
@@ -86,7 +160,7 @@
       "Sanchez21": 0.2,
       "Sanchez21_down": 0.2,
       "Carnevale22": 0.2,
-      "Scharenberg22": 0.2,
+      "Scharenberg22": 0.3,
       "Steinhart": 0.2,
       "Replogle_K562_essential": 0.2,
       "Replogle_K562_gwps": 0.2
@@ -97,55 +171,55 @@
       "Sanchez21": 0.088235,
       "Sanchez21_down": 0.09361000000000001,
       "Carnevale22": 0.06515000000000001,
-      "Scharenberg22": 0.5051,
+      "Scharenberg22": 0.48572,
       "Steinhart": 0.11548499999999999,
       "Replogle_K562_essential": 0.60713,
       "Replogle_K562_gwps": 0.34788500000000006
     },
-    "mean": 0.26034944444444447,
+    "mean": 0.2581961111111111,
     "vs_reference": {
-      "delta": 0.0,
+      "delta": -0.0021533333333333344,
       "ci95": [
-        0.0,
+        -0.006460000000000003,
         0.0
       ],
       "wins": 0,
-      "ties": 9,
-      "losses": 0
+      "ties": 8,
+      "losses": 1
     }
   },
   "per_screen_oracle": {
     "best_w": {
-      "IFNG": 0.2,
+      "IFNG": 0.3,
       "IL2": 0.2,
       "Sanchez21": 0.1,
       "Sanchez21_down": 0.0,
       "Carnevale22": 0.2,
       "Scharenberg22": 0.2,
-      "Steinhart": 0.2,
+      "Steinhart": 0.5,
       "Replogle_K562_essential": 0.0,
       "Replogle_K562_gwps": 0.2
     },
     "per_screen": {
-      "IFNG": 0.184155,
+      "IFNG": 0.18602,
       "IL2": 0.336395,
       "Sanchez21": 0.09708000000000001,
       "Sanchez21_down": 0.0964,
       "Carnevale22": 0.06515000000000001,
       "Scharenberg22": 0.5051,
-      "Steinhart": 0.11548499999999999,
+      "Steinhart": 0.1448,
       "Replogle_K562_essential": 0.619,
       "Replogle_K562_gwps": 0.34788500000000006
     },
-    "mean": 0.26296111111111115,
+    "mean": 0.2664255555555556,
     "vs_reference": {
-      "delta": 0.0026116666666666727,
+      "delta": 0.006076111111111117,
       "ci95": [
-        0.0,
-        0.005585569444444464
+        0.0011899999999999997,
+        0.01274666666666669
       ],
-      "wins": 3,
-      "ties": 6,
+      "wins": 5,
+      "ties": 4,
       "losses": 0
     }
   },
@@ -153,7 +227,10 @@
     "grid": [
       0.0,
       0.1,
-      0.2
+      0.2,
+      0.3,
+      0.4,
+      0.5
     ],
     "curve": {
       "0.0": {
@@ -218,6 +295,78 @@
           "Replogle_K562_gwps": 0.3476
         },
         "vs_reference": null
+      },
+      "0.3": {
+        "mean": 0.25852444444444445,
+        "per_screen": {
+          "IFNG": 0.18602,
+          "IL2": 0.33598,
+          "Sanchez21": 0.0829,
+          "Sanchez21_down": 0.08177999999999999,
+          "Carnevale22": 0.06452,
+          "Scharenberg22": 0.48572,
+          "Steinhart": 0.13513999999999998,
+          "Replogle_K562_essential": 0.6127,
+          "Replogle_K562_gwps": 0.34196
+        },
+        "vs_reference": {
+          "delta": -0.0037599999999999964,
+          "ci95": [
+            -0.009873333333333305,
+            0.0027267222222222233
+          ],
+          "wins": 3,
+          "ties": 0,
+          "losses": 6
+        }
+      },
+      "0.4": {
+        "mean": 0.24660888888888888,
+        "per_screen": {
+          "IFNG": 0.17708,
+          "IL2": 0.30810000000000004,
+          "Sanchez21": 0.06216000000000001,
+          "Sanchez21_down": 0.06726000000000001,
+          "Carnevale22": 0.06083999999999999,
+          "Scharenberg22": 0.4694,
+          "Steinhart": 0.131,
+          "Replogle_K562_essential": 0.6031599999999999,
+          "Replogle_K562_gwps": 0.34048
+        },
+        "vs_reference": {
+          "delta": -0.015675555555555554,
+          "ci95": [
+            -0.02500461111111109,
+            -0.005928611111111103
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
+      },
+      "0.5": {
+        "mean": 0.24928666666666668,
+        "per_screen": {
+          "IFNG": 0.17854,
+          "IL2": 0.28734000000000004,
+          "Sanchez21": 0.06284,
+          "Sanchez21_down": 0.06934,
+          "Carnevale22": 0.0606,
+          "Scharenberg22": 0.48572000000000004,
+          "Steinhart": 0.1448,
+          "Replogle_K562_essential": 0.61586,
+          "Replogle_K562_gwps": 0.33854
+        },
+        "vs_reference": {
+          "delta": -0.012997777777777763,
+          "ci95": [
+            -0.02572811111111108,
+            -1.2944444444456573e-05
+          ],
+          "wins": 1,
+          "ties": 0,
+          "losses": 8
+        }
       }
     },
     "loo_selection": {
@@ -257,36 +406,36 @@
     },
     "per_screen_oracle": {
       "best_w": {
-        "IFNG": 0.2,
+        "IFNG": 0.3,
         "IL2": 0.2,
         "Sanchez21": 0.1,
         "Sanchez21_down": 0.0,
         "Carnevale22": 0.1,
         "Scharenberg22": 0.2,
-        "Steinhart": 0.2,
+        "Steinhart": 0.5,
         "Replogle_K562_essential": 0.2,
         "Replogle_K562_gwps": 0.2
       },
       "per_screen": {
-        "IFNG": 0.18525999999999998,
+        "IFNG": 0.18602,
         "IL2": 0.33848,
         "Sanchez21": 0.09708000000000001,
         "Sanchez21_down": 0.0964,
         "Carnevale22": 0.06476,
         "Scharenberg22": 0.5061199999999999,
-        "Steinhart": 0.11857999999999999,
+        "Steinhart": 0.1448,
         "Replogle_K562_essential": 0.61902,
         "Replogle_K562_gwps": 0.3476
       },
-      "mean": 0.26369999999999993,
+      "mean": 0.26669777777777776,
       "vs_reference": {
-        "delta": 0.0014155555555555558,
+        "delta": 0.004413333333333337,
         "ci95": [
-          0.0,
-          0.003920000000000001
+          0.0002444444444444468,
+          0.010240000000000008
         ],
-        "wins": 3,
-        "ties": 6,
+        "wins": 5,
+        "ties": 4,
         "losses": 0
       }
     }
