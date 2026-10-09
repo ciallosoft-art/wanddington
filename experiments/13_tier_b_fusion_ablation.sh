@@ -4,9 +4,10 @@ export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # Attribute the combinatorial-tier fusion repair to its two independent parts.
 #
 # The reported C-arm scores Score(g) = 0.80*ml(g) + 0.20*1[g in named]. On Horlbeck that is the wrong
-# control law -- the ML branch is near chance, so a 0.20 bonus cannot lift a pair it scores low, and
-# only ~24% of each batch ends up being what the LLM actually named, even though LLM-named picks hit
-# at 0.329 against 0.162 for ML-driven ones. WaddingtonCPairArm changes only the combination:
+# control law -- the ML branch is near chance, so a 0.20 bonus cannot lift a pair it scores low: in the
+# twenty-replicate runs only 23% of each batch is what the LLM actually named (28% at 32 per round),
+# although LLM-named picks hit at 26% against 15% for the rest (29% and 16%). WaddingtonCPairArm
+# changes only the combination:
 #
 #   named_first   take the LLM's names first (ordered among themselves by the fill score), ML fills
 #                 the remainder -- the same named-only vote expressed as an ordering, not a weight
@@ -14,7 +15,17 @@ export WADDINGTON_LEGACY_TASK_PROMPTS=0
 #                 pair_* columns) blended 50/50 with the online ML score, instead of ML alone
 #
 # Run separately so the gain can be attributed rather than asserted. Neither knob is tuned on
-# Horlbeck: the 50/50 blend is fixed, not searched.
+# Horlbeck: the 50/50 blend is fixed, not searched. Every number in the paper's account of these runs
+# is recomputed by `python -m waddington_select.analysis.pair_tier`.
+#
+# Feature-table history (pair_tier reads it off each cold-start run's round-1 batch, which is the
+# prior's own top B). pair_complex_shared was added to the table once, during the 128-per-round sweep:
+#   128 per round  namedfirst_only, namedfirst_prior, coldstart_prior   seven pair columns
+#                  complex_first, coldstart_prior_v8, explore_*          eight
+#   32 per round   namedfirst_only, namedfirst_prior                     seven
+#                  everything from coldstart_prior on                    eight -- so there coldstart_prior
+#                  and coldstart_prior_v8 are the same configuration, run twice (67.8 and 68.5)
+# Rerunning this script today puts every run on eight columns.
 #
 # Usage: bash experiments/13_tier_b_fusion_ablation.sh [replicates]
 set -uo pipefail
@@ -49,11 +60,12 @@ run () {   # label  named_first  prior_fill  [cold_start] [complex_first] [explo
 }
 run namedfirst_only  1 0
 run namedfirst_prior 1 1
-# Round 1 on the interaction prior alone; named-first from round 2. The per-round breakdown showed
-# round 1 is where the LLM is weakest (22.9% vs the prior's own 28.9% over the same 128 slots).
+# Round 1 on the interaction prior alone; named-first from round 2. Round 1 is where the LLM is weakest:
+# its round-1 picks hit at 23% in the named-first runs, the prior's own top 128 at 29% (seven columns).
 run coldstart_prior  1 1 1
-# Curated-complex pairs ahead of everything, including the LLM: 34.4% per pick vs its 32.9%, and the
-# source is fixed in advance so it cannot run dry mid-campaign the way LLM proposals do.
+# Curated-complex pairs ahead of everything, including the LLM: 34.4% per pick against about 31% for
+# LLM-named picks at 128 per round, and fixed in advance, so it cannot run dry mid-campaign the way LLM
+# proposals do. Rejected: against the matched control below it costs 11 hits at 640 picks.
 run complex_first    1 1 1 1
 # Matched control for complex_first. Adding pair_complex_shared to the table changed the runtime
 # fingerprint, so the three configs above could not be resumed and remain on the 7-feature table --

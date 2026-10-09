@@ -1,47 +1,38 @@
 """
-WaddingtonCPairArm — the C-arm's fusion, repaired for the combinatorial tier.
+WaddingtonCPairArm — the C-arm's fusion, repaired for the combinatorial tier (paper: "Diagnosing and
+repairing the combinatorial failure"; every number below is recomputed by analysis/pair_tier.py).
 
 Why a separate arm
 ------------------
 The reported C-arm fuses a single global weight, Score(g) = 0.80*ml(g) + 0.20*1[g in named]. That is
-correct where it was calibrated: on single-gene screens the ML branch is the stronger source
-(LOO prior 0.217 hit@R5), so letting it rank and using the LLM as a light endorsement is an upgrade.
+right where it was calibrated: on single-gene screens the ML branch is the stronger source. On Horlbeck
+its prior is at chance (58 hits in 640 picks, random 60) and the ordering inverts. In the C-arm's
+twenty-replicate runs at 128 pairs per round, LLM-named picks hit at 26% and the other picks at 15%
+(29% and 16% at 32 per round), yet only 23% of the batch is LLM-named (28%), although the LLM names
+close to a full batch of valid pairs each round: a 0.20 bonus cannot lift a pair the ML branch scores
+low. This arm changes how the sources are combined, not the sources. Each change is a switch:
 
-On Horlbeck the ordering inverts and the same arithmetic becomes the failure. Measured on the
-twenty-replicate runs:
+  named_first   WADDINGTON_PAIR_NAMED_FIRST, default on. The LLM's names go first, ordered among
+                themselves by the fill score, and the fill score ranks the rest of the batch. The same
+                named-only vote, expressed as an ordering, so a branch at chance cannot outvote it.
+  prior_fill    WADDINGTON_PAIR_PRIOR_FILL, default on. The fill score is 0.5 * online ML score +
+                0.5 * the label-free interaction prior (interaction_prior below) instead of the ML score
+                alone. Ranked alone, the prior puts 182 hits in the top 640 with the seven original
+                pair columns and 196 with the eighth (complex co-membership), against 117 for the online
+                model.
+  cold_start    WADDINGTON_PAIR_COLD_START, default off. Round 1 is the prior's own top B and named-first
+                starts in round 2. Before any feedback the LLM is the weaker source: in the named-first
+                runs its round-1 picks hit at 23%, where the prior's top 128 hit at 29% (seven columns).
+  complex_first WADDINGTON_PAIR_COMPLEX_FIRST, default off. The 445 pairs whose genes share an EBI
+                Complex Portal complex (34% hit rate, the most precise single signal) go ahead of
+                everything else. Tested and rejected: at 640 picks it costs 11 hits against having the
+                column in the table (209.9 vs 220.9), because what it displaces is LLM proposals and pairs
+                the online model has learned to rank. At 160 picks it scores 70.2 against 68.5.
+  explore_frac  WADDINGTON_PAIR_EXPLORE_FRAC, default 0. A share of each batch spent on coverage. Also
+                rejected: 12.5% and 25% cost 6 and 18 hits at 640 picks.
 
-  per-pick hit rate, LLM-named selections      0.329   (3.32x random -- identical to BDA's agent)
-  per-pick hit rate, ML-driven selections      0.162   (1.64x random)
-  share of the batch that was LLM-named          24%
-
-A 0.20 bonus cannot lift a pair the ML branch scores low, so three quarters of each batch is drawn
-from the weaker source; the LLM names 26-30 valid pairs every round and the fusion discards most of
-them. This arm changes only how the two branches are combined -- not the branches themselves:
-
-  named_first   the LLM's names are taken FIRST (ordered among themselves by ML score), and the ML
-                ranking fills only what is left. This is the same "named-only vote" semantics
-                expressed as an ordering instead of an additive weight, so the LLM can no longer be
-                outvoted by a branch that is at chance.
-  prior_fill    the filler is ranked by the label-free interaction prior (an equal-weight rank-sum of
-                the pair_* columns) blended with the online ML score, rather than by the ML score
-                alone. Ranking the pool by that prior alone puts 182 hits in the top 640 against 117
-                for the online model, so it is the better source for the slots the LLM cannot fill.
-  complex_first the 445 pairs whose two genes share an EBI Complex Portal complex are taken ahead of
-                everything else. They hit at 34.4%, the highest precision of any signal measured here
-                -- above the LLM's own 32.9% per pick -- because two subunits of one complex is the
-                textbook buffering interaction. Coverage is only 0.44%, so it cannot fill a budget on
-                its own, and folding it into the rank sum dilutes it (196 hits in the top 640 against
-                216 when taken first). Same lesson as named-first: a high-precision, low-coverage
-                signal belongs in the ordering, not in a weighted sum.
-  cold_start    round 1 ranks by the interaction prior ALONE, and named-first begins at round 2.
-                Per-round measurement showed the LLM is the weaker source before it has seen any
-                feedback: round 1 hits at 22.9% where the prior's own top 128 hits at 28.9%, and the
-                LLM only overtakes it from round 3 (34%). Round 1 is also the round where the online
-                branch knows nothing, so blending it in would only add noise -- hence the prior alone
-                rather than the usual fill score.
-
-Both are on by default here and individually switchable, so their contributions can be attributed.
-The reported C-arm is untouched.
+The repair the paper reports is named_first + prior_fill + cold_start on the eight-column table
+(experiments/13_tier_b_fusion_ablation.sh, run "coldstart_prior_v8"). The reported C-arm is untouched.
 """
 
 from __future__ import annotations
@@ -58,6 +49,24 @@ from ..tables import INTERACTION_PREFIX, split_pair
 
 def _flag(name: str, default: str = "1") -> bool:
     return os.environ.get(name, default) == "1"
+
+
+def interaction_prior(sub: pd.DataFrame) -> dict[str, float]:
+    """Equal-weight rank-sum of one screen's pair_* columns, in [0, 1]. Label-free: no outcome is read.
+
+    `sub` is that screen's rows, with pair tokens in "gene"."""
+    cols = [c for c in sub.columns if c.startswith(INTERACTION_PREFIX)]
+    if not cols:
+        return {}
+    z = np.zeros(len(sub), dtype=float)
+    for c in cols:
+        v = sub[c].to_numpy(dtype=float)
+        # co-essentiality is informative in BOTH directions (synergy and buffering), so rank |r|
+        if c.endswith("coessential"):
+            v = np.abs(v)
+        z += pd.Series(v).rank(pct=True).to_numpy()
+    z /= max(len(cols), 1)
+    return dict(zip(sub["gene"].tolist(), z.tolist()))
 
 
 def pair_selection_config() -> dict:
@@ -93,19 +102,7 @@ class WaddingtonCPairArm(WaddingtonCArm):
         csv, _ = _get_feature_config(dataset_name)
         df = load_training_frame(csv, dataset_name)
         df["gene"] = df["gene"].str.strip().str.upper()
-        sub = df[df["dataset"] == dataset_name]
-        cols = [c for c in sub.columns if c.startswith(INTERACTION_PREFIX)]
-        if not cols:
-            return {}
-        z = np.zeros(len(sub), dtype=float)
-        for c in cols:
-            v = sub[c].to_numpy(dtype=float)
-            # co-essentiality is informative in BOTH directions (synergy and buffering), so rank |r|
-            if c.endswith("coessential"):
-                v = np.abs(v)
-            z += pd.Series(v).rank(pct=True).to_numpy()
-        z /= max(len(cols), 1)
-        return dict(zip(sub["gene"].tolist(), z.tolist()))
+        return interaction_prior(df[df["dataset"] == dataset_name])
 
     def _load_complex_pairs(self, dataset_name: str) -> set[str]:
         """Candidates whose two genes share a curated complex. Label-free."""
