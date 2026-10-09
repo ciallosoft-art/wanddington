@@ -15,6 +15,9 @@ the benchmark's difficulty tiers", Table pairs-bda, "Diagnosing and repairing th
   llm_supply     LLM-named valid pairs per round, distinct over five rounds, the share of the batch they
                  fill, and the hit rate of LLM-named and other picks
   complex        the complex co-membership pairs: count and hit rate
+  coverage       genes touched by the selected pairs, and the exploration slope
+  learning_curve a model trained on N randomly revealed pairs, scored on the rest (AUC, hits in the top
+                 640), on the seven- and the eight-column table
 
     python -m waddington_select.analysis.pair_tier
 """
@@ -28,14 +31,21 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import stats
+from sklearn.metrics import roc_auc_score
 
 from ..arms.waddington_c_pair_arm import interaction_prior
+from ..phenotype import ANCHOR_COLS
+from ..tables import ABSDIFF_SUFFIX
 from .sources import GPT, REPO
 
 PAIR_TABLE_V3 = REPO / "workspace" / "evaluation" / "lgbm_training_data_horlbeck_pairs_v3.csv"
 OUT = REPO / "workspace" / "results" / "pair_tier_summary.json"
 COMPLEX_COL = "pair_complex_shared"
 NEGATIVE = "NEGATIVE"  # the library's negative control, paired with each of the 448 genes
+CURVE_SIZES = [32, 64, 128, 320, 640, 1280, 2560, 5000, 10000, 20000]
+CURVE_DRAWS = 5
+CURVE_LGBM = dict(objective="binary", learning_rate=0.05, n_estimators=300, num_leaves=31, verbose=-1,
+                  n_jobs=4, random_state=42)
 BUDGETS = {128: 640, 32: 160}
 
 B128 = GPT / "tier_b_pairs_20rep"                      # pair-mean table (no interaction features)
@@ -154,6 +164,40 @@ def _welch(a: np.ndarray, b: np.ndarray) -> dict:
 def _ci95(x: np.ndarray) -> list[float]:
     h = stats.t.ppf(0.975, len(x) - 1) * x.std(ddof=1) / np.sqrt(len(x))
     return [float(x.mean() - h), float(x.mean() + h)]
+
+
+def learning_curve(sub: pd.DataFrame, drop: set[str]) -> dict:
+    """The within-screen learning curve: train on N randomly revealed Horlbeck pairs, rank the rest, and
+    count the hits among the top 640 (and the AUC). Five draws per N. The draws are those of the
+    2026-09-12 diagnosis (seed 0), so `hits_top640_row_order` reproduces its numbers; that run broke score
+    ties by row order, while `hits_top640` breaks them at random. The two differ only where the model has
+    barely learned anything: at 32 pairs it cannot split at all and scores every pair the same."""
+    import lightgbm as lgb
+    anchors = set(ANCHOR_COLS) | {c + ABSDIFF_SUFFIX for c in ANCHOR_COLS}
+    feats = [c for c in sub.columns
+             if c not in ("gene", "label", "dataset") and c not in anchors and c not in drop]
+    y_all = sub["label"].to_numpy()
+    X_all = sub[feats].to_numpy(dtype=float)
+    draw_rng, tie_rng = np.random.default_rng(0), np.random.default_rng(1)
+    out = {"features": len(feats), "draws": CURVE_DRAWS, "points": {}}
+    for n in CURVE_SIZES:
+        aucs, hits, hits_row = [], [], []
+        for _ in range(CURVE_DRAWS):
+            idx = draw_rng.choice(len(sub), n, replace=False)
+            mask = np.ones(len(sub), bool)
+            mask[idx] = False
+            ytr, yte = y_all[idx], y_all[mask]
+            if ytr.sum() < 2:
+                continue
+            m = lgb.LGBMClassifier(**CURVE_LGBM, scale_pos_weight=(ytr == 0).sum() / max((ytr == 1).sum(), 1))
+            m.fit(X_all[idx], ytr)
+            p = m.predict_proba(X_all[mask])[:, 1]
+            aucs.append(roc_auc_score(yte, p))
+            hits_row.append(int(yte[np.argsort(-p)[:640]].sum()))
+            hits.append(int(yte[np.lexsort((tie_rng.random(len(p)), -p))[:640]].sum()))
+        out["points"][str(n)] = {"auc": float(np.mean(aucs)), "hits_top640": float(np.mean(hits)),
+                                 "hits_top640_row_order": float(np.mean(hits_row)), "draws_used": len(aucs)}
+    return out
 
 
 def run() -> dict:
@@ -306,6 +350,9 @@ def run() -> dict:
             res["coverage"][f"{budget}:explore_slope"] = {"hits_per_unit_share": float(fit.slope),
                                                            "p": float(fit.pvalue)}
 
+    # The within-screen learning curve, on the seven-column table of the original diagnosis and on today's
+    res["learning_curve"] = {"7_columns": learning_curve(sub, {COMPLEX_COL}), "8_columns": learning_curve(sub, set())}
+
     OUT.write_text(json.dumps(res, indent=2, default=str))
     return res
 
@@ -327,6 +374,10 @@ if __name__ == "__main__":
     for k, v in r["vs_bda"].items():
         print(f"  vs BDA {k}: {v['delta']:+.1f} p={v['p']:.2g}" +
               (f" d={v['cohens_d']:.2f} ci90=[{v['ci90'][0]:.1f},{v['ci90'][1]:.1f}]" if "cohens_d" in v else ""))
+    for k, curve in r["learning_curve"].items():
+        print(f"  learning curve, {k} ({curve['features']} features): " + ", ".join(
+            f"{n}: AUC {v['auc']:.3f} top640 {v['hits_top640']:.0f} (row-order {v['hits_top640_row_order']:.0f})"
+            for n, v in curve["points"].items()))
     for k, v in r["llm_supply"].items():
         print(f"  supply {k}: named/round {v['named_per_round']} distinct {v['distinct_named_over_five_rounds']:.0f} "
               f"share {v['llm_share_of_batch']:.2f} hit named {v['hit_rate_llm_named']} other {v['hit_rate_other']}")
