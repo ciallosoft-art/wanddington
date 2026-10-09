@@ -216,7 +216,7 @@ def complex_membership(genes: list[str], offline: bool) -> dict[str, set[int]]:
 
     CORUM would be the conventional source but its host currently serves a certificate its own chain
     cannot validate; Complex Portal is the same kind of curated assembly data over a working endpoint.
-    Members are listed as UniProt accessions, so we map our gene symbols to UniProt once (449 symbols,
+    Members are listed as UniProt accessions, so we map our gene symbols to UniProt once (449 library entries: 448 genes and the negative control,
     one batched MyGene call) rather than mapping thousands of accessions the other way.
     """
     if not COMPLEX_TSV.exists():

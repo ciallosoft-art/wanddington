@@ -17,8 +17,9 @@ and every Waddington arm are measured against an identical hit definition and po
 the tier is chosen the same way as everywhere else — by WADDINGTON_TRAINING_CSV{,_V3}.
 
 Two-gene note: BDA's shipped pair prompt hardcodes the wrong gene library (see the patch comment in
-research_assistant.py). `--pair-pool real` substitutes Horlbeck's actual 449 genes; `--pair-pool
-shipped` leaves it as released. Run both — the difference is the cost of that packaging bug.
+research_assistant.py). `--pair-pool real` substitutes Horlbeck's actual library (448 genes plus the
+negative control); `--pair-pool shipped` leaves it as released. Run both — the difference is the cost
+of that packaging bug.
 
 Usage:
     conda run -n waddington-bio python3 workspace/evaluation/run_bda_controlled.py \

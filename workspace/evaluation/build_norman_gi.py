@@ -28,7 +28,7 @@ Scope and caveats, all of which matter when reading any transfer result:
   * Only pairs where BOTH genes also have a single-perturbation arm can be scored (130 of 179).
   * Norman is CRISPRa (over-expression); Horlbeck is CRISPRi (knock-down). The modality differs, the
     same way Steinhart differs from the other eight single-gene screens in this benchmark.
-  * The two gene sets are disjoint (0 of 72 Norman genes appear among Horlbeck's 449). For transfer
+  * The two gene sets are disjoint (0 of 72 Norman genes appear among Horlbeck's 448). For transfer
     this is a feature, not a bug: nothing can pass between them except through the features.
   * 130 pairs is a small training set. The learning curve on Horlbeck suggests this is around where
     a within-screen model starts to beat chance, so treat any transfer result as directional.

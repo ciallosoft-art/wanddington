@@ -83,7 +83,7 @@ conda run -n waddington-bio python3 workspace/evaluation/summarize_tiers.py
 | Script | What it runs |
 |---|---|
 | `10_tiers_genedisco.sh` | GeneDisco's acquisition functions on the tier tables. Forced sequential: `WADDINGTON_PARALLEL>=2` deadlocks the `kmeans_data` arm (sklearn's KMeans spawns its own threads inside the harness's ThreadPoolExecutor — 33 threads, no progress). |
-| `11_tiers_bda.sh` | BioDiscoveryAgent's own agent, scored by our oracle. Two-gene runs twice: `--pair-pool real` injects Horlbeck's actual 449-gene library, `shipped` keeps the released 124-gene one. |
+| `11_tiers_bda.sh` | BioDiscoveryAgent's own agent, scored by our oracle. Two-gene runs twice: `--pair-pool real` injects Horlbeck's actual library (448 genes plus the negative control), `shipped` keeps the released 124-gene one. |
 | `12_tier_b_interaction.sh` | Combinatorial tier with genuine interaction features `x(g_a, g_b)`. |
 | `13_tier_b_fusion_ablation.sh` | The fusion repair, one switch at a time: named-first, interaction-prior fill, round-1 cold start, complex-first, explore quota. Takes `[replicates] [batch]`; pass `32` for BDA's own protocol. |
 | `14_bda_pairs_20rep.sh` | Raises the BDA two-gene baseline to twenty replicates. |
@@ -105,7 +105,7 @@ No arm code is tier-specific. A tier is selected entirely by `WADDINGTON_TRAININ
 `WADDINGTON_TRAINING_CSV_V3` and `WADDINGTON_EXTRA_DATASETS`, which every consumer now reads from
 `waddington_select/tables.py`. In the combinatorial tier a candidate is one opaque token
 `"GENEA|GENEB"`, so the oracle, round loop, hit@R5 and result JSON are unchanged; only the LLM prompt
-asks for `"GENE1 + GENE2"` and injects the 449-gene screen library, without which the model's
+asks for `"GENE1 + GENE2"` and injects the screen library (448 genes plus the negative control), without which the model's
 round-1 proposals are ~98% outside the measured pool.
 
 ## Historical Claude paper reproduction

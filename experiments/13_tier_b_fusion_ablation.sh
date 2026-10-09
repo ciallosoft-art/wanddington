@@ -72,7 +72,7 @@ run complex_first    1 1 1 1
 # complex_first would otherwise differ from them by two things at once (the extra column in the
 # feature table AND the ordering rule). This rerun isolates the ordering.
 run coldstart_prior_v8 1 1 1 0
-# Explore/exploit. Selection is heavily redundant: round 1 touches 47 of 449 genes, five rounds reach
+# Explore/exploit. Selection is heavily redundant: round 1 touches 47 of the 448 genes, five rounds reach
 # 61%, the most-sampled gene appears 31 times against 2.9 under uniform sampling -- so the online model
 # trains on a narrow slice, and its learning curve is far from saturated. Spend part of each batch on
 # the best pair containing the least-sampled gene and see whether better rounds 3-5 repay round 1.

@@ -14,7 +14,7 @@ export WADDINGTON_LEGACY_TASK_PROMPTS=0
 # plus workspace/evaluation/_bda_stubs/ to satisfy tool imports that the no-tools setting never calls.
 #
 # Two-gene runs are done TWICE. BDA's shipped pair prompt hardcodes a 124-gene Schmidt T-cell list,
-# but Horlbeck's library is a different 449 genes (overlap 8 => at most 28 of 100,576 pairs
+# but Horlbeck's library is a different 448 genes plus a negative control (overlap 8 => at most 28 of 100,576 pairs
 # proposable, 3 of them hits), and its own reported Table 2 reaches 45.1 hits — so the released prompt
 # cannot be what produced their numbers. `real` substitutes the actual library and measures the
 # method; `shipped` measures the released artifact. Report both.

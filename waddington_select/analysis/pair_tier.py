@@ -35,6 +35,7 @@ from .sources import GPT, REPO
 PAIR_TABLE_V3 = REPO / "workspace" / "evaluation" / "lgbm_training_data_horlbeck_pairs_v3.csv"
 OUT = REPO / "workspace" / "results" / "pair_tier_summary.json"
 COMPLEX_COL = "pair_complex_shared"
+NEGATIVE = "NEGATIVE"  # the library's negative control, paired with each of the 448 genes
 BUDGETS = {128: 640, 32: 160}
 
 B128 = GPT / "tier_b_pairs_20rep"                      # pair-mean table (no interaction features)
@@ -272,24 +273,28 @@ def run() -> dict:
                 "hit_rate_llm_named": float(np.mean(sel_named)) if sel_named else None,
                 "hit_rate_other": float(np.mean(sel_other)) if sel_other else None}
 
-    # Coverage (the exploration table): genes touched by the selected pairs, per replicate
-    n_genes = len({g for t in pool for g in t.split("|")})
-    res["coverage"] = {"n_library_genes": n_genes}
+    # Coverage (the exploration table): real genes touched by the selected pairs, per replicate. The
+    # library is 448 genes plus a negative control; pairing a gene with the control is a candidate too.
+    n_genes = len({g for t in pool for g in t.split("|")} - {NEGATIVE})
+    res["coverage"] = {"n_library_genes": n_genes, "n_negative_control_pairs": sum(NEGATIVE in t.split("|") for t in pool)}
     for B, budget in BUDGETS.items():
         for label in ("coldstart_prior_v8", "explore_12pct", "explore_25pct"):
             rs = all_runs[B].get(label)
             if not rs:
                 continue
             from collections import Counter
-            touched, round1, top_count = [], [], []
+            touched, round1, top_count, control_picks = [], [], [], []
             for r in rs:
-                c = Counter(g for batch in r["selected_genes_per_round"] for t in batch for g in t.split("|"))
+                c = Counter(g for batch in r["selected_genes_per_round"] for t in batch for g in t.split("|")
+                            if g != NEGATIVE)
                 touched.append(len(c))
                 top_count.append(max(c.values()))
-                round1.append(len({g for t in r["selected_genes_per_round"][0] for g in t.split("|")}))
+                round1.append(len({g for t in r["selected_genes_per_round"][0] for g in t.split("|")} - {NEGATIVE}))
+                control_picks.append(sum(NEGATIVE in t.split("|") for b in r["selected_genes_per_round"] for t in b))
             res["coverage"][f"{budget}:{label}"] = {
                 "genes_touched": float(np.mean(touched)), "round1_genes": float(np.mean(round1)),
                 "most_sampled_gene_count": float(np.mean(top_count)),
+                "negative_control_picks": float(np.mean(control_picks)),
                 "uniform_expectation_per_gene": 2 * budget / n_genes}
         xs, ys = [], []
         for label, share in (("coldstart_prior_v8", 0.0), ("explore_12pct", 0.125), ("explore_25pct", 0.25)):

@@ -219,7 +219,7 @@ class LLMReasoningArm(BaseArm):
         test_df = df[df["dataset"] == dataset_name].reset_index(drop=True)
         self._genes: list[str] = test_df["gene"].tolist()
         self._gene_set: set[str] = set(self._genes)
-        # A combinatorial screen is a small designed library (Horlbeck: 449 genes), not the genome.
+        # A combinatorial screen is a small designed library (Horlbeck: 448 genes plus a negative control), not the genome.
         # Without it the model proposes biologically sensible pairs that were simply never measured —
         # 138 of 140 fell outside the pool in round 1 — so the LLM branch degenerates to ML padding
         # until feedback happens to name real pairs. BDA injects the candidate list for the same

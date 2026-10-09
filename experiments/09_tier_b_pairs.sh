@@ -90,7 +90,7 @@ fi
 
 echo "=== Experiment 09: BDA tier 'harder' (2-gene combinations, Horlbeck) ==="
 echo "Tables: $(basename "$PAIR_V1") / $(basename "$PAIR_V3")"
-echo "Pool:   100576 pairs over 449 genes, 9959 hits (9.90%); batch=${HORLBECK_BATCH}"
+echo "Pool:   100576 pairs over 448 genes plus a negative control, 9959 hits (9.90%); batch=${HORLBECK_BATCH}"
 echo "Memory: $MEMORY_PATH"
 echo "Checkpoint directory: $RESULT_DIR"
 echo

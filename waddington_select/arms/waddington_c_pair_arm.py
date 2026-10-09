@@ -120,7 +120,7 @@ class WaddingtonCPairArm(WaddingtonCArm):
         """n pairs chosen for coverage: the best-scoring pair containing the least-sampled gene.
 
         Not random exploration -- the prior still orders the candidates, coverage only decides which
-        gene to look at next. Selection is otherwise very redundant: round 1 touches 47 of 449 genes,
+        gene to look at next. Selection is otherwise very redundant: round 1 touches 47 of the 448 genes,
         five rounds reach 61%, and the most-sampled gene appears 31 times against 2.9 under uniform
         sampling, so the online model sees a narrow slice of the feature space.
         """
