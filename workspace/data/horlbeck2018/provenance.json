@@ -1,0 +1,21 @@
+{
+  "source": "Horlbeck MA et al. (2018) Mapping the genetic landscape of human cells. Cell 174:953-967. doi:10.1016/j.cell.2018.06.010",
+  "retrieved": "2026-10-09",
+  "files": {
+    "cell2018_mmc5.xlsx": {
+      "what": "Table S5, sgRNA- and gene-level GI scores (K562 and Jurkat)",
+      "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867418307359-mmc5.xlsx",
+      "sha256": "b18d644a727132819567f66b4633d79c2b239fff78eafd300912764924a42d38",
+      "bytes": 78175535
+    },
+    "cell2018_mmc2.xlsx": {
+      "what": "Table S2, genes, annotations and sgRNA sequences",
+      "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867418307359-mmc2.xlsx",
+      "sha256": "86cad8cbdaf01357ceabaf132b26e31788a55e217dc664d5701bba30448287b3",
+      "bytes": 597018
+    }
+  },
+  "extracted/gene_gi_scores.csv": "sheet 'gene GI scores and correlations', header rows dropped, columns renamed (gene_a, gene_b, {k562,jurkat}_{r1,r2,avg}_{gi,corr})",
+  "not_used": "Mendeley doi:10.17632/rdzk59n6j4.1 (Jurkat.zip, K562.zip): its files are served from S3 eu-west-1, unreachable from this machine; Table S5 carries the same gene-level scores. PMC copies sit behind a browser proof-of-work check; Europe PMC does not serve this manuscript's supplements.",
+  "extracted_sha256": "9eb4f00f74b9ad067ed1b4eb5a6e72197733c2e6c1e5a94ecf711c23ef485c6e"
+}

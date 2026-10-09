@@ -80,6 +80,11 @@ workspace/results/campaigns/
 
 # Phenotypes the scientist registers from their own screens (user data, not repo data)
 workspace/data/user_phenotypes/
+# Horlbeck et al. 2018 raw GI-map downloads (Mendeley doi:10.17632/rdzk59n6j4.1, ~240 MB). Not
+# committed; workspace/data/horlbeck2018/provenance.json records the URLs and sha256 of each file.
+workspace/data/horlbeck2018/*.zip
+workspace/data/horlbeck2018/*.xlsx
+workspace/data/horlbeck2018/extracted/
 
 # CRISPRa validation table (derived from an external download; rebuild with build_crispra_validation.py)
 workspace/evaluation/lgbm_training_data_crispra_validation.csv
