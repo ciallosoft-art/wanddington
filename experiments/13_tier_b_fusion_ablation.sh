@@ -49,7 +49,10 @@ export PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS
 export WADDINGTON_PARALLEL="${WADDINGTON_PARALLEL:-4}"
 mkdir -p "$R"
 
+# ONLY=<label> runs that one configuration and skips the rest.
+ONLY="${ONLY:-}"
 run () {   # label  named_first  prior_fill  [cold_start] [complex_first] [explore_frac]
+  [[ -n "$ONLY" && "$ONLY" != "$1" ]] && return 0
   echo "### $1  (nf=$2 pf=$3 cs=${4:-0} cx=${5:-0} ex=${6:-0})  $(date '+%m-%d %H:%M')"
   env WADDINGTON_PAIR_NAMED_FIRST="$2" WADDINGTON_PAIR_PRIOR_FILL="$3" \
       WADDINGTON_PAIR_COLD_START="${4:-0}" WADDINGTON_PAIR_COMPLEX_FIRST="${5:-0}" \
@@ -78,4 +81,15 @@ run coldstart_prior_v8 1 1 1 0
 # the best pair containing the least-sampled gene and see whether better rounds 3-5 repay round 1.
 run explore_12pct    1 1 1 0 0.125
 run explore_25pct    1 1 1 0 0.25
+# The final repair without its LLM: the same prior, cold start, online ML and fill score, no named pairs.
+# Against coldstart_prior_v8 it isolates what the LLM adds. It makes no LLM call and is deterministic,
+# so one replicate is the whole answer.
+if [[ -z "$ONLY" || "$ONLY" == no_llm ]]; then
+  echo "### no_llm  (nf=1 pf=1 cs=1 cx=0 ex=0, no LLM)  $(date '+%m-%d %H:%M')"
+  env WADDINGTON_PAIR_NAMED_FIRST=1 WADDINGTON_PAIR_PRIOR_FILL=1 WADDINGTON_PAIR_COLD_START=1 \
+      WADDINGTON_PAIR_COMPLEX_FIRST=0 WADDINGTON_PAIR_EXPLORE_FRAC=0 \
+    conda run -n waddington-bio python3 -m waddington_select --arms waddington_c_pair_no_llm \
+      --datasets Horlbeck --replicates 1 --seed-mode local --rounds 5 --resume \
+      --out "$R/pair_no_llm_1rep.json"
+fi
 echo "### ABLATION DONE $(date '+%m-%d %H:%M')"

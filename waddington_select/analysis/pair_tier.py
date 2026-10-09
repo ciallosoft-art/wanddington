@@ -63,6 +63,9 @@ RUNS = {
         "padded_llm": (B128 / "calibration_20rep.json", "llm_reasoning"),
         "c_arm": (B128 / "waddington_c_20rep.json", "waddington_c"),
         "c_arm_interaction": (I128 / "waddington_c_20rep.json", "waddington_c"),
+        "online_ml_interaction_7col": (I128 / "deterministic_1rep.json", "online_adaptive"),
+        "online_ml_interaction_8col": (I128 / "deterministic_8feat_1rep.json", "online_adaptive"),
+        "repair_no_llm": (I128 / "pair_no_llm_1rep.json", "waddington_c_pair_no_llm"),
         "namedfirst_only": (I128 / "pair_namedfirst_only.json", "waddington_c_pair"),
         "namedfirst_prior": (I128 / "pair_namedfirst_prior.json", "waddington_c_pair"),
         "coldstart_prior": (I128 / "pair_coldstart_prior.json", "waddington_c_pair"),
@@ -79,6 +82,9 @@ RUNS = {
         "padded_llm": (B32 / "calibration_20rep.json", "llm_reasoning"),
         "c_arm": (B32 / "waddington_c_20rep.json", "waddington_c"),
         "bda": (B32 / "bda_controlled_real.json", "bda"),
+        "c_arm_interaction": (I32 / "waddington_c_7col_20rep.json", "waddington_c"),
+        "online_ml_interaction_7col": (I32 / "deterministic_7col_1rep.json", "online_adaptive"),
+        "repair_no_llm": (I32 / "pair_no_llm_1rep.json", "waddington_c_pair_no_llm"),
         "namedfirst_only": (I32 / "pair_namedfirst_only.json", "waddington_c_pair"),
         "namedfirst_prior": (I32 / "pair_namedfirst_prior.json", "waddington_c_pair"),
         "coldstart_prior": (I32 / "pair_coldstart_prior.json", "waddington_c_pair"),
@@ -90,7 +96,9 @@ RUNS = {
 }
 PRIOR_FILL = {"namedfirst_prior", "coldstart_prior", "complex_first", "coldstart_prior_v8",
               "explore_12pct", "explore_25pct"}
-COLD_START_PLAIN = {"coldstart_prior", "coldstart_prior_v8"}  # round 1 = the prior's own top B
+COLD_START_PLAIN = {"coldstart_prior", "coldstart_prior_v8", "repair_no_llm"}  # round 1 = the prior's top B
+TABLE_LABELS = ("namedfirst", "coldstart", "complex", "explore", "repair_no_llm", "c_arm_interaction",
+                "online_ml_interaction")
 
 # (budget, from, to): the steps the paper attributes
 STEPS = [
@@ -102,6 +110,8 @@ STEPS = [
     (128, "coldstart_prior_v8", "complex_first"),
     (128, "coldstart_prior_v8", "explore_12pct"),
     (128, "coldstart_prior_v8", "explore_25pct"),
+    (32, "c_arm", "c_arm_interaction"),
+    (32, "c_arm_interaction", "namedfirst_only"),
     (32, "c_arm", "namedfirst_only"),
     (32, "namedfirst_only", "namedfirst_prior"),
     (32, "namedfirst_prior", "coldstart_prior_v8"),
@@ -245,10 +255,13 @@ def run() -> dict:
             if (B, label) in verified:
                 tv[label] = {k: v for k, v in verified[(B, label)].items() if k not in ("created", "fingerprint")}
                 continue
-            if not label.startswith(("namedfirst", "coldstart", "complex", "explore")):
+            if not label.startswith(TABLE_LABELS):
                 continue
             c, fp = _created(B, label), _fingerprint(B, label)
-            if fp in by_fingerprint:
+            table = str(_manifest(B, label).get("protocol", {}).get("training_csv_v3_override") or "")
+            if table.endswith("_7col.csv"):
+                tv[label] = {"columns": 7, "how": "seven-column table copy named in the manifest"}
+            elif fp in by_fingerprint:
                 tv[label] = {"columns": by_fingerprint[fp], "how": "same runtime fingerprint as a verified run"}
             elif last_seven and c and c <= last_seven:
                 tv[label] = {"columns": 7, "how": "created before a run verified on seven columns"}
@@ -279,6 +292,8 @@ def run() -> dict:
             key = f"{cols}_columns" + ("_complex_first" if label == "complex_first" else "")
             ref = prior_alone[key][str(budget)]
             x = _hits(runs[label])
+            if len(x) < 2:
+                continue
             res["over_prior"][f"{budget}:{label}"] = {
                 "columns": cols, "prior_ordering": key, "prior_alone": ref, "delta": float(x.mean() - ref),
                 "p": float(stats.ttest_1samp(x, ref).pvalue), "replicates_above": int((x > ref).sum()),
@@ -316,6 +331,22 @@ def run() -> dict:
                 "llm_share_of_batch": float(share.mean()), "llm_share_per_round": share.mean(0).round(3).tolist(),
                 "hit_rate_llm_named": float(np.mean(sel_named)) if sel_named else None,
                 "hit_rate_other": float(np.mean(sel_other)) if sel_other else None}
+
+    # What the LLM adds to the repair: prior alone -> + online ML (no LLM, deterministic) -> + LLM (full arm)
+    res["llm_contribution"] = {}
+    for B, budget in BUDGETS.items():
+        runs = all_runs[B]
+        if "repair_no_llm" not in runs or "coldstart_prior_v8" not in runs:
+            continue
+        cols = res["table_version"][str(budget)].get("repair_no_llm", {}).get("columns", 8)
+        prior = prior_alone[f"{cols}_columns"][str(budget)]
+        no_llm = float(_hits(runs["repair_no_llm"]).mean())
+        full = _hits(runs["coldstart_prior_v8"])
+        res["llm_contribution"][str(budget)] = {
+            "columns": cols, "prior_alone": prior, "no_llm": no_llm, "full": float(full.mean()),
+            "online_ml_over_prior": no_llm - prior, "llm_over_no_llm": float(full.mean() - no_llm),
+            "p_llm": float(stats.ttest_1samp(full, no_llm).pvalue),
+            "replicates_above_no_llm": int((full > no_llm).sum()), "n": len(full)}
 
     # Coverage (the exploration table): real genes touched by the selected pairs, per replicate. The
     # library is 448 genes plus a negative control; pairing a gene with the control is a candidate too.
@@ -374,6 +405,10 @@ if __name__ == "__main__":
     for k, v in r["vs_bda"].items():
         print(f"  vs BDA {k}: {v['delta']:+.1f} p={v['p']:.2g}" +
               (f" d={v['cohens_d']:.2f} ci90=[{v['ci90'][0]:.1f},{v['ci90'][1]:.1f}]" if "cohens_d" in v else ""))
+    for k, v in r.get("llm_contribution", {}).items():
+        print(f"  LLM contribution, {k} picks ({v['columns']} cols): prior {v['prior_alone']} -> no LLM "
+              f"{v['no_llm']:.0f} -> full {v['full']:.1f}; LLM {v['llm_over_no_llm']:+.1f} p={v['p_llm']:.2g} "
+              f"above {v['replicates_above_no_llm']}/{v['n']}")
     for k, curve in r["learning_curve"].items():
         print(f"  learning curve, {k} ({curve['features']} features): " + ", ".join(
             f"{n}: AUC {v['auc']:.3f} top640 {v['hits_top640']:.0f} (row-order {v['hits_top640_row_order']:.0f})"

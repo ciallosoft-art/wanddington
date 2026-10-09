@@ -155,13 +155,17 @@ class WaddingtonCPairArm(WaddingtonCArm):
                 counts[g] += 1
         return picked
 
-    def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
-        ml_scores = self._online.all_scores()
+    def _llm_vote(self, round_idx: int, revealed: dict[str, bool]) -> set[str]:
+        """The pairs the LLM branch votes for this round: its own names under the named-only policy."""
         padded = set(self._llm.select(round_idx, revealed))
         named = set(getattr(self._llm, "_llm_named", padded))
         self._last_llm_named_proposals = named
         self._last_llm_static_padding_proposals = set(getattr(self._llm, "_static_padding", []))
-        llm_set = named if _named_only_llm_vote() else padded
+        return named if _named_only_llm_vote() else padded
+
+    def _select_weighted(self, round_idx: int, revealed: dict[str, bool]) -> list[str]:
+        ml_scores = self._online.all_scores()
+        llm_set = self._llm_vote(round_idx, revealed)
 
         pool = [g for g in self._online._genes if g not in self._selected]
         n_explore = int(round(self.batch_size * self._explore_frac))
@@ -193,8 +197,9 @@ class WaddingtonCPairArm(WaddingtonCArm):
             return 0.5 * ml + 0.5 * self._prior.get(g, 0.0)
 
         if self._named_first:
-            # Complex-sharing pairs outrank even the LLM: 34.4% vs its 32.9% per pick, and unlike the
-            # LLM this source never runs out mid-campaign because it is fixed in advance.
+            # With complex_first on, complex-sharing pairs outrank even the LLM's names (34.4% hit rate
+            # against about 31% for LLM-named picks at 128 per round). That switch was rejected; see the
+            # module docstring.
             named = sorted((g for g in pool if g in llm_set), key=fill_score, reverse=True)
             rest = sorted((g for g in pool if g not in llm_set), key=fill_score, reverse=True)
             batch = _take(named + rest, [])
@@ -207,3 +212,19 @@ class WaddingtonCPairArm(WaddingtonCArm):
                         for g in pool}
             batch = sorted(combined, key=combined.__getitem__, reverse=True)[: self.batch_size]
         return batch
+
+
+class WaddingtonCPairNoLLMArm(WaddingtonCPairArm):
+    """The repaired pair arm with its LLM removed: the same prior, cold start, online ML and fill score,
+    but no named pairs, so the fill score orders every slot. Against the full arm it isolates what the
+    LLM adds on top of the label-free prior and the online model. Makes no LLM call and is deterministic,
+    so one replicate is the whole answer."""
+
+    def __init__(self, dataset_name: str, batch_size: int, **kwargs) -> None:
+        kwargs.setdefault("name", "waddington_c_pair_no_llm")
+        super().__init__(dataset_name, batch_size, **kwargs)
+
+    def _llm_vote(self, round_idx: int, revealed: dict[str, bool]) -> set[str]:
+        self._last_llm_named_proposals = set()
+        self._last_llm_static_padding_proposals = set()
+        return set()

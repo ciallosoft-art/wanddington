@@ -88,7 +88,7 @@ from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
 from .arms.waddington_c_feature_reasoning_arm import WaddingtonCFeatureReasoningArm, WaddingtonCPoolOnlyArm, WaddingtonCLinearArm
 from .arms.waddington_c_ensemble_arm import WaddingtonCEnsembleArm
-from .arms.waddington_c_pair_arm import WaddingtonCPairArm, pair_selection_config
+from .arms.waddington_c_pair_arm import WaddingtonCPairArm, WaddingtonCPairNoLLMArm, pair_selection_config
 from .arms.genedisco_arm import GeneDiscoArm, ACQUISITIONS as _GD_ACQ
 from .arms.ml_engine_arm import (MLEngineArm, AcquisitionArm, ACQUISITIONS as _ML_ACQ,
                                  parse_acq_name as _parse_acq, parse_arm_name as _parse_ml_arm,
@@ -107,13 +107,17 @@ _PAPER_ARMS = {
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
-    "waddington_c_pair",
+    "waddington_c_pair", "waddington_c_pair_no_llm",
 } | {f"genedisco_{a}" for a in _GD_ACQ} | {
     f"ml_{kind}_{m}" for kind in ("engine", "static") for m in _ml_engine_names()
 } | {f"ml_acq_{a}" for a in _ML_ACQ} | {f"ml_bnnacq_{a}" for a in _BNN_ACQ} | set(_gdf_arm_names()) | set(_gdfb_arm_names()) | {"ml_svgpacq_ucb1"} | {
     # the C-arm's 0.8/0.2 fusion adds 0.2 to a probability, so only probabilistic engines qualify
     f"waddington_c__{m}" for m in _ml_engine_names() if m != "lightgbm" and _ML_ENGINES[m].probabilistic
 }
+
+
+# C-arm variants that never call the LLM: their replicates are deterministic re-evaluations
+_NO_LLM_ARMS = {"waddington_c_no_llm", "waddington_c_pair_no_llm"}
 
 
 def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> list:
@@ -156,6 +160,8 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(WaddingtonCLinearArm(dataset_name, bs))
         elif name == "waddington_c_pair":
             arms.append(WaddingtonCPairArm(dataset_name, bs))
+        elif name == "waddington_c_pair_no_llm":
+            arms.append(WaddingtonCPairNoLLMArm(dataset_name, bs))
         elif name == "waddington_c_ensemble":
             arms.append(WaddingtonCEnsembleArm(dataset_name, bs))
         elif name.startswith("waddington_c__"):  # the full C-arm with an alternative ML engine
@@ -461,14 +467,11 @@ def _run_one_repeat(ds: str, arm_name: str, repeat_idx: int, oracle, n_rounds: i
                           or (arm_name.startswith("waddington_c__")
                               and _ml_is_stochastic(arm_name[len("waddington_c__"):])))
     item["local_seed"] = local_seed if consumes_local_rng else None
-    item["provider_seed"] = None if (
-        arm_name == "llm_reasoning" or arm_name.startswith("waddington")
-    ) else "not_applicable"
+    calls_llm = (arm_name == "llm_reasoning" or arm_name.startswith("waddington")) and arm_name not in _NO_LLM_ARMS
+    item["provider_seed"] = None if calls_llm else "not_applicable"
     item["replicate_semantics"] = (
         "local_rng_seeded" if consumes_local_rng else
-        "remote_api_invocation; independence_not_assumed" if (
-            arm_name == "llm_reasoning" or arm_name.startswith("waddington")
-        ) else "deterministic_re_evaluation"
+        "remote_api_invocation; independence_not_assumed" if calls_llm else "deterministic_re_evaluation"
     )
     item["completed_at"] = datetime.now(timezone.utc).isoformat()
     return item
