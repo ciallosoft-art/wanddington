@@ -14,7 +14,9 @@ low. This arm changes how the sources are combined, not the sources. Each change
 
   named_first   WADDINGTON_PAIR_NAMED_FIRST, default on. The LLM's names go first, ordered among
                 themselves by the fill score, and the fill score ranks the rest of the batch. The same
-                named-only vote, expressed as an ordering, so a branch at chance cannot outvote it.
+                named-only vote, expressed as an ordering, so a branch at chance cannot outvote it. Off,
+                the batch is ranked by 0.8 * fill + 0.2 * 1[named], the reported fusion; that is the
+                better setting once prior_fill is on (see below).
   prior_fill    WADDINGTON_PAIR_PRIOR_FILL, default on. The fill score is 0.5 * online ML score +
                 0.5 * the label-free interaction prior (interaction_prior below) instead of the ML score
                 alone. Ranked alone, the prior puts 182 hits in the top 640 with the seven original
@@ -31,8 +33,14 @@ low. This arm changes how the sources are combined, not the sources. Each change
   explore_frac  WADDINGTON_PAIR_EXPLORE_FRAC, default 0. A share of each batch spent on coverage. Also
                 rejected: 12.5% and 25% cost 6 and 18 hits at 640 picks.
 
-The repair the paper reports is named_first + prior_fill + cold_start on the eight-column table
-(experiments/13_tier_b_fusion_ablation.sh, run "coldstart_prior_v8"). The reported C-arm is untouched.
+Which configuration the paper reports (all on the eight-column table, experiments/13):
+  verifier_prior      prior_fill + cold_start with named_first OFF, i.e. the reported C-arm's fusion
+                      0.8 * fill + 0.2 * 1[named] on the repaired fill score: 237.8 at 640 picks, 76.7 at
+                      160. The best configuration, and the one the paper takes as the result.
+  coldstart_prior_v8  the same with named_first ON: 220.9 / 68.5. Named-first helped only while the fill
+                      was the online model alone; once the prior fills the batch, the LLM's names displace
+                      better picks, and the arm without its LLM (WaddingtonCPairNoLLMArm) reaches 239 / 72.
+The reported C-arm is untouched.
 """
 
 from __future__ import annotations

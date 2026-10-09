@@ -81,6 +81,13 @@ run coldstart_prior_v8 1 1 1 0
 # the best pair containing the least-sampled gene and see whether better rounds 3-5 repay round 1.
 run explore_12pct    1 1 1 0 0.125
 run explore_25pct    1 1 1 0 0.25
+# The LLM as a verifier instead of a proposer: no named-first ordering, so the score is the reported
+# C-arm's fusion applied to the repaired fill score, 0.8 * (0.5 ML + 0.5 prior) + 0.2 * 1[named], with the
+# same cold start. The repair above forces the LLM's names first and, once the prior fills the batch, that
+# costs hits against no LLM at all; this tests whether the paper's verifier role does better on pairs.
+# Result: 237.8 at 640 picks (no LLM 239, names first 220.9) and 76.7 at 160 (72, 68.5) -- the
+# configuration the paper takes as the repair.
+run verifier_prior   0 1 1 0
 # The final repair without its LLM: the same prior, cold start, online ML and fill score, no named pairs.
 # Against coldstart_prior_v8 it isolates what the LLM adds. It makes no LLM call and is deterministic,
 # so one replicate is the whole answer.

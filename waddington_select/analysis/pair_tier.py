@@ -15,6 +15,8 @@ the benchmark's difficulty tiers", Table pairs-bda, "Diagnosing and repairing th
   llm_supply     LLM-named valid pairs per round, distinct over five rounds, the share of the batch they
                  fill, and the hit rate of LLM-named and other picks
   complex        the complex co-membership pairs: count and hit rate
+  llm_contribution  the final repair three ways: the prior alone, without its LLM (prior + online ML),
+                 with the LLM's names first, and with the LLM as the reported 0.2 verifier
   coverage       genes touched by the selected pairs, and the exploration slope
   learning_curve a model trained on N randomly revealed pairs, scored on the rest (AUC, hits in the top
                  640), on the seven- and the eight-column table
@@ -66,6 +68,7 @@ RUNS = {
         "online_ml_interaction_7col": (I128 / "deterministic_1rep.json", "online_adaptive"),
         "online_ml_interaction_8col": (I128 / "deterministic_8feat_1rep.json", "online_adaptive"),
         "repair_no_llm": (I128 / "pair_no_llm_1rep.json", "waddington_c_pair_no_llm"),
+        "verifier_prior": (I128 / "pair_verifier_prior.json", "waddington_c_pair"),
         "namedfirst_only": (I128 / "pair_namedfirst_only.json", "waddington_c_pair"),
         "namedfirst_prior": (I128 / "pair_namedfirst_prior.json", "waddington_c_pair"),
         "coldstart_prior": (I128 / "pair_coldstart_prior.json", "waddington_c_pair"),
@@ -85,6 +88,7 @@ RUNS = {
         "c_arm_interaction": (I32 / "waddington_c_7col_20rep.json", "waddington_c"),
         "online_ml_interaction_7col": (I32 / "deterministic_7col_1rep.json", "online_adaptive"),
         "repair_no_llm": (I32 / "pair_no_llm_1rep.json", "waddington_c_pair_no_llm"),
+        "verifier_prior": (I32 / "pair_verifier_prior.json", "waddington_c_pair"),
         "namedfirst_only": (I32 / "pair_namedfirst_only.json", "waddington_c_pair"),
         "namedfirst_prior": (I32 / "pair_namedfirst_prior.json", "waddington_c_pair"),
         "coldstart_prior": (I32 / "pair_coldstart_prior.json", "waddington_c_pair"),
@@ -95,10 +99,10 @@ RUNS = {
     },
 }
 PRIOR_FILL = {"namedfirst_prior", "coldstart_prior", "complex_first", "coldstart_prior_v8",
-              "explore_12pct", "explore_25pct"}
-COLD_START_PLAIN = {"coldstart_prior", "coldstart_prior_v8", "repair_no_llm"}  # round 1 = the prior's top B
+              "explore_12pct", "explore_25pct", "verifier_prior"}
+COLD_START_PLAIN = {"coldstart_prior", "coldstart_prior_v8", "repair_no_llm", "verifier_prior"}  # round 1 = the prior's top B
 TABLE_LABELS = ("namedfirst", "coldstart", "complex", "explore", "repair_no_llm", "c_arm_interaction",
-                "online_ml_interaction")
+                "online_ml_interaction", "verifier")
 
 # (budget, from, to): the steps the paper attributes
 STEPS = [
@@ -110,6 +114,7 @@ STEPS = [
     (128, "coldstart_prior_v8", "complex_first"),
     (128, "coldstart_prior_v8", "explore_12pct"),
     (128, "coldstart_prior_v8", "explore_25pct"),
+    (128, "coldstart_prior_v8", "verifier_prior"),
     (32, "c_arm", "c_arm_interaction"),
     (32, "c_arm_interaction", "namedfirst_only"),
     (32, "c_arm", "namedfirst_only"),
@@ -117,6 +122,7 @@ STEPS = [
     (32, "namedfirst_prior", "coldstart_prior_v8"),
     (32, "coldstart_prior_v8", "complex_first"),
     (32, "coldstart_prior", "coldstart_prior_v8"),
+    (32, "coldstart_prior_v8", "verifier_prior"),
 ]
 
 
@@ -347,6 +353,13 @@ def run() -> dict:
             "online_ml_over_prior": no_llm - prior, "llm_over_no_llm": float(full.mean() - no_llm),
             "p_llm": float(stats.ttest_1samp(full, no_llm).pvalue),
             "replicates_above_no_llm": int((full > no_llm).sum()), "n": len(full)}
+        if "verifier_prior" in runs:  # the LLM as a 0.2 verifier on the same fill score
+            ver = _hits(runs["verifier_prior"])
+            res["llm_contribution"][str(budget)]["verifier"] = {
+                "mean": float(ver.mean()), "sd": float(ver.std(ddof=1)), "n": len(ver),
+                "over_no_llm": float(ver.mean() - no_llm), "p_vs_no_llm": float(stats.ttest_1samp(ver, no_llm).pvalue),
+                "replicates_above_no_llm": int((ver > no_llm).sum()),
+                "vs_named_first": _welch(full, ver)}
 
     # Coverage (the exploration table): real genes touched by the selected pairs, per replicate. The
     # library is 448 genes plus a negative control; pairing a gene with the control is a candidate too.
