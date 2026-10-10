@@ -1,0 +1,51 @@
+{
+  "created_utc": "2026-10-10T05:07:33.327889+00:00",
+  "protocol": {
+    "agent": "BioDiscoveryAgent (no tools)",
+    "datasets": [
+      "Horlbeck_Jurkat"
+    ],
+    "replicates": 20,
+    "rounds": 5,
+    "combinatorial": true,
+    "pair_pool": "real",
+    "llm_model": "openai-codex/gpt-5.6-luna",
+    "scored_by": "waddington_select.oracle.DatasetOracle",
+    "batch_sizes": {
+      "Horlbeck_Jurkat": 32
+    }
+  },
+  "scientific_inputs": {
+    "training_csv": "/home/duanyu/Python/SKILL/waddington/workspace/evaluation/lgbm_training_data_horlbeck_jurkat_pairs.csv",
+    "training_csv_sha256": "2cc88cd1d25f17f41ea6b4a7a4e37744befe5cd5bb47130e6943bf66ac5272c2",
+    "training_csv_v3": "/home/duanyu/Python/SKILL/waddington/workspace/evaluation/lgbm_training_data_horlbeck_jurkat_pairs_v3.csv",
+    "training_csv_v3_sha256": "49dfa76cfa3e30b5b3963fb5daa7cca5eb183567f5ceaa173430a2f6be287497"
+  },
+  "external_agent": {
+    "repo": "/home/duanyu/Python/keypaper/code/BioDiscoveryAgent",
+    "git_head": "19673c7371c542cfa155ffaa9047c53525f9fe2e",
+    "git_dirty": true,
+    "patched_files": {
+      "LLM.py": "ce6df9fb79b8556e79147e166dae04d302ec97d5afde90a5a87f58d9515997e4",
+      "tools.py": "1639a23460899230f6f6a4f68cf9b2ab61a4c774c3172e6a6bffd3439c29a3fe",
+      "research_assistant.py": "b7869eeb2a8ac64b577c356c2b13f54edf2243601d180870305df55b95ac9aad"
+    },
+    "patches": [
+      "LLM.py:complete_text \u2014 all completions routed through our LLMClient at a fixed model",
+      "tools.py:parse_entries \u2014 tolerate a missing 'Solution:' header on top-up re-prompts",
+      "tools.py:agent_loop \u2014 credit an unfilled round instead of discarding it",
+      "research_assistant.py \u2014 opt-in WADDINGTON_BDA_PAIR_POOL override for the pair library"
+    ],
+    "import_stubs": [
+      "Bio",
+      "__pycache__",
+      "html2text",
+      "langchain",
+      "openai",
+      "paper_scrapper",
+      "paperqa",
+      "scholarly",
+      "transformers"
+    ]
+  }
+}
