@@ -35,12 +35,14 @@ low. This arm changes how the sources are combined, not the sources. Each change
 
 Which configuration the paper reports (all on the eight-column table, experiments/13):
   verifier_prior      prior_fill + cold_start with named_first OFF, i.e. the reported C-arm's fusion
-                      0.8 * fill + 0.2 * 1[named] on the repaired fill score: 237.8 at 640 picks, 76.7 at
-                      160. The best configuration, and the one the paper takes as the result.
-  coldstart_prior_v8  the same with named_first ON: 220.9 / 68.5. Named-first helped only while the fill
-                      was the online model alone; once the prior fills the batch, the LLM's names displace
-                      better picks, and the arm without its LLM (WaddingtonCPairNoLLMArm) reaches 239 / 72.
-The reported C-arm is untouched.
+                      0.8 * fill + 0.2 * 1[named] on the repaired fill score: 232.6 at 640 picks, 76.2 at
+                      160 (with the cross-experiment memory, as every pair run). The paper's repair at BDA's
+                      budget; at 640 picks the arm without its LLM (WaddingtonCPairNoLLMArm) does better, 239.
+  coldstart_prior_v8  the same with named_first ON: 220.9 / 68.5, below the no-LLM arm (239 / 72): once the
+                      prior fills the batch, the LLM's names displace better picks.
+On Horlbeck's held-out Jurkat map (experiments/18, docs/jurkat_protocol.md) the repair does not replicate:
+BDA's agent beats the verifier configuration at 160 picks (33.8 vs 29.2), and there, with a weak prior,
+named_first is the better role. The reported C-arm is untouched.
 """
 
 from __future__ import annotations
