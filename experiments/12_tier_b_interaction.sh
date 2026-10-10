@@ -74,13 +74,15 @@ export WADDINGTON_GPT_RESULT_DIR="$RESULT_DIR"
 mkdir -p "$RESULT_DIR"
 echo "=== Horlbeck with interaction features ($PAIR_COLUMNS pair columns), batch $BATCH, $REPS replicates ==="
 
+# ONLY=deterministic or ONLY=carm runs one of the two steps.
+ONLY="${ONLY:-}"
 # Deterministic arms: identical every replicate, so one pass is the whole answer.
-conda run -n waddington-bio python3 -m waddington_select \
+[[ -z "$ONLY" || "$ONLY" == deterministic ]] && conda run -n waddington-bio python3 -m waddington_select \
   --arms random coreset static_ranker online_adaptive \
   --datasets Horlbeck --replicates 1 --seed-mode local --rounds 5 --resume \
   --out "$RESULT_DIR/deterministic${TAG}_1rep.json"
 
-conda run -n waddington-bio python3 -m waddington_select \
+[[ -z "$ONLY" || "$ONLY" == carm ]] && conda run -n waddington-bio python3 -m waddington_select \
   --arms waddington_c \
   --datasets Horlbeck --replicates "$REPS" --seed-mode local --rounds 5 --resume \
   --out "$RESULT_DIR/waddington_c${TAG}_${REPS}rep.json"
