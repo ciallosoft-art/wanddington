@@ -1,0 +1,41 @@
+{
+  "k562_rule_check": {
+    "pairs": 100128,
+    "ours": 10014,
+    "bda": 9959,
+    "missed": 19,
+    "extra": 74,
+    "jaccard": 0.9907305890561148,
+    "thresholds": [
+      -1.9538584649,
+      1.82022797915
+    ]
+  },
+  "jurkat": {
+    "pool": 75078,
+    "genes": 388,
+    "hits": 7508,
+    "hit_rate": 0.10000266389621461,
+    "thresholds": [
+      -1.46071500175,
+      1.5499673737499997
+    ]
+  },
+  "string": {
+    "new_genes": [
+      "COPA",
+      "CWC22",
+      "DUT",
+      "EIF2B2",
+      "EIF4G2",
+      "MED10",
+      "MRPL11",
+      "MRPL35",
+      "SNRNP200",
+      "SPDL1"
+    ],
+    "new_edges_rows": 304,
+    "k562_rows": 6274,
+    "string_version_for_new_edges": "12.5"
+  }
+}

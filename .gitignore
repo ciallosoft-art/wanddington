@@ -115,6 +115,9 @@ workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv
 # before that column existed; experiments/12_tier_b_interaction.sh derives them from the two above.
 workspace/evaluation/lgbm_training_data_horlbeck_pairs_7col.csv
 workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3_7col.csv
+# The Jurkat map's pair tables (docs/jurkat_protocol.md), rebuilt by build_horlbeck_pairs.py --screen Horlbeck_Jurkat
+workspace/evaluation/lgbm_training_data_horlbeck_jurkat_pairs.csv
+workspace/evaluation/lgbm_training_data_horlbeck_jurkat_pairs_v3.csv
 
 # Run logs under results/ are console transcripts, not results (matching the existing 20-rep dirs,
 # which track only .json). The provenance that matters lives in the .manifest.json sidecars.

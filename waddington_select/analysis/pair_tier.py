@@ -69,6 +69,7 @@ RUNS = {
         "online_ml_interaction_8col": (I128 / "deterministic_8feat_1rep.json", "online_adaptive"),
         "repair_no_llm": (I128 / "pair_no_llm_1rep.json", "waddington_c_pair_no_llm"),
         "verifier_prior": (I128 / "pair_verifier_prior.json", "waddington_c_pair"),
+        "verifier_prior_nomem": (I128 / "pair_verifier_prior_nomem.json", "waddington_c_pair"),
         "namedfirst_only": (I128 / "pair_namedfirst_only.json", "waddington_c_pair"),
         "namedfirst_prior": (I128 / "pair_namedfirst_prior.json", "waddington_c_pair"),
         "coldstart_prior": (I128 / "pair_coldstart_prior.json", "waddington_c_pair"),
@@ -86,9 +87,11 @@ RUNS = {
         "c_arm": (B32 / "waddington_c_20rep.json", "waddington_c"),
         "bda": (B32 / "bda_controlled_real.json", "bda"),
         "c_arm_interaction": (I32 / "waddington_c_7col_20rep.json", "waddington_c"),
+        "c_arm_interaction_nomem": (I32 / "waddington_c_7col_nomem_20rep.json", "waddington_c"),
         "online_ml_interaction_7col": (I32 / "deterministic_7col_1rep.json", "online_adaptive"),
         "repair_no_llm": (I32 / "pair_no_llm_1rep.json", "waddington_c_pair_no_llm"),
         "verifier_prior": (I32 / "pair_verifier_prior.json", "waddington_c_pair"),
+        "verifier_prior_nomem": (I32 / "pair_verifier_prior_nomem.json", "waddington_c_pair"),
         "namedfirst_only": (I32 / "pair_namedfirst_only.json", "waddington_c_pair"),
         "namedfirst_prior": (I32 / "pair_namedfirst_prior.json", "waddington_c_pair"),
         "coldstart_prior": (I32 / "pair_coldstart_prior.json", "waddington_c_pair"),
@@ -99,8 +102,13 @@ RUNS = {
     },
 }
 PRIOR_FILL = {"namedfirst_prior", "coldstart_prior", "complex_first", "coldstart_prior_v8",
-              "explore_12pct", "explore_25pct", "verifier_prior"}
-COLD_START_PLAIN = {"coldstart_prior", "coldstart_prior_v8", "repair_no_llm", "verifier_prior"}  # round 1 = the prior's top B
+              "explore_12pct", "explore_25pct", "verifier_prior", "verifier_prior_nomem"}
+# Runs made after 2026-09-16 without the legacy prompt switch, so the LLM saw no cross-experiment memory;
+# kept as a memory ablation against their counterparts, which read experiment 08's memory like every
+# other combinatorial run.
+NO_MEMORY = {"verifier_prior_nomem": "verifier_prior", "c_arm_interaction_nomem": "c_arm_interaction"}
+COLD_START_PLAIN = {"coldstart_prior", "coldstart_prior_v8", "repair_no_llm", "verifier_prior",
+                    "verifier_prior_nomem"}  # round 1 = the prior's top B
 TABLE_LABELS = ("namedfirst", "coldstart", "complex", "explore", "repair_no_llm", "c_arm_interaction",
                 "online_ml_interaction", "verifier")
 
@@ -361,6 +369,16 @@ def run() -> dict:
                 "replicates_above_no_llm": int((ver > no_llm).sum()),
                 "vs_named_first": _welch(full, ver)}
 
+    # Memory ablation: the same configuration with and without the cross-experiment memory in the prompt
+    res["memory_ablation"] = {}
+    for B, budget in BUDGETS.items():
+        runs = all_runs[B]
+        for nomem, mem in NO_MEMORY.items():
+            if nomem in runs and mem in runs:
+                res["memory_ablation"][f"{budget}:{mem}"] = {
+                    "with_memory": float(_hits(runs[mem]).mean()), "without_memory": float(_hits(runs[nomem]).mean()),
+                    **_welch(_hits(runs[nomem]), _hits(runs[mem]))}
+
     # Coverage (the exploration table): real genes touched by the selected pairs, per replicate. The
     # library is 448 genes plus a negative control; pairing a gene with the control is a candidate too.
     n_genes = len({g for t in pool for g in t.split("|")} - {NEGATIVE})
@@ -418,6 +436,9 @@ if __name__ == "__main__":
     for k, v in r["vs_bda"].items():
         print(f"  vs BDA {k}: {v['delta']:+.1f} p={v['p']:.2g}" +
               (f" d={v['cohens_d']:.2f} ci90=[{v['ci90'][0]:.1f},{v['ci90'][1]:.1f}]" if "cohens_d" in v else ""))
+    for k, v in r.get("memory_ablation", {}).items():
+        print(f"  memory {k}: with {v['with_memory']:.1f}, without {v['without_memory']:.1f}, "
+              f"delta {v['delta']:+.1f} p={v['p']:.2g}")
     for k, v in r.get("llm_contribution", {}).items():
         print(f"  LLM contribution, {k} picks ({v['columns']} cols): prior {v['prior_alone']} -> no LLM "
               f"{v['no_llm']:.0f} -> full {v['full']:.1f}; LLM {v['llm_over_no_llm']:+.1f} p={v['p_llm']:.2g} "

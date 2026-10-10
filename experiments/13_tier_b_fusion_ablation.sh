@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Use task prompts matched to the actual Perturb-seq readout definitions.
-export WADDINGTON_LEGACY_TASK_PROMPTS=0
+# Combinatorial runs made before 2026-09-16 read experiment 08's cross-experiment memory, which predates the
+# task-prompt protocol field; today's code ignores it unless WADDINGTON_LEGACY_TASK_PROMPTS=1. For these
+# pair screens that switch changes nothing else (it only swaps the two Replogle prompts), so set it to
+# reproduce those runs with their memory; 0 runs the LLM with no memory at all.
+export WADDINGTON_LEGACY_TASK_PROMPTS="${WADDINGTON_LEGACY_TASK_PROMPTS:-0}"
 # Attribute the combinatorial-tier fusion repair to its two independent parts.
 #
 # The reported C-arm scores Score(g) = 0.80*ml(g) + 0.20*1[g in named]. On Horlbeck that is the wrong

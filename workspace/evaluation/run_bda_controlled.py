@@ -68,7 +68,26 @@ BDA_NAME = {
     "Replogle_K562_essential": "Replogle_K562_essential",
     "Replogle_K562_gwps": "Replogle_K562_gwps",
     "Horlbeck": "Horlbeck",
+    # Horlbeck's Jurkat map (docs/jurkat_protocol.md). Ours, not BDA's: built by build_horlbeck_jurkat.py
+    # in BDA's format, and copied into BDA's datasets/ by ensure_derived_benchmark before a run.
+    "Horlbeck_Jurkat": "Horlbeck_Jurkat",
 }
+DERIVED_DIR = REPO_ROOT / "workspace" / "data" / "horlbeck2018"
+DERIVED = {"Horlbeck_Jurkat"}
+
+
+def ensure_derived_benchmark(dataset: str) -> None:
+    """Put a benchmark we built (ground truth, hits, task prompt) where BDA's code reads its own."""
+    if dataset not in DERIVED:
+        return
+    stem = BDA_NAME[dataset]
+    for src, dst in ((DERIVED_DIR / f"ground_truth_{stem}.csv", BDA_DIR / "datasets" / f"ground_truth_{stem}.csv"),
+                     (DERIVED_DIR / f"topmovers_{stem}.npy", BDA_DIR / "datasets" / f"topmovers_{stem}.npy"),
+                     (DERIVED_DIR / "task_prompts" / f"{stem}.json",
+                      BDA_DIR / "datasets" / "task_prompts" / f"{stem}.json")):
+        if not dst.exists() or dst.read_bytes() != src.read_bytes():
+            dst.write_bytes(src.read_bytes())
+            print(f"    [benchmark] copied {src.name} into BDA's datasets/")
 
 
 def ensure_task_prompt(dataset: str) -> None:
@@ -84,8 +103,8 @@ def ensure_task_prompt(dataset: str) -> None:
     print(f"    [task prompt] wrote {path.name} from our HARDCODED_TASKS")
 
 
-def horlbeck_pool() -> str:
-    gt = BDA_DIR / "datasets" / "ground_truth_Horlbeck.csv"
+def horlbeck_pool(stem: str = "Horlbeck") -> str:
+    gt = BDA_DIR / "datasets" / f"ground_truth_{stem}.csv"
     import pandas as pd
     pairs = [ast.literal_eval(s) for s in pd.read_csv(gt)["Gene_pairs"]]
     genes = sorted({g.upper() for p in pairs for g in p})
@@ -98,6 +117,7 @@ def run_one(dataset: str, replicate: int, rounds: int, combinatorial: bool,
     oracle = DatasetOracle(dataset)
     batch = oracle.batch_size
     stem = BDA_NAME[dataset]
+    ensure_derived_benchmark(dataset)
     ensure_task_prompt(dataset)
 
     workdir = Path(tempfile.mkdtemp(prefix=f"bda_{dataset}_{replicate}_"))
@@ -127,7 +147,7 @@ def run_one(dataset: str, replicate: int, rounds: int, combinatorial: bool,
     env["PYTHONPATH"] = os.pathsep.join(
         [str(stubs), str(REPO_ROOT)] + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else []))
     if combinatorial and pair_pool == "real":
-        env["WADDINGTON_BDA_PAIR_POOL"] = horlbeck_pool()
+        env["WADDINGTON_BDA_PAIR_POOL"] = horlbeck_pool(stem)
     else:
         env.pop("WADDINGTON_BDA_PAIR_POOL", None)
 

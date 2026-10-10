@@ -64,16 +64,31 @@ sys.path.insert(0, str(REPO_ROOT))
 from waddington_select.tables import ABSDIFF_SUFFIX, pair_token  # noqa: E402
 
 BDA_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
-GROUND_TRUTH = BDA_DIR / "ground_truth_Horlbeck.csv"
-TOPMOVERS = BDA_DIR / "topmovers_Horlbeck.npy"
-
-INTERACTION_CSV = HERE / "pair_interaction_features.csv"
+JURKAT_DIR = REPO_ROOT / "workspace" / "data" / "horlbeck2018"
 TIER_A_V1 = HERE / "lgbm_training_data_tier_a.csv"
 TIER_A_V3 = HERE / "lgbm_training_data_tier_a_v3.csv"
-OUT_V1 = HERE / "lgbm_training_data_horlbeck_pairs.csv"
-OUT_V3 = HERE / "lgbm_training_data_horlbeck_pairs_v3.csv"
 
+# --screen picks the map. Horlbeck (K562) is BDA's; Horlbeck_Jurkat is the same library in Jurkat cells,
+# built by build_horlbeck_jurkat.py for the held-out test (docs/jurkat_protocol.md). Either way the
+# training half is the nine single-gene screens only -- no screen's pair labels enter the other's table.
+SCREENS = {
+    "Horlbeck": dict(ground_truth=BDA_DIR / "ground_truth_Horlbeck.csv",
+                     topmovers=BDA_DIR / "topmovers_Horlbeck.npy",
+                     interaction=HERE / "pair_interaction_features.csv",
+                     out_v1=HERE / "lgbm_training_data_horlbeck_pairs.csv",
+                     out_v3=HERE / "lgbm_training_data_horlbeck_pairs_v3.csv"),
+    "Horlbeck_Jurkat": dict(ground_truth=JURKAT_DIR / "ground_truth_Horlbeck_Jurkat.csv",
+                            topmovers=JURKAT_DIR / "topmovers_Horlbeck_Jurkat.npy",
+                            interaction=HERE / "pair_interaction_features_horlbeck_jurkat.csv",
+                            out_v1=HERE / "lgbm_training_data_horlbeck_jurkat_pairs.csv",
+                            out_v3=HERE / "lgbm_training_data_horlbeck_jurkat_pairs_v3.csv"),
+}
 DATASET = "Horlbeck"
+GROUND_TRUTH = SCREENS[DATASET]["ground_truth"]
+TOPMOVERS = SCREENS[DATASET]["topmovers"]
+INTERACTION_CSV = SCREENS[DATASET]["interaction"]
+OUT_V1 = SCREENS[DATASET]["out_v1"]
+OUT_V3 = SCREENS[DATASET]["out_v3"]
 ANCHOR_FEATS = ["g1_ppi_score", "archs4_coexpr", "kegg_overlap"]
 
 
@@ -82,7 +97,7 @@ def load_pairs() -> tuple[list[str], dict[str, int], list[tuple[str, str]]]:
     raw = [ast.literal_eval(s) for s in gt["Gene_pairs"]]
     tokens = [pair_token(a, b) for a, b in raw]
     if len(set(tokens)) != len(tokens):
-        raise RuntimeError("duplicate pair tokens in the Horlbeck ground truth")
+        raise RuntimeError(f"duplicate pair tokens in the {DATASET} ground truth")
 
     tm = np.load(TOPMOVERS, allow_pickle=True)
     hits = {pair_token(a, b) for a, b in tm}
@@ -94,7 +109,7 @@ def load_pairs() -> tuple[list[str], dict[str, int], list[tuple[str, str]]]:
     print(f"  pool  : {len(tokens)} pairs over "
           f"{len({g for p in raw for g in p})} genes")
     print(f"  labels: {sum(labels.values())} hits ({100 * np.mean(list(labels.values())):.2f}%) "
-          f"— BDA's two-tailed rule, ~5% most buffering + ~5% most synergistic by signed GI score")
+          f"— two-tailed, ~5% most extreme in each direction of the signed GI score")
     return tokens, labels, [(a.strip().upper(), b.strip().upper()) for a, b in raw]
 
 
@@ -181,7 +196,12 @@ def build(tier_a_csv: Path, out_csv: Path) -> pd.DataFrame:
     return out
 
 
-def main(check_only: bool = False) -> None:
+def main(check_only: bool = False, screen: str = "Horlbeck") -> None:
+    global DATASET, GROUND_TRUTH, TOPMOVERS, INTERACTION_CSV, OUT_V1, OUT_V3
+    DATASET = screen
+    cfg = SCREENS[screen]
+    GROUND_TRUTH, TOPMOVERS, INTERACTION_CSV = cfg["ground_truth"], cfg["topmovers"], cfg["interaction"]
+    OUT_V1, OUT_V3 = cfg["out_v1"], cfg["out_v3"]
     for p in (TIER_A_V1, TIER_A_V3):
         if not p.exists():
             raise SystemExit(f"{p.name} missing — run build_tier_a_unfiltered.py first")
@@ -212,4 +232,5 @@ def main(check_only: bool = False) -> None:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--check-only", action="store_true")
+    ap.add_argument("--screen", default="Horlbeck", choices=sorted(SCREENS))
     main(**vars(ap.parse_args()))

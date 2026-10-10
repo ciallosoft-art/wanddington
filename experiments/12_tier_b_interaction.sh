@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Use task prompts matched to the actual Perturb-seq readout definitions.
-export WADDINGTON_LEGACY_TASK_PROMPTS=0
+# Combinatorial runs made before 2026-09-16 read experiment 08's cross-experiment memory, which predates the
+# task-prompt protocol field; today's code ignores it unless WADDINGTON_LEGACY_TASK_PROMPTS=1. For these
+# pair screens that switch changes nothing else (it only swaps the two Replogle prompts), so set it to
+# reproduce those runs with their memory; 0 runs the LLM with no memory at all.
+export WADDINGTON_LEGACY_TASK_PROMPTS="${WADDINGTON_LEGACY_TASK_PROMPTS:-0}"
 # Combinatorial tier WITH genuine interaction features x(g_a, g_b).
 #
 # The pair table built by build_horlbeck_pairs.py describes a pair only by symmetric functions of its

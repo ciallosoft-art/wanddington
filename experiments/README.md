@@ -78,7 +78,7 @@ bash experiments/09_tier_b_pairs.sh        # reuses experiment 08's memory
 conda run -n waddington-bio python3 workspace/evaluation/summarize_tiers.py
 ```
 
-### External baselines and the combinatorial repair (scripts 10-14)
+### External baselines, the combinatorial repair and its held-out test (scripts 10-14, 18)
 
 | Script | What it runs |
 |---|---|
@@ -87,12 +87,16 @@ conda run -n waddington-bio python3 workspace/evaluation/summarize_tiers.py
 | `12_tier_b_interaction.sh` | Combinatorial tier with genuine interaction features `x(g_a, g_b)`. |
 | `13_tier_b_fusion_ablation.sh` | The fusion repair, one switch at a time: named-first, interaction-prior fill, round-1 cold start, complex-first, explore quota. Takes `[replicates] [batch]`; pass `32` for BDA's own protocol. |
 | `14_bda_pairs_20rep.sh` | Raises the BDA two-gene baseline to twenty replicates. |
+| `12_tier_b_interaction.sh 20 32` | With `PAIR_COLUMNS=7`: the C-arm with interaction features at BDA's budget, on a seven-column copy of the table, so it can be compared with the seven-column repair stages. |
+| `18_jurkat_heldout.sh` | Held-out test on Horlbeck's Jurkat map, every setting frozen at K562's (`docs/jurkat_protocol.md`). Takes `[replicates] [batch]` (default 32, the primary budget); `ONLY=<step>` runs one step. |
 
 Feature and label builders these depend on:
 
 ```bash
 conda run -n waddington-bio python3 workspace/evaluation/build_pair_interaction_features.py   # 8 interaction features
 conda run -n waddington-bio python3 workspace/evaluation/build_norman_gi.py                   # second GI screen
+conda run -n waddington-bio python3 workspace/evaluation/build_horlbeck_jurkat.py             # Jurkat map: labels, prompt, STRING seed
+conda run -n waddington-bio python3 workspace/evaluation/build_horlbeck_pairs.py --screen Horlbeck_Jurkat
 conda run -n waddington-bio python3 workspace/evaluation/run_bda_controlled.py --help         # the BDA harness
 ```
 

@@ -71,6 +71,13 @@ TASK_PROMPT_FILES: dict[str, Optional[str]] = {
     "Horlbeck": "Horlbeck.json",
 }
 
+# Task prompts we derive ourselves, kept out of BDA's directory. The Jurkat map's prompt is BDA's
+# Horlbeck prompt with the cell line changed and nothing else (workspace/evaluation/build_horlbeck_jurkat.py,
+# docs/jurkat_protocol.md).
+TASK_PROMPT_PATHS: dict[str, Path] = {
+    "Horlbeck_Jurkat": REPO_ROOT / "workspace" / "data" / "horlbeck2018" / "task_prompts" / "Horlbeck_Jurkat.json",
+}
+
 HARDCODED_TASKS: dict[str, dict[str, str]] = {
     "Replogle_K562_essential": {
         "Task": "Identify genes whose CRISPRi knockdown causes a strong transcriptomic response in K562 cells in the curated essential-gene Perturb-seq panel",
@@ -122,6 +129,8 @@ def _load_task(dataset_name: str) -> dict[str, str]:
     if (task_prompt_protocol() == LEGACY_TASK_PROMPT_PROTOCOL
             and dataset_name in LEGACY_REPLOGLE_TASKS):
         return LEGACY_REPLOGLE_TASKS[dataset_name]
+    if dataset_name in TASK_PROMPT_PATHS:
+        return json.loads(TASK_PROMPT_PATHS[dataset_name].read_text())
     prompt_file = TASK_PROMPT_FILES.get(dataset_name)
     if prompt_file:
         path = TASK_PROMPTS_DIR / prompt_file
