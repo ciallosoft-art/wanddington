@@ -15,6 +15,9 @@ jurkat_heldout.py — the pre-registered analysis of the held-out test on Horlbe
   replicated  P1 and P2 both in the predicted direction with Holm-adjusted p < 0.05 at 160 picks
   transfer    secondary, exploratory: rankers trained on K562's pair labels, scored on the Jurkat pool;
               and ranking by the same pair's K562 GI score
+  llm_picks   exploratory, added after the runs (2026-10-11; no pre-registered result depends on it): in
+              each LLM arm, the share of the batch the LLM named and the hit rate of its named picks
+              against the rest; for BDA's agent, the picks it actually made and its hits per pick
 
     python -m waddington_select.analysis.jurkat_heldout
 """
@@ -90,6 +93,44 @@ def load_arm(budget_batch: int, label: str) -> np.ndarray | None:
     if not runs:
         return None
     return np.array([r["cumulative_hits"][-1] for r in runs], dtype=float)
+
+
+def load_runs(budget_batch: int, label: str) -> list[dict] | None:
+    """The arm's per-replicate records (selections per round), or None if it has not been run."""
+    stem, arm = ARMS[label]
+    f = GPT / f"jurkat_b{budget_batch}_20rep" / f"{stem}.json"
+    if not f.exists():
+        return None
+    return json.loads(f.read_text()).get(DATASET, {}).get(arm) or None
+
+
+def llm_picks(pool: pd.DataFrame) -> dict:
+    """Exploratory: how the LLM's named picks hit against the rest of the batch, and BDA's picks per run."""
+    hits = set(pool.loc[pool["label"] == 1, "gene"])
+    out = {}
+    for batch, budget in BUDGETS.items():
+        for label in ("padded_llm", "c_arm", "repair_names_first", "repair_verifier"):
+            rs = load_runs(batch, label)
+            if not rs or "selected_llm_named_genes_per_round" not in rs[0]:
+                continue
+            named, other, share = [], [], []
+            for r in rs:
+                for i, sel in enumerate(r["selected_genes_per_round"]):
+                    nm = set(r["selected_llm_named_genes_per_round"][i])
+                    named += [g in hits for g in sel if g in nm]
+                    other += [g in hits for g in sel if g not in nm]
+                    share.append(len(nm & set(sel)) / batch)
+            out[f"{budget}:{label}"] = {"llm_share_of_batch": float(np.mean(share)),
+                                        "hit_rate_llm_named": float(np.mean(named)) if named else None,
+                                        "hit_rate_other": float(np.mean(other)) if other else None}
+        rs = load_runs(batch, "bda")
+        if rs:
+            picks = np.array([sum(len(b) for b in r["selected_genes_per_round"]) for r in rs], dtype=float)
+            h = np.array([r["cumulative_hits"][-1] for r in rs], dtype=float)
+            out[f"{budget}:bda"] = {"picks_mean": float(picks.mean()), "picks_min": int(picks.min()),
+                                    "runs_short": int((picks < budget).sum()), "n": len(rs),
+                                    "hits_per_pick": float(h.sum() / picks.sum())}
+    return out
 
 
 def _summary(x: np.ndarray) -> dict:
@@ -180,6 +221,7 @@ def run() -> dict:
     if "P1" in primary and "P2" in primary:
         res["replicated"] = all(primary[i]["direction_ok"] and primary[i]["p_holm"] < 0.05 for i in ("P1", "P2"))
     res["transfer"] = transfer(pool)
+    res["llm_picks"] = llm_picks(pool)
     OUT.write_text(json.dumps(res, indent=2))
     return res
 
@@ -195,3 +237,5 @@ if __name__ == "__main__":
                   f"predicted {c['predicted']} -> {'ok' if c['direction_ok'] else 'NOT as predicted'}")
     print("replicated (P1 and P2 at 160 picks):", r["replicated"])
     print("transfer from K562:", json.dumps(r["transfer"]))
+    for k, v in r["llm_picks"].items():
+        print(f"   picks {k}: " + ", ".join(f"{a} {b:.3f}" if isinstance(b, float) else f"{a} {b}" for a, b in v.items()))
