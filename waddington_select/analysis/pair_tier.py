@@ -11,7 +11,7 @@ the benchmark's difficulty tiers", Table pairs-bda, "Diagnosing and repairing th
   runs           every configuration at both budgets: replicates, mean +- s.d.
   steps          the changes the paper attributes, as Welch tests between consecutive configurations
   over_prior     each run that uses the prior, against that prior ranked on its own
-  vs_bda         the 160-pick rows against BioDiscoveryAgent's agent at its own budget
+  vs_bda         every replicated row against BioDiscoveryAgent's agent at the same budget (160 and 640)
   llm_supply     LLM-named valid pairs per round, distinct over five rounds, the share of the batch they
                  fill, and the hit rate of LLM-named and other picks
   complex        the complex co-membership pairs: count and hit rate
@@ -64,6 +64,7 @@ RUNS = {
         "online_ml": (B128 / "calibration_20rep.json", "online_adaptive"),
         "padded_llm": (B128 / "calibration_20rep.json", "llm_reasoning"),
         "c_arm": (B128 / "waddington_c_20rep.json", "waddington_c"),
+        "bda": (B128 / "bda_controlled_real.json", "bda"),  # experiments/14 at 128/round (2026-10-12)
         "c_arm_interaction": (I128 / "waddington_c_20rep.json", "waddington_c"),
         "online_ml_interaction_7col": (I128 / "deterministic_1rep.json", "online_adaptive"),
         "online_ml_interaction_8col": (I128 / "deterministic_8feat_1rep.json", "online_adaptive"),
@@ -314,16 +315,21 @@ def run() -> dict:
                 "n": len(x)}
 
         if "bda" in runs:
+            # keyed "<budget>:<row>"; BDA's agent has runs at both budgets (640 since 2026-10-12)
             bda = _hits(runs["bda"])
+
+            def _vs_value(ref: float) -> dict:
+                return {"value": ref, "delta": float(ref - bda.mean()),
+                        "p": float(stats.ttest_1samp(bda, ref).pvalue),
+                        "bda_replicates_reaching": int((bda >= ref).sum())}
+
             for label in runs:
-                if label != "bda" and len(runs[label]) > 1:
-                    res["vs_bda"][label] = _welch(bda, _hits(runs[label]))
+                if label == "bda":
+                    continue
+                x = _hits(runs[label])
+                res["vs_bda"][f"{budget}:{label}"] = _welch(bda, x) if len(x) > 1 else _vs_value(float(x[0]))
             for k in (7, 8):
-                ref = prior_alone[f"{k}_columns"][str(budget)]
-                res["vs_bda"][f"prior_alone_{k}_columns"] = {
-                    "value": ref, "delta": float(ref - bda.mean()),
-                    "p": float(stats.ttest_1samp(bda, ref).pvalue),
-                    "bda_replicates_reaching": int((bda >= ref).sum())}
+                res["vs_bda"][f"{budget}:prior_alone_{k}_columns"] = _vs_value(prior_alone[f"{k}_columns"][str(budget)])
 
         for label, rs in runs.items():
             if "llm_named_proposals_per_round" not in rs[0]:
