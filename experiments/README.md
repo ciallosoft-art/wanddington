@@ -88,6 +88,9 @@ conda run -n waddington-bio python3 workspace/evaluation/summarize_tiers.py
 | `13_tier_b_fusion_ablation.sh` | The fusion repair, one switch at a time: named-first, interaction-prior fill, round-1 cold start, complex-first, explore quota. Takes `[replicates] [batch]`; pass `32` for BDA's own protocol. |
 | `14_bda_pairs_20rep.sh` | Raises the BDA two-gene baseline to twenty replicates. `[reps] [batch]`: batch 32 (default, BDA's protocol, 160 picks) or 128 (640 picks, run 2026-10-11/12). |
 | `12_tier_b_interaction.sh 20 32` | With `PAIR_COLUMNS=7`: the C-arm with interaction features at BDA's budget, on a seven-column copy of the table, so it can be compared with the seven-column repair stages. |
+| `15_ml_engines.sh <group>` | Alternative ML engines inside the C-arm's ML engine, ML only (`docs/ml_engines_plan.md`). `TIER=full_pool` runs a group on the full-pool tier into `ml_engines/tier_a/` (analysis `ml_engines_tier_a.py`). |
+| `16_ml_engines_carm.sh` | The best alternative engines inside the full GPT C-arm. |
+| `17_fusion_weight.sh` | The full GPT C-arm at other fusion weights (Figure 8). |
 | `18_jurkat_heldout.sh` | Held-out test on Horlbeck's Jurkat map, every setting frozen at K562's (`docs/jurkat_protocol.md`). Takes `[replicates] [batch]` (default 32, the primary budget); `ONLY=<step>` runs one step. |
 
 Feature and label builders these depend on:
