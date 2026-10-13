@@ -30,6 +30,11 @@
 #   (gdf_rerun is historical: it patched the first gdf run, which the row-order fix superseded entirely)
 #   experiments/15_ml_engines.sh gdf_rerun # after the float32 softuncertain fix: re-run the BNN softuncertain arms on
 #                                          # every screen and the arms the crash never reached (-> *.rerun.json)
+#
+# TIER=full_pool runs a group on BDA's full-pool tier (core-essential genes kept, Table tiers) instead of the
+# headline tier: same arms and settings, the tier_a tables, outputs in ml_engines/tier_a/ (phase 3 of the
+# plan, 2026-10-13). Groups: tabular graph genept svm svm_rbf score score_hard desc bnn beyond; bnn runs the
+# engine only (no acquisition rules on it) and beyond leaves out the GP's UCB rule.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -40,9 +45,21 @@ export WADDINGTON_PARALLEL=1  # the engines already use every core; repeat-level
 export CUBLAS_WORKSPACE_CONFIG=:4096:8  # reproducible cuBLAS for the GNN (dense neighbour mean on the GPU)
 
 OUT=workspace/results/ml_engines
-mkdir -p "$OUT"
-
 GROUP="${1:-tabular}"
+TIER="${TIER:-headline}"
+case "$TIER" in
+  headline) ;;
+  full_pool)
+    case "$GROUP" in
+      tabular|graph|genept|svm|svm_rbf|score|score_hard|desc|bnn|beyond) ;;
+      *) echo "TIER=full_pool supports: tabular graph genept svm svm_rbf score score_hard desc bnn beyond" >&2; exit 2 ;;
+    esac
+    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv"
+    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv"
+    OUT=workspace/results/ml_engines/tier_a ;;
+  *) echo "TIER must be headline or full_pool" >&2; exit 2 ;;
+esac
+mkdir -p "$OUT"
 case "$GROUP" in
   tabular) DET="lightgbm logreg lambdarank"; SEEDED="rf mlp" ;;
   graph)   DET="rwr";                        SEEDED="gnn" ;;
@@ -63,6 +80,7 @@ case "$GROUP" in
   beyond)  DET="lgbm_rwr";                   SEEDED="mf svgp"; EXTRA_SEEDED="ml_svgpacq_ucb1" ;;
   *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a|gdfb_tier_a|bnn_setrules]" >&2; exit 2 ;;
 esac
+if [ "$GROUP" = beyond ] && [ "$TIER" = full_pool ]; then EXTRA_SEEDED=""; fi
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
 
@@ -75,6 +93,11 @@ if [ "$GROUP" = acquisition ]; then
   # step 6: LightGBM held fixed as a 5-member bootstrap ensemble; only the selection rule differs
   echo "== acquisition rules, 5 seeds"
   run "ml_acq_greedy ml_acq_ucb05 ml_acq_ucb1 ml_acq_thompson ml_acq_margin" 5 "$OUT/acquisition_seeded.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = bnn ] && [ "$TIER" = full_pool ]; then
+  echo "== bnn engine (full pool), 5 seeds"
+  run "ml_engine_bnn ml_static_bnn" 5 "$OUT/bnn_seeded.json"
   echo "done -> $OUT"; exit 0
 fi
 if [ "$GROUP" = bnn ]; then

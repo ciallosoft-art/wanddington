@@ -32,12 +32,12 @@ REF = "ml_engine_lightgbm"
 PHASE1 = {"logreg", "rf", "mlp", "lambdarank", "rwr", "gnn", "genept_lr", "genept_lgbm", "svm_linear", "svm_rbf"}
 
 
-def _load() -> dict[str, dict[str, list[dict]]]:
-    """arm -> screen -> runs, merged over every experiment-15 output file."""
+def _load(res: Path = RES) -> dict[str, dict[str, list[dict]]]:
+    """arm -> screen -> runs, merged over every experiment-15 output file in `res` (not recursive)."""
     arms: dict[str, dict[str, list[dict]]] = {}
     # "<name>.rerun.json" files re-run arms after a fix (docs/ml_engines_plan.md) and load last, so their
     # entries supersede the original file's; the originals stay on disk untouched.
-    for p in sorted(RES.glob("*.json"), key=lambda p: (".rerun." in p.name, p.name)):
+    for p in sorted(res.glob("*.json"), key=lambda p: (".rerun." in p.name, p.name)):
         if p.name.endswith(".manifest.json") or p.name in {"summary.json", "control.json"}:
             continue
         for ds, by_arm in json.loads(p.read_text()).items():
