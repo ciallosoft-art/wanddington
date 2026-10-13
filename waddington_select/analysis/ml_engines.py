@@ -76,23 +76,29 @@ LABEL_FREE_FEATURES = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm",
                        "ppi_score_sum", "string_degree_norm", "reactome_pathway_count_norm", "pli_score"]
 
 
-def label_free_baselines() -> dict[str, dict[str, float]]:
+def label_free_baselines(csv: Path | None = None) -> dict[str, dict[str, float]]:
     """No training at all: walk down a single gene-level feature from high to low (static, 5 rounds of B).
     Post-hoc reference rows (added after the label-permutation control showed how predictive the raw
     features are), not part of the pre-registered comparison. DepMap columns exist for every screen's
-    genes in the v3 table, so these run on all nine screens even where the C-arm's policy drops DepMap."""
+    genes in the v3 table, so these run on all nine screens even where the C-arm's policy drops DepMap.
+
+    Ties are broken in a label-free order (arms.base.label_free_order, seed 0). The table stores some
+    screens' hits first, and the first version of this function broke ties by stored row order: that read
+    labels on Scharenberg22 (0.612 instead of 0.599) and K562-Essential, and put the DepMap-essentiality
+    mean at 0.234 instead of 0.232 (2026-10-13). Hits are the table's own labels, so `csv` may be either
+    tier's v3 table (the headline tier by default)."""
     import pandas as pd
-    from ..oracle import DatasetOracle
-    df = pd.read_csv(REPO / "workspace" / "evaluation" / "lgbm_training_data_v3.csv")
+    from ..arms.base import label_free_order
+    df = pd.read_csv(csv or REPO / "workspace" / "evaluation" / "lgbm_training_data_v3.csv")
     df["gene"] = df["gene"].str.strip().str.upper()
     out = {}
     for f in LABEL_FREE_FEATURES:
         out[f] = {}
         for ds in BENCH:
             tf = df[df["dataset"] == ds]
-            o = DatasetOracle(ds)
-            top = tf.sort_values(f, ascending=False, kind="stable")["gene"].tolist()[: 5 * BATCH_SIZES[ds]]
-            out[f][ds] = sum(o.reveal(top).values()) / o.total_hits
+            tf = tf.iloc[label_free_order(tf["gene"].tolist(), 0)]
+            top = tf.sort_values(f, ascending=False, kind="stable").head(5 * BATCH_SIZES[ds])
+            out[f][ds] = float(top["label"].sum() / tf["label"].sum())
     return out
 
 
