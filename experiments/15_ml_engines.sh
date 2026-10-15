@@ -33,8 +33,13 @@
 #
 # TIER=full_pool runs a group on BDA's full-pool tier (core-essential genes kept, Table tiers) instead of the
 # headline tier: same arms and settings, the tier_a tables, outputs in ml_engines/tier_a/ (phase 3 of the
-# plan, 2026-10-13). Groups: tabular graph genept svm svm_rbf score score_hard desc bnn beyond; bnn runs the
-# engine only (no acquisition rules on it) and beyond leaves out the GP's UCB rule.
+# plan, 2026-10-13). Groups: tabular graph genept svm svm_rbf score score_hard desc bnn beyond acquisition
+# gdf_binary; bnn runs the engine only (no acquisition rules on it) and beyond leaves out the GP's UCB rule.
+# TIER=pairs / pairs_interaction runs the engines that take a pair's features on the combinatorial tier
+# (128 pairs per round; the pair-mean table of experiment 09, or the table with the interaction features),
+# outputs in ml_engines/pairs[_interaction]/ (docs/tier_extension_plan.md, part 乙4-5). Groups: tabular,
+# svm (linear only), bnn (engine only), beyond (the sparse GP only), acquisition. The gene-level engines
+# (RWR, GraphSAGE, GenePT, matrix factorisation, descriptors) are not defined for a pair.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -47,17 +52,29 @@ export CUBLAS_WORKSPACE_CONFIG=:4096:8  # reproducible cuBLAS for the GNN (dense
 OUT=workspace/results/ml_engines
 GROUP="${1:-tabular}"
 TIER="${TIER:-headline}"
+DATASETS=()
 case "$TIER" in
   headline) ;;
   full_pool)
     case "$GROUP" in
-      tabular|graph|genept|svm|svm_rbf|score|score_hard|desc|bnn|beyond) ;;
-      *) echo "TIER=full_pool supports: tabular graph genept svm svm_rbf score score_hard desc bnn beyond" >&2; exit 2 ;;
+      tabular|graph|genept|svm|svm_rbf|score|score_hard|desc|bnn|beyond|acquisition|gdf_binary) ;;
+      *) echo "TIER=full_pool supports: tabular graph genept svm svm_rbf score score_hard desc bnn beyond acquisition gdf_binary" >&2; exit 2 ;;
     esac
     export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv"
     export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv"
     OUT=workspace/results/ml_engines/tier_a ;;
-  *) echo "TIER must be headline or full_pool" >&2; exit 2 ;;
+  pairs|pairs_interaction)
+    case "$GROUP" in
+      tabular|svm|bnn|beyond|acquisition) ;;
+      *) echo "TIER=$TIER supports: tabular svm bnn beyond acquisition" >&2; exit 2 ;;
+    esac
+    PT="lgbm_training_data_horlbeck_pairs_mean"; [ "$TIER" = pairs_interaction ] && PT="lgbm_training_data_horlbeck_pairs"
+    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/${PT}.csv"
+    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/${PT}_v3.csv"
+    export WADDINGTON_EXTRA_DATASETS="Horlbeck:128"
+    DATASETS=(--datasets Horlbeck)
+    OUT="workspace/results/ml_engines/$TIER" ;;
+  *) echo "TIER must be headline, full_pool, pairs or pairs_interaction" >&2; exit 2 ;;
 esac
 mkdir -p "$OUT"
 case "$GROUP" in
@@ -81,12 +98,15 @@ case "$GROUP" in
   *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a|gdfb_tier_a|bnn_setrules]" >&2; exit 2 ;;
 esac
 if [ "$GROUP" = beyond ] && [ "$TIER" = full_pool ]; then EXTRA_SEEDED=""; fi
+case "$TIER" in pairs|pairs_interaction)
+  [ "$GROUP" = beyond ] && { DET=""; SEEDED="svgp"; EXTRA_SEEDED=""; } ;;
+esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }
 
 run() {  # $1 = arm list, $2 = replicates, $3 = output file
   conda run --no-capture-output -n waddington-bio python3 -m waddington_select.run_sequential \
-    --arms $1 --replicates "$2" --seed-mode local --out "$3" --resume
+    --arms $1 ${DATASETS[@]+"${DATASETS[@]}"} --replicates "$2" --seed-mode local --out "$3" --resume
 }
 
 if [ "$GROUP" = acquisition ]; then
@@ -95,8 +115,8 @@ if [ "$GROUP" = acquisition ]; then
   run "ml_acq_greedy ml_acq_ucb05 ml_acq_ucb1 ml_acq_thompson ml_acq_margin" 5 "$OUT/acquisition_seeded.json"
   echo "done -> $OUT"; exit 0
 fi
-if [ "$GROUP" = bnn ] && [ "$TIER" = full_pool ]; then
-  echo "== bnn engine (full pool), 5 seeds"
+if [ "$GROUP" = bnn ] && [ "$TIER" != headline ]; then
+  echo "== bnn engine ($TIER), 5 seeds"
   run "ml_engine_bnn ml_static_bnn" 5 "$OUT/bnn_seeded.json"
   echo "done -> $OUT"; exit 0
 fi
@@ -192,7 +212,7 @@ if [ -n "$DET" ]; then
   echo "== $GROUP: deterministic engines ($DET), 2 replicates"
   run "$(arms "$DET")" 2 "$OUT/${GROUP}_deterministic.json"
 fi
-if [ "$GROUP" = svm ] || [ "$GROUP" = svm_rbf ]; then
+if { [ "$GROUP" = svm ] || [ "$GROUP" = svm_rbf ]; } && [ -z "${DATASETS[*]:-}" ]; then
   # The Nystroem-RBF SVM spends ~30 s per fit in single-threaded liblinear (200 landmarks). Screens are
   # independent, so run one single-threaded process per screen, three at a time: five at a time with
   # 500 landmarks contended for memory bandwidth and ran ~4x slower (see ml_engines/_aborted_svm_rbf_500).

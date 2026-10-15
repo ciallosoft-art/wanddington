@@ -72,8 +72,8 @@
     "hit_frequency_avg": 0.17454518165602018,
     "feature_family": {
       "intrinsic": 0.2177033699802297,
-      "anchor": 0.15624505321756157,
-      "depmap": 0.2296446679754813,
+      "anchor": 0.15158965570502123,
+      "depmap": 0.2312697938732589,
       "intrinsic_anchor_no_depmap": 0.21932555712424806,
       "intrinsic_depmap_no_anchor": 0.22794823031291223,
       "all": 0.24253232399737568
@@ -186,16 +186,16 @@
       "feature_set": "intrinsic+depmap (no anchor)",
       "n_shuffles": 8,
       "importance": {
-        "hub_score_norm": -0.0012927184120675758,
-        "ppi_score_sum": 0.02055801126182153,
-        "pli_score": 0.014982281272134298,
-        "string_degree_norm": 0.01773233351467907,
-        "kegg_pathway_count_norm": -0.001870799604743473,
-        "reactome_pathway_count_norm": 0.0036679296849349546,
-        "depmap_frac_ess": 0.11153443155912386,
-        "depmap_mean_norm": 0.010188118607940508,
-        "depmap_min_norm": 0.03190436080461931,
-        "depmap_K562_norm": 0.021183790001156503
+        "hub_score_norm": -0.00416457315925147,
+        "ppi_score_sum": 0.01855832794714014,
+        "pli_score": 0.015527817844542035,
+        "string_degree_norm": 0.018528102064445585,
+        "kegg_pathway_count_norm": 0.0011558419162573203,
+        "reactome_pathway_count_norm": 0.0031552268530069478,
+        "depmap_frac_ess": 0.11000410629046489,
+        "depmap_mean_norm": 0.01122349583879114,
+        "depmap_min_norm": 0.03108570202896266,
+        "depmap_K562_norm": 0.021926558668829463
       }
     }
   }

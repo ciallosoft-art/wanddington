@@ -53,15 +53,23 @@ def _load():
     return df
 
 
-def _loo_hit_at_r5(df, target, feats, drop_from_train=()):
+def _target_rows(df, target):
+    """The target screen's rows in a label-free order. With few features (a single family) LightGBM scores
+    some genes alike, and argsort would break those ties by stored row order, which puts some screens' hits
+    first (2026-10-16; worth up to 0.002 on a family's mean)."""
     sub = df[df["dataset"] == target]
+    return sub.iloc[label_free_order(sub["gene"].tolist(), 0)]
+
+
+def _loo_hit_at_r5(df, target, feats, drop_from_train=()):
+    sub = _target_rows(df, target)
     pool, y = sub["gene"].tolist(), dict(zip(sub["gene"], sub["label"]))
     total, bs = int(sub["label"].sum()), BATCH_SIZES[target]
     train = df[(df["dataset"] != target) & (~df["dataset"].isin(drop_from_train))]
     pos, neg = (train["label"] == 1).sum(), (train["label"] == 0).sum()
     m = lgb.LGBMClassifier(**LGBM, scale_pos_weight=neg / max(pos, 1))
     m.fit(train[feats].values, train["label"].values)
-    order = np.argsort(-m.predict_proba(sub[feats].values)[:, 1])
+    order = np.argsort(-m.predict_proba(sub[feats].values)[:, 1], kind="stable")
     top = [pool[i] for i in order[:5 * bs]]
     return (sum(y[g] for g in top) / total) if total else 0.0
 
@@ -126,7 +134,7 @@ def permutation_importance(df, feats=None, n_shuffles: int = 8, seed: int = 0) -
     drops = {f: [] for f in feats}
     base_all = []
     for target in BENCHMARK_DATASETS:
-        sub = df[df["dataset"] == target]
+        sub = _target_rows(df, target)
         pool, y = sub["gene"].tolist(), dict(zip(sub["gene"], sub["label"]))
         total, bs = int(sub["label"].sum()), BATCH_SIZES[target]
         train = df[df["dataset"] != target]
@@ -136,7 +144,7 @@ def permutation_importance(df, feats=None, n_shuffles: int = 8, seed: int = 0) -
         X = sub[feats].values.astype(float)
 
         def hit(matrix):
-            order = np.argsort(-m.predict_proba(matrix)[:, 1])
+            order = np.argsort(-m.predict_proba(matrix)[:, 1], kind="stable")
             top = [pool[i] for i in order[:5 * bs]]
             return (sum(y[g] for g in top) / total) if total else 0.0
 
