@@ -129,6 +129,14 @@ class OnlineAdaptiveArm(BaseArm):
         self._test_frame: pd.DataFrame = (
             df[df["dataset"] == dataset_name].reset_index(drop=True).copy()
         )
+        if os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1":
+            # One integer feature scores thousands of candidates alike, and every ordering downstream (the
+            # ranking, the fusion, the LLM's candidate list) breaks those ties by row order, which stores some
+            # screens' hits first. Put the candidates in a label-free order (2026-10-16). Not done by default:
+            # the reported feature set gives no ties that reach a decision (analysis/order_audit.py).
+            from .base import label_free_order
+            self._test_frame = self._test_frame.iloc[
+                label_free_order(self._test_frame["gene"].tolist(), 0)].reset_index(drop=True)
         self._genes: list[str] = self._test_frame["gene"].tolist()
 
         # State updated each round

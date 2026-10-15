@@ -350,7 +350,7 @@
       "waddington_recurrent": 0.4740614322743563,
       "feature_loo_recurrent": 0.43873400929749784,
       "hit_frequency_novel": 0.0,
-      "hit_frequency_recurrent": 0.4948572051770131,
+      "hit_frequency_recurrent": 0.37813348301839883,
       "novel_share": 0.6455946266297906
     },
     "paired_novel_wadd_minus_loo": {

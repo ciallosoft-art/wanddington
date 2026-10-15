@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 import lightgbm as lgb
 
+from ..arms.base import label_free_order
 from ..oracle import BATCH_SIZES, BENCHMARK_DATASETS
 
 REPO = Path(__file__).resolve().parents[2]
@@ -65,14 +66,29 @@ def _loo_hit_at_r5(df, target, feats, drop_from_train=()):
     return (sum(y[g] for g in top) / total) if total else 0.0
 
 
+TIE_SEEDS = 20  # label-free tie-break orders averaged over in the hit-frequency ranking
+
+
 def _hit_frequency(df, target):
+    """Rank the target's genes by how often each is a hit in the OTHER screens, take the top 5*B.
+
+    Thousands of genes share a count (mostly 1 or 2), so the cut-off falls inside a tie. The table stores
+    some screens' hits first (Scharenberg22, K562-Essential, K562-GWPS; IL2 partly), so breaking ties by
+    stored row order reads labels: it gave 0.243 over the nine screens, against 0.175 with label-free ties
+    (2026-10-16). Ties are now broken in TIE_SEEDS label-free orders and the hit ratio averaged."""
     bench = list(BENCHMARK_DATASETS)
     hitset = {d: set(df[(df.dataset == d) & (df.label == 1)].gene) for d in bench}
     sub = df[df.dataset == target]
     pool, total, bs = sub.gene.tolist(), sub.label.sum(), BATCH_SIZES[target]
+    if not total:
+        return 0.0
     freq = {g: sum(g in hitset[o] for o in bench if o != target) for g in pool}
-    top = sorted(pool, key=lambda g: -freq[g])[:5 * bs]
-    return (sum(g in hitset[target] for g in top) / total) if total else 0.0
+    vals = []
+    for seed in range(TIE_SEEDS):
+        order = [pool[i] for i in label_free_order(pool, seed)]
+        top = sorted(order, key=lambda g: -freq[g])[:5 * bs]
+        vals.append(sum(g in hitset[target] for g in top) / total)
+    return float(np.mean(vals))
 
 
 def _anchor_leakage(df, bench, hitset) -> dict:

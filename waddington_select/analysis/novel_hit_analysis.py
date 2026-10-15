@@ -28,7 +28,8 @@ import numpy as np
 import lightgbm as lgb
 
 from ..oracle import BATCH_SIZES, BENCHMARK_DATASETS
-from .prior_probes import _load, LGBM, ALLF
+from ..arms.base import label_free_order
+from .prior_probes import _load, LGBM, ALLF, TIE_SEEDS
 
 REPO = Path(__file__).resolve().parents[2]
 # The reported run (analysis/sources.py); `--claude` reproduces the predecessor's 5-seed analysis into the
@@ -63,11 +64,15 @@ def _loo_selection(df, target):
     return {genes[i] for i in order[: 5 * BATCH_SIZES[target]]}
 
 
-def _hitfreq_selection(df, target, hitset):
+def _hitfreq_selection(df, target, hitset, seed: int = 0):
+    """Top 5*B by hit count in the other screens, ties in a label-free order (see prior_probes._hit_frequency:
+    stored row order puts some screens' hits first and inflated this selection until 2026-10-16)."""
     sub = df[df["dataset"] == target]
     others = [o for o in BENCHMARK_DATASETS if o != target]
-    freq = {g: sum(g in hitset[o] for o in others) for g in sub["gene"]}
-    top = sorted(sub["gene"].tolist(), key=lambda g: -freq[g])[: 5 * BATCH_SIZES[target]]
+    genes = sub["gene"].tolist()
+    freq = {g: sum(g in hitset[o] for o in others) for g in genes}
+    order = [genes[i] for i in label_free_order(genes, seed)]
+    top = sorted(order, key=lambda g: -freq[g])[: 5 * BATCH_SIZES[target]]
     return set(top)
 
 
@@ -84,11 +89,13 @@ def run() -> dict:
     for d in BENCHMARK_DATASETS:
         rec, nov = _split(d, hitset)
         loo = _loo_selection(df, d)
-        hf = _hitfreq_selection(df, d, hitset)
+        hfs = [_hitfreq_selection(df, d, hitset, seed) for seed in range(TIE_SEEDS)]
+        hf = hfs[0]
         row = {
             "n_recurrent": len(rec), "n_novel": len(nov),
             "feature_loo": {"recurrent_recall": _recall(loo, rec), "novel_recall": _recall(loo, nov)},
-            "hit_frequency": {"recurrent_recall": _recall(hf, rec), "novel_recall": _recall(hf, nov)},
+            "hit_frequency": {"recurrent_recall": float(np.mean([_recall(h, rec) for h in hfs])),
+                              "novel_recall": float(np.mean([_recall(h, nov) for h in hfs]))},
         }
         if wadd and d in wadd and wadd[d].get("waddington_c"):
             seeds = [set(s.get("revealed_hits", [])) for s in wadd[d]["waddington_c"]]

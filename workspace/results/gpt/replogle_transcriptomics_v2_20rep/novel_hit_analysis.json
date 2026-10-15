@@ -8,13 +8,13 @@
         "novel_recall": 0.00819672131147541
       },
       "hit_frequency": {
-        "recurrent_recall": 0.36942675159235666,
+        "recurrent_recall": 0.37547770700636945,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.4568471337579618,
         "novel_recall": 0.008709016393442622,
-        "extra_over_hitfreq_novel_frac": 0.07089534835940957
+        "extra_over_hitfreq_novel_frac": 0.0706071199921946
       }
     },
     "IL2": {
@@ -25,13 +25,13 @@
         "novel_recall": 0.03535353535353535
       },
       "hit_frequency": {
-        "recurrent_recall": 0.5335689045936396,
+        "recurrent_recall": 0.43692579505300355,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.5514134275618374,
         "novel_recall": 0.029040404040404044,
-        "extra_over_hitfreq_novel_frac": 0.1129887038512675
+        "extra_over_hitfreq_novel_frac": 0.0858944601212471
       }
     },
     "Sanchez21": {
@@ -42,7 +42,7 @@
         "novel_recall": 0.011254019292604502
       },
       "hit_frequency": {
-        "recurrent_recall": 0.29535864978902954,
+        "recurrent_recall": 0.3044303797468354,
         "novel_recall": 0.0
       },
       "waddington": {
@@ -59,13 +59,13 @@
         "novel_recall": 0.013050570962479609
       },
       "hit_frequency": {
-        "recurrent_recall": 0.2558139534883721,
+        "recurrent_recall": 0.2666666666666666,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.28972868217054254,
         "novel_recall": 0.011092985318107667,
-        "extra_over_hitfreq_novel_frac": 0.17021008093378978
+        "extra_over_hitfreq_novel_frac": 0.17121355962710216
       }
     },
     "Carnevale22": {
@@ -76,7 +76,7 @@
         "novel_recall": 0.011477761836441894
       },
       "hit_frequency": {
-        "recurrent_recall": 0.30409356725146197,
+        "recurrent_recall": 0.3052631578947368,
         "novel_recall": 0.0
       },
       "waddington": {
@@ -93,13 +93,13 @@
         "novel_recall": 0.24
       },
       "hit_frequency": {
-        "recurrent_recall": 1.0,
+        "recurrent_recall": 0.7020833333333332,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.8,
         "novel_recall": 0.22200000000000006,
-        "extra_over_hitfreq_novel_frac": 1.0
+        "extra_over_hitfreq_novel_frac": 0.5196192696192696
       }
     },
     "Steinhart": {
@@ -110,13 +110,13 @@
         "novel_recall": 0.009900990099009901
       },
       "hit_frequency": {
-        "recurrent_recall": 0.18181818181818182,
+        "recurrent_recall": 0.2102272727272727,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.29545454545454547,
         "novel_recall": 0.03712871287128714,
-        "extra_over_hitfreq_novel_frac": 0.3054195804195804
+        "extra_over_hitfreq_novel_frac": 0.322068487068487
       }
     },
     "Replogle_K562_essential": {
@@ -127,13 +127,13 @@
         "novel_recall": 0.5
       },
       "hit_frequency": {
-        "recurrent_recall": 0.6101694915254238,
+        "recurrent_recall": 0.3711864406779661,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.6313559322033897,
         "novel_recall": 0.25,
-        "extra_over_hitfreq_novel_frac": 0.0870104895104895
+        "extra_over_hitfreq_novel_frac": 0.055439026487788104
       }
     },
     "Replogle_K562_gwps": {
@@ -144,13 +144,13 @@
         "novel_recall": 0.11153846153846154
       },
       "hit_frequency": {
-        "recurrent_recall": 0.9034653465346535,
+        "recurrent_recall": 0.43094059405940593,
         "novel_recall": 0.0
       },
       "waddington": {
         "recurrent_recall": 0.6242574257425744,
         "novel_recall": 0.13317307692307692,
-        "extra_over_hitfreq_novel_frac": 0.8441583589334366
+        "extra_over_hitfreq_novel_frac": 0.3692254992765399
       }
     }
   },
@@ -164,7 +164,7 @@
       "novel_recall": 0.10453022893266758
     },
     "hit_frequency": {
-      "recurrent_recall": 0.4948572051770131,
+      "recurrent_recall": 0.37813348301839883,
       "novel_recall": 0.0
     },
     "waddington": {

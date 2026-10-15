@@ -226,6 +226,11 @@ class LLMReasoningArm(BaseArm):
 
         # Gene pool for this dataset
         test_df = df[df["dataset"] == dataset_name].reset_index(drop=True)
+        if os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1":
+            # As in online_adaptive_arm: under the single hit-frequency feature the static ranking is mostly
+            # ties, so the candidates go in a label-free order instead of the stored one (2026-10-16).
+            from .base import label_free_order
+            test_df = test_df.iloc[label_free_order(test_df["gene"].tolist(), 0)].reset_index(drop=True)
         self._genes: list[str] = test_df["gene"].tolist()
         self._gene_set: set[str] = set(self._genes)
         # A combinatorial screen is a small designed library (Horlbeck: 448 genes plus a negative control), not the genome.
