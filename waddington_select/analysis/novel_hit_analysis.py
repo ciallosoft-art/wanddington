@@ -128,9 +128,20 @@ def run() -> dict:
 
 
 if __name__ == "__main__":
-    import sys
-    if "--claude" in sys.argv:
+    import argparse
+    from . import prior_probes
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--claude", action="store_true")
+    ap.add_argument("--csv", type=Path, default=None, help="another tier's v3 table (its tables must also be in "
+                                                              "the environment, for the oracle)")
+    ap.add_argument("--run", type=Path, default=None)
+    ap.add_argument("--out", type=Path, default=None)
+    a = ap.parse_args()
+    if a.claude:
         WADD_RUN, OUT = CLAUDE_WADD_RUN, CLAUDE_OUT
+    if a.csv:
+        prior_probes.CSV = a.csv
+    WADD_RUN, OUT = a.run or WADD_RUN, a.out or OUT
     r = run()
     t = r["totals"]
     print(f"hits: {t['recurrent']} recurrent, {t['novel']} novel "

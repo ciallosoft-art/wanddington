@@ -39,9 +39,9 @@ W_LLM = DEFAULT_HONEST_WLLM
 W_ML = 1.0 - W_LLM  # same expression as the arm, so the fused scores are bit-identical
 
 
-def _check_protocol() -> None:
+def _check_protocol(manifest: Path = MANIFEST) -> None:
     """The replay is only meaningful under the configuration the 20-replicate C-arm actually ran."""
-    proto = json.loads(MANIFEST.read_text())["protocol"]
+    proto = json.loads(manifest.read_text())["protocol"]
     want = {"legacy_router": False, "drop_anchor_features": True, "feature_policy": "metadata",
             "llm_vote_policy": "gpt_named_only", "force_wllm": None}
     got = {k: proto.get(k) for k in want}
@@ -89,9 +89,12 @@ def _replay_run(base: OnlineAdaptiveArm, oracle: DatasetOracle, rec: dict, bs: i
     return rounds
 
 
-def run(screens: list[str] | None = None, repeats: int | None = None, out: Path = OUT) -> dict:
-    _check_protocol()
-    data = json.loads(RUN.read_text())
+def run(screens: list[str] | None = None, repeats: int | None = None, out: Path = OUT,
+        run_file: Path = RUN, manifest: Path = MANIFEST, arm: str = "waddington_c") -> dict:
+    """Replay `arm` in `run_file`. The defaults are the reported headline run; another tier's run needs
+    that tier's tables in the environment before import (experiments/21_tier_offline.sh)."""
+    _check_protocol(manifest)
+    data = json.loads(run_file.read_text())
     screens = screens or list(data.keys())
     pooled = {"rounds": []}
     per_dataset, verify = {}, {}
@@ -102,7 +105,7 @@ def run(screens: list[str] | None = None, repeats: int | None = None, out: Path 
         base = OnlineAdaptiveArm(ds, bs, training_csv=training_csv, extra_feature_cols=extra,
                                  drop_anchor_feats=_drop_anchor_default())
         oracle = DatasetOracle(ds)
-        runs = data[ds]["waddington_c"][: repeats or None]
+        runs = data[ds][arm][: repeats or None]
         ds_rounds = []
         for rep, rec in enumerate(runs):
             for rr in _replay_run(base, oracle, rec, bs):
@@ -119,7 +122,8 @@ def run(screens: list[str] | None = None, repeats: int | None = None, out: Path 
         "_method": ("Replay of the 20-replicate GPT-5.6 Luna C-arm (main_table_20rep.json): online ML rebuilt "
                     "with the arm's own configuration and fed the recorded reveals; fused ranking recomputed "
                     "from the recorded LLM names. 'verified' = replayed batch equals the recorded batch."),
-        "source_run": str(RUN.relative_to(REPO)),
+        "source_run": str(Path(run_file).resolve().relative_to(REPO)),
+        "arm": arm,
         "verification": verify,
         "per_dataset": per_dataset,
         "overall": hit_rate_by_source(verified),
@@ -134,8 +138,11 @@ if __name__ == "__main__":
     ap.add_argument("--screens", type=lambda s: s.split(","), default=None)
     ap.add_argument("--repeats", type=int, default=None)
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--run", type=Path, default=RUN)
+    ap.add_argument("--manifest", type=Path, default=MANIFEST)
+    ap.add_argument("--arm", default="waddington_c")
     a = ap.parse_args()
-    r = run(a.screens, a.repeats, a.out)
+    r = run(a.screens, a.repeats, a.out, a.run, a.manifest, a.arm)
     v = r["verification"]
     print(f"\nverified {sum(x['verified'] for x in v.values())}/{sum(x['rounds'] for x in v.values())} rounds")
     for s, x in r["overall"].items():
