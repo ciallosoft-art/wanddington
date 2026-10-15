@@ -38,16 +38,19 @@ case "${TIER:-headline}" in
     export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv"
     export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv"
     OUT_DIR="workspace/results/fusion_weight/full_pool" ;;
-  pairs)
+  pairs|pairs_interaction)
     MEMORY_PATH="workspace/results/gpt/tier_a_full_pool_20rep/experience_memory.json"
     export WADDINGTON_LEGACY_TASK_PROMPTS=1  # that memory predates the protocol field; nothing else changes
-    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_horlbeck_pairs.csv"
-    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv"
+    # pairs: the pair-mean table of experiment 09 (build_horlbeck_pairs_mean.py); pairs_interaction: the same
+    # table with the eight interaction columns that experiment 12 later added to it
+    PT="lgbm_training_data_horlbeck_pairs_mean"; [ "${TIER:-}" = pairs_interaction ] && PT="lgbm_training_data_horlbeck_pairs"
+    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/${PT}.csv"
+    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/${PT}_v3.csv"
     export WADDINGTON_EXTRA_DATASETS="Horlbeck:128"
     export WADDINGTON_PARALLEL="${WADDINGTON_PARALLEL:-4}"
     DATASETS=(--datasets Horlbeck)
-    OUT_DIR="workspace/results/fusion_weight/pairs" ;;
-  *) echo "TIER must be headline, full_pool or pairs" >&2; exit 2 ;;
+    OUT_DIR="workspace/results/fusion_weight/${TIER}" ;;
+  *) echo "TIER must be headline, full_pool, pairs or pairs_interaction" >&2; exit 2 ;;
 esac
 export WADDINGTON_LLM_BACKEND=pi
 export WADDINGTON_PI_MODEL="$MODEL"

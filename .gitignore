@@ -111,6 +111,9 @@ docs/RETROSPECTIVE_AND_PPT_PLAN.md
 # ground_truth_Horlbeck.csv / topmovers_Horlbeck.npy -- so 72 MB of derived rows buys nothing.
 workspace/evaluation/lgbm_training_data_horlbeck_pairs.csv
 workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv
+# Pair-mean copies without the interaction columns (build_horlbeck_pairs_mean.py), the table of experiment 09.
+workspace/evaluation/lgbm_training_data_horlbeck_pairs_mean.csv
+workspace/evaluation/lgbm_training_data_horlbeck_pairs_mean_v3.csv
 # Seven-pair-feature copies (complex co-membership dropped) that recreate the table of the runs made
 # before that column existed; experiments/12_tier_b_interaction.sh derives them from the two above.
 workspace/evaluation/lgbm_training_data_horlbeck_pairs_7col.csv
