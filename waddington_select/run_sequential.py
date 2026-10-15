@@ -83,6 +83,8 @@ from .llm_client import (
 
 # ── Ablation arms ────────────────────────────────────────────────────────────
 from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
+from .arms.waddington_c_ablation_arms import (WaddingtonCAnonNamesArm, WaddingtonCNoMemoryFinalArm,
+                                               WaddingtonCStaticMLArm)
 from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
 from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
@@ -108,6 +110,7 @@ _PAPER_ARMS = {
     "waddington_c_no_ml", "waddington_c_shuffled_names",
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
     "waddington_c_pair", "waddington_c_pair_no_llm",
+    "waddington_c_nomem", "waddington_c_static_ml", "waddington_c_anon_names",
 } | {f"genedisco_{a}" for a in _GD_ACQ} | {
     f"ml_{kind}_{m}" for kind in ("engine", "static") for m in _ml_engine_names()
 } | {f"ml_acq_{a}" for a in _ML_ACQ} | {f"ml_bnnacq_{a}" for a in _BNN_ACQ} | set(_gdf_arm_names()) | set(_gdfb_arm_names()) | {"ml_svgpacq_ucb1"} | {
@@ -152,6 +155,12 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(WaddingtonCNoMLArm(dataset_name, bs))
         elif name == "waddington_c_shuffled_names":
             arms.append(WaddingtonCShuffledNamesArm(dataset_name, bs))
+        elif name == "waddington_c_nomem":
+            arms.append(WaddingtonCNoMemoryFinalArm(dataset_name, bs))
+        elif name == "waddington_c_static_ml":
+            arms.append(WaddingtonCStaticMLArm(dataset_name, bs))
+        elif name == "waddington_c_anon_names":
+            arms.append(WaddingtonCAnonNamesArm(dataset_name, bs))
         elif name == "waddington_c_feature_reasoning":
             arms.append(WaddingtonCFeatureReasoningArm(dataset_name, bs))
         elif name == "waddington_c_pool_only":
@@ -319,7 +328,8 @@ def _protocol_manifest(
         model = default_model_for_backend(backend)
         reasoning = None
     uses_memory = any(
-        arm.startswith("waddington") and arm not in {"waddington_c_no_memory", "waddington_c_no_llm"}
+        arm.startswith("waddington")
+        and arm not in {"waddington_c_no_memory", "waddington_c_no_llm", "waddington_c_nomem"}
         for arm in arm_names
     )
     memory_hash = None

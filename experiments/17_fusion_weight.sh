@@ -24,8 +24,31 @@ unset WADDINGTON_LLM_MODEL WADDINGTON_PI_CMD WADDINGTON_LEGACY_ROUTER
 unset WADDINGTON_AUTH_PATH WADDINGTON_REUSE_FEYNMAN
 unset WADDINGTON_FORCE_WLLM WADDINGTON_FORCE_ROUTE WADDINGTON_FEATURE_POLICY
 unset WADDINGTON_DROP_ANCHOR_FEATS WADDINGTON_HITFREQ_ONLY WADDINGTON_REASON_FROM_STRUCTURE
-unset WADDINGTON_EXCLUDE_STUDY WADDINGTON_TRAINING_CSV
+unset WADDINGTON_EXCLUDE_STUDY WADDINGTON_TRAINING_CSV WADDINGTON_TRAINING_CSV_V3 WADDINGTON_EXTRA_DATASETS
 unset PYTHONOPTIMIZE
+
+# TIER=full_pool|pairs runs the same grid on BDA's other two tiers (docs/tier_extension_plan.md, part 丙2),
+# with each tier's reported settings (as in experiment 19); the 0.2 reference is experiment 19's paired
+# twenty-replicate run of the reported C-arm on that tier. The default is the headline tier above.
+DATASETS=()
+case "${TIER:-headline}" in
+  headline) ;;
+  full_pool)
+    MEMORY_PATH="workspace/results/gpt/tier_a_full_pool_v2_20rep/experience_memory.json"
+    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv"
+    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv"
+    OUT_DIR="workspace/results/fusion_weight/full_pool" ;;
+  pairs)
+    MEMORY_PATH="workspace/results/gpt/tier_a_full_pool_20rep/experience_memory.json"
+    export WADDINGTON_LEGACY_TASK_PROMPTS=1  # that memory predates the protocol field; nothing else changes
+    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_horlbeck_pairs.csv"
+    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_horlbeck_pairs_v3.csv"
+    export WADDINGTON_EXTRA_DATASETS="Horlbeck:128"
+    export WADDINGTON_PARALLEL="${WADDINGTON_PARALLEL:-4}"
+    DATASETS=(--datasets Horlbeck)
+    OUT_DIR="workspace/results/fusion_weight/pairs" ;;
+  *) echo "TIER must be headline, full_pool or pairs" >&2; exit 2 ;;
+esac
 export WADDINGTON_LLM_BACKEND=pi
 export WADDINGTON_PI_MODEL="$MODEL"
 export WADDINGTON_CHAT_MODEL="$MODEL"
@@ -61,7 +84,7 @@ node --input-type=module -e '
 for w in $WEIGHTS; do
   echo "=== Experiment 17: C-arm at w_llm = $w, $REPS replicates, memory $MEMORY_PATH ==="
   WADDINGTON_FORCE_WLLM="$w" conda run --no-capture-output -n waddington-bio python3 -m waddington_select \
-    --arms waddington_c \
+    --arms waddington_c ${DATASETS[@]+"${DATASETS[@]}"} \
     --replicates "$REPS" \
     --seed-mode local \
     --rounds 5 \

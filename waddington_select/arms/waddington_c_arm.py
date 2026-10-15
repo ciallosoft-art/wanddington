@@ -184,6 +184,10 @@ def _classify(n_genes: int, n_hits: int) -> str:
 class WaddingtonCArm(BaseArm):
     """Three-tier DepMap feature routing for per-dataset optimal ML signal."""
 
+    # Subclasses may swap the LLM branch's class (the component ablations in waddington_c_ablation_arms).
+    # None keeps the reported choice below.
+    _LLM_CLASS = None
+
     def __init__(
         self,
         dataset_name: str,
@@ -259,7 +263,9 @@ class WaddingtonCArm(BaseArm):
             memory = _rank_memory_by_relevance(raw_memory, task)[:4]
         else:
             memory = []
-        if self._reason_from_structure:
+        if self._LLM_CLASS is not None:
+            llm_cls = self._LLM_CLASS
+        elif self._reason_from_structure:
             # Lazy import: the feature-reasoning arm imports back from this module, so importing it at
             # module top would be circular.
             from .waddington_c_feature_reasoning_arm import _AnonymousFeaturesLLMArm
