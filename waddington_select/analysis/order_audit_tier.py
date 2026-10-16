@@ -7,13 +7,15 @@ method that breaks score ties by row order reads labels. Everything is run twice
 as stored and in alphabetical order (training rows untouched), and compared gene for gene. No LLM calls:
 
   c_arm_replay   the reported C-arm's own run (the tier's 20-replicate run), replayed with the recorded LLM
-                 names under each order; a round passes if the replayed batch equals the recorded batch gene
-                 for gene and in order. The batch order is what the LLM's next prompt shows (its history lists
+                 names under each order; each round's replayed batch is compared with the recorded one gene
+                 for gene and in order, as a set, and by hits (first-order: the replay stays on the recorded
+                 trajectory). The batch order is what the LLM's next prompt shows (its history lists
                  each round's hits and non-hits in batch order); the prompt has no other input that depends on
                  row order (task, memory, alphabetically sorted list of tested genes), so identical batches
                  mean identical prompts.
-  llm_padding    the LLM arm's static ranking, which pads a batch when the LLM names too few genes (the padded
-                 LLM baseline uses the padding; the C-arm's named-only vote ignores it)
+  padded_llm     the padding the padded LLM baseline draws from its static ranking when the LLM names too few
+                 genes, recomputed on its recorded run under each order (the C-arm's named-only vote ignores
+                 padding); the stored-order recomputation must reproduce the recorded padding
   baselines      static ranker, online ML, coreset and the C-arm's ML engine, full five-round campaigns
                  (static ranker and coreset read the table directly; a pandas shim reorders it for them)
 
@@ -38,7 +40,7 @@ from ..arms.online_adaptive_arm import OnlineAdaptiveArm
 from ..arms.waddington_c_arm import _drop_anchor_default, _get_feature_config
 from ..oracle import BATCH_SIZES, DatasetOracle
 from .final_system_stats import BENCH
-from .replay_attribution import _replay_run
+from .replay_attribution import W_LLM, W_ML
 
 from ..arms import coreset_arm
 
@@ -87,28 +89,78 @@ def _c_online(ds: str) -> OnlineAdaptiveArm:
                              drop_anchor_feats=_drop_anchor_default())
 
 
+def _c_replay(base: OnlineAdaptiveArm, oracle: DatasetOracle, rec: dict, bs: int) -> list[dict]:
+    """The recorded C-arm trajectory, its fused ranking recomputed from the recorded LLM names (as
+    replay_attribution), comparing each round's replayed batch with the recorded one: exactly, as a set, and
+    by hits. The replay stays on the recorded trajectory, so a hit difference is the first-order effect."""
+    online = copy.deepcopy(base)
+    selected: set[str] = set()
+    out = []
+    for r, recorded in enumerate(rec["selected_genes_per_round"]):
+        ml = online.all_scores()
+        named = set(rec["llm_named_proposals_per_round"][r])
+        combined = {g: W_ML * ml.get(g, 0.0) + W_LLM * (1.0 if g in named else 0.0)
+                    for g in online._genes if g not in selected}
+        replayed = sorted(combined, key=combined.__getitem__, reverse=True)[:bs]
+        rev = oracle.reveal(list(recorded))
+        out.append({"exact": replayed == list(recorded), "same_set": set(replayed) == set(recorded),
+                    "hits_recorded": int(sum(rev.values())), "hits_replayed": int(sum(oracle.reveal(replayed).values()))})
+        selected |= set(recorded)
+        if r < len(rec["selected_genes_per_round"]) - 1:
+            online.update(r, rev)
+    return out
+
+
+def _padding(ranking: list[str], rec: dict) -> list[list[str]]:
+    """The padding the padded LLM baseline would draw from `ranking`, round by round, on the recorded run."""
+    selected: set[str] = set()
+    out = []
+    for r, sel in enumerate(rec["selected_genes_per_round"]):
+        n = len(rec["llm_static_padding_proposals_per_round"][r])
+        named = set(rec["llm_named_proposals_per_round"][r])
+        pad = []
+        for g in ranking:
+            if len(pad) >= n:
+                break
+            if g not in selected and g not in named:
+                pad.append(g)
+        out.append(pad)
+        selected |= set(sel)
+    return out
+
+
 def audit(run_file: Path) -> dict:
     from ..run_sequential import _run_one_repeat
     data = json.loads(run_file.read_text())
     res = {"source_run": str(run_file), "screens": {}}
     for ds in BENCH:
         oracle = DatasetOracle(ds)
+        total = oracle.total_hits
         row = {}
-        # 1. the C-arm's recorded trajectory, replayed under each order
+        # 1. the reported C-arm's recorded trajectory under each order
         runs = data[ds]["waddington_c"]
         for mode in ("stored", "alpha"):
             _mode(mode, ds)
             base = _c_online(ds)
-            rounds = [rr for rec in runs for rr in _replay_run(copy.deepcopy(base), oracle, rec, BATCH_SIZES[ds])]
-            row[f"c_replay_{mode}"] = {"verified": sum(r["verified"] for r in rounds), "rounds": len(rounds)}
-        # 2. the LLM arm's padding order
-        rank = {}
-        for mode in ("stored", "alpha"):
-            _mode(mode, ds)
-            rank[mode] = llm_reasoning_arm.LLMReasoningArm(ds, BATCH_SIZES[ds])._static_ranking
-        k = 5 * BATCH_SIZES[ds]
-        row["llm_padding"] = {"top_5B_identical": rank["stored"][:k] == rank["alpha"][:k],
-                              "full_identical": rank["stored"] == rank["alpha"]}
+            rounds = [x for rec in runs for x in _c_replay(base, oracle, rec, BATCH_SIZES[ds])]
+            row[f"c_{mode}"] = {
+                "rounds": len(rounds), "exact": sum(x["exact"] for x in rounds),
+                "same_set": sum(x["same_set"] for x in rounds),
+                "hit_ratio_change": sum(x["hits_replayed"] - x["hits_recorded"] for x in rounds) / (len(runs) * total)}
+        # 2. the padded LLM baseline's padding under each order (on its own recorded run)
+        if "llm_reasoning" in data[ds]:
+            pads = {}
+            for mode in ("stored", "alpha"):
+                _mode(mode, ds)
+                ranking = llm_reasoning_arm.LLMReasoningArm(ds, BATCH_SIZES[ds])._static_ranking
+                pads[mode] = [_padding(ranking, rec) for rec in data[ds]["llm_reasoning"]]
+            recs = data[ds]["llm_reasoning"]
+            reconstructed = all(pads["stored"][i][r] == list(rec["llm_static_padding_proposals_per_round"][r])
+                                for i, rec in enumerate(recs) for r in range(len(rec["selected_genes_per_round"])))
+            hits = {m: sum(sum(oracle.reveal(p).values()) for run in pads[m] for p in run if p) for m in pads}
+            row["padded_llm"] = {"stored_reconstructs_recorded": reconstructed,
+                                 "padded_genes": sum(len(p) for run in pads["stored"] for p in run),
+                                 "hit_ratio_change": (hits["alpha"] - hits["stored"]) / (len(recs) * total)}
         # 3. deterministic baselines and the C-arm's ML engine, whole campaigns
         for arm in ("static_ranker", "online_adaptive", "coreset", "ml_engine_lightgbm"):
             sel = {}
@@ -116,18 +168,24 @@ def audit(run_file: Path) -> dict:
                 _mode(mode, ds)
                 r = _run_one_repeat(ds, arm, 0, oracle, 5, "local")
                 sel[mode] = (r["selected_genes_per_round"], r["hit_ratio_per_round"][-1])
-            row[arm] = {"selections_identical": sel["stored"][0] == sel["alpha"][0],
+            row[arm] = {"same_order": sel["stored"][0] == sel["alpha"][0],
+                        "same_sets": [set(a) for a in sel["stored"][0]] == [set(b) for b in sel["alpha"][0]],
                         "hit_at_r5": [sel["stored"][1], sel["alpha"][1]]}
         _mode("stored")
         res["screens"][ds] = row
         print(ds, json.dumps(row), flush=True)
-    s = res["screens"].values()
+    s = list(res["screens"].values())
     res["summary"] = {
-        "c_replay_verified_alpha": sum(r["c_replay_alpha"]["verified"] for r in s),
-        "c_replay_rounds": sum(r["c_replay_alpha"]["rounds"] for r in s),
-        "c_replay_verified_stored": sum(r["c_replay_stored"]["verified"] for r in s),
-        "llm_padding_top_identical": all(r["llm_padding"]["top_5B_identical"] for r in s),
-        "baselines_identical": {a: all(r[a]["selections_identical"] for r in s)
+        "c_rounds": sum(r["c_alpha"]["rounds"] for r in s),
+        "c_exact_stored": sum(r["c_stored"]["exact"] for r in s),
+        "c_exact_alpha": sum(r["c_alpha"]["exact"] for r in s),
+        "c_same_set_alpha": sum(r["c_alpha"]["same_set"] for r in s),
+        "c_mean_hit_ratio_change_alpha": sum(r["c_alpha"]["hit_ratio_change"] for r in s) / len(s),
+        "padded_llm_mean_hit_ratio_change_alpha": (sum(r["padded_llm"]["hit_ratio_change"] for r in s if "padded_llm" in r)
+                                                   / max(1, sum("padded_llm" in r for r in s))),
+        "baselines_same_hit_at_r5": {a: all(abs(r[a]["hit_at_r5"][0] - r[a]["hit_at_r5"][1]) < 1e-12 for r in s)
+                                     for a in ("static_ranker", "online_adaptive", "coreset", "ml_engine_lightgbm")},
+        "baselines_same_sets": {a: all(r[a]["same_sets"] for r in s)
                                 for a in ("static_ranker", "online_adaptive", "coreset", "ml_engine_lightgbm")},
     }
     return res
