@@ -1,0 +1,203 @@
+{
+  "per_screen": {
+    "IFNG": {
+      "loo_all": 0.19130434782608696,
+      "loo_no_sibling": 0.11521739130434783,
+      "hit_frequency": 0.14429347826086955,
+      "novel_hit_frac": 0.575,
+      "has_sibling": true
+    },
+    "IL2": {
+      "loo_all": 0.32262996941896027,
+      "loo_no_sibling": 0.20489296636085627,
+      "hit_frequency": 0.21597859327217125,
+      "novel_hit_frac": 0.42,
+      "has_sibling": true
+    },
+    "Sanchez21": {
+      "loo_all": 0.06493506493506493,
+      "loo_no_sibling": 0.06060606060606061,
+      "hit_frequency": 0.08225108225108223,
+      "novel_hit_frac": 0.709,
+      "has_sibling": true
+    },
+    "Sanchez21_down": {
+      "loo_all": 0.07034632034632035,
+      "loo_no_sibling": 0.06168831168831169,
+      "hit_frequency": 0.06883116883116884,
+      "novel_hit_frac": 0.696,
+      "has_sibling": true
+    },
+    "Carnevale22": {
+      "loo_all": 0.07211028632025451,
+      "loo_no_sibling": 0.07211028632025451,
+      "hit_frequency": 0.059544008483563095,
+      "novel_hit_frac": 0.783,
+      "has_sibling": false
+    },
+    "Scharenberg22": {
+      "loo_all": 0.5471698113207547,
+      "loo_no_sibling": 0.5471698113207547,
+      "hit_frequency": 0.31698113207547174,
+      "novel_hit_frac": 0.509,
+      "has_sibling": false
+    },
+    "Steinhart": {
+      "loo_all": 0.0738255033557047,
+      "loo_no_sibling": 0.0738255033557047,
+      "hit_frequency": 0.06241610738255034,
+      "novel_hit_frac": 0.685,
+      "has_sibling": false
+    },
+    "Replogle_K562_essential": {
+      "loo_all": 0.42857142857142855,
+      "loo_no_sibling": 0.3333333333333333,
+      "hit_frequency": 0.3476190476190476,
+      "novel_hit_frac": 0.063,
+      "has_sibling": true
+    },
+    "Replogle_K562_gwps": {
+      "loo_all": 0.28679653679653677,
+      "loo_no_sibling": 0.2824675324675325,
+      "hit_frequency": 0.18841991341991343,
+      "novel_hit_frac": 0.563,
+      "has_sibling": true
+    }
+  },
+  "summary": {
+    "loo_all_avg": 0.22863214098790133,
+    "loo_no_sibling_avg": 0.19459013297301736,
+    "sibling_pairs_normal": 0.22743061131573297,
+    "sibling_pairs_excluded": 0.17636759929340703,
+    "hit_frequency_avg": 0.16514828128842646,
+    "feature_family": {
+      "intrinsic": 0.21089254754583375,
+      "anchor": 0.14675916729510002,
+      "depmap": 0.21053739583209474,
+      "intrinsic_anchor_no_depmap": 0.20837338074166897,
+      "intrinsic_depmap_no_anchor": 0.22603861120107707,
+      "all": 0.22863214098790133
+    },
+    "anchor_leakage": {
+      "per_screen": {
+        "IFNG": {
+          "n_anchors": 12,
+          "n_anchor_hits": 10,
+          "anchor_hits": [
+            "ZAP70",
+            "LCK",
+            "PLCG1",
+            "VAV1",
+            "CBLB",
+            "MAP4K1",
+            "CD5",
+            "NFKB2",
+            "RNF20",
+            "RNF40"
+          ]
+        },
+        "IL2": {
+          "n_anchors": 12,
+          "n_anchor_hits": 10,
+          "anchor_hits": [
+            "ZAP70",
+            "LAT",
+            "PLCG1",
+            "VAV1",
+            "CBLB",
+            "MAP4K1",
+            "CD5",
+            "IL2",
+            "IL2RA",
+            "IL2RB"
+          ]
+        },
+        "Sanchez21": {
+          "n_anchors": 8,
+          "n_anchor_hits": 3,
+          "anchor_hits": [
+            "VPS33A",
+            "STAU1",
+            "UBA5"
+          ]
+        },
+        "Sanchez21_down": {
+          "n_anchors": 8,
+          "n_anchor_hits": 1,
+          "anchor_hits": [
+            "SLC18A3"
+          ]
+        },
+        "Carnevale22": {
+          "n_anchors": 6,
+          "n_anchor_hits": 2,
+          "anchor_hits": [
+            "ADORA2A",
+            "ATP6V0D1"
+          ]
+        },
+        "Scharenberg22": {
+          "n_anchors": 8,
+          "n_anchor_hits": 5,
+          "anchor_hits": [
+            "SPNS1",
+            "ATG9A",
+            "EIF2AK3",
+            "LDLR",
+            "NPC1"
+          ]
+        },
+        "Steinhart": {
+          "n_anchors": 7,
+          "n_anchor_hits": 2,
+          "anchor_hits": [
+            "AXIN2",
+            "BATF"
+          ]
+        },
+        "Replogle_K562_essential": {
+          "n_anchors": 11,
+          "n_anchor_hits": 1,
+          "anchor_hits": [
+            "MED1"
+          ]
+        },
+        "Replogle_K562_gwps": {
+          "n_anchors": 10,
+          "n_anchor_hits": 9,
+          "anchor_hits": [
+            "MED19",
+            "MED10",
+            "MED17",
+            "TAF1",
+            "TAF2",
+            "KDM1A",
+            "MAX",
+            "WDR82",
+            "SSRP1"
+          ]
+        }
+      },
+      "total_anchors": 82,
+      "total_anchor_hits": 43,
+      "frac_anchors_that_are_hits": 0.524
+    },
+    "permutation_importance": {
+      "baseline_hit_at_r5": 0.22603861120107707,
+      "feature_set": "intrinsic+depmap (no anchor)",
+      "n_shuffles": 8,
+      "importance": {
+        "hub_score_norm": 0.00019610608349948847,
+        "ppi_score_sum": 0.023706986920179432,
+        "pli_score": 0.022919322565565302,
+        "string_degree_norm": 0.03290916699192846,
+        "kegg_pathway_count_norm": 0.006825339058880513,
+        "reactome_pathway_count_norm": 0.012477049679325601,
+        "depmap_frac_ess": 0.10778001597018795,
+        "depmap_mean_norm": 0.014021493259073073,
+        "depmap_min_norm": 0.026193544273816097,
+        "depmap_K562_norm": 0.037960578189363145
+      }
+    }
+  }
+}

@@ -326,6 +326,76 @@ def pair_features(seeds: int = 20) -> dict:
     return out
 
 
+def rules_on_engines() -> dict:
+    """The acquisition rules on the Bayesian MLP (against its greedy engine) and UCB on the sparse GP (against
+    its Probability-of-Hit engine), on the full pool and the pairs (experiment 15, bnn_rules / svgp_ucb)."""
+    res = {}
+    for tier, d in (("full_pool", ENG / "tier_a"), ("pairs", ENG / "pairs")):
+        if not d.exists():
+            continue
+        arms = _arms(d)
+        rows = {}
+        for ref, prefix in (("ml_engine_bnn", "ml_bnnacq_"), ("ml_engine_svgp", "ml_svgpacq_")):
+            if ref not in arms:
+                continue
+            for a in (x for x in arms if x.startswith(prefix)):
+                if tier == "full_pool":
+                    if not all(s in arms[a] for s in BENCH):
+                        continue
+                    ps, r = _per_screen(arms[a]), _per_screen(arms[ref])
+                    rows[a] = {"reference": ref, "mean": float(np.mean(list(ps.values()))),
+                               "reference_mean": float(np.mean(list(r.values()))), "vs_reference": _paired(ps, r)}
+                else:
+                    x, r = _hits(arms[a]["Horlbeck"]), _hits(arms[ref]["Horlbeck"])
+                    rows[a] = {"reference": ref, **_summ(x), "reference_mean": float(r.mean()), "vs_reference": _vs(x, r)}
+        res[tier] = rows
+    return res
+
+
+def genedisco_scores() -> dict:
+    """GeneDisco's rules fed the revealed genes' continuous scores (its own information setting), full pool."""
+    d = ENG / "tier_a"
+    arms = {a: v for a, v in _arms(d).items() if a.startswith("gdf_") and all(s in v for s in BENCH)} if d.exists() else {}
+    if not arms:
+        return {}
+    ref = json.loads((d / "summary.json").read_text())["rows"]["ml_engine_lightgbm"]["per_screen"]
+    rows = {a: {"mean": float(np.mean(list(_per_screen(v).values()))), "per_screen": _per_screen(v),
+                "vs_lightgbm_online": _paired(_per_screen(v), ref)} for a, v in arms.items()}
+    best = max(rows, key=lambda a: rows[a]["mean"])
+    oracle = {s: max(r["per_screen"][s] for r in rows.values()) for s in BENCH}
+    return {"rows": rows, "best_rule": best, "per_screen_oracle": float(np.mean(list(oracle.values()))),
+            "n_rules": len(rows)}
+
+
+def full_pool_probes() -> dict:
+    """What the prior learns, the matched-LOO comparisons, the LLM feature probe and the hit-frequency system
+    on the full pool; the LLM feature probe and the static prior's permutation importance on the pairs."""
+    off = RES / "tier_offline"
+    out = {}
+    f = off / "full_pool" / "prior_probes.json"
+    if f.exists():
+        pp = json.loads(f.read_text())
+        ps = pp["per_screen"]
+        out["prior_probes"] = {"summary": {k: v for k, v in pp["summary"].items() if k != "anchor_leakage"},
+                               "loo_minus_hit_frequency": _paired({d: ps[d]["loo_all"] for d in BENCH},
+                                                                  {d: ps[d]["hit_frequency"] for d in BENCH})}
+        h = RES / "hitfreq_system" / "full_pool" / "hitfreq_c_20rep.json"
+        if h.exists():
+            from .sources import REPORTED_TIER_A_RUN
+            hs = _per_screen(_arms(h)["waddington_c"])
+            cs = _per_screen(_arms(REPORTED_TIER_A_RUN)["waddington_c"])
+            hf = {d: ps[d]["hit_frequency"] for d in BENCH}
+            out["hit_frequency_system"] = {"mean": float(np.mean(list(hs.values()))),
+                                           "c_minus_it": _paired(cs, hs), "it_minus_static": _paired(hs, hf)}
+    for name, path in (("final_stats", off / "full_pool" / "final_system_stats.json"),
+                       ("llm_feature_probe", off / "full_pool" / "llm_feature_probe.json"),
+                       ("llm_feature_probe_pairs", off / "pairs" / "llm_feature_probe.json"),
+                       ("prior_permutation_pairs", off / "pairs" / "prior_permutation.json")):
+        if path.exists():
+            out[name] = json.loads(path.read_text())
+    return out
+
+
 def novel_hits() -> dict:
     f = RES / "tier_offline" / "full_pool" / "novel_hit_analysis.json"
     return json.loads(f.read_text()) if f.exists() else {}
@@ -335,7 +405,8 @@ def run() -> dict:
     res = {"ablations": ablations(), "fusion": fusion(), "pair_engines": pair_engines(),
            "acquisition": acquisition(), "genedisco_full_pool": genedisco(), "attribution": attribution(),
            "shap": shap(), "novel_hits_full_pool": novel_hits(), "full_pool_per_screen": full_pool_per_screen(),
-           "pair_features": pair_features()}
+           "pair_features": pair_features(), "rules_on_engines": rules_on_engines(),
+           "genedisco_scores_full_pool": genedisco_scores(), "full_pool_probes": full_pool_probes()}
     OUT.write_text(json.dumps(res, indent=2))
     return res
 
@@ -383,4 +454,17 @@ if __name__ == "__main__":
     fp = r["full_pool_per_screen"]["mean"]
     print("[full pool means]", {k: round(v, 4) for k, v in fp.items()})
     print("[pair features]", {k: (v["top160"], v["top640"]) for k, v in r["pair_features"].items()})
+    for tier, rows in r["rules_on_engines"].items():
+        print(f"[rules on engines {tier}]")
+        for a, v in rows.items():
+            print(f"  {a:28s} {v['mean']:.4f}  vs {v['reference']} ({v['reference_mean']:.4f}) {_fmt(v['vs_reference'])}")
+    g = r["genedisco_scores_full_pool"]
+    if g:
+        b = g["rows"][g["best_rule"]]
+        print(f"[GeneDisco scores, full pool] {g['n_rules']} rules; best {g['best_rule']} {b['mean']:.4f} "
+              f"{_fmt(b['vs_lightgbm_online'])}; oracle {g['per_screen_oracle']:.4f}")
+    fp = r["full_pool_probes"]
+    if "hit_frequency_system" in fp:
+        hs = fp["hit_frequency_system"]
+        print(f"[full pool hit-frequency system] {hs['mean']:.4f}; C - it {_fmt(hs['c_minus_it'])}; it - static {_fmt(hs['it_minus_static'])}")
     print(f"saved -> {OUT}")

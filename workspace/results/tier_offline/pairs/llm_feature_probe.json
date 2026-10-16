@@ -1,0 +1,57 @@
+{
+  "feature_set": "intrinsic+depmap (no anchor)",
+  "ml_hit_share": {
+    "hub_score_norm": 0.02120368831228685,
+    "ppi_score_sum": 0.05859043600331269,
+    "pli_score": 0.08121047028402892,
+    "string_degree_norm": 0.08824266686158093,
+    "kegg_pathway_count_norm": 0.03485603913341041,
+    "reactome_pathway_count_norm": 0.0674265508264075,
+    "depmap_frac_ess": 0.07304071389171049,
+    "depmap_mean_norm": 0.025132946654798916,
+    "depmap_min_norm": 0.02259420992030485,
+    "depmap_K562_norm": 0.038500856916696136,
+    "hub_score_norm_absdiff": 0.039102075426898475,
+    "ppi_score_sum_absdiff": 0.052130941282439225,
+    "pli_score_absdiff": 0.06300635154662391,
+    "string_degree_norm_absdiff": 0.06535660718800086,
+    "kegg_pathway_count_norm_absdiff": 0.01364720390195727,
+    "reactome_pathway_count_norm_absdiff": 0.05403977387162025,
+    "depmap_frac_ess_absdiff": 0.09348007947874266,
+    "depmap_mean_norm_absdiff": 0.02160305875692359,
+    "depmap_min_norm_absdiff": 0.0474912742046594,
+    "depmap_K562_norm_absdiff": 0.03934405553759669
+  },
+  "llm_named_share": {
+    "hub_score_norm": 0.02151370345151175,
+    "ppi_score_sum": 0.03795773587467046,
+    "pli_score": 0.04800066641419898,
+    "string_degree_norm": 0.05567822034486243,
+    "kegg_pathway_count_norm": 0.03615265906888804,
+    "reactome_pathway_count_norm": 0.053379758542629704,
+    "depmap_frac_ess": 0.05500060781688035,
+    "depmap_mean_norm": 0.04207440602558425,
+    "depmap_min_norm": 0.01993796635931636,
+    "depmap_K562_norm": 0.039361367335678264,
+    "hub_score_norm_absdiff": 0.06340442269712686,
+    "ppi_score_sum_absdiff": 0.08276554762916725,
+    "pli_score_absdiff": 0.03442739703657369,
+    "string_degree_norm_absdiff": 0.06825685335404096,
+    "kegg_pathway_count_norm_absdiff": 0.10396061847367909,
+    "reactome_pathway_count_norm_absdiff": 0.09148396309761068,
+    "depmap_frac_ess_absdiff": 0.05825562985196331,
+    "depmap_mean_norm_absdiff": 0.023833419076890603,
+    "depmap_min_norm_absdiff": 0.025100220682190363,
+    "depmap_K562_norm_absdiff": 0.039454836866536634
+  },
+  "family_share": {
+    "ml": {
+      "depmap": 0.36118719536143273,
+      "connectivity_constraint": 0.6388128046385673
+    },
+    "llm": {
+      "depmap": 0.30301845401504013,
+      "connectivity_constraint": 0.6969815459849599
+    }
+  }
+}

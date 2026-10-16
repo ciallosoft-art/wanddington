@@ -1,0 +1,29 @@
+{
+  "permutation_importance": {
+    "baseline_hit_at_r5": 0.0040164675168189575,
+    "feature_set": "intrinsic+depmap (no anchor)",
+    "n_shuffles": 8,
+    "importance": {
+      "hub_score_norm": -0.0003137865247514811,
+      "ppi_score_sum": -0.002108645446329953,
+      "pli_score": -0.0006903303544532585,
+      "string_degree_norm": -0.0024349834320714935,
+      "kegg_pathway_count_norm": 0.00010041168792047385,
+      "reactome_pathway_count_norm": -0.0012551460990059245,
+      "depmap_frac_ess": -0.0008158449643538509,
+      "depmap_mean_norm": -0.0013932121698965762,
+      "depmap_min_norm": -0.0012049402550456875,
+      "depmap_K562_norm": -0.00017572045386082948,
+      "hub_score_norm_absdiff": 0.0,
+      "ppi_score_sum_absdiff": 0.0,
+      "pli_score_absdiff": 0.0,
+      "string_degree_norm_absdiff": 0.0,
+      "kegg_pathway_count_norm_absdiff": 0.0,
+      "reactome_pathway_count_norm_absdiff": 0.0,
+      "depmap_frac_ess_absdiff": 0.0,
+      "depmap_mean_norm_absdiff": 0.0,
+      "depmap_min_norm_absdiff": 0.0,
+      "depmap_K562_norm_absdiff": 0.0
+    }
+  }
+}

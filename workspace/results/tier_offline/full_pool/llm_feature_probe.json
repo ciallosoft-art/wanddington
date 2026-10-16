@@ -1,0 +1,37 @@
+{
+  "feature_set": "intrinsic+depmap (no anchor)",
+  "ml_hit_share": {
+    "hub_score_norm": 0.022233848655961612,
+    "ppi_score_sum": 0.08965087418052244,
+    "pli_score": 0.10801100564433354,
+    "string_degree_norm": 0.06232814010974316,
+    "kegg_pathway_count_norm": 0.059357825725736134,
+    "reactome_pathway_count_norm": 0.02975091343698768,
+    "depmap_frac_ess": 0.26900871652642994,
+    "depmap_mean_norm": 0.13719964586455272,
+    "depmap_min_norm": 0.11431698031034736,
+    "depmap_K562_norm": 0.10814204954538538
+  },
+  "llm_named_share": {
+    "hub_score_norm": 0.010634844706033028,
+    "ppi_score_sum": 0.3170719990672601,
+    "pli_score": 0.1883732327389901,
+    "string_degree_norm": 0.10187563027334966,
+    "kegg_pathway_count_norm": 0.04776686677152116,
+    "reactome_pathway_count_norm": 0.06315087629712224,
+    "depmap_frac_ess": 0.09685853996352604,
+    "depmap_mean_norm": 0.04940338783757755,
+    "depmap_min_norm": 0.07927312992352291,
+    "depmap_K562_norm": 0.045591492421097154
+  },
+  "family_share": {
+    "ml": {
+      "depmap": 0.6286673922467154,
+      "connectivity_constraint": 0.3713326077532846
+    },
+    "llm": {
+      "depmap": 0.2711265501457237,
+      "connectivity_constraint": 0.7288734498542763
+    }
+  }
+}
