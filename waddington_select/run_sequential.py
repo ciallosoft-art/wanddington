@@ -83,9 +83,9 @@ from .llm_client import (
 
 # ── Ablation arms ────────────────────────────────────────────────────────────
 from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
-from .arms.waddington_c_ablation_arms import (WaddingtonCAnonFeaturesArm, WaddingtonCAnonNamesArm,
-                                               WaddingtonCAnonPoolArm, WaddingtonCNoMemoryFinalArm,
-                                               WaddingtonCStaticMLArm)
+from .arms.waddington_c_ablation_arms import (WaddingtonCAnonFeaturesArm, WaddingtonCAnonLinearArm,
+                                               WaddingtonCAnonNamesArm, WaddingtonCAnonPoolArm,
+                                               WaddingtonCNoMemoryFinalArm, WaddingtonCStaticMLArm)
 from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
 from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
 from .arms.waddington_c_shuffled_names_arm import WaddingtonCShuffledNamesArm
@@ -112,7 +112,7 @@ _PAPER_ARMS = {
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
     "waddington_c_pair", "waddington_c_pair_no_llm",
     "waddington_c_nomem", "waddington_c_static_ml", "waddington_c_anon_names",
-    "waddington_c_anon_pool", "waddington_c_anon_features",
+    "waddington_c_anon_pool", "waddington_c_anon_features", "waddington_c_anon_linear",
 } | {f"genedisco_{a}" for a in _GD_ACQ} | {
     f"ml_{kind}_{m}" for kind in ("engine", "static") for m in _ml_engine_names()
 } | {f"ml_acq_{a}" for a in _ML_ACQ} | {f"ml_bnnacq_{a}" for a in _BNN_ACQ} | set(_gdf_arm_names()) | set(_gdfb_arm_names()) | {"ml_svgpacq_ucb1"} | {
@@ -122,7 +122,7 @@ _PAPER_ARMS = {
 
 
 # C-arm variants that never call the LLM: their replicates are deterministic re-evaluations
-_NO_LLM_ARMS = {"waddington_c_no_llm", "waddington_c_pair_no_llm"}
+_NO_LLM_ARMS = {"waddington_c_no_llm", "waddington_c_pair_no_llm", "waddington_c_anon_linear"}
 
 
 def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> list:
@@ -167,6 +167,8 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(WaddingtonCAnonPoolArm(dataset_name, bs))
         elif name == "waddington_c_anon_features":
             arms.append(WaddingtonCAnonFeaturesArm(dataset_name, bs))
+        elif name == "waddington_c_anon_linear":
+            arms.append(WaddingtonCAnonLinearArm(dataset_name, bs))
         elif name == "waddington_c_feature_reasoning":
             arms.append(WaddingtonCFeatureReasoningArm(dataset_name, bs))
         elif name == "waddington_c_pool_only":
@@ -335,7 +337,7 @@ def _protocol_manifest(
         reasoning = None
     uses_memory = any(
         arm.startswith("waddington")
-        and arm not in {"waddington_c_no_memory", "waddington_c_no_llm", "waddington_c_nomem"}
+        and arm not in {"waddington_c_no_memory", "waddington_c_no_llm", "waddington_c_nomem", "waddington_c_anon_linear"}
         for arm in arm_names
     )
     memory_hash = None

@@ -13,6 +13,8 @@ named-only vote stay the reported ones:
   waddington_c_anon_pool   A0.5: anonymous identifiers plus the ML-ranked candidate pool, no features
   waddington_c_anon_features  A1: anonymous identifiers, the pool and each candidate's structural features
                            (the reported arm's opt-in reason_from_structure mode)
+  waddington_c_anon_linear A1 with its LLM replaced by the hit-centroid rule (no LLM calls): is A1 the LLM
+                           reasoning, or would any rule on the same features do?
 
 The ladder's earlier arms (waddington_c_pool_only / _feature_reasoning) inherit the legacy shuffled-names arm,
 which routes on the target's realized hit rate; these keep the reported routing (docs/tier_extension_plan.md,
@@ -26,7 +28,8 @@ from __future__ import annotations
 
 from .waddington_c_arm import WaddingtonCArm
 from .waddington_c_no_ml_arm import _FrozenOnlineArm
-from .waddington_c_feature_reasoning_arm import _AnonymousFeaturesLLMArm, _AnonymousPoolOnlyLLMArm
+from .waddington_c_feature_reasoning_arm import (_AnonymousFeaturesLLMArm, _AnonymousPoolOnlyLLMArm,
+                                                 _LinearCentroidLLMArm)
 from .waddington_c_shuffled_names_arm import _AnonymousNamesLLMArm
 
 
@@ -77,4 +80,29 @@ class WaddingtonCAnonFeaturesArm(WaddingtonCAnonNamesArm):
 
     def __init__(self, dataset_name: str, batch_size: int, **kwargs) -> None:
         kwargs.setdefault("name", "waddington_c_anon_features")
+        super().__init__(dataset_name, batch_size, **kwargs)
+
+
+class _NamedLinearCentroidLLMArm(_LinearCentroidLLMArm):
+    """The centroid rule under the reported named-only vote: its projection picks are what it names. In round
+    1, with no feedback yet, it names nothing (its fallback there is the static ranking, the analogue of an
+    LLM's padding). The older linear arm predates the named-only vote, when every pick counted; under that
+    vote this rule's empty named set would leave the fusion to the ML branch alone."""
+
+    def _pick(self, cand_anon):
+        picked = super()._pick(cand_anon)
+        rule = self._axis() is not None
+        self._llm_named = set(picked) if rule else set()
+        self._static_padding = [] if rule else list(picked)
+        return picked
+
+
+class WaddingtonCAnonLinearArm(WaddingtonCAnonNamesArm):
+    """A1 on the reported C-arm with its LLM replaced by the hit-centroid rule in the same anonymous feature
+    space (no LLM calls)."""
+
+    _LLM_CLASS = _NamedLinearCentroidLLMArm
+
+    def __init__(self, dataset_name: str, batch_size: int, **kwargs) -> None:
+        kwargs.setdefault("name", "waddington_c_anon_linear")
         super().__init__(dataset_name, batch_size, **kwargs)
