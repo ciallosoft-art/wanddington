@@ -36,7 +36,8 @@ def _tier_a_reference() -> dict[str, dict[str, float]]:
 
 def summarize() -> dict:
     arms = H._load(RES)
-    complete = {a: v for a, v in arms.items() if all(ds in v for ds in BENCH)}
+    # the directory also holds the GeneDisco arms and the acquisition rules (part 乙 of the tier extension)
+    complete = {a: v for a, v in arms.items() if a.startswith(("ml_engine_", "ml_static_")) and all(ds in v for ds in BENCH)}
     if H.REF not in complete:
         raise SystemExit(f"{H.REF} missing or incomplete; run TIER=full_pool experiments/15_ml_engines.sh tabular")
     ref = H._per_screen(complete[H.REF])
@@ -73,7 +74,7 @@ def summarize() -> dict:
         free[f] = {"per_screen": ps, "mean": float(np.mean([ps[ds] for ds in BENCH])),
                    "ml_engine_minus_this": _paired(ref, ps), "c_minus_this": _paired(ctx["waddington_c"], ps)}
     res = {"tier": "full_pool", "reference": H.REF, "rows": rows,
-           "incomplete": sorted(set(arms) - set(complete)),
+           "incomplete": sorted(a for a in arms if a.startswith(("ml_engine_", "ml_static_")) and a not in complete),
            "context_full_pool_run": {a: {"per_screen": ps, "mean": float(np.mean(list(ps.values())))}
                                      for a, ps in ctx.items()},
            "c_minus_ml_engine": _paired(ctx["waddington_c"], ref),
