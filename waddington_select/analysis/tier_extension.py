@@ -12,7 +12,10 @@ experiment 21, and writes workspace/results/tier_extension_summary.json. Trains 
   acquisition   acquisition rules on the full pool and the pairs (experiment 15, group acquisition)
   genedisco     GeneDisco with its own models and rules, equal information, on the full pool (gdfb arms)
   attribution   source attribution and the ML-adjusted value of LLM endorsement (experiment 21 replays)
+  shap          the online model's most-used features over its selections, from the same replays
   novel_hits    recurrent vs novel hits on the full pool (experiment 21)
+  full_pool_per_screen  every method of Table tiers on the full pool, per screen
+  pair_features the eight interaction features ranked one at a time on the K562 map (no training)
 
 Single-gene tiers: paired over the nine screens, screen-clustered bootstrap 95% CI, wins/ties/losses
 (final_system_stats._paired). The pair tier has one screen: Welch t-test over replicates, or a one-sample
@@ -257,6 +260,72 @@ def attribution() -> dict:
     return res
 
 
+def shap() -> dict:
+    """Mean |SHAP| of the online model over the genes it selected, per screen and pooled (verified rounds)."""
+    res = {}
+    for tier in ("full_pool", "pairs"):
+        f = RES / "tier_offline" / tier / "attribution_replay.json"
+        if not f.exists():
+            continue
+        acc: dict[str, dict[str, list[float]]] = {}
+        for r in json.loads(f.read_text())["pooled"]["rounds"]:
+            if r.get("verified", True):
+                for feat, v in r["shap"].items():
+                    acc.setdefault(r["dataset"], {}).setdefault(feat, []).append(abs(v))
+        per = {ds: dict(sorted(((k, float(np.mean(v))) for k, v in fs.items()), key=lambda kv: -kv[1]))
+               for ds, fs in acc.items()}
+        feats = {k for fs in per.values() for k in fs}
+        pooled = {k: float(np.mean([fs[k] for fs in per.values() if k in fs])) for k in feats}
+        res[tier] = {"per_screen_top3": {ds: list(fs.items())[:3] for ds, fs in per.items()},
+                     "pooled": dict(sorted(pooled.items(), key=lambda kv: -kv[1]))}
+    return res
+
+
+def full_pool_per_screen() -> dict:
+    """Table tiers' full-pool column, per screen: the six arms of experiment 08, GeneDisco (equal information,
+    its best rule on the headline tier) and BDA's agent."""
+    from .sources import REPORTED_TIER_A_RUN
+    main = _arms(REPORTED_TIER_A_RUN)
+    cols = {"random": main["random"], "coreset": main["coreset"], "static_ranker": main["static_ranker"],
+            "online_ml": main["online_adaptive"], "padded_llm": main["llm_reasoning"], "waddington_c": main["waddington_c"]}
+    gd = _arms(ENG / "port" / "tier_a_gdfb_coreset_seeded.json").get("gdfb_achilles_bnn_coreset")
+    bda = _arms(RES / "gpt" / "tier_a_full_pool_20rep" / "bda_controlled.json").get("bda")
+    if gd:
+        cols["genedisco"] = gd
+    if bda:
+        cols["bda"] = bda
+    per = {k: _per_screen(v) for k, v in cols.items()}
+    return {"per_screen": per, "mean": {k: float(np.mean([v[s] for s in BENCH])) for k, v in per.items()}}
+
+
+def pair_features(seeds: int = 20) -> dict:
+    """Top-k hits on K562's pair map when ranking by one interaction feature (|r| for co-essentiality), or by
+    the repaired arm's equal-weight rank sum of all eight; ties broken in label-free orders, averaged."""
+    import pandas as pd
+    from ..arms.base import label_free_order
+    from ..arms.waddington_c_pair_arm import interaction_prior
+    t = REPO / "workspace" / "evaluation" / "lgbm_training_data_horlbeck_pairs.csv"
+    df = pd.read_csv(t, usecols=lambda c: c.startswith("pair_") or c in ("gene", "dataset", "label"))
+    df = df[df["dataset"] == "Horlbeck"].reset_index(drop=True)
+    y = df["label"].to_numpy()
+    cols = [c for c in df.columns if c.startswith("pair_")]
+    scores = {c: (df[c].abs() if c.endswith("coessential") else df[c]).to_numpy(float) for c in cols}
+    scores["rank_sum_all"] = df["gene"].map(interaction_prior(df[["gene"] + cols])).to_numpy(float)
+    out = {}
+    for name, sc in scores.items():
+        row = {}
+        for k in (160, 640):
+            vals = []
+            for seed in range(seeds):
+                order = label_free_order(df["gene"].tolist(), seed)
+                idx = order[np.argsort(-sc[order], kind="stable")[:k]]
+                vals.append(int(y[idx].sum()))
+            row[f"top{k}"] = float(np.mean(vals))
+        row["nonzero"] = float((sc != 0).mean())
+        out[name] = row
+    return out
+
+
 def novel_hits() -> dict:
     f = RES / "tier_offline" / "full_pool" / "novel_hit_analysis.json"
     return json.loads(f.read_text()) if f.exists() else {}
@@ -265,7 +334,8 @@ def novel_hits() -> dict:
 def run() -> dict:
     res = {"ablations": ablations(), "fusion": fusion(), "pair_engines": pair_engines(),
            "acquisition": acquisition(), "genedisco_full_pool": genedisco(), "attribution": attribution(),
-           "novel_hits_full_pool": novel_hits()}
+           "shap": shap(), "novel_hits_full_pool": novel_hits(), "full_pool_per_screen": full_pool_per_screen(),
+           "pair_features": pair_features()}
     OUT.write_text(json.dumps(res, indent=2))
     return res
 
@@ -305,4 +375,12 @@ if __name__ == "__main__":
               + ", ".join(f"{s} {x['hit_rate']*100:.1f}% (n={x['picked']})" for s, x in v["by_source"].items()))
         lg = v["conditional"].get("logit", v["conditional"])
         print(f"   endorsed OR {lg['endorsed_odds_ratio']:.2f} [{lg['or_ci95'][0]:.2f}, {lg['or_ci95'][1]:.2f}]")
+    for tier, v in r["shap"].items():
+        print(f"[shap {tier}] pooled top: " + ", ".join(f"{k} {x:.3f}" for k, x in list(v["pooled"].items())[:5]))
+    nh = r["novel_hits_full_pool"]
+    if nh:
+        print("[novel hits full pool]", nh["totals"], {k: {a: round(b, 3) for a, b in v.items()} for k, v in nh["macro_avg"].items()})
+    fp = r["full_pool_per_screen"]["mean"]
+    print("[full pool means]", {k: round(v, 4) for k, v in fp.items()})
+    print("[pair features]", {k: (v["top160"], v["top640"]) for k, v in r["pair_features"].items()})
     print(f"saved -> {OUT}")
