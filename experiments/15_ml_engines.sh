@@ -57,16 +57,16 @@ case "$TIER" in
   headline) ;;
   full_pool)
     case "$GROUP" in
-      tabular|graph|genept|svm|svm_rbf|score|score_hard|desc|bnn|beyond|acquisition|gdf_binary) ;;
-      *) echo "TIER=full_pool supports: tabular graph genept svm svm_rbf score score_hard desc bnn beyond acquisition gdf_binary" >&2; exit 2 ;;
+      tabular|graph|genept|svm|svm_rbf|score|score_hard|desc|bnn|beyond|acquisition|gdf_binary|gdf|bnn_rules|svgp_ucb) ;;
+      *) echo "TIER=full_pool supports: tabular graph genept svm svm_rbf score score_hard desc bnn beyond acquisition gdf_binary gdf bnn_rules svgp_ucb" >&2; exit 2 ;;
     esac
     export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_tier_a.csv"
     export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_tier_a_v3.csv"
     OUT=workspace/results/ml_engines/tier_a ;;
   pairs|pairs_interaction)
     case "$GROUP" in
-      tabular|svm|bnn|beyond|acquisition) ;;
-      *) echo "TIER=$TIER supports: tabular svm bnn beyond acquisition" >&2; exit 2 ;;
+      tabular|svm|bnn|beyond|acquisition|bnn_rules|svgp_ucb) ;;
+      *) echo "TIER=$TIER supports: tabular svm bnn beyond acquisition bnn_rules svgp_ucb" >&2; exit 2 ;;
     esac
     PT="lgbm_training_data_horlbeck_pairs_mean"; [ "$TIER" = pairs_interaction ] && PT="lgbm_training_data_horlbeck_pairs"
     export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/${PT}.csv"
@@ -95,7 +95,8 @@ case "$GROUP" in
   gdfb_tier_a) DET="";                       SEEDED="" ;;  # explicit arm list below
   bnn_setrules) DET="";                      SEEDED="" ;;  # explicit arm list below
   beyond)  DET="lgbm_rwr";                   SEEDED="mf svgp"; EXTRA_SEEDED="ml_svgpacq_ucb1" ;;
-  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a|gdfb_tier_a|bnn_setrules]" >&2; exit 2 ;;
+  bnn_rules|svgp_ucb) DET="";                SEEDED="" ;;  # other tiers: the rules on the BNN / sparse GP
+  *) echo "usage: $0 [tabular|graph|genept|acquisition|svm|svm_rbf|score|score_hard|desc|bnn|gdf|gdf_rerun|beyond|gdf_binary|gd_port|gd_port_tier_a|gdfb_tier_a|bnn_setrules|bnn_rules|svgp_ucb]" >&2; exit 2 ;;
 esac
 if [ "$GROUP" = beyond ] && [ "$TIER" = full_pool ]; then EXTRA_SEEDED=""; fi
 case "$TIER" in pairs|pairs_interaction)
@@ -113,6 +114,18 @@ if [ "$GROUP" = acquisition ]; then
   # step 6: LightGBM held fixed as a 5-member bootstrap ensemble; only the selection rule differs
   echo "== acquisition rules, 5 seeds"
   run "ml_acq_greedy ml_acq_ucb05 ml_acq_ucb1 ml_acq_thompson ml_acq_margin" 5 "$OUT/acquisition_seeded.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = bnn_rules ]; then
+  # Other tiers (2026-10-16): the four acquisition rules on the Bayesian MLP; its greedy engine is group bnn.
+  echo "== bnn acquisition rules ($TIER), 5 seeds"
+  run "ml_bnnacq_bald ml_bnnacq_ucb1 ml_bnnacq_badge ml_bnnacq_kmeans_embedding" 5 "$OUT/bnn_rules_seeded.json"
+  echo "done -> $OUT"; exit 0
+fi
+if [ "$GROUP" = svgp_ucb ]; then
+  # Other tiers: UCB on the sparse GP's latent function; its Probability-of-Hit engine is group beyond.
+  echo "== sparse GP, UCB ($TIER), 5 seeds"
+  run "ml_svgpacq_ucb1" 5 "$OUT/svgp_ucb_seeded.json"
   echo "done -> $OUT"; exit 0
 fi
 if [ "$GROUP" = bnn ] && [ "$TIER" != headline ]; then

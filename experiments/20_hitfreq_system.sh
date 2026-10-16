@@ -9,16 +9,18 @@
 # (corrected prompts, the replogle_transcriptomics_v2_20rep memory, twenty replicates), so it pairs with the
 # reported twenty-replicate C-arm.
 #
-#   bash experiments/20_hitfreq_system.sh [replicates]   (default 20; resumable)
+#   [TIER=full_pool] bash experiments/20_hitfreq_system.sh [replicates]   (default 20; resumable)
 export WADDINGTON_LEGACY_TASK_PROMPTS=0
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-TIER=headline
+TIER="${TIER:-headline}"  # headline, or full_pool (2026-10-16); not defined for pairs
+case "$TIER" in headline|full_pool) ;; *) echo "TIER must be headline or full_pool" >&2; exit 2 ;; esac
 REPS="${1:-20}"
 MODEL="openai-codex/gpt-5.6-luna"
 ARMS="waddington_c"
 OUT_DIR="workspace/results/hitfreq_system"
+[ "$TIER" = full_pool ] && OUT_DIR="workspace/results/hitfreq_system/full_pool"
 
 unset WADDINGTON_LLM_MODEL WADDINGTON_PI_CMD WADDINGTON_LEGACY_ROUTER
 unset WADDINGTON_AUTH_PATH WADDINGTON_REUSE_FEYNMAN

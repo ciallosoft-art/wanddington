@@ -33,12 +33,13 @@ from .sources import REPORTED_RUN_DIR  # noqa: E402  (the reported run; analysis
 RUN = REPORTED_RUN_DIR / "waddington_c_20rep.json"
 OUT = REPO / "workspace" / "results" / "llm_feature_probe.json"
 FEATS = INTRINSIC + DEPMAP  # no-anchor reported configuration
+SCREENS = list(BENCHMARK_DATASETS)  # --pairs: ["Horlbeck"], and FEATS gains each feature's within-pair spread
 
 
 def _named_counts(run: dict) -> dict:
     """screen -> {gene(upper): number of repeats in which the LLM named it}."""
     out: dict[str, collections.Counter] = {}
-    for s in BENCHMARK_DATASETS:
+    for s in SCREENS:
         cnt: collections.Counter = collections.Counter()
         for r in run[s]["waddington_c"]:
             named: set[str] = set()
@@ -52,7 +53,7 @@ def _named_counts(run: dict) -> dict:
 
 def _pooled_table(df: pd.DataFrame, named: dict) -> pd.DataFrame:
     rows = []
-    for s in BENCHMARK_DATASETS:
+    for s in SCREENS:
         sub = df[df["dataset"] == s].copy()
         sub["llm_named"] = (sub["gene"].map(lambda g: named[s].get(g, 0)) > 0).astype(int)
         sub["screen"] = s
@@ -96,6 +97,22 @@ def run() -> dict:
 
 
 if __name__ == "__main__":
+    import argparse
+    from . import prior_probes
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", type=Path, default=None, help="a run with the C-arm's selection dumps")
+    ap.add_argument("--csv", type=Path, default=None, help="that tier's v3 table")
+    ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--pairs", action="store_true", help="the two-gene tier: Horlbeck only, pair encoding")
+    a = ap.parse_args()
+    RUN, OUT = a.run or RUN, a.out or OUT
+    if a.csv:
+        prior_probes.CSV = a.csv
+    if a.pairs:
+        SCREENS = ["Horlbeck"]
+        FEATS = FEATS + [f + "_absdiff" for f in FEATS]
+        INTRINSIC = INTRINSIC + [f + "_absdiff" for f in INTRINSIC]
+        DEPMAP = DEPMAP + [f + "_absdiff" for f in DEPMAP]
     r = run()
     print(f"{'feature':28s} {'ML(hit)':>9s} {'LLM(named)':>11s}")
     for f in sorted(FEATS, key=lambda f: -r["ml_hit_share"][f]):

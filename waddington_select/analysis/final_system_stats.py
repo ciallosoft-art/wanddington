@@ -73,6 +73,20 @@ def _matched_loo() -> dict:
     return per
 
 
+def tier_stats(run_file: Path) -> dict:
+    """The headline comparisons on another tier's twenty-replicate run (its tables must be in the
+    environment): the full system against the matched static LOO prior, the routed LOO baseline, online
+    ML, the padded LLM baseline and coreset, paired over the nine screens; screen-clustered marginal CIs."""
+    run = json.loads(Path(run_file).read_text())
+    per = lambda arm: {d: float(np.mean([r["hit_ratio_per_round"][-1] for r in run[d][arm]])) for d in BENCH}
+    P = {"final": per("waddington_c"), "LOO": per("static_ranker"), "online": per("online_adaptive"),
+         "llm": per("llm_reasoning"), "coreset": per("coreset"), "matched_LOO": _matched_loo()}
+    return {"source": str(run_file), "means": {k: float(np.mean(list(v.values()))) for k, v in P.items()},
+            "per_screen": P,
+            "paired": {f"vs_{k}": _paired(P["final"], P[k]) for k in ("matched_LOO", "LOO", "online", "llm", "coreset")},
+            "marginal_ci": {k: _marginal(P[k]) for k in ("final", "matched_LOO", "online")}}
+
+
 def _marginal(per: dict, seed=0, n_boot=5000) -> dict:
     """Screen-clustered bootstrap CI of a method's nine-screen mean (unpaired; deliberately wide)."""
     v = np.array([per[s] for s in BENCH])
@@ -190,6 +204,14 @@ def _fmt(p):
 
 if __name__ == "__main__":
     import sys
+    if "--tier-run" in sys.argv:  # another tier: python -m ... --tier-run RUN.json OUT.json (tables in the env)
+        i = sys.argv.index("--tier-run")
+        res = tier_stats(Path(sys.argv[i + 1]))
+        Path(sys.argv[i + 2]).write_text(json.dumps(res, indent=2))
+        print({k: round(v, 4) for k, v in res["means"].items()})
+        for k, v in res["paired"].items():
+            print(f"  {k:16s} {_fmt(v)}")
+        sys.exit(0)
     if "--claude" not in sys.argv:
         r = run_gpt()
         f = _fmt

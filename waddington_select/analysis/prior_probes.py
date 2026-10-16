@@ -121,7 +121,7 @@ def _anchor_leakage(df, bench, hitset) -> dict:
             "frac_anchors_that_are_hits": round(th / ta, 3) if ta else 0.0}
 
 
-def permutation_importance(df, feats=None, n_shuffles: int = 8, seed: int = 0) -> dict:
+def permutation_importance(df, feats=None, n_shuffles: int = 8, seed: int = 0, targets=None) -> dict:
     """Per-feature permutation importance for the LOO prior, in hit@R5 units. For each screen the LightGBM
     is trained on the other screens (as in ``_loo_hit_at_r5``); then each feature is permuted across the
     target genes and we measure how far hit@R5 falls (averaged over shuffles, then screens). Reported over
@@ -133,7 +133,7 @@ def permutation_importance(df, feats=None, n_shuffles: int = 8, seed: int = 0) -
     rng = np.random.default_rng(seed)
     drops = {f: [] for f in feats}
     base_all = []
-    for target in BENCHMARK_DATASETS:
+    for target in (targets or BENCHMARK_DATASETS):
         sub = _target_rows(df, target)
         pool, y = sub["gene"].tolist(), dict(zip(sub["gene"], sub["label"]))
         total, bs = int(sub["label"].sum()), BATCH_SIZES[target]
@@ -206,6 +206,21 @@ def run() -> dict:
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--csv", type=Path, default=None, help="another tier's v3 table (default: the headline tier)")
+    ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--pairs", action="store_true",
+                    help="the two-gene tier (Horlbeck in WADDINGTON_EXTRA_DATASETS): only the permutation importance "
+                         "of its static LOO prior, over the pair encoding (each feature and its within-pair spread)")
+    a = ap.parse_args()
+    CSV, OUT = a.csv or CSV, a.out or OUT
+    if a.pairs:
+        feats = INTRINSIC + DEPMAP
+        pi = permutation_importance(_load(), feats=feats + [f + "_absdiff" for f in feats], targets=["Horlbeck"])
+        OUT.write_text(json.dumps({"permutation_importance": pi}, indent=2))
+        print(json.dumps(pi["importance"], indent=1), f"baseline {pi['baseline_hit_at_r5']:.4f}")
+        raise SystemExit(0)
     r = run()
     s = r["summary"]
     print(f"LOO (all feats) avg              {s['loo_all_avg']:.3f}")

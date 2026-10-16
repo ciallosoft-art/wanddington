@@ -27,16 +27,25 @@ case "$TIER" in
     RUN=workspace/results/gpt/tier_a_full_pool_v2_20rep/main_table_20rep.json
     MANIFEST=workspace/results/gpt/tier_a_full_pool_v2_20rep/waddington_c_20rep.manifest.json
     python3 -m waddington_select.analysis.novel_hit_analysis \
-      --csv "$WADDINGTON_TRAINING_CSV_V3" --run "$RUN" --out "$OUT_DIR/novel_hit_analysis.json" ;;
+      --csv "$WADDINGTON_TRAINING_CSV_V3" --run "$RUN" --out "$OUT_DIR/novel_hit_analysis.json"
+    # what the prior learns; the LLM branch's feature probe; the headline comparisons (2026-10-16)
+    python3 -m waddington_select.analysis.prior_probes --csv "$WADDINGTON_TRAINING_CSV_V3" --out "$OUT_DIR/prior_probes.json"
+    python3 -m waddington_select.analysis.llm_feature_probe --run "$RUN" --csv "$WADDINGTON_TRAINING_CSV_V3" \
+      --out "$OUT_DIR/llm_feature_probe.json"
+    python3 -m waddington_select.analysis.final_system_stats --tier-run "$RUN" "$OUT_DIR/final_system_stats.json" ;;
   pairs)
     export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_horlbeck_pairs_mean.csv"
     export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/lgbm_training_data_horlbeck_pairs_mean_v3.csv"
     export WADDINGTON_EXTRA_DATASETS="Horlbeck:128"
     RUN=workspace/results/tier_ablations/pairs/ablations_20rep.json
-    MANIFEST=workspace/results/tier_ablations/pairs/ablations_20rep.manifest.json ;;
+    MANIFEST=workspace/results/tier_ablations/pairs/ablations_20rep.manifest.json
+    python3 -m waddington_select.analysis.llm_feature_probe --pairs --run "$RUN" --csv "$WADDINGTON_TRAINING_CSV_V3" \
+      --out "$OUT_DIR/llm_feature_probe.json"
+    python3 -m waddington_select.analysis.prior_probes --pairs --csv "$WADDINGTON_TRAINING_CSV_V3" \
+      --out "$OUT_DIR/prior_permutation.json" ;;
   *) echo "TIER must be full_pool or pairs" >&2; exit 2 ;;
 esac
 
-python3 -m waddington_select.analysis.replay_attribution \
+[ "${SKIP_REPLAY:-0}" = 1 ] || python3 -m waddington_select.analysis.replay_attribution \
   --run "$RUN" --manifest "$MANIFEST" --out "$OUT_DIR/attribution_replay.json"
 echo "### TIER $TIER OFFLINE DONE $(date '+%m-%d %H:%M')"
