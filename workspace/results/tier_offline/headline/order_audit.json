@@ -1,0 +1,484 @@
+{
+ "source_run": "workspace/results/gpt/replogle_transcriptomics_v2_20rep/main_table_20rep.json",
+ "screens": {
+  "IFNG": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 7135,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.1683,
+     0.1683
+    ]
+   },
+   "online_adaptive": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.1833,
+     0.1833
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0998,
+     0.0998
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.1596,
+     0.1596
+    ]
+   }
+  },
+  "IL2": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 74,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 4444,
+    "hit_ratio_change": -0.0002079002079002079
+   },
+   "static_ranker": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.3056,
+     0.3056
+    ]
+   },
+   "online_adaptive": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.3139,
+     0.3139
+    ]
+   },
+   "coreset": {
+    "same_order": false,
+    "same_sets": false,
+    "hit_at_r5": [
+     0.1393,
+     0.1393
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.3056,
+     0.3056
+    ]
+   }
+  },
+  "Sanchez21": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 4661,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0768,
+     0.0768
+    ]
+   },
+   "online_adaptive": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0873,
+     0.0873
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0314,
+     0.0314
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0838,
+     0.0838
+    ]
+   }
+  },
+  "Sanchez21_down": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 4421,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0907,
+     0.0907
+    ]
+   },
+   "online_adaptive": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.101,
+     0.101
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0781,
+     0.0781
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0964,
+     0.0964
+    ]
+   }
+  },
+  "Carnevale22": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 5141,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": false,
+    "same_sets": false,
+    "hit_at_r5": [
+     0.0484,
+     0.0484
+    ]
+   },
+   "online_adaptive": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0472,
+     0.0472
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0541,
+     0.0541
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0622,
+     0.0622
+    ]
+   }
+  },
+  "Scharenberg22": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 2218,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.449,
+     0.449
+    ]
+   },
+   "online_adaptive": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.449,
+     0.449
+    ]
+   },
+   "coreset": {
+    "same_order": false,
+    "same_sets": false,
+    "hit_at_r5": [
+     0.2857,
+     0.2857
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.4694,
+     0.4694
+    ]
+   }
+  },
+  "Steinhart": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 4337,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0759,
+     0.0759
+    ]
+   },
+   "online_adaptive": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0897,
+     0.0897
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0897,
+     0.0897
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.0759,
+     0.0759
+    ]
+   }
+  },
+  "Replogle_K562_essential": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 99,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 2953,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.4921,
+     0.4921
+    ]
+   },
+   "online_adaptive": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.4762,
+     0.4762
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.2698,
+     0.2698
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": false,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.619,
+     0.619
+    ]
+   }
+  },
+  "Replogle_K562_gwps": {
+   "c_stored": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "c_alpha": {
+    "rounds": 100,
+    "exact": 100,
+    "same_set": 100,
+    "hit_ratio_change": 0.0
+   },
+   "padded_llm": {
+    "stored_reconstructs_recorded": true,
+    "padded_genes": 5107,
+    "hit_ratio_change": 0.0
+   },
+   "static_ranker": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.2468,
+     0.2468
+    ]
+   },
+   "online_adaptive": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.2727,
+     0.2727
+    ]
+   },
+   "coreset": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.1558,
+     0.1558
+    ]
+   },
+   "ml_engine_lightgbm": {
+    "same_order": true,
+    "same_sets": true,
+    "hit_at_r5": [
+     0.3333,
+     0.3333
+    ]
+   }
+  }
+ },
+ "summary": {
+  "c_rounds": 900,
+  "c_exact_stored": 900,
+  "c_exact_alpha": 873,
+  "c_same_set_alpha": 900,
+  "c_mean_hit_ratio_change_alpha": 0.0,
+  "padded_llm_mean_hit_ratio_change_alpha": -2.31000231000231e-05,
+  "baselines_same_hit_at_r5": {
+   "static_ranker": true,
+   "online_adaptive": true,
+   "coreset": true,
+   "ml_engine_lightgbm": true
+  },
+  "baselines_same_sets": {
+   "static_ranker": false,
+   "online_adaptive": true,
+   "coreset": false,
+   "ml_engine_lightgbm": true
+  }
+ }
+}
