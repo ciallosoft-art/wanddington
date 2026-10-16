@@ -27,8 +27,11 @@ cd "$(dirname "$0")/.."
 TIER="${TIER:?set TIER=headline, full_pool or pairs}"
 REPS="${1:-20}"
 MODEL="openai-codex/gpt-5.6-luna"
-ARMS="waddington_c waddington_c_nomem waddington_c_static_ml waddington_c_anon_names"
+ARMS="${ARMS:-waddington_c waddington_c_nomem waddington_c_static_ml waddington_c_anon_names}"
 OUT_DIR="workspace/results/tier_ablations/$TIER"
+OUT_NAME="${OUT_NAME:-ablations}"
+# Part 丁 of docs/tier_extension_plan.md reuses this harness: ARMS (the ladder's A0.5 / A1, or waddington_c__rf),
+# OUT_NAME (a separate result file), EXCLUDE_STUDY=1 (the leave-one-study-out prior), SCREENS (a subset).
 
 unset WADDINGTON_LLM_MODEL WADDINGTON_PI_CMD WADDINGTON_LEGACY_ROUTER
 unset WADDINGTON_AUTH_PATH WADDINGTON_REUSE_FEYNMAN
@@ -76,6 +79,8 @@ export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export WADDINGTON_GPT_RESULT_DIR="$OUT_DIR"
 export WADDINGTON_MEMORY_PATH="$MEMORY_PATH"
+[ "${EXCLUDE_STUDY:-0}" = 1 ] && export WADDINGTON_EXCLUDE_STUDY=1
+[ -n "${SCREENS:-}" ] && DATASETS=(--datasets $SCREENS)
 
 [ -s "$MEMORY_PATH" ] || { echo "ERROR: memory $MEMORY_PATH missing" >&2; exit 1; }
 mkdir -p "$OUT_DIR"
@@ -100,5 +105,5 @@ conda run --no-capture-output -n waddington-bio python3 -m waddington_select \
   --seed-mode local \
   --rounds 5 \
   --resume \
-  --out "$OUT_DIR/ablations_${REPS}rep.json"
+  --out "$OUT_DIR/${OUT_NAME}_${REPS}rep.json"
 echo "### TIER $TIER DONE $(date '+%m-%d %H:%M')"

@@ -83,7 +83,8 @@ from .llm_client import (
 
 # ── Ablation arms ────────────────────────────────────────────────────────────
 from .arms.waddington_c_no_memory_arm import WaddingtonCNoMemoryArm
-from .arms.waddington_c_ablation_arms import (WaddingtonCAnonNamesArm, WaddingtonCNoMemoryFinalArm,
+from .arms.waddington_c_ablation_arms import (WaddingtonCAnonFeaturesArm, WaddingtonCAnonNamesArm,
+                                               WaddingtonCAnonPoolArm, WaddingtonCNoMemoryFinalArm,
                                                WaddingtonCStaticMLArm)
 from .arms.waddington_c_no_llm_arm import WaddingtonCNoLLMArm
 from .arms.waddington_c_no_ml_arm import WaddingtonCNoMLArm
@@ -111,6 +112,7 @@ _PAPER_ARMS = {
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
     "waddington_c_pair", "waddington_c_pair_no_llm",
     "waddington_c_nomem", "waddington_c_static_ml", "waddington_c_anon_names",
+    "waddington_c_anon_pool", "waddington_c_anon_features",
 } | {f"genedisco_{a}" for a in _GD_ACQ} | {
     f"ml_{kind}_{m}" for kind in ("engine", "static") for m in _ml_engine_names()
 } | {f"ml_acq_{a}" for a in _ML_ACQ} | {f"ml_bnnacq_{a}" for a in _BNN_ACQ} | set(_gdf_arm_names()) | set(_gdfb_arm_names()) | {"ml_svgpacq_ucb1"} | {
@@ -161,6 +163,10 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(WaddingtonCStaticMLArm(dataset_name, bs))
         elif name == "waddington_c_anon_names":
             arms.append(WaddingtonCAnonNamesArm(dataset_name, bs))
+        elif name == "waddington_c_anon_pool":
+            arms.append(WaddingtonCAnonPoolArm(dataset_name, bs))
+        elif name == "waddington_c_anon_features":
+            arms.append(WaddingtonCAnonFeaturesArm(dataset_name, bs))
         elif name == "waddington_c_feature_reasoning":
             arms.append(WaddingtonCFeatureReasoningArm(dataset_name, bs))
         elif name == "waddington_c_pool_only":

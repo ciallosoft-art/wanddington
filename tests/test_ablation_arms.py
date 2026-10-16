@@ -5,9 +5,12 @@ import unittest
 import numpy as np
 
 from waddington_select.arms.llm_reasoning_arm import LLMReasoningArm
-from waddington_select.arms.waddington_c_ablation_arms import (WaddingtonCAnonNamesArm,
+from waddington_select.arms.waddington_c_ablation_arms import (WaddingtonCAnonFeaturesArm,
+                                                               WaddingtonCAnonNamesArm, WaddingtonCAnonPoolArm,
                                                                WaddingtonCNoMemoryFinalArm,
                                                                WaddingtonCStaticMLArm)
+from waddington_select.arms.waddington_c_feature_reasoning_arm import (_AnonymousFeaturesLLMArm,
+                                                                       _AnonymousPoolOnlyLLMArm)
 from waddington_select.arms.waddington_c_arm import WaddingtonCArm
 from waddington_select.arms.waddington_c_shuffled_names_arm import _AnonymousNamesLLMArm
 from waddington_select.oracle import BATCH_SIZES, DatasetOracle
@@ -29,12 +32,15 @@ class AblationArmTests(unittest.TestCase):
         cls.static = WaddingtonCStaticMLArm(DS, bs)
         cls.nomem = WaddingtonCNoMemoryFinalArm(DS, bs)
         cls.anon = WaddingtonCAnonNamesArm(DS, bs)
+        cls.pool = WaddingtonCAnonPoolArm(DS, bs)
+        cls.feats = WaddingtonCAnonFeaturesArm(DS, bs)
         oracle = DatasetOracle(DS)
         genes = cls.c._online._ranking[:bs]
         cls.revealed = oracle.reveal(genes)
 
     def test_registered(self):
-        names = ["waddington_c_nomem", "waddington_c_static_ml", "waddington_c_anon_names"]
+        names = ["waddington_c_nomem", "waddington_c_static_ml", "waddington_c_anon_names",
+                 "waddington_c_anon_pool", "waddington_c_anon_features"]
         self.assertTrue(set(names) <= _PAPER_ARMS)
         self.assertEqual([a.name for a in make_arms(DS, names)], names)
 
@@ -43,7 +49,7 @@ class AblationArmTests(unittest.TestCase):
         self.assertIs(type(self.c._llm), LLMReasoningArm)
 
     def test_same_fusion_as_reported(self):
-        for arm in (self.static, self.nomem, self.anon):
+        for arm in (self.static, self.nomem, self.anon, self.pool, self.feats):
             self.assertEqual((arm._route, arm._w_ml, arm._w_llm), (self.c._route, self.c._w_ml, self.c._w_llm))
             np.testing.assert_allclose(_scores(arm), _scores(self.c))  # same round-0 prior
 
@@ -59,6 +65,11 @@ class AblationArmTests(unittest.TestCase):
 
     def test_no_memory(self):
         self.assertEqual(self.nomem._llm._memory, [])
+
+    def test_ladder_rungs(self):
+        self.assertIs(type(self.pool._llm), _AnonymousPoolOnlyLLMArm)
+        self.assertIs(type(self.feats._llm), _AnonymousFeaturesLLMArm)
+        self.assertEqual(self.feats._llm._memory, self.c._llm._memory)
 
     def test_anonymous_names(self):
         self.assertIsInstance(self.anon._llm, _AnonymousNamesLLMArm)
