@@ -33,7 +33,6 @@ test("onboarding asks for the tier after the gene pool", async () => {
   assert.equal(r.stage, "tier");               // undecided: ask again
   assert.equal(state.onboarding.tier, null);
 
-  state.onboarding.proposed = ["STAT1"];      // skip the LLM anchor proposal
   r = await handleOnboarding(state, "keep", {}, null);
   assert.equal(state.onboarding.tier, "full_pool");
   assert.equal(r.stage, "hits");               // then the hit rule, before any result is seen
@@ -45,7 +44,7 @@ test("onboarding asks for the tier after the gene pool", async () => {
 
   r = await handleOnboarding(state, "fdr < 0.05 up", {}, null);
   assert.deepEqual(state.onboarding.hitRule, { type: "fdr", maxFdr: 0.05, direction: "up" });
-  assert.equal(r.stage, "anchors");
+  assert.equal(r.stage, "design");             // then the screen's design (onboard-design.test.mjs)
 });
 
 test("hit rule replies", () => {
@@ -68,7 +67,6 @@ test("a bare yes accepts the default tier", async () => {
   const state = {};
   await startOnboarding(state, { name: "S", task: "t", measurement: "m" }, null);
   await handleOnboarding(state, "", { file: { content: "Gene,Score\nSTAT1,1\n", name: "pool.csv" } }, null);
-  state.onboarding.proposed = ["STAT1"];
   await handleOnboarding(state, "yes", {}, null);
   assert.equal(state.onboarding.tier, "non_essential");
 });

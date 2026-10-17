@@ -72,10 +72,16 @@ def siblings(dataset: str) -> list[str]:
 
 def feature_policy_metadata(dataset: str) -> dict:
     """Return {'depmap': 'none'|'pan'|'pan_k562'} from metadata only."""
-    m = SCREEN_METADATA[dataset]
-    if m["modality"] == "CRISPRa" or m["curated_ess"]:
+    return feature_policy_from(SCREEN_METADATA[dataset])
+
+
+def feature_policy_from(m: dict) -> dict:
+    """The same rule for any screen's design metadata (a scientist's registered screen, phenotype.py).
+    A field left out is unknown and switches nothing off: an unknown modality is treated as
+    loss-of-function, an unknown cell line as not K562, and the library as not a curated panel."""
+    if m.get("modality") == "CRISPRa" or m.get("curated_ess"):
         return {"depmap": "none"}
-    if m["cell_line"] == "K562":
+    if m.get("cell_line") == "K562":
         return {"depmap": "pan"}
     return {"depmap": "pan_k562"}
 

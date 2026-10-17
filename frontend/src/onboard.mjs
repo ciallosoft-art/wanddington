@@ -1,12 +1,12 @@
 // onboard.mjs — guided registration of a scientist's OWN phenotype.
 //
-// describe the screen → provide the gene pool file → the LLM PROPOSES anchor genes → the scientist
-// confirms/edits → build features (waddington_select/phenotype.py) → it becomes rankable.
+// describe the screen → provide the gene pool file → tier → hit rule → the screen's design (perturbation,
+// cell line, curated panel?) → build features (waddington_select/phenotype.py) → it becomes rankable.
 //
-// Anchors are the one scientifically load-bearing input: the three anchor-relative features
-// (g1_ppi_score / archs4_coexpr / kegg_overlap) are computed against them. So the LLM proposes and
-// the scientist vets. They are seeds for feature computation only — suggest.py never recommends a
-// phenotype's own anchors back, so a mediocre anchor cannot resurface as a fake "discovery".
+// The design decides which DepMap essentiality features the prior may use, by the benchmarks' metadata
+// rule (router_protocol.feature_policy_from): none for CRISPRa (DepMap is knockout-derived) or a curated
+// essential panel, pan-cancer only in K562, else pan-cancer + K562. Anchor genes are no longer asked for:
+// the reported C-arm drops the anchor-relative features, so they would not change a single ranking.
 
 import { complete } from "./llm/complete.mjs";
 import { registerPhenotype } from "./brain.mjs";
@@ -22,24 +22,10 @@ Return ONE JSON object, nothing else:
 Infer a sensible name from the biology if they didn't give one. Do not invent a task/measurement that
 they did not describe — use null so we can ask.`;
 
-const ANCHOR_SYS = `You are proposing ANCHOR genes that seed a gene-selection model for a new CRISPR screen.
-
-Anchors are 8-12 well-established human genes CENTRAL to the phenotype's biology (canonical pathway
-members, receptors, core regulators). They are used only to compute network / co-expression / pathway
-similarity features for every gene in the library. They are NOT predictions and are never recommended
-back to the scientist, so choose genes that are textbook-certain for this biology rather than guesses.
-
-Return ONLY a JSON array of official human gene symbols, e.g. ["GPX4","SLC7A11","ACSL4"]`;
-
-const GENE_RE = /\b[A-Z][A-Z0-9-]{1,14}\b/g;
 // Whole-token validator. Deliberately NOT global: a /g regex carries lastIndex across .test()
 // calls, which silently drops every other gene when used in a filter. Anchored too, so a token
 // only passes if the WHOLE string is a symbol -- \b alone accepts "TP53 (tumour suppressor)".
 const GENE_TOKEN_RE = /^[A-Z][A-Z0-9-]{1,14}$/;
-const STOP = new Set([
-  "YES", "NO", "OK", "OKAY", "USE", "THE", "AND", "OR", "GENES", "GENE", "ANCHORS", "ANCHOR",
-  "CONFIRM", "INSTEAD", "ADD", "REMOVE", "DROP", "PLEASE", "CSV", "TSV", "TXT", "MAGECK", "I", "A",
-]);
 
 function parseJson(text) {
   let t = String(text).trim();
@@ -57,12 +43,6 @@ function parseJson(text) {
     }
   }
   return null;
-}
-
-/** Gene symbols the scientist typed (used to override the proposed anchors). */
-export function parseGenes(message) {
-  const hits = String(message).match(GENE_RE) || [];
-  return [...new Set(hits.filter((g) => !STOP.has(g) && /\d|[A-Z]{2,}/.test(g)))];
 }
 
 export function onboardCommand(message) {
@@ -123,6 +103,66 @@ const TOP_FRACTION_REFUSED =
   "would call ~5% of every batch a hit whatever the effects. Choose `label`, a score cutoff (`|score| >= 1.5`) or an " +
   "FDR cutoff (`fdr < 0.05`). (To replay a completed screen, use upload-and-run instead, which can rank the whole screen.)";
 
+// The perturbation, in the order checked: CRISPRa and CRISPRi before KO, so "dCas9-KRAB" is not a knockout.
+// A bare "activation" is not CRISPRa: "T cell activation" is a phenotype, not a modality.
+const MODALITY_RES = [
+  ["CRISPRa", /crispr-?a\b|crispr[- ]activation|vp64|\bvpr\b|\bsam\b|over-?express|gain[- ]of[- ]function|crispr激活|过表达/i],
+  ["CRISPRi", /crispr-?i\b|crispr[- ]interference|knock-?down|krab|crispr干扰|敲低/i],
+  ["KO", /\bko\b|knock-?out|crispr-?ko|\bcas9\b|敲除/i],
+];
+const UNKNOWN_RE = /\b(?:unknown|unsure|not sure|don'?t know)\b|不知道|不确定|未知/i;
+const K562_RE = /(?<![A-Za-z0-9])K-?562(?![0-9])/i;
+const CURATED_RE = /\bcurated\b|essential[- ](?:gene )?panel|必需基因(?:面板|集合|库)/i;
+const NOT_CURATED_RE = /\b(?:not|no|isn'?t|non)[- ](?:a\s+)?curated|不是/i;
+
+/** KO / CRISPRi / CRISPRa named in a message, "unknown" if they say they don't know, else null. */
+export function parseModality(message) {
+  const m = String(message || "");
+  for (const [modality, re] of MODALITY_RES) if (re.test(m)) return modality;
+  return UNKNOWN_RE.test(m) ? "unknown" : null;
+}
+
+/**
+ * The screen's design from a reply such as "CRISPRa, primary T cells" or "KO in K562":
+ * {modality: KO|CRISPRi|CRISPRa|unknown|null, cellLine: string|null, curatedEss: boolean}.
+ */
+export function parseDesign(message) {
+  const text = String(message || "").trim();
+  const curatedEss = CURATED_RE.test(text) && !NOT_CURATED_RE.test(text);
+  let cellLine = null;
+  if (K562_RE.test(text)) cellLine = "K562";
+  else {
+    const inPhrase = text.match(/\bin\s+([^,;.，；。]+)/i) || text.match(/在\s*([^,;.，；。中里]+)[中里]/);
+    const part = text.split(/[,;，；\n]/).map((x) => x.trim()).filter(Boolean)
+      .find((x) => !parseModality(x) && !CURATED_RE.test(x) && onboardCommand(x) === "other");
+    cellLine = (inPhrase ? inPhrase[1] : part || "").trim().slice(0, 80) || null;
+  }
+  return { modality: parseModality(text), cellLine, curatedEss };
+}
+
+/** What a description already says about the design (the scientist confirms it): a named perturbation, else null. */
+function designGuess(description) {
+  const modality = parseModality(description);
+  if (!modality || modality === "unknown") return null;
+  return { modality, cellLine: K562_RE.test(description) ? "K562" : null,
+           curatedEss: CURATED_RE.test(description) && !NOT_CURATED_RE.test(description) };
+}
+
+const DESIGN_WHY = "It decides which DepMap essentiality features the model may use (none for CRISPRa or a curated " +
+  "essential panel, pan-cancer only in K562).";
+
+const DESIGN_TEXT =
+  "Last, the screen's design. Which perturbation — `KO`, `CRISPRi` or `CRISPRa` — and which cells? e.g. " +
+  "`CRISPRa, primary T cells` or `CRISPRi, K562`. Add `curated essential panel` if your library is a curated set of " +
+  "essential genes; say `unknown` if you don't know the perturbation (it is then treated as loss-of-function). " + DESIGN_WHY;
+
+export function designText(guess) {
+  if (!guess) return DESIGN_TEXT;
+  const where = guess.cellLine ? ` in ${guess.cellLine}` : "";
+  return `I read the design as ${guess.modality}${where}${guess.curatedEss ? ", a curated essential panel" : ""}. ` +
+    "Reply `yes` if that's right, or correct it (e.g. `CRISPRi, K562`; add the cells if you like). " + DESIGN_WHY;
+}
+
 const TIER_TEXT =
   "Should the 684 common core-essential genes (CEGv2) be removed from the candidates? Reply `yes` to remove them " +
   "(the default, and the paper's main tier: you are after phenotype-specific hits, not generic essentials), or " +
@@ -146,19 +186,6 @@ export function normalizeAnchors(genes) {
   )].slice(0, 12);
 }
 
-export async function proposeAnchors(task, measurement, modelSpec) {
-  const raw = await complete({
-    spec: modelSpec,
-    systemPrompt: ANCHOR_SYS,
-    prompt: `Phenotype: ${task}\nMeasurement: ${measurement}\n\nPropose the anchor genes.`,
-    temperature: 0,
-    maxTokens: 300,
-  });
-  const arr = parseJson(raw);
-  const genes = Array.isArray(arr) ? arr : parseGenes(raw);
-  return normalizeAnchors(genes);
-}
-
 /** Begin onboarding; immediately advances to the first thing we actually need. */
 export async function startOnboarding(state, fields, modelSpec) {
   state.onboarding = {
@@ -171,10 +198,11 @@ export async function startOnboarding(state, fields, modelSpec) {
     genesPath: null,
     genesContent: null,
     genesName: null,
-    proposed: null,
-    anchors: null,
+    description: fields.text || "",   // what the scientist has said about the screen (prefills the design)
     tier: null,
     hitRule: null,
+    design: null,                     // {modality, cellLine, curatedEss}
+    designGuess: null,
   };
   return advance(state, modelSpec);
 }
@@ -215,13 +243,10 @@ async function advance(state, modelSpec) {
     return { kind: "onboard", stage: "hits", name: o.name, text: HITS_TEXT };
   }
 
-  if (!o.anchors) {
-    o.stage = "anchors";
-    if (!o.proposed) o.proposed = await proposeAnchors(o.task, o.measurement, modelSpec);
-    return {
-      kind: "onboard", stage: "anchors", name: o.name, proposed: o.proposed,
-      text: `Proposed anchor genes (seeds used only to compute similarity features — they'll never be recommended back to you). Reply \`yes\` to accept, or list your own gene symbols instead.`,
-    };
+  if (!o.design) {
+    o.stage = "design";
+    o.designGuess = designGuess([o.description, o.task, o.measurement].filter(Boolean).join(" \n "));
+    return { kind: "onboard", stage: "design", name: o.name, guess: o.designGuess, text: designText(o.designGuess) };
   }
 
   o.stage = "building";
@@ -230,12 +255,14 @@ async function advance(state, modelSpec) {
     genesFile: o.genesPath || undefined,
     genesContent: o.genesContent || undefined,
     genesName: o.genesName || undefined,
-    anchors: o.anchors,
     task: o.task,
     measurement: o.measurement,
     batchSize: o.batchSize || undefined,
     tier: o.tier,
     hitRule: o.hitRule,
+    modality: o.design.modality,
+    cellLine: o.design.cellLine || undefined,
+    curatedEss: o.design.curatedEss,
   });
   state.onboarding = null;
   state.dataset = res.name;
@@ -252,6 +279,7 @@ export async function handleOnboarding(state, message, opts, modelSpec) {
   }
 
   if (o.stage === "collect") {
+    o.description = [o.description, message].filter(Boolean).join(" \n ");
     const f = await extractPhenotype(message, modelSpec);
     o.name = o.name || f.name || null;
     o.task = o.task || f.task || null;
@@ -285,19 +313,16 @@ export async function handleOnboarding(state, message, opts, modelSpec) {
     return advance(state, modelSpec);
   }
 
-  if (o.stage === "anchors") {
-    if (cmd === "confirm") {
-      o.anchors = o.proposed;
-    } else {
-      const custom = parseGenes(message);
-      if (custom.length >= 3) o.anchors = custom;
+  if (o.stage === "design") {
+    const said = parseDesign(message);
+    if (said.modality) {
+      o.design = said;
+    } else if (cmd === "confirm" && o.designGuess) {
+      // "yes" to the guess, possibly with the cells added ("yes, in K562")
+      o.design = { ...o.designGuess, cellLine: said.cellLine || o.designGuess.cellLine,
+                   curatedEss: said.curatedEss || o.designGuess.curatedEss };
     }
-    if (!o.anchors) {
-      return {
-        kind: "onboard", stage: "anchors", name: o.name, proposed: o.proposed,
-        text: "Reply `yes` to accept these anchors, or list at least 3 gene symbols to use instead.",
-      };
-    }
+    if (!o.design) return { kind: "onboard", stage: "design", name: o.name, guess: o.designGuess, text: DESIGN_TEXT };
     return advance(state, modelSpec);
   }
 

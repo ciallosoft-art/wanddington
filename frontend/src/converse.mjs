@@ -65,7 +65,7 @@ async function defaultAsk() {
  *   { kind:"suggest", dataset, genes, info, narration, feedback:{hits,misses}, state }
  */
 export async function respond(message, state, modelSpec, opts = {}) {
-  // Onboarding the scientist's own phenotype (describe → gene pool → anchors → build).
+  // Onboarding the scientist's own phenotype (describe → gene pool → tier → hit rule → design → build).
   if (state.onboarding?.active) {
     const previous = state.dataset;
     const result = await handleOnboarding(state, message, opts, modelSpec);
@@ -127,7 +127,7 @@ export async function respond(message, state, modelSpec, opts = {}) {
   if (intent.action === "register") {
     const started = await startOnboarding(
       state,
-      { name: intent.name, task: intent.task, measurement: intent.measurement, batchSize: intent.n },
+      { name: intent.name, task: intent.task, measurement: intent.measurement, batchSize: intent.n, text: message },
       modelSpec,
     );
     return { ...started, state };

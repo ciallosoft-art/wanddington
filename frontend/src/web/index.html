@@ -367,14 +367,10 @@
         if (r.stage === "pool") {
           b.appendChild(el(null, `<b>Onboarding · ${esc(r.name)}</b> — ${esc(r.text)}`));
           b.appendChild(fileInputNode());
-        } else if (r.stage === "anchors") {
-          b.appendChild(el(null, `<b>Onboarding · ${esc(r.name)}</b> — proposed anchor genes (${r.proposed.length}):`));
-          b.appendChild(chips(r.proposed));
-          b.appendChild(el("meta", esc(r.text)));
         } else if (r.stage === "done") {
           b.appendChild(el(null, `<b>Phenotype registered · ${esc(r.name)}</b> — pool ${r.n_genes} genes (${r.n_genes_with_known_features} with known features)${tierNote(r.tier, r.n_core_essential_removed)}`
-            + (r.hit_rule_text ? ` · hit rule: ${esc(r.hit_rule_text)}` : "")));
-          b.appendChild(chips(r.anchors));
+            + (r.hit_rule_text ? ` · hit rule: ${esc(r.hit_rule_text)}` : "") + designNote(r.metadata, r.depmap_policy)));
+          if (r.anchors?.length) b.appendChild(chips(r.anchors));
           b.appendChild(el("meta", `now rankable — try “run a real experiment on ${esc(r.name)} with my own results”`));
         } else {
           b.appendChild(el(null, esc(r.text || "…")));
@@ -577,10 +573,9 @@
       let roundEl = null;
       return (e) => {
         if (e.type === "upload") tl.appendChild(el("run-head", `📤 New screen <b>${esc(e.name)}</b> uploaded (${(e.bytes / 1024).toFixed(0)} KB) — registering it (no code change, just data)…`));
-        else if (e.type === "anchor-proposing") tl.appendChild(el("run-head", "🧬 Proposing anchor genes from the phenotype…"));
         else if (e.type === "anchors") tl.appendChild(el("run-head", `anchor genes: <span translate="no">${e.anchors.map(esc).join(", ")}</span>`));
         else if (e.type === "registering") tl.appendChild(el("run-head", `⚙ Building ML features for <b>${esc(e.name)}</b>…`));
-        else if (e.type === "registered") tl.appendChild(el("run-head", `✅ Registered <b>${esc(e.name)}</b> — ${e.nGenes} genes (${e.nWithFeatures} with known features)${tierNote(e.tier, e.nCoreEssentialRemoved)}. Rankable now.`));
+        else if (e.type === "registered") tl.appendChild(el("run-head", `✅ Registered <b>${esc(e.name)}</b> — ${e.nGenes} genes (${e.nWithFeatures} with known features)${tierNote(e.tier, e.nCoreEssentialRemoved)}${designNote(e.design, e.depmap)}. Rankable now.`));
         else if (e.type === "already-registered") tl.appendChild(el("run-head", `<b>${esc(e.name)}</b> is already registered.`));
         else if (e.type === "intent") tl.appendChild(el("run-head", `🧠 ${esc(e.text)}<div class="rh-readout">reveal source: ${esc(e.readout)}</div>`));
         else if (e.type === "round-open") {
@@ -652,7 +647,26 @@
       return "";
     }
 
-    async function runUpload({ name, content, fileName, task, rounds, tier = "non_essential" }, chat = current) {
+    // " · CRISPRa in primary T cells → DepMap off" for a registered phenotype's design, else ""
+    function designNote(m, depmap) {
+      if (!m) return "";
+      const where = m.cell_line ? ` in ${esc(m.cell_line)}` : "";
+      const dm = { none: "off", pan: "pan-cancer only", pan_k562: "pan-cancer + K562" }[depmap] || esc(depmap || "?");
+      return ` · ${esc(m.modality)}${m.modality === "unknown" ? " (treated as loss-of-function)" : ""}${where}`
+        + `${m.curated_ess ? ", curated essential panel" : ""} → DepMap ${dm}`;
+    }
+
+    // KO / CRISPRi / CRISPRa from a typed answer (mirrors onboard.mjs parseModality); "" = unknown; null = unrecognised
+    function modalityOf(text) {
+      const t = String(text || "").trim();
+      if (!t || /^(?:unknown|unsure|not sure|\?)$/i.test(t)) return "unknown";
+      if (/crispr-?a\b|crispr[- ]activation|vp64|\bvpr\b|over-?express|gain[- ]of[- ]function/i.test(t)) return "CRISPRa";
+      if (/crispr-?i\b|crispr[- ]interference|knock-?down|krab/i.test(t)) return "CRISPRi";
+      if (/\bko\b|knock-?out|crispr-?ko|\bcas9\b/i.test(t)) return "KO";
+      return null;
+    }
+
+    async function runUpload({ name, content, fileName, task, rounds, tier = "non_essential", modality, cellLine }, chat = current) {
       if (!chat || !chats.includes(chat) || pendingChats.has(chat.id)) return;
       const label = `📤 Upload & run "${name}" — register from my screen, then rank (${rounds} rounds)`;
       if (chat === current) {
@@ -672,7 +686,7 @@
       try {
         const res = await fetch("/api/run-upload", {
           method: "POST", headers: apiHeaders(),
-          body: JSON.stringify({ name, readoutContent: content, readoutName: fileName, task, rounds, tier }),
+          body: JSON.stringify({ name, readoutContent: content, readoutName: fileName, task, rounds, tier, modality, cellLine }),
         });
         if (!res.ok) throw new Error((await res.json()).text || `Request failed (${res.status})`);
         const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
@@ -705,10 +719,19 @@
           if (name == null) return;
           name = name.replace(/[^A-Za-z0-9_]/g, "_") || base;
           const task = prompt("One line — what phenotype does this screen measure?", "") || "";
+          // The design sets which DepMap essentiality features the model may use (none for CRISPRa, pan-cancer only in K562).
+          let modality = null;
+          for (let ask = "Perturbation: KO, CRISPRi or CRISPRa? (blank = unknown, treated as loss-of-function)"; modality == null;
+               ask = "Not recognised — type KO, CRISPRi or CRISPRa (blank = unknown):") {
+            const said = prompt(ask, "");
+            if (said == null) return;
+            modality = modalityOf(said);
+          }
+          const cellLine = (prompt("Cell line / type (e.g. K562, primary T cells; blank = unknown):", "") || "").trim();
           const tier = confirm("Remove the 684 common core-essential genes (CEGv2) from the candidates?\n\n"
             + "OK = remove them (default; the paper's main tier: phenotype-specific hits)\n"
             + "Cancel = keep the full pool, essentials included") ? "non_essential" : "full_pool";
-          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5, tier }, chat);
+          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5, tier, modality, cellLine }, chat);
         };
         reader.readAsText(f);
       };

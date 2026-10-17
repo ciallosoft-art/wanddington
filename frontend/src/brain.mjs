@@ -48,7 +48,7 @@ export async function getDatasets() {
  * Onboard a new phenotype: build its ML features from the scientist's screen/library file.
  * Accepts a `genesFile` path (CLI) or raw `genesContent` (+ `genesName` for the extension hint, Web upload).
  */
-export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate, tier, hitRule }) {
+export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate, tier, hitRule, modality, cellLine, curatedEss }) {
   let poolFile = genesFile;
   if (!poolFile) {
     if (genesContent == null) throw new Error("registerPhenotype: need a gene-pool file path or content");
@@ -59,9 +59,18 @@ export async function registerPhenotype({ name, genesFile, genesContent, genesNa
   }
   const args = [
     "-m", "waddington_select.phenotype", "register", "--name", name,
-    "--genes-file", poolFile, "--anchors", ...anchors,
+    "--genes-file", poolFile,
     "--task", task, "--measurement", measurement, "--json",
   ];
+  // Optional: only the legacy anchor-feature configuration uses anchors (the reported C-arm drops them).
+  if (anchors?.length) args.push("--anchors", ...anchors);
+  // The screen's design sets which DepMap features the prior uses (phenotype.py; unknown = loss-of-function).
+  if (modality) {
+    if (!["KO", "CRISPRi", "CRISPRa", "unknown"].includes(modality)) throw new Error(`registerPhenotype: unknown modality ${modality}`);
+    args.push("--modality", modality);
+  }
+  if (cellLine) args.push(`--cell-line=${String(cellLine).slice(0, 80)}`);
+  if (curatedEss) args.push("--curated-essential");
   if (batchSize) args.push("--batch", String(batchSize));
   if (expectedHitRate) args.push("--expected-hit-rate", String(expectedHitRate));
   if (tier) {

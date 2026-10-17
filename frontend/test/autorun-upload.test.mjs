@@ -5,6 +5,8 @@ import * as path from "node:path";
 import { tmpdir } from "node:os";
 import vm from "node:vm";
 
+import { normalizeAnchors, parseModality } from "../src/onboard.mjs";
+
 async function harness(t, unknown = []) {
   const root = fs.mkdtempSync(path.join(tmpdir(), "waddington-upload-test-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
@@ -24,7 +26,7 @@ async function harness(t, unknown = []) {
       },
     },
     "./intent.mjs": { routeIntent: async () => ({ action: "experiment" }) },
-    "./onboard.mjs": { proposeAnchors: async () => ["IRF1"] },
+    "./onboard.mjs": { normalizeAnchors, parseModality },
   };
   const source = fs.readFileSync(new URL("../src/autorun.mjs", import.meta.url), "utf8");
   const module = new vm.SourceTextModule(source);
@@ -77,4 +79,19 @@ test("unknown measurements stop an automatic campaign before outcomes are counte
   }), /missing genes or measurements/);
   assert.equal(h.ingestions.length, 1);
   assert.equal(h.events.some(e => e.type === "revealed" || e.type === "summary"), false);
+});
+
+test("upload registers the screen's design and needs no anchors", async t => {
+  const h = await harness(t);
+  await h.api.autoRunUpload({ name: "Screen", readoutContent: "Gene,Score\nSTAT1,2\nJAK2,0\n", rounds: 1,
+                              modality: "CRISPR activation", cellLine: "primary T cells", onStep: h.onStep });
+  const reg = h.registrations[0];
+  assert.deepEqual([reg.modality, reg.cellLine, reg.curatedEss, reg.anchors], ["CRISPRa", "primary T cells", false, []]);
+  assert.equal(h.events.some(e => e.type === "anchors"), false);
+
+  const h2 = await harness(t);
+  await h2.api.autoRunUpload({ name: "Screen", readoutContent: "Gene,Score\nSTAT1,2\n", rounds: 1 });
+  assert.equal(h2.registrations[0].modality, "unknown");          // not given: treated as loss-of-function
+  await assert.rejects(h2.api.autoRunUpload({ name: "Other", readoutContent: "Gene,Score\nSTAT1,2\n", rounds: 1,
+                                              modality: "CRISPR" }), /unrecognised modality/);
 });

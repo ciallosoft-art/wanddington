@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { normalizeAnchors, parseGenes } from "../src/onboard.mjs";
+import { normalizeAnchors } from "../src/onboard.mjs";
 
 const EIGHT = ["TP53", "BRCA1", "STAT1", "JAK1", "IFNGR1", "ZAP70", "VAV1", "CD3E"];
 
@@ -36,11 +36,5 @@ test("anchor normalisation keeps every valid symbol", async (t) => {
     assert.equal(normalizeAnchors(many).length, 12);
     assert.deepEqual(normalizeAnchors(null), []);
     assert.deepEqual(normalizeAnchors(undefined), []);
-  });
-
-  await t.test("free-text scanning still finds every symbol in a sentence", () => {
-    // parseGenes uses the same source regex with .match(), which resets lastIndex; it must keep
-    // working after the validator was split out.
-    assert.deepEqual(parseGenes("please use TP53 and BRCA1 and STAT1"), ["TP53", "BRCA1", "STAT1"]);
   });
 });

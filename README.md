@@ -108,8 +108,9 @@ register (the chat's onboarding does this for you):
 
 ```bash
 conda run -n waddington-bio python3 -m waddington_select.phenotype register --name MyScreen \
-    --genes-file my_library.csv --anchors STAT1 JAK1 IFNGR1 \
+    --genes-file my_library.csv \
     --task "genes that regulate IL-2 secretion" --measurement "IL-2 FACS" [--tier non_essential|full_pool] \
+    --modality CRISPRi --cell-line "primary T cells" \
     --hit-rule threshold --threshold 1.5        # or: --hit-rule fdr --max-fdr 0.05 / --hit-rule label
 
 # each round: derive hits for the tested batch from that round's readout, by the registered rule
@@ -126,6 +127,16 @@ screen); `ingest` refuses it, and its legacy top-5% default, on a readout coveri
 candidate pool, i.e. one round's batch, where it would call ~5% of every batch a hit whatever the effects.
 For one batch per round the screen-wide hit count is unknown, so progress is reported as hits per tested
 gene rather than hit@R5.
+
+**Design metadata.** `--modality KO|CRISPRi|CRISPRa|unknown`, `--cell-line` and `--curated-essential`
+(the library is a curated essential-gene panel) are known before the screen is run, and set which DepMap
+features the prior uses by the same rule as the benchmarks (`router_protocol.feature_policy_from`): none for
+CRISPRa (DepMap is knockout-derived, and a gene dispensable when deleted can be potent when over-expressed)
+or a curated essential panel (an essentiality prior would restate the selection), pan-cancer only in K562
+(the K562 feature would restate an essentiality label on its own cell line), otherwise pan-cancer + K562.
+Leaving the modality out records it as `unknown`, treated as loss-of-function. Anchor genes (`--anchors`)
+are optional: the reported C-arm drops the anchor-relative features, so only the legacy configuration
+(`WADDINGTON_LEGACY_ROUTER=1`) uses them; without anchors those features are 0.
 
 **Single-gene tier.** `non_essential` (default) is BDA's harder tier and the paper's headline: the 684
 CEGv2 core-essential genes (`waddington_select/data/CEGv2.txt`) are removed from the candidate pool, so

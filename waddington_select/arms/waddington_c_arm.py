@@ -138,21 +138,34 @@ def _get_feature_config(dataset_name: str) -> tuple[Path, list[str]]:
     return csv, extra
 
 
+def _metadata_depmap_policy(dataset_name: str) -> str | None:
+    """'none' | 'pan' | 'pan_k562' from a screen's design metadata: a benchmark's frozen SCREEN_METADATA,
+    or the modality / cell line / curated flag a scientist registered with their screen (phenotype.py;
+    an entry registered before metadata existed reads as unknown, i.e. pan_k562 as before). None for any
+    other dataset (the CRISPRa validation screens), which keeps the committed sets below."""
+    from ..router_protocol import SCREEN_METADATA, feature_policy_from, feature_policy_metadata
+    if dataset_name in SCREEN_METADATA:
+        return feature_policy_metadata(dataset_name)["depmap"]
+    entry = load_registry().get(dataset_name)
+    if entry is not None:
+        return feature_policy_from(entry.get("metadata") or {})["depmap"]
+    return None
+
+
 def _feature_config_by_policy(dataset_name: str) -> tuple[Path, list[str]]:
     # Reported default: derive the DepMap feature policy from pre-experiment metadata only
     # (modality / curated-flag / cell line), never from the target's realized labels. See router_protocol.
     if _feature_policy() == "metadata":
         try:
-            from ..router_protocol import feature_policy_metadata, SCREEN_METADATA
-            if dataset_name in SCREEN_METADATA:
-                pol = feature_policy_metadata(dataset_name)["depmap"]
-                if pol == "none":
-                    return TRAINING_DATA_V1, []
-                if pol == "pan":
-                    return TRAINING_DATA_V3, DEPMAP_PAN_FEATS
-                return TRAINING_DATA_V3, DEPMAP_K562_FEATS
+            pol = _metadata_depmap_policy(dataset_name)
         except Exception:
-            pass  # fall through to the default committed policy
+            pol = None  # fall through to the default committed policy
+        if pol == "none":
+            return TRAINING_DATA_V1, []
+        if pol == "pan":
+            return TRAINING_DATA_V3, DEPMAP_PAN_FEATS
+        if pol == "pan_k562":
+            return TRAINING_DATA_V3, DEPMAP_K562_FEATS
     if dataset_name in DEPMAP_EXCLUDED:
         return TRAINING_DATA_V1, []
     elif dataset_name in K562_EXCLUDED:

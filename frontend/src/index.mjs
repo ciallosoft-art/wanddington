@@ -23,9 +23,12 @@ Usage:
   waddington run [DATASET]   Retrospective one-click run: treat a completed screen's readout as ground
                              truth, auto-run the sequential campaign, print a live step-by-step timeline
                              and the final hit@R5 (e.g. "waddington run IFNG --rounds 5")
-  waddington run --upload FILE --name X [--task "…"] [--anchors A,B,C]
+  waddington run --upload FILE --name X [--task "…"] [--modality KO|CRISPRi|CRISPRa] [--cell-line "…"]
+                 [--curated-essential] [--tier non_essential|full_pool]
                              Same, for a BRAND-NEW screen: register it from the uploaded readout (builds
-                             its features — no code change), then run. Anchors are LLM-proposed if omitted.
+                             its features — no code change), then run. The design sets the DepMap features:
+                             none for CRISPRa or a curated essential panel, pan-cancer only in K562
+                             (modality omitted = unknown, treated as loss-of-function).
   waddington complete        One-shot completion (reads prompt from stdin or --prompt); used by the
                              Python pipeline's provider-agnostic backend
   waddington --help
@@ -69,16 +72,20 @@ async function oneShotComplete(values) {
  * timeline. Uses a benchmark screen's own readout as a stand-in for a scientist's completed screen,
  * runs the sequential C-arm campaign against it, and prints each step as it happens.
  */
+const DEPMAP_TEXT = { none: "off", pan: "pan-cancer only", pan_k562: "pan-cancer + K562" };
+
 async function runAutoDemo(values, positionals) {
   const rounds = values.rounds ? parseInt(values.rounds, 10) : 5;
   const spec = values.model || pickDefaultChatModel();
   const bar = (r) => "█".repeat(Math.round(r * 30)).padEnd(30, "·");
   const onStep = (e) => {
     if (e.type === "upload") console.log(`📤 Uploaded readout for a NEW screen "${e.name}" (${e.bytes} bytes).`);
-    else if (e.type === "anchor-proposing") console.log(`   proposing anchor genes from the task…`);
     else if (e.type === "anchors") console.log(`   anchors: ${e.anchors.join(", ")}`);
     else if (e.type === "registering") console.log(`   building ML features (registering "${e.name}")…`);
-    else if (e.type === "registered") console.log(`✅ Registered "${e.name}" — ${e.nGenes} genes (${e.nWithFeatures} with known features). Now rankable.\n`);
+    else if (e.type === "registered") {
+      console.log(`✅ Registered "${e.name}" — ${e.nGenes} genes (${e.nWithFeatures} with known features). Now rankable.`);
+      if (e.design) console.log(`   design: ${e.design.modality}${e.design.cell_line ? ` in ${e.design.cell_line}` : ""} → DepMap ${DEPMAP_TEXT[e.depmap] || e.depmap}\n`);
+    }
     else if (e.type === "already-registered") console.log(`   "${e.name}" is already registered.\n`);
     else if (e.type === "intent") console.log(`🧠 ${e.text}\n   readout: ${e.readout}\n`);
     else if (e.type === "round-open") console.log(`── Round ${e.round}/${e.rounds} ─────────────────────────────`);
@@ -106,6 +113,8 @@ async function runAutoDemo(values, positionals) {
     await autoRunUpload({
       name, readoutFile: values.upload, rounds, modelSpec: spec,
       task: values.task, measurement: values.measurement,
+      modality: values.modality, cellLine: values["cell-line"], curatedEss: Boolean(values["curated-essential"]),
+      tier: values.tier === "full_pool" ? "full_pool" : "non_essential",
       anchors: values.anchors ? values.anchors.split(/[,\s]+/).filter(Boolean) : undefined,
       onStep,
     });
@@ -140,6 +149,10 @@ export async function main() {
       task: { type: "string" },
       measurement: { type: "string" },
       anchors: { type: "string" },
+      modality: { type: "string" },
+      "cell-line": { type: "string" },
+      "curated-essential": { type: "boolean" },
+      tier: { type: "string" },
     },
   });
 

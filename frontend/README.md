@@ -19,11 +19,17 @@ server. Use file uploads in the Web UI; server-side file paths remain available 
 
 Onboarding your own screen asks for a name, the phenotype, the library file (every gene in it becomes a
 candidate), the single-gene tier — remove the 684 CEGv2 core-essential genes (default, the paper's main
-tier) or keep the full pool — the hit rule, and the anchor genes. The hit rule (`label`, `|score| >= 1.5`,
+tier) or keep the full pool — the hit rule, and the screen's design. The hit rule (`label`, `|score| >= 1.5`,
 `fdr < 0.05`, optionally `up`/`down`) is fixed for the campaign; a `top 5%` rule is refused there, since
 you upload one batch per round and it needs the whole screen. Progress is then shown as hits per tested
-gene, because the screen-wide hit count is unknown. The Web UI's "upload & run" replays a *completed*
-screen: it asks the tier with an OK/Cancel dialog and registers the top 5% of the whole screen as the hits.
+gene, because the screen-wide hit count is unknown. The design is the perturbation and the cells (e.g.
+`CRISPRa, primary T cells`; a perturbation named in your first message is offered for confirmation), plus
+`curated essential panel` if that is what the library is. It sets which DepMap essentiality features the
+model may use: none for CRISPRa or a curated panel, pan-cancer only in K562, otherwise pan-cancer + K562;
+`unknown` is treated as loss-of-function. Anchor genes are no longer asked for: the reported system drops
+the anchor-relative features. The Web UI's "upload & run" replays a *completed* screen: it asks the
+perturbation, the cells and the tier in dialogs and registers the top 5% of the whole screen as the hits
+(CLI: `waddington run --upload FILE --name X --modality CRISPRa --cell-line "…"`).
 
 Feedback is saved separately for each phenotype. Uploads preserve CSV/TSV/MAGeCK format; missing
 genes or measurements must be supplied before a campaign advances. If the next recommendation

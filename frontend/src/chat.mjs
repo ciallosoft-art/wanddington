@@ -25,12 +25,6 @@ function render(result) {
     return;
   }
   if (result.kind === "onboard") {
-    if (result.stage === "anchors") {
-      console.log(`\n[Onboarding · ${result.name}] Proposed anchor genes (${result.proposed.length}):`);
-      console.log("  " + result.proposed.join(", "));
-      console.log(`\n${result.text}\n`);
-      return;
-    }
     if (result.stage === "done") {
       console.log(`\n[Phenotype registered · ${result.name}]`);
       console.log(`  gene pool: ${result.n_genes} (${result.n_genes_with_known_features} with known features)`);
@@ -39,7 +33,13 @@ function render(result) {
           : `non-essential (${result.n_core_essential_removed} core-essential genes removed)`}`);
       }
       if (result.hit_rule_text) console.log(`  hit rule:  ${result.hit_rule_text}`);
-      console.log(`  anchors:   ${result.anchors.join(", ")}`);
+      if (result.metadata) {
+        const m = result.metadata;
+        console.log(`  design:    ${m.modality}${m.modality === "unknown" ? " (treated as loss-of-function)" : ""}`
+          + `${m.cell_line ? ` in ${m.cell_line}` : ""}${m.curated_ess ? ", curated essential panel" : ""}`);
+        console.log(`  DepMap:    ${{ none: "off", pan: "pan-cancer features only", pan_k562: "pan-cancer + K562 features" }[result.depmap_policy] || result.depmap_policy}`);
+      }
+      if (result.anchors?.length) console.log(`  anchors:   ${result.anchors.join(", ")}`);
       console.log(`\nIt's now rankable. Say e.g. "run a real experiment on ${result.name} with my own results".\n`);
       return;
     }

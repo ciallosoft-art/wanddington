@@ -20,7 +20,7 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 
 import { suggestGenes, ingestResults, registerPhenotype, getDatasets, BENCHMARK_DATASETS, REPO_ROOT } from "./brain.mjs";
 import { routeIntent } from "./intent.mjs";
-import { proposeAnchors } from "./onboard.mjs";
+import { normalizeAnchors, parseModality } from "./onboard.mjs";
 
 // A few benchmark screens carry a different file name than their pipeline id.
 const READOUT_NAME = { Steinhart: "Steinhart_crispra_GD2_D22", Carnevale22: "Carnevale22_Adenosine" };
@@ -146,14 +146,20 @@ export async function autoRun({ dataset, readoutFile, rounds = 5, batchSize, top
  * @param {string} [o.readoutFile]    path to the completed-screen readout (CLI)
  * @param {string} [o.readoutContent] raw readout content (Web upload)
  * @param {string} [o.readoutName]    original filename (extension hint for parsing)
- * @param {string[]} [o.anchors]      seed genes; if omitted, the LLM proposes them from the task
- * @param {string} [o.task] [o.measurement] phenotype description (LLM narration + anchor proposal)
+ * @param {string} [o.modality]      KO / CRISPRi / CRISPRa (free text accepted, e.g. "CRISPR knockout"); blank =
+ *                                    unknown, treated as loss-of-function. Sets the DepMap features (phenotype.py)
+ * @param {string} [o.cellLine]       the cells (K562 switches the K562 DepMap feature off)
+ * @param {boolean} [o.curatedEss]    the library is a curated essential-gene panel (DepMap off)
+ * @param {string[]} [o.anchors]      optional seed genes (only the legacy anchor-feature configuration uses them)
+ * @param {string} [o.task] [o.measurement] phenotype description (LLM narration)
  */
-export async function autoRunUpload({ name, readoutFile, readoutContent, readoutName, anchors, task, measurement, batchSize, rounds = 5, topRatio = 0.05, tier = "non_essential", modelSpec, onStep = () => {} }) {
+export async function autoRunUpload({ name, readoutFile, readoutContent, readoutName, anchors, task, measurement, batchSize, rounds = 5, topRatio = 0.05, tier = "non_essential", modality, cellLine, curatedEss = false, modelSpec, onStep = () => {} }) {
   const emit = (e) => { try { onStep({ t: Date.now(), ...e }); } catch { /* dead stream */ } };
   if (!name || /[^A-Za-z0-9_]/.test(name)) throw new Error("upload run: a simple phenotype name (letters/digits/underscore only) is required");
   const content = readoutContent != null ? readoutContent : (readoutFile ? readFileSync(readoutFile, "utf8") : null);
   if (content == null) throw new Error("upload run: need a readout file (path or content)");
+  const mod = modality ? parseModality(modality) : "unknown";
+  if (!mod) throw new Error(`upload run: unrecognised modality "${modality}" — use KO, CRISPRi, CRISPRa or leave it blank`);
   const ext = extname(readoutName || readoutFile || "readout.csv").toLowerCase();
   if (![".csv", ".tsv", ".txt"].includes(ext)) throw new Error("upload run: use a CSV, TSV or TXT readout");
   const filename = `readout${ext}`;
@@ -170,20 +176,16 @@ export async function autoRunUpload({ name, readoutFile, readoutContent, readout
   if (!known.includes(name)) {
     const t = task || `CRISPR screen: ${name}`;
     const m = measurement || "screen readout score (sgRNA log-fold-change)";
-    let anch = (anchors || []).map((a) => String(a).trim().toUpperCase()).filter(Boolean);
-    if (!anch.length) {
-      emit({ type: "anchor-proposing", task: t });
-      try { anch = await proposeAnchors(t, m, modelSpec); } catch { anch = []; }
-    }
-    if (!anch.length) throw new Error("upload run: no anchor genes — pass anchors, or give a task the model can seed anchors from");
-    emit({ type: "anchors", anchors: anch });
+    const anch = normalizeAnchors(anchors);
+    if (anch.length) emit({ type: "anchors", anchors: anch });
     emit({ type: "registering", name });
     // A replay of a completed screen: the top `topRatio` of the whole screen by |score| are its hits (BDA's
     // convention), registered as the phenotype's fixed hit rule.
     const hitRule = { type: "top_fraction", fraction: topRatio, direction: "both" };
-    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize, tier, hitRule });
+    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize, tier, hitRule,
+                                          modality: mod, cellLine, curatedEss });
     emit({ type: "registered", name, nGenes: reg.n_genes, nWithFeatures: reg.n_genes_with_known_features, anchors: anch,
-           tier: reg.tier, nCoreEssentialRemoved: reg.n_core_essential_removed });
+           tier: reg.tier, nCoreEssentialRemoved: reg.n_core_essential_removed, design: reg.metadata, depmap: reg.depmap_policy });
   } else {
     emit({ type: "already-registered", name });
   }

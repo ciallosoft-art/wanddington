@@ -11,6 +11,9 @@ How the features split (verified against the training CSV):
   - anchor-relative (depend on the phenotype's *anchor* genes) → computed here for the new anchors:
     g1_ppi_score (STRING PPI expansion), archs4_coexpr (co-expression), kegg_overlap.
     The STRING/ARCHS4 work is cached per anchor, so this costs ~one call per anchor, not per gene.
+    Anchors are OPTIONAL: the reported C-arm drops these three features (waddington_c_arm
+    _drop_anchor_default), so they only matter to the legacy anchor-feature configuration
+    (WADDINGTON_LEGACY_ROUTER=1 or WADDINGTON_DROP_ANCHOR_FEATS=0). Without anchors they are 0.
 
 The registered phenotype gets label=0 rows: it is never used as training data (see features.py), only
 as the candidate pool. Round 1 therefore comes from zero-shot transfer (the model trained on the 9
@@ -22,6 +25,12 @@ prior is then trained on the full-pool tables -- the only tables whose screens c
 also the only place their gene-intrinsic features can be looked up (the non-essential tables have none
 of them, and a gene missing from the lookup gets all-zero features).
 
+Design metadata (router_protocol.feature_policy_from): the perturbation (KO / CRISPRi / CRISPRa, or
+unknown), the cell line and whether the library is a curated essential-gene panel -- known before the
+screen is run. They set which DepMap features the prior uses, by the same rule as the benchmarks: none for
+CRISPRa (DepMap is knockout-derived) or a curated essentiality panel (it would restate the selection),
+pan-cancer only in K562, else pan-cancer + K562. An unknown modality is treated as loss-of-function.
+
 Hit rule (ingest.py): how a tested gene is called a hit from the scientist's readout, fixed at
 registration so every round is called the same way and the rule is chosen before any result is seen:
 ``label`` (the readouts carry a hit column), ``threshold`` (|score| >= X, or one direction), ``fdr``
@@ -30,8 +39,9 @@ ingest refuses it on one round's batch). Without one, ingest falls back to its l
 
 Usage:
     python -m waddington_select.phenotype register --name MyScreen \
-        --genes-file screen.csv --anchors STAT1 JAK1 IFNGR1 \
-        --task "..." --measurement "..." [--tier non_essential|full_pool] \
+        --genes-file screen.csv --task "..." --measurement "..." \
+        [--modality KO|CRISPRi|CRISPRa|unknown] [--cell-line K562] [--curated-essential] \
+        [--anchors STAT1 JAK1 IFNGR1] [--tier non_essential|full_pool] \
         [--hit-rule label|threshold|fdr|top_fraction [--threshold X] [--max-fdr Q] [--top-fraction F]
          [--direction both|up|down] [--score-col C] [--fdr-col C]] \
         [--batch 32] [--expected-hit-rate 0.05] [--json]
@@ -42,6 +52,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -62,6 +73,41 @@ INTRINSIC_COLS = [
 ]
 # Features that depend on this phenotype's anchor genes → computed per registration.
 ANCHOR_COLS = ["g1_ppi_score", "archs4_coexpr", "kegg_overlap"]
+
+MODALITIES = ("KO", "CRISPRi", "CRISPRa", "unknown")
+_MODALITY_WORDS = [  # checked in order: CRISPRa/CRISPRi before KO, so "dCas9-KRAB" is not a knockout
+    ("CRISPRa", re.compile(r"crispr-?a\b|activation|over-?express|gain.of.function|vp64|\bvpr\b|\bsam\b", re.I)),
+    ("CRISPRi", re.compile(r"crispr-?i\b|interference|knock-?down|krab", re.I)),
+    ("KO", re.compile(r"\bko\b|knock-?out|crispr-?ko|\bcas9\b|deletion", re.I)),
+    ("unknown", re.compile(r"^(?:unknown|unsure|not sure|don'?t know|n/?a|\?)$", re.I)),
+]
+
+
+def normalize_modality(value: str | None) -> str:
+    """KO / CRISPRi / CRISPRa / unknown from a free-text perturbation ("CRISPR knockout", "dCas9-VP64" …);
+    None or blank is unknown. Raises ValueError for anything else."""
+    text = str(value or "").strip()
+    if not text:
+        return "unknown"
+    for modality, pattern in _MODALITY_WORDS:
+        if pattern.search(text):
+            return modality
+    raise ValueError(f"unrecognised modality {value!r}: use one of {', '.join(MODALITIES)}")
+
+
+def normalize_cell_line(value: str | None) -> str | None:
+    """'K562' for any spelling the rule must recognise (k562, K-562, "K562 cells"), else the text as given."""
+    text = " ".join(str(value or "").split())
+    if not text:
+        return None
+    return "K562" if re.search(r"(?<![A-Za-z0-9])K-?562(?![0-9])", text, re.I) else text[:80]
+
+
+DEPMAP_POLICY_TEXT = {
+    "none": "off (CRISPRa or a curated essential panel: a knockout essentiality prior would mislead)",
+    "pan": "pan-cancer features only (K562: the K562 feature would restate the label on its own cell line)",
+    "pan_k562": "pan-cancer + K562 features",
+}
 
 
 # ── registry ────────────────────────────────────────────────────────────────
@@ -138,18 +184,29 @@ def register(
     expected_hit_rate: float | None = None,
     tier: str = TIER_NON_ESSENTIAL,
     hit_rule: dict | None = None,
+    modality: str | None = None,
+    cell_line: str | None = None,
+    curated_essential: bool = False,
 ) -> dict:
-    """Build features for a new phenotype's gene pool and register it."""
+    """Build features for a new phenotype's gene pool and register it. ``anchors`` may be empty."""
+    from .oracle import BENCHMARK_DATASETS  # lazy: oracle imports this module
+    from .router_protocol import feature_policy_from
+
     if not name or "/" in name:
         raise SystemExit("--name must be a simple identifier")
+    if name in BENCHMARK_DATASETS:
+        raise SystemExit(f"--name {name!r} is a benchmark screen; choose another name")
     if tier not in TIERS:
         raise SystemExit(f"--tier must be one of {', '.join(TIERS)}")
+    try:
+        metadata = {"modality": normalize_modality(modality), "cell_line": normalize_cell_line(cell_line),
+                    "curated_ess": bool(curated_essential)}
+    except ValueError as exc:
+        raise SystemExit(str(exc))
     genes = sorted({g.strip().upper() for g in genes if str(g).strip()})
-    anchors = [a.strip().upper() for a in anchors if str(a).strip()]
+    anchors = [a.strip().upper() for a in (anchors or []) if str(a).strip()]
     if not genes:
         raise SystemExit("empty gene pool")
-    if not anchors:
-        raise SystemExit("at least one anchor gene is required (seed biology for this phenotype)")
     ceg = core_essential_genes()
     n_core_essential = len(set(genes) & ceg)
     if tier == TIER_NON_ESSENTIAL:
@@ -160,7 +217,7 @@ def register(
     base_csv = tier_tables(tier)[1]
     base_cols = pd.read_csv(base_csv, nrows=0).columns.tolist()
     intrinsic = _intrinsic_lookup(base_csv)
-    anchor_feats = _anchor_features(genes, anchors)
+    anchor_feats = _anchor_features(genes, anchors) if anchors else {col: {} for col in ANCHOR_COLS}
 
     df = pd.DataFrame({"gene": genes})
     for col in ANCHOR_COLS:
@@ -186,6 +243,9 @@ def register(
         "batch_size": int(batch_size),
         "anchors": anchors,
         "tier": tier,
+        # design metadata -> which DepMap features the prior uses (router_protocol.feature_policy_from)
+        "metadata": metadata,
+        "depmap_policy": feature_policy_from(metadata)["depmap"],
         "hit_rule": hit_rule,   # ingest.make_hit_rule; None = ingest's legacy options
         # core-essential genes in the uploaded pool: removed under non_essential, kept under full_pool
         "n_core_essential_in_upload": n_core_essential,
@@ -213,7 +273,14 @@ def main() -> None:
     r.add_argument("--name", required=True)
     r.add_argument("--genes-file", default=None, help="screen/library file — the gene pool")
     r.add_argument("--genes", nargs="*", default=None, help="explicit gene pool (alternative)")
-    r.add_argument("--anchors", nargs="+", required=True, help="seed genes for this phenotype")
+    r.add_argument("--anchors", nargs="*", default=[],
+                   help="optional seed genes; only the legacy anchor-feature configuration uses them")
+    r.add_argument("--modality", default=None,
+                   help="the perturbation: KO, CRISPRi, CRISPRa or unknown (default; treated as loss-of-function). "
+                        "CRISPRa switches the knockout-derived DepMap features off")
+    r.add_argument("--cell-line", default=None, help="the cell line / type (K562 switches the K562 DepMap feature off)")
+    r.add_argument("--curated-essential", action="store_true",
+                   help="the library is a curated essential-gene panel (switches the DepMap features off)")
     r.add_argument("--task", required=True)
     r.add_argument("--measurement", required=True)
     r.add_argument("--batch", type=int, default=32)
@@ -259,8 +326,9 @@ def main() -> None:
             print("No user phenotypes registered.")
             return
         for n, e in reg.items():
+            m = e.get("metadata") or {}
             print(f"  {n:24s} genes={e['n_genes']:6d}  batch={e['batch_size']:4d}  tier={e.get('tier') or '-':13s} "
-                  f"anchors={', '.join(e['anchors'][:5])}")
+                  f"modality={m.get('modality') or '-':8s} cell_line={m.get('cell_line') or '-'}")
         return
 
     genes = args.genes
@@ -278,9 +346,14 @@ def main() -> None:
                                      fraction=args.top_fraction)
         except ValueError as exc:
             p.error(str(exc))
+    try:
+        normalize_modality(args.modality)
+    except ValueError as exc:
+        p.error(str(exc))
     res = register(
         args.name, genes, args.anchors, args.task, args.measurement,
         batch_size=args.batch, expected_hit_rate=args.expected_hit_rate, tier=args.tier, hit_rule=hit_rule,
+        modality=args.modality, cell_line=args.cell_line, curated_essential=args.curated_essential,
     )
     if args.json:
         print(json.dumps(res))
@@ -290,7 +363,12 @@ def main() -> None:
     print(f"  tier:       {res['tier']} ({res['n_core_essential_removed']} core-essential genes removed, "
           f"{res['n_core_essential_in_upload']} in the upload)")
     print(f"  hit rule:   {describe_hit_rule(res['hit_rule'])}")
-    print(f"  anchors:    {', '.join(res['anchors'])}")
+    m = res["metadata"]
+    print(f"  design:     {m['modality']}{' (treated as loss-of-function)' if m['modality'] == 'unknown' else ''}, "
+          f"cell line {m['cell_line'] or 'unknown'}{', curated essential panel' if m['curated_ess'] else ''}")
+    print(f"  DepMap:     {DEPMAP_POLICY_TEXT[res['depmap_policy']]}")
+    if res["anchors"]:
+        print(f"  anchors:    {', '.join(res['anchors'])}")
     print(f"  batch size: {res['batch_size']}")
     print(f"  features:   {res['features_csv']}")
     print(f"\nNow run:  python -m waddington_select.suggest --dataset {res['name']}")
