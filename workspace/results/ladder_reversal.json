@@ -1,0 +1,1218 @@
+{
+ "noise": {
+  "runs": {
+   "A1_old": {
+    "mean": 0.25985185185185183,
+    "per_screen": {
+     "IFNG": 0.17416666666666666,
+     "IL2": 0.3603666666666667,
+     "Sanchez21": 0.08806666666666667,
+     "Sanchez21_down": 0.10143333333333333,
+     "Carnevale22": 0.05566666666666666,
+     "Scharenberg22": 0.551,
+     "Steinhart": 0.0598,
+     "Replogle_K562_essential": 0.5820333333333334,
+     "Replogle_K562_gwps": 0.36613333333333337
+    },
+    "sd": {
+     "IFNG": 0.004750087718488297,
+     "IL2": 0.005231953108862255,
+     "Sanchez21": 0.002441993720985653,
+     "Sanchez21_down": 0.006639528095680694,
+     "Carnevale22": 0.003348631561299829,
+     "Scharenberg22": 0.02040000000000003,
+     "Steinhart": 0.003983716857408419,
+     "Replogle_K562_essential": 0.024233104079612523,
+     "Replogle_K562_gwps": 0.002482606157515374
+    },
+    "replicates": 3,
+    "se_of_nine_screen_mean": 0.0021627536682098784
+   },
+   "A2_old": {
+    "mean": 0.2544296296296296,
+    "per_screen": {
+     "IFNG": 0.17956666666666665,
+     "IL2": 0.3305666666666667,
+     "Sanchez21": 0.08613333333333333,
+     "Sanchez21_down": 0.09183333333333334,
+     "Carnevale22": 0.06603333333333333,
+     "Scharenberg22": 0.5034,
+     "Steinhart": 0.10343333333333334,
+     "Replogle_K562_essential": 0.5873,
+     "Replogle_K562_gwps": 0.34159999999999996
+    },
+    "sd": {
+     "IFNG": 0.0021361959960016046,
+     "IL2": 0.002050203241957567,
+     "Sanchez21": 0.0023501772982763075,
+     "Sanchez21_down": 0.0019629909152447276,
+     "Carnevale22": 0.0013279056191361372,
+     "Scharenberg22": 0.0311615147256997,
+     "Steinhart": 0.006850060826980536,
+     "Replogle_K562_essential": 0.0,
+     "Replogle_K562_gwps": 0.005022947341949736
+    },
+    "replicates": 3,
+    "se_of_nine_screen_mean": 0.0020916254730093432
+   },
+   "A1_new": {
+    "mean": 0.24082555555555554,
+    "per_screen": {
+     "IFNG": 0.151185,
+     "IL2": 0.28971,
+     "Sanchez21": 0.08648000000000002,
+     "Sanchez21_down": 0.10201,
+     "Carnevale22": 0.065215,
+     "Scharenberg22": 0.5071399999999999,
+     "Steinhart": 0.074175,
+     "Replogle_K562_essential": 0.544445,
+     "Replogle_K562_gwps": 0.34707000000000005
+    },
+    "sd": {
+     "IFNG": 0.004806604557109003,
+     "IL2": 0.00668847398219701,
+     "Sanchez21": 0.0032706992653269936,
+     "Sanchez21_down": 0.0015508571483978898,
+     "Carnevale22": 0.0025068905041903985,
+     "Scharenberg22": 0.021215793521262457,
+     "Steinhart": 0.007034866175362765,
+     "Replogle_K562_essential": 0.02421488178785929,
+     "Replogle_K562_gwps": 0.0067260765133291345
+    },
+    "replicates": 20,
+    "se_of_nine_screen_mean": 0.0008672455706384856
+   },
+   "A2_new": {
+    "mean": 0.2611016666666667,
+    "per_screen": {
+     "IFNG": 0.1834,
+     "IL2": 0.33535,
+     "Sanchez21": 0.086835,
+     "Sanchez21_down": 0.092415,
+     "Carnevale22": 0.06585000000000002,
+     "Scharenberg22": 0.51428,
+     "Steinhart": 0.11065500000000002,
+     "Replogle_K562_essential": 0.6142749999999999,
+     "Replogle_K562_gwps": 0.346855
+    },
+    "sd": {
+     "IFNG": 0.003157780699695345,
+     "IL2": 0.004824662518876588,
+     "Sanchez21": 0.004891375331292717,
+     "Sanchez21_down": 0.003841090168716497,
+     "Carnevale22": 0.0031282246520485404,
+     "Scharenberg22": 0.01566254667737825,
+     "Steinhart": 0.008789615583474804,
+     "Replogle_K562_essential": 0.015517049197237018,
+     "Replogle_K562_gwps": 0.008306337149556678
+    },
+    "replicates": 20,
+    "se_of_nine_screen_mean": 0.00066391144839206
+   }
+  },
+  "name_value_old": -0.005422222222222217,
+  "name_value_new": 0.020276111111111134,
+  "change_in_name_value": 0.02569833333333335,
+  "se_change_in_name_value": 0.003200827055589689,
+  "a1_change": -0.01902629629629629,
+  "se_a1_change": 0.0023301541384954253,
+  "a2_change": 0.00667203703703706,
+  "se_a2_change": 0.002194464748098634,
+  "a1_change_paired": {
+   "delta": -0.01902629629629632,
+   "ci95": [
+    -0.03738742129629633,
+    -0.0027915972222222465
+   ],
+   "wins": 3,
+   "ties": 0,
+   "losses": 6
+  },
+  "a2_change_paired": {
+   "delta": 0.006672037037037032,
+   "ci95": [
+    0.002399754629629653,
+    0.0123193657407407
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  }
+ },
+ "llm_side": {
+  "A1_old": {
+   "per_screen": {
+    "IFNG": {
+     "precision": 0.19724137931034483,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5982651134378923,
+      "archs4_coexpr": 0.5909606163006195,
+      "kegg_overlap": 0.5785091998302034
+     },
+     "named_per_round": 117.66666666666667
+    },
+    "IL2": {
+     "precision": 0.24293785310734464,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5606086399525173,
+      "archs4_coexpr": 0.5595304884371767,
+      "kegg_overlap": 0.5805206144540833
+     },
+     "named_per_round": 119.2
+    },
+    "Sanchez21": {
+     "precision": 0.11559888579387187,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6073657451205606,
+      "archs4_coexpr": 0.6659936703402755,
+      "kegg_overlap": 0.5347853216275745
+     },
+     "named_per_round": 117.0
+    },
+    "Sanchez21_down": {
+     "precision": 0.14756446991404013,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5790366719375514,
+      "archs4_coexpr": 0.6612819754891792,
+      "kegg_overlap": 0.5149238982834572
+     },
+     "named_per_round": 116.33333333333333
+    },
+    "Carnevale22": {
+     "precision": 0.07019867549668875,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5338152985074626,
+      "archs4_coexpr": 0.5213171771688798,
+      "kegg_overlap": 0.5147118461165672
+     },
+     "named_per_round": 120.53333333333333
+    },
+    "Scharenberg22": {
+     "precision": 0.15508021390374332,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6576368642695172,
+      "archs4_coexpr": 0.5611657758341432,
+      "kegg_overlap": 0.6434918610301262
+     },
+     "named_per_round": 32.0
+    },
+    "Steinhart": {
+     "precision": 0.012465373961218837,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5331973240496585,
+      "archs4_coexpr": 0.5682073571878583,
+      "kegg_overlap": 0.5530416757626766
+     },
+     "named_per_round": 122.8
+    },
+    "Replogle_K562_essential": {
+     "precision": 0.19662921348314608,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.8093858418217121,
+      "archs4_coexpr": 0.511818111457713,
+      "kegg_overlap": 0.5606805509285898
+     },
+     "named_per_round": 31.8
+    },
+    "Replogle_K562_gwps": {
+     "precision": 0.47928994082840237,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.628913395736865,
+      "archs4_coexpr": 0.5989904337759696,
+      "kegg_overlap": 0.5430978481164201
+     },
+     "named_per_round": 125.93333333333334
+    }
+   },
+   "precision": 0.17966733397764456,
+   "anchor_percentile": {
+    "g1_ppi_score": 0.6120249883148596,
+    "archs4_coexpr": 0.5821406228879794,
+    "kegg_overlap": 0.5581958684610775
+   }
+  },
+  "A2_old": {
+   "per_screen": {
+    "IFNG": {
+     "precision": 0.1630170316301703,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.7942929434917064,
+      "archs4_coexpr": 0.6826270526943816,
+      "kegg_overlap": 0.863781402552096
+     },
+     "named_per_round": 106.93333333333334
+    },
+    "IL2": {
+     "precision": 0.13114754098360656,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.7765231055282148,
+      "archs4_coexpr": 0.6281171206885274,
+      "kegg_overlap": 0.8946575515254414
+     },
+     "named_per_round": 109.33333333333333
+    },
+    "Sanchez21": {
+     "precision": 0.07321772639691715,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6581792265464931,
+      "archs4_coexpr": 0.5492677355540129,
+      "kegg_overlap": 0.7414420310789397
+     },
+     "named_per_round": 103.46666666666667
+    },
+    "Sanchez21_down": {
+     "precision": 0.08674698795180723,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6895430077334574,
+      "archs4_coexpr": 0.5632308878168607,
+      "kegg_overlap": 0.7632383830570434
+     },
+     "named_per_round": 82.66666666666667
+    },
+    "Carnevale22": {
+     "precision": 0.06481481481481481,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6456822752130235,
+      "archs4_coexpr": 0.5598228891894912,
+      "kegg_overlap": 0.783207764069947
+     },
+     "named_per_round": 119.46666666666667
+    },
+    "Scharenberg22": {
+     "precision": 0.0967741935483871,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6092031647202868,
+      "archs4_coexpr": 0.5680711348300417,
+      "kegg_overlap": 0.59654757786892
+     },
+     "named_per_round": 11.8
+    },
+    "Steinhart": {
+     "precision": 0.02635431918008785,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6087321370492338,
+      "archs4_coexpr": 0.5269753788208782,
+      "kegg_overlap": 0.6946828107183031
+     },
+     "named_per_round": 121.46666666666667
+    },
+    "Replogle_K562_essential": {
+     "precision": 0.2972972972972973,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.7915305448021906,
+      "archs4_coexpr": 0.48099329619488257,
+      "kegg_overlap": 0.5132376546124068
+     },
+     "named_per_round": 5.666666666666667
+    },
+    "Replogle_K562_gwps": {
+     "precision": 0.3709090909090909,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.7013297854112851,
+      "archs4_coexpr": 0.5916187546645996,
+      "kegg_overlap": 0.614297121835519
+     },
+     "named_per_round": 41.266666666666666
+    }
+   },
+   "precision": 0.1455865558569088,
+   "anchor_percentile": {
+    "g1_ppi_score": 0.6972240211662101,
+    "archs4_coexpr": 0.5723026944948528,
+    "kegg_overlap": 0.7183435885909574
+   }
+  },
+  "A1_new": {
+   "per_screen": {
+    "IFNG": {
+     "precision": 0.16823529411764707,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5469188721131526,
+      "archs4_coexpr": 0.5260408575723114,
+      "kegg_overlap": 0.5824791381080089
+     },
+     "named_per_round": 119.83
+    },
+    "IL2": {
+     "precision": 0.18693693693693694,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5085838284965151,
+      "archs4_coexpr": 0.49744750412620703,
+      "kegg_overlap": 0.5489131012917552
+     },
+     "named_per_round": 125.32
+    },
+    "Sanchez21": {
+     "precision": 0.10537870472008781,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5426850350097296,
+      "archs4_coexpr": 0.5452944914219757,
+      "kegg_overlap": 0.5391531493714795
+     },
+     "named_per_round": 122.27
+    },
+    "Sanchez21_down": {
+     "precision": 0.11659192825112108,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5448654092279784,
+      "archs4_coexpr": 0.5467522215697431,
+      "kegg_overlap": 0.531709609469349
+     },
+     "named_per_round": 121.36
+    },
+    "Carnevale22": {
+     "precision": 0.08532423208191127,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.515582592376072,
+      "archs4_coexpr": 0.5141924264800491,
+      "kegg_overlap": 0.5337216706064875
+     },
+     "named_per_round": 120.64
+    },
+    "Scharenberg22": {
+     "precision": 0.1407766990291262,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5655268186301875,
+      "archs4_coexpr": 0.5030677924665307,
+      "kegg_overlap": 0.5908478893076987
+     },
+     "named_per_round": 31.96
+    },
+    "Steinhart": {
+     "precision": 0.014675052410901468,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5252759455764212,
+      "archs4_coexpr": 0.4989710851558,
+      "kegg_overlap": 0.5917024164378796
+     },
+     "named_per_round": 123.88
+    },
+    "Replogle_K562_essential": {
+     "precision": 0.1810344827586207,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6683051074668215,
+      "archs4_coexpr": 0.49622539389104264,
+      "kegg_overlap": 0.5486167559775893
+     },
+     "named_per_round": 31.97
+    },
+    "Replogle_K562_gwps": {
+     "precision": 0.40352941176470586,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5782927725805868,
+      "archs4_coexpr": 0.5758959942347437,
+      "kegg_overlap": 0.5483785579607673
+     },
+     "named_per_round": 120.0
+    }
+   },
+   "precision": 0.15583141578567317,
+   "anchor_percentile": {
+    "g1_ppi_score": 0.555115153497496,
+    "archs4_coexpr": 0.522654196324267,
+    "kegg_overlap": 0.5572802542812239
+   }
+  },
+  "A2_new": {
+   "per_screen": {
+    "IFNG": {
+     "precision": 0.12998522895125553,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.803568792680963,
+      "archs4_coexpr": 0.6724451445785599,
+      "kegg_overlap": 0.8597860921548685
+     },
+     "named_per_round": 108.71
+    },
+    "IL2": {
+     "precision": 0.09716599190283401,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.7919532452133159,
+      "archs4_coexpr": 0.6273266298888787,
+      "kegg_overlap": 0.900390140646779
+     },
+     "named_per_round": 103.65
+    },
+    "Sanchez21": {
+     "precision": 0.05948372615039282,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6888539617062327,
+      "archs4_coexpr": 0.5527730600964764,
+      "kegg_overlap": 0.7225743953714157
+     },
+     "named_per_round": 102.64
+    },
+    "Sanchez21_down": {
+     "precision": 0.07954545454545454,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6829676866214337,
+      "archs4_coexpr": 0.5486623902010708,
+      "kegg_overlap": 0.7332553630087871
+     },
+     "named_per_round": 110.8
+    },
+    "Carnevale22": {
+     "precision": 0.06168831168831169,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6456786693664461,
+      "archs4_coexpr": 0.5595271891096972,
+      "kegg_overlap": 0.777322381306139
+     },
+     "named_per_round": 117.39
+    },
+    "Scharenberg22": {
+     "precision": 0.09259259259259259,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.5982866622500148,
+      "archs4_coexpr": 0.5559991443698845,
+      "kegg_overlap": 0.5816334225127672
+     },
+     "named_per_round": 12.63
+    },
+    "Steinhart": {
+     "precision": 0.02171767028627838,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.6293118551656803,
+      "archs4_coexpr": 0.5389011327251308,
+      "kegg_overlap": 0.7041720275440677
+     },
+     "named_per_round": 118.95
+    },
+    "Replogle_K562_essential": {
+     "precision": 0.2926829268292683,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.8224995225880374,
+      "archs4_coexpr": 0.4546368314297069,
+      "kegg_overlap": 0.5250318704742636
+     },
+     "named_per_round": 6.22
+    },
+    "Replogle_K562_gwps": {
+     "precision": 0.3862433862433862,
+     "anchor_percentile": {
+      "g1_ppi_score": 0.7548147196682397,
+      "archs4_coexpr": 0.5816897622201068,
+      "kegg_overlap": 0.6243894779110699
+     },
+     "named_per_round": 46.51
+    }
+   },
+   "precision": 0.13567836546553044,
+   "anchor_percentile": {
+    "g1_ppi_score": 0.713103901695596,
+    "archs4_coexpr": 0.5657734760688347,
+    "kegg_overlap": 0.7142839078811286
+   }
+  }
+ },
+ "replay": {
+  "A1_old": {
+   "per_screen": {
+    "IFNG": {
+     "recorded": 0.17416666666666666,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.29461756373937675,
+     "two_stage_approximated": false,
+     "first_order_own": 0.17414796342477137,
+     "first_order_fixed_weights": 0.17414796342477137,
+     "first_order_ml_no_anchor": 0.16334164588528677,
+     "first_order_both": 0.16334164588528677,
+     "round1_own": 0.06234413965087282,
+     "round1_fixed_weights": 0.06234413965087282,
+     "round1_ml_no_anchor": 0.06109725685785536,
+     "round1_both": 0.06109725685785536
+    },
+    "IL2": {
+     "recorded": 0.3603666666666667,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.39373601789709173,
+     "two_stage_approximated": false,
+     "first_order_own": 0.3603603603603604,
+     "first_order_fixed_weights": 0.3603603603603604,
+     "first_order_ml_no_anchor": 0.3423423423423424,
+     "first_order_both": 0.3423423423423424,
+     "round1_own": 0.11503811503811505,
+     "round1_fixed_weights": 0.11503811503811505,
+     "round1_ml_no_anchor": 0.11642411642411643,
+     "round1_both": 0.11642411642411643
+    },
+    "Sanchez21": {
+     "recorded": 0.08806666666666667,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.25754985754985754,
+     "two_stage_approximated": false,
+     "first_order_own": 0.08808692277842452,
+     "first_order_fixed_weights": 0.08808692277842452,
+     "first_order_ml_no_anchor": 0.08731082654249127,
+     "first_order_both": 0.08731082654249127,
+     "round1_own": 0.01590997283663174,
+     "round1_fixed_weights": 0.01590997283663174,
+     "round1_ml_no_anchor": 0.013969732246798603,
+     "round1_both": 0.013969732246798603
+    },
+    "Sanchez21_down": {
+     "recorded": 0.10143333333333333,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.22234957020057305,
+     "two_stage_approximated": false,
+     "first_order_own": 0.101415996938385,
+     "first_order_fixed_weights": 0.101415996938385,
+     "first_order_ml_no_anchor": 0.10562571756601608,
+     "first_order_both": 0.10562571756601608,
+     "round1_own": 0.017604286261002678,
+     "round1_fixed_weights": 0.017604286261002678,
+     "round1_ml_no_anchor": 0.01722158438576349,
+     "round1_both": 0.01722158438576349
+    },
+    "Carnevale22": {
+     "recorded": 0.05566666666666666,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.2853982300884956,
+     "two_stage_approximated": false,
+     "first_order_own": 0.055683563748079874,
+     "first_order_fixed_weights": 0.055683563748079874,
+     "first_order_ml_no_anchor": 0.05913978494623656,
+     "first_order_both": 0.05913978494623656,
+     "round1_own": 0.021121351766513058,
+     "round1_fixed_weights": 0.021121351766513058,
+     "round1_ml_no_anchor": 0.02227342549923195,
+     "round1_both": 0.02227342549923195
+    },
+    "Scharenberg22": {
+     "recorded": 0.551,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.37083333333333335,
+     "two_stage_approximated": false,
+     "first_order_own": 0.5510204081632653,
+     "first_order_fixed_weights": 0.5510204081632654,
+     "first_order_ml_no_anchor": 0.54421768707483,
+     "first_order_both": 0.54421768707483,
+     "round1_own": 0.10204081632653061,
+     "round1_fixed_weights": 0.14285714285714285,
+     "round1_ml_no_anchor": 0.10204081632653061,
+     "round1_both": 0.0748299319727891
+    },
+    "Steinhart": {
+     "recorded": 0.0598,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.3002171552660152,
+     "two_stage_approximated": false,
+     "first_order_own": 0.059770114942528735,
+     "first_order_fixed_weights": 0.06896551724137931,
+     "first_order_ml_no_anchor": 0.06206896551724137,
+     "first_order_both": 0.06896551724137931,
+     "round1_own": 0.02528735632183908,
+     "round1_fixed_weights": 0.02528735632183908,
+     "round1_ml_no_anchor": 0.02528735632183908,
+     "round1_both": 0.029885057471264367
+    },
+    "Replogle_K562_essential": {
+     "recorded": 0.5820333333333334,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.21593291404612158,
+     "two_stage_approximated": false,
+     "first_order_own": 0.582010582010582,
+     "first_order_fixed_weights": 0.6031746031746031,
+     "first_order_ml_no_anchor": 0.5767195767195767,
+     "first_order_both": 0.5714285714285714,
+     "round1_own": 0.164021164021164,
+     "round1_fixed_weights": 0.164021164021164,
+     "round1_ml_no_anchor": 0.164021164021164,
+     "round1_both": 0.1693121693121693
+    },
+    "Replogle_K562_gwps": {
+     "recorded": 0.36613333333333337,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.4737956590788777,
+     "two_stage_approximated": true,
+     "first_order_own": 0.3661616161616162,
+     "first_order_fixed_weights": 0.3665223665223665,
+     "first_order_ml_no_anchor": 0.3643578643578644,
+     "first_order_both": 0.35858585858585856,
+     "round1_own": 0.08261183261183262,
+     "round1_fixed_weights": 0.08261183261183262,
+     "round1_ml_no_anchor": 0.08261183261183262,
+     "round1_both": 0.0836940836940837
+    }
+   },
+   "effects_vs_own": {
+    "fixed_weights": {
+     "per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": 1.1102230246251565e-16,
+      "Steinhart": 0.009195402298850575,
+      "Replogle_K562_essential": 0.021164021164021163,
+      "Replogle_K562_gwps": 0.0003607503607503393
+     },
+     "mean": 0.003413352647069132,
+     "round1_per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": 0.040816326530612235,
+      "Steinhart": 0.0,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": 0.0
+     },
+     "round1_mean": 0.004535147392290249
+    },
+    "ml_no_anchor": {
+     "per_screen": {
+      "IFNG": -0.010806317539484606,
+      "IL2": -0.018018018018018,
+      "Sanchez21": -0.0007760962359332491,
+      "Sanchez21_down": 0.004209720627631072,
+      "Carnevale22": 0.003456221198156688,
+      "Scharenberg22": -0.006802721088435271,
+      "Steinhart": 0.0022988505747126367,
+      "Replogle_K562_essential": -0.005291005291005235,
+      "Replogle_K562_gwps": -0.0018037518037518074
+     },
+     "mean": -0.0037259019529030856,
+     "round1_per_screen": {
+      "IFNG": -0.001246882793017462,
+      "IL2": 0.0013860013860013815,
+      "Sanchez21": -0.0019402405898331383,
+      "Sanchez21_down": -0.00038270187523918933,
+      "Carnevale22": 0.0011520737327188925,
+      "Scharenberg22": 0.0,
+      "Steinhart": 0.0,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": 0.0
+     },
+     "round1_mean": -0.00011463890437439062
+    },
+    "both": {
+     "per_screen": {
+      "IFNG": -0.010806317539484606,
+      "IL2": -0.018018018018018,
+      "Sanchez21": -0.0007760962359332491,
+      "Sanchez21_down": 0.004209720627631072,
+      "Carnevale22": 0.003456221198156688,
+      "Scharenberg22": -0.006802721088435271,
+      "Steinhart": 0.009195402298850575,
+      "Replogle_K562_essential": -0.010582010582010581,
+      "Replogle_K562_gwps": -0.0075757575757576245
+     },
+     "mean": -0.004188841879444555,
+     "round1_per_screen": {
+      "IFNG": -0.001246882793017462,
+      "IL2": 0.0013860013860013815,
+      "Sanchez21": -0.0019402405898331383,
+      "Sanchez21_down": -0.00038270187523918933,
+      "Carnevale22": 0.0011520737327188925,
+      "Scharenberg22": -0.027210884353741513,
+      "Steinhart": 0.004597701149425287,
+      "Replogle_K562_essential": 0.005291005291005291,
+      "Replogle_K562_gwps": 0.0010822510822510734
+     },
+     "round1_mean": -0.0019190752189365973
+    }
+   },
+   "verified": "135/135",
+   "named_in_ml_top": 0.31271447791108253
+  },
+  "A2_old": {
+   "per_screen": {
+    "IFNG": {
+     "recorded": 0.17956666666666665,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.01059850374064838,
+     "two_stage_approximated": false,
+     "first_order_own": 0.17955112219451372,
+     "first_order_legacy_weights": 0.17955112219451372,
+     "round1_own": 0.06026600166251039,
+     "round1_legacy_weights": 0.06026600166251039
+    },
+    "IL2": {
+     "recorded": 0.3305666666666667,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.013414634146341463,
+     "two_stage_approximated": false,
+     "first_order_own": 0.3305613305613306,
+     "first_order_legacy_weights": 0.3305613305613306,
+     "round1_own": 0.10741510741510742,
+     "round1_legacy_weights": 0.10741510741510742
+    },
+    "Sanchez21": {
+     "recorded": 0.08613333333333333,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.01288659793814433,
+     "two_stage_approximated": false,
+     "first_order_own": 0.08614668218859138,
+     "first_order_legacy_weights": 0.08614668218859138,
+     "round1_own": 0.022506790842064417,
+     "round1_legacy_weights": 0.022506790842064417
+    },
+    "Sanchez21_down": {
+     "recorded": 0.09183333333333334,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.012096774193548387,
+     "two_stage_approximated": false,
+     "first_order_own": 0.09184845005740527,
+     "first_order_legacy_weights": 0.09184845005740527,
+     "round1_own": 0.017604286261002678,
+     "round1_legacy_weights": 0.017604286261002678
+    },
+    "Carnevale22": {
+     "recorded": 0.06603333333333333,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.012834821428571428,
+     "two_stage_approximated": false,
+     "first_order_own": 0.06605222734254991,
+     "first_order_legacy_weights": 0.06605222734254991,
+     "round1_own": 0.021889400921658985,
+     "round1_legacy_weights": 0.021889400921658985
+    },
+    "Scharenberg22": {
+     "recorded": 0.5034,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.07909604519774012,
+     "two_stage_approximated": false,
+     "first_order_own": 0.5034013605442177,
+     "first_order_legacy_weights": 0.40816326530612246,
+     "round1_own": 0.1292517006802721,
+     "round1_legacy_weights": 0.06802721088435375
+    },
+    "Steinhart": {
+     "recorded": 0.10343333333333334,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.023600439077936335,
+     "two_stage_approximated": false,
+     "first_order_own": 0.10344827586206896,
+     "first_order_legacy_weights": 0.11724137931034483,
+     "round1_own": 0.03908045977011494,
+     "round1_legacy_weights": 0.05057471264367816
+    },
+    "Replogle_K562_essential": {
+     "recorded": 0.5873,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.16470588235294117,
+     "two_stage_approximated": false,
+     "first_order_own": 0.5873015873015873,
+     "first_order_legacy_weights": 0.5873015873015873,
+     "round1_own": 0.19576719576719573,
+     "round1_legacy_weights": 0.19576719576719573
+    },
+    "Replogle_K562_gwps": {
+     "recorded": 0.34159999999999996,
+     "rounds": 15,
+     "verified": 15,
+     "named_in_ml_top": 0.15508885298869143,
+     "two_stage_approximated": true,
+     "first_order_own": 0.3416305916305917,
+     "first_order_legacy_weights": 0.3272005772005772,
+     "round1_own": 0.08477633477633478,
+     "round1_legacy_weights": 0.07900432900432901
+    }
+   },
+   "effects_vs_own": {
+    "legacy_weights": {
+     "per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": -0.09523809523809523,
+      "Steinhart": 0.013793103448275862,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": -0.01443001443001446
+     },
+     "mean": -0.010652778468870425,
+     "round1_per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": -0.061224489795918366,
+      "Steinhart": 0.011494252873563218,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": -0.0057720057720057755
+     },
+     "round1_mean": -0.0061669158549289916
+    }
+   },
+   "verified": "135/135",
+   "named_in_ml_top": 0.053813616784951446
+  },
+  "A1_new": {
+   "per_screen": {
+    "IFNG": {
+     "recorded": 0.151185,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.3837102561962781,
+     "two_stage_approximated": false,
+     "first_order_own": 0.1511845386533666,
+     "first_order_legacy_weights": 0.1511845386533666,
+     "first_order_ml_anchor": 0.1736907730673317,
+     "first_order_both": 0.1736907730673317,
+     "round1_own": 0.0399002493765586,
+     "round1_legacy_weights": 0.0399002493765586,
+     "round1_ml_anchor": 0.055985037406483786,
+     "round1_both": 0.055985037406483786
+    },
+    "IL2": {
+     "recorded": 0.28971,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.4108681774656878,
+     "two_stage_approximated": false,
+     "first_order_own": 0.2897089397089398,
+     "first_order_legacy_weights": 0.2897089397089398,
+     "first_order_ml_anchor": 0.3305613305613306,
+     "first_order_both": 0.3305613305613306,
+     "round1_own": 0.08814968814968815,
+     "round1_legacy_weights": 0.08814968814968815,
+     "round1_ml_anchor": 0.11902286902286903,
+     "round1_both": 0.11902286902286903
+    },
+    "Sanchez21": {
+     "recorded": 0.08648000000000002,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.2964750143125869,
+     "two_stage_approximated": false,
+     "first_order_own": 0.08649592549476136,
+     "first_order_legacy_weights": 0.08649592549476136,
+     "first_order_ml_anchor": 0.09249126891734577,
+     "first_order_both": 0.09249126891734577,
+     "round1_own": 0.015424912689173457,
+     "round1_legacy_weights": 0.015424912689173457,
+     "round1_ml_anchor": 0.016647264260768336,
+     "round1_both": 0.016647264260768336
+    },
+    "Sanchez21_down": {
+     "recorded": 0.10201,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.3038068556361239,
+     "two_stage_approximated": false,
+     "first_order_own": 0.10200918484500573,
+     "first_order_legacy_weights": 0.10200918484500573,
+     "first_order_ml_anchor": 0.1031572904707233,
+     "first_order_both": 0.1031572904707233,
+     "round1_own": 0.020034443168771527,
+     "round1_legacy_weights": 0.020034443168771527,
+     "round1_ml_anchor": 0.019575200918484498,
+     "round1_both": 0.019575200918484498
+    },
+    "Carnevale22": {
+     "recorded": 0.065215,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.32634283819628646,
+     "two_stage_approximated": false,
+     "first_order_own": 0.0652073732718894,
+     "first_order_legacy_weights": 0.0652073732718894,
+     "first_order_ml_anchor": 0.05841013824884793,
+     "first_order_both": 0.05841013824884793,
+     "round1_own": 0.024308755760368665,
+     "round1_legacy_weights": 0.024308755760368665,
+     "round1_ml_anchor": 0.02488479262672811,
+     "round1_both": 0.02488479262672811
+    },
+    "Scharenberg22": {
+     "recorded": 0.5071399999999999,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.42428035043804757,
+     "two_stage_approximated": false,
+     "first_order_own": 0.5071428571428571,
+     "first_order_legacy_weights": 0.5142857142857142,
+     "first_order_ml_anchor": 0.5642857142857142,
+     "first_order_both": 0.5499999999999998,
+     "round1_own": 0.04285714285714286,
+     "round1_legacy_weights": 0.05510204081632654,
+     "round1_ml_anchor": 0.17346938775510207,
+     "round1_both": 0.05510204081632654
+    },
+    "Steinhart": {
+     "recorded": 0.074175,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.2876170487568615,
+     "two_stage_approximated": false,
+     "first_order_own": 0.07413793103448275,
+     "first_order_legacy_weights": 0.07310344827586207,
+     "first_order_ml_anchor": 0.07482758620689654,
+     "first_order_both": 0.08655172413793102,
+     "round1_own": 0.018965517241379314,
+     "round1_legacy_weights": 0.018965517241379314,
+     "round1_ml_anchor": 0.022068965517241378,
+     "round1_both": 0.023448275862068962
+    },
+    "Replogle_K562_essential": {
+     "recorded": 0.544445,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.34532374100719426,
+     "two_stage_approximated": false,
+     "first_order_own": 0.5444444444444445,
+     "first_order_legacy_weights": 0.5444444444444445,
+     "first_order_ml_anchor": 0.5301587301587303,
+     "first_order_both": 0.5444444444444445,
+     "round1_own": 0.18968253968253973,
+     "round1_legacy_weights": 0.18968253968253973,
+     "round1_ml_anchor": 0.17777777777777776,
+     "round1_both": 0.18968253968253973
+    },
+    "Replogle_K562_gwps": {
+     "recorded": 0.34707000000000005,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.41408333333333336,
+     "two_stage_approximated": true,
+     "first_order_own": 0.3470779220779221,
+     "first_order_legacy_weights": 0.3448593073593073,
+     "first_order_ml_anchor": 0.35113636363636364,
+     "first_order_both": 0.3501623376623377,
+     "round1_own": 0.0807900432900433,
+     "round1_legacy_weights": 0.08073593073593074,
+     "round1_ml_anchor": 0.08766233766233765,
+     "round1_both": 0.08338744588744589
+    }
+   },
+   "effects_vs_own": {
+    "legacy_weights": {
+     "per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": 0.0071428571428571175,
+      "Steinhart": -0.0010344827586206834,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": -0.0022186147186147864
+     },
+     "mean": 0.0004321955184024053,
+     "round1_per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": 0.012244897959183682,
+      "Steinhart": 0.0,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": -5.4112554112556444e-05
+     },
+     "round1_mean": 0.0013545317116745695
+    },
+    "ml_anchor": {
+     "per_screen": {
+      "IFNG": 0.0225062344139651,
+      "IL2": 0.040852390852390785,
+      "Sanchez21": 0.005995343422584412,
+      "Sanchez21_down": 0.0011481056257175715,
+      "Carnevale22": -0.00679723502304147,
+      "Scharenberg22": 0.05714285714285705,
+      "Steinhart": 0.0006896551724137889,
+      "Replogle_K562_essential": -0.014285714285714235,
+      "Replogle_K562_gwps": 0.004058441558441539
+     },
+     "mean": 0.012367786542179394,
+     "round1_per_screen": {
+      "IFNG": 0.016084788029925183,
+      "IL2": 0.030873180873180875,
+      "Sanchez21": 0.001222351571594879,
+      "Sanchez21_down": -0.0004592422502870293,
+      "Carnevale22": 0.0005760368663594445,
+      "Scharenberg22": 0.1306122448979592,
+      "Steinhart": 0.003103448275862064,
+      "Replogle_K562_essential": -0.011904761904761973,
+      "Replogle_K562_gwps": 0.006872294372294349
+     },
+     "round1_mean": 0.019664482303569666
+    },
+    "both": {
+     "per_screen": {
+      "IFNG": 0.0225062344139651,
+      "IL2": 0.040852390852390785,
+      "Sanchez21": 0.005995343422584412,
+      "Sanchez21_down": 0.0011481056257175715,
+      "Carnevale22": -0.00679723502304147,
+      "Scharenberg22": 0.042857142857142705,
+      "Steinhart": 0.01241379310344827,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": 0.0030844155844155785
+     },
+     "mean": 0.01356224342629144,
+     "round1_per_screen": {
+      "IFNG": 0.016084788029925183,
+      "IL2": 0.030873180873180875,
+      "Sanchez21": 0.001222351571594879,
+      "Sanchez21_down": -0.0004592422502870293,
+      "Carnevale22": 0.0005760368663594445,
+      "Scharenberg22": 0.012244897959183682,
+      "Steinhart": 0.004482758620689649,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": 0.0025974025974025844
+     },
+     "round1_mean": 0.007513574918672141
+    }
+   },
+   "verified": "900/900",
+   "named_in_ml_top": 0.3547230683713777
+  },
+  "A2_new": {
+   "per_screen": {
+    "IFNG": {
+     "recorded": 0.1834,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.011682457915555148,
+     "two_stage_approximated": false,
+     "first_order_own": 0.18341645885286784,
+     "first_order_legacy_weights": 0.18341645885286784,
+     "round1_own": 0.06197007481296758,
+     "round1_legacy_weights": 0.06197007481296758
+    },
+    "IL2": {
+     "recorded": 0.33535,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.012542209358417752,
+     "two_stage_approximated": false,
+     "first_order_own": 0.33534303534303533,
+     "first_order_legacy_weights": 0.33534303534303533,
+     "round1_own": 0.10790020790020789,
+     "round1_legacy_weights": 0.10790020790020789
+    },
+    "Sanchez21": {
+     "recorded": 0.086835,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.013347622759158222,
+     "two_stage_approximated": false,
+     "first_order_own": 0.08684516880093132,
+     "first_order_legacy_weights": 0.08684516880093132,
+     "round1_own": 0.02083818393480792,
+     "round1_legacy_weights": 0.02083818393480792
+    },
+    "Sanchez21_down": {
+     "recorded": 0.092415,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.013447653429602888,
+     "two_stage_approximated": false,
+     "first_order_own": 0.09242250287026407,
+     "first_order_legacy_weights": 0.09242250287026407,
+     "round1_own": 0.016877152698048223,
+     "round1_legacy_weights": 0.016877152698048223
+    },
+    "Carnevale22": {
+     "recorded": 0.06585000000000002,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.01490757304710793,
+     "two_stage_approximated": false,
+     "first_order_own": 0.06584101382488479,
+     "first_order_legacy_weights": 0.06584101382488479,
+     "round1_own": 0.020737327188940093,
+     "round1_legacy_weights": 0.020737327188940093
+    },
+    "Scharenberg22": {
+     "recorded": 0.51428,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.0688836104513064,
+     "two_stage_approximated": false,
+     "first_order_own": 0.5142857142857143,
+     "first_order_legacy_weights": 0.41632653061224484,
+     "round1_own": 0.1204081632653061,
+     "round1_legacy_weights": 0.06836734693877551
+    },
+    "Steinhart": {
+     "recorded": 0.11065500000000002,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.021521647751155948,
+     "two_stage_approximated": false,
+     "first_order_own": 0.1106896551724138,
+     "first_order_legacy_weights": 0.1203448275862069,
+     "round1_own": 0.038965517241379304,
+     "round1_legacy_weights": 0.05517241379310345
+    },
+    "Replogle_K562_essential": {
+     "recorded": 0.6142749999999999,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.1527331189710611,
+     "two_stage_approximated": false,
+     "first_order_own": 0.6142857142857142,
+     "first_order_legacy_weights": 0.6142857142857142,
+     "round1_own": 0.19603174603174606,
+     "round1_legacy_weights": 0.19523809523809527
+    },
+    "Replogle_K562_gwps": {
+     "recorded": 0.346855,
+     "rounds": 100,
+     "verified": 100,
+     "named_in_ml_top": 0.160610621371748,
+     "two_stage_approximated": true,
+     "first_order_own": 0.34686147186147187,
+     "first_order_legacy_weights": 0.33511904761904765,
+     "round1_own": 0.08782467532467532,
+     "round1_legacy_weights": 0.08576839826839827
+    }
+   },
+   "effects_vs_own": {
+    "legacy_weights": {
+     "per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": -0.09795918367346951,
+      "Steinhart": 0.0096551724137931,
+      "Replogle_K562_essential": 0.0,
+      "Replogle_K562_gwps": -0.011742424242424221
+     },
+     "mean": -0.011116270611344514,
+     "round1_per_screen": {
+      "IFNG": 0.0,
+      "IL2": 0.0,
+      "Sanchez21": 0.0,
+      "Sanchez21_down": 0.0,
+      "Carnevale22": 0.0,
+      "Scharenberg22": -0.052040816326530584,
+      "Steinhart": 0.016206896551724144,
+      "Replogle_K562_essential": -0.0007936507936507908,
+      "Replogle_K562_gwps": -0.0020562770562770477
+     },
+     "round1_mean": -0.004298205291637142
+    }
+   },
+   "verified": "900/900",
+   "named_in_ml_top": 0.05218627945056816
+  }
+ }
+}
