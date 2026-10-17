@@ -26,6 +26,10 @@ function render(result) {
     if (result.stage === "done") {
       console.log(`\n[Phenotype registered · ${result.name}]`);
       console.log(`  gene pool: ${result.n_genes} (${result.n_genes_with_known_features} with known features)`);
+      if (result.tier) {
+        console.log(`  tier:      ${result.tier === "full_pool" ? "full pool (core-essential genes kept)"
+          : `non-essential (${result.n_core_essential_removed} core-essential genes removed)`}`);
+      }
       console.log(`  anchors:   ${result.anchors.join(", ")}`);
       console.log(`\nIt's now rankable. Say e.g. "run a real experiment on ${result.name} with my own results".\n`);
       return;

@@ -72,6 +72,23 @@ export function onboardCommand(message) {
   return "other";
 }
 
+/**
+ * The single-gene tier a reply asks for: "non_essential" (remove the 684 CEGv2 core-essential genes — the
+ * default and the paper's main tier) or "full_pool" (keep them), else null. A bare "yes"/"ok" is handled by
+ * the caller as accepting the default.
+ */
+export function parseTier(message) {
+  const m = String(message || "").trim().toLowerCase();
+  if (/\b(keep|full|all genes|include|no)\b/.test(m) || /全池|保留|不排除|不去掉|全部基因/.test(message)) return "full_pool";
+  if (/\b(remove|exclude|drop|default|non[-_ ]?essential)\b/.test(m) || /排除|去掉|去除|默认|非必需/.test(message)) return "non_essential";
+  return null;
+}
+
+const TIER_TEXT =
+  "Should the 684 common core-essential genes (CEGv2) be removed from the candidates? Reply `yes` to remove them " +
+  "(the default, and the paper's main tier: you are after phenotype-specific hits, not generic essentials), or " +
+  "`keep` to rank the full pool, essentials included.";
+
 export async function extractPhenotype(message, modelSpec) {
   try {
     const raw = await complete({ spec: modelSpec, systemPrompt: EXTRACT_SYS, prompt: message, temperature: 0, maxTokens: 400 });
@@ -117,6 +134,7 @@ export async function startOnboarding(state, fields, modelSpec) {
     genesName: null,
     proposed: null,
     anchors: null,
+    tier: null,
   };
   return advance(state, modelSpec);
 }
@@ -147,6 +165,11 @@ async function advance(state, modelSpec) {
     };
   }
 
+  if (!o.tier) {
+    o.stage = "tier";
+    return { kind: "onboard", stage: "tier", name: o.name, text: TIER_TEXT };
+  }
+
   if (!o.anchors) {
     o.stage = "anchors";
     if (!o.proposed) o.proposed = await proposeAnchors(o.task, o.measurement, modelSpec);
@@ -166,6 +189,7 @@ async function advance(state, modelSpec) {
     task: o.task,
     measurement: o.measurement,
     batchSize: o.batchSize || undefined,
+    tier: o.tier,
   });
   state.onboarding = null;
   state.dataset = res.name;
@@ -198,6 +222,12 @@ export async function handleOnboarding(state, message, opts, modelSpec) {
       const p = (opts.path || message || "").trim();
       if (p && /\.(csv|txt|tsv)$/i.test(p)) o.genesPath = p;
     }
+    return advance(state, modelSpec);
+  }
+
+  if (o.stage === "tier") {
+    o.tier = parseTier(message) || (cmd === "confirm" ? "non_essential" : null);
+    if (!o.tier) return { kind: "onboard", stage: "tier", name: o.name, text: TIER_TEXT };
     return advance(state, modelSpec);
   }
 

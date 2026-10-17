@@ -20,15 +20,18 @@ Usage:
     # GPT-5.6 Luna/none through Codex OAuth is the default:
     python3 -m waddington_select.suggest --dataset IFNG
 
-Note (v1): --dataset must be one of the nine benchmark phenotypes, since the ML features are
-precomputed per dataset. Suggesting for an arbitrary new phenotype needs the feature pipeline to
-run on that gene pool first (follow-up work).
+--dataset is one of the nine benchmark phenotypes or a phenotype registered with
+`python -m waddington_select.phenotype register` (which builds its features). A registered phenotype's
+single-gene tier (non_essential by default, or full_pool) decides the training tables and which reported
+run's cross-experiment memory is read (deployment_memory_path).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
+from pathlib import Path
 
 from .oracle import ALL_DATASETS, BATCH_SIZES
 from .arms.waddington_c_arm import WaddingtonCArm, WaddingtonCSkillsArm
@@ -42,6 +45,23 @@ def _anchor_genes(dataset: str) -> list[str]:
     """Seed genes of a registered user phenotype (empty for the benchmark datasets)."""
     from .phenotype import load_registry
     return _norm((load_registry().get(dataset) or {}).get("anchors"))
+
+
+def deployment_memory_path(dataset: str) -> Path:
+    """The cross-experiment memory a recommendation reads: $WADDINGTON_MEMORY_PATH if set, else the memory
+    of the reported run for the phenotype's tier (analysis/sources.py) -- the full-pool run's for a phenotype
+    registered in the full-pool tier, the headline run's otherwise. (config.ACTIVE_MEMORY_PATH is where the
+    memory builder writes, not a calibrated memory, and is absent from a fresh clone: recommendations used to
+    run without memory.)"""
+    env = os.environ.get("WADDINGTON_MEMORY_PATH")
+    if env:
+        return Path(env)
+    from .analysis.sources import REPORTED_RUN_DIR, REPORTED_TIER_A_RUN
+    from .phenotype import phenotype_tier
+    from .tables import TIER_FULL_POOL
+    if phenotype_tier(dataset) == TIER_FULL_POOL:
+        return REPORTED_TIER_A_RUN.parent / "experience_memory.json"
+    return REPORTED_RUN_DIR / "experience_memory.json"
 
 
 def suggest(
@@ -70,8 +90,8 @@ def suggest(
     if use_skills:
         arm = WaddingtonCSkillsArm(dataset, batch_size)
     else:
-        arm = WaddingtonCArm(dataset, batch_size, trace=recorder,
-                             reason_from_structure=reason_from_structure)
+        arm = WaddingtonCArm(dataset, batch_size, trace=recorder, reason_from_structure=reason_from_structure,
+                             memory_path=deployment_memory_path(dataset))
     pool: set[str] = arm._llm._gene_set  # canonical gene pool for this phenotype
 
     hits = _norm(tested_hits)
@@ -109,6 +129,7 @@ def suggest(
         "unknown_genes": unknown,
         "route": getattr(arm, "_route", "?"),
         "reason_from_structure": getattr(arm, "_reason_from_structure", False),
+        "memory_entries": len(getattr(arm._llm, "_memory", []) or []),
     }
     if info_trace is not None:
         info["trace"] = info_trace

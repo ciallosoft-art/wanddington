@@ -16,10 +16,17 @@ The registered phenotype gets label=0 rows: it is never used as training data (s
 as the candidate pool. Round 1 therefore comes from zero-shot transfer (the model trained on the 9
 benchmarks); from round 2 the online arm retrains on the hits the scientist uploads.
 
+Single-gene tier (tables.py): ``non_essential`` (default, the paper's headline tier) removes the 684
+CEGv2 core-essential genes from the pool, as the benchmark tables do; ``full_pool`` keeps them, and the
+prior is then trained on the full-pool tables -- the only tables whose screens contain those genes, so
+also the only place their gene-intrinsic features can be looked up (the non-essential tables have none
+of them, and a gene missing from the lookup gets all-zero features).
+
 Usage:
     python -m waddington_select.phenotype register --name MyScreen \
         --genes-file screen.csv --anchors STAT1 JAK1 IFNGR1 \
-        --task "..." --measurement "..." [--batch 32] [--expected-hit-rate 0.05] [--json]
+        --task "..." --measurement "..." [--tier non_essential|full_pool] \
+        [--batch 32] [--expected-hit-rate 0.05] [--json]
     python -m waddington_select.phenotype list [--json]
 """
 
@@ -34,7 +41,7 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVAL_DIR = REPO_ROOT / "workspace" / "evaluation"
-from .tables import TRAINING_DATA_V3 as BASE_CSV  # noqa: E402  (override-aware; see tables.py)
+from .tables import TIER_NON_ESSENTIAL, TIERS, core_essential_genes, tier_tables  # noqa: E402
 USER_DIR = REPO_ROOT / "workspace" / "data" / "user_phenotypes"
 REGISTRY_PATH = USER_DIR / "registry.json"
 
@@ -63,6 +70,13 @@ def is_user_phenotype(name: str) -> bool:
     return name in load_registry()
 
 
+def phenotype_tier(name: str) -> str | None:
+    """A registered phenotype's single-gene tier (entries made before tiers existed are non-essential
+    in intent but were not filtered; they report ``None``), else None."""
+    entry = load_registry().get(name)
+    return entry.get("tier") if entry else None
+
+
 def task_prompt(name: str) -> dict | None:
     """Task/Measurement for a registered phenotype (else None)."""
     entry = load_registry().get(name)
@@ -87,9 +101,9 @@ def features_frame(name: str) -> pd.DataFrame | None:
 
 # ── feature construction ────────────────────────────────────────────────────
 
-def _intrinsic_lookup() -> pd.DataFrame:
+def _intrinsic_lookup(base_csv: Path) -> pd.DataFrame:
     """gene → the gene-intrinsic feature values, taken from the existing training data."""
-    df = pd.read_csv(BASE_CSV, usecols=["gene"] + INTRINSIC_COLS)
+    df = pd.read_csv(base_csv, usecols=["gene"] + INTRINSIC_COLS)
     df["gene"] = df["gene"].astype(str).str.strip().str.upper()
     return df.drop_duplicates("gene").set_index("gene")
 
@@ -113,19 +127,29 @@ def register(
     measurement: str,
     batch_size: int = 32,
     expected_hit_rate: float | None = None,
+    tier: str = TIER_NON_ESSENTIAL,
 ) -> dict:
     """Build features for a new phenotype's gene pool and register it."""
     if not name or "/" in name:
         raise SystemExit("--name must be a simple identifier")
+    if tier not in TIERS:
+        raise SystemExit(f"--tier must be one of {', '.join(TIERS)}")
     genes = sorted({g.strip().upper() for g in genes if str(g).strip()})
     anchors = [a.strip().upper() for a in anchors if str(a).strip()]
     if not genes:
         raise SystemExit("empty gene pool")
     if not anchors:
         raise SystemExit("at least one anchor gene is required (seed biology for this phenotype)")
+    ceg = core_essential_genes()
+    n_core_essential = len(set(genes) & ceg)
+    if tier == TIER_NON_ESSENTIAL:
+        genes = [g for g in genes if g not in ceg]
+        if not genes:
+            raise SystemExit("every gene in the pool is a CEGv2 core-essential gene; use --tier full_pool")
 
-    base_cols = pd.read_csv(BASE_CSV, nrows=0).columns.tolist()
-    intrinsic = _intrinsic_lookup()
+    base_csv = tier_tables(tier)[1]
+    base_cols = pd.read_csv(base_csv, nrows=0).columns.tolist()
+    intrinsic = _intrinsic_lookup(base_csv)
     anchor_feats = _anchor_features(genes, anchors)
 
     df = pd.DataFrame({"gene": genes})
@@ -151,6 +175,10 @@ def register(
     entry = {
         "batch_size": int(batch_size),
         "anchors": anchors,
+        "tier": tier,
+        # core-essential genes in the uploaded pool: removed under non_essential, kept under full_pool
+        "n_core_essential_in_upload": n_core_essential,
+        "n_core_essential_removed": n_core_essential if tier == TIER_NON_ESSENTIAL else 0,
         "n_genes": len(genes),
         "n_genes_with_known_features": covered,
         "expected_hit_rate": expected_hit_rate,
@@ -178,6 +206,9 @@ def main() -> None:
     r.add_argument("--measurement", required=True)
     r.add_argument("--batch", type=int, default=32)
     r.add_argument("--expected-hit-rate", type=float, default=None)
+    r.add_argument("--tier", choices=TIERS, default=TIER_NON_ESSENTIAL,
+                   help="non_essential (default, the paper's headline tier) removes the 684 CEGv2 core-essential "
+                        "genes from the pool; full_pool keeps them and trains the prior on the full-pool tables")
     r.add_argument("--json", action="store_true")
 
     ls = sub.add_parser("list")
@@ -205,7 +236,8 @@ def main() -> None:
             print("No user phenotypes registered.")
             return
         for n, e in reg.items():
-            print(f"  {n:24s} genes={e['n_genes']:6d}  batch={e['batch_size']:4d}  anchors={', '.join(e['anchors'][:5])}")
+            print(f"  {n:24s} genes={e['n_genes']:6d}  batch={e['batch_size']:4d}  tier={e.get('tier') or '-':13s} "
+                  f"anchors={', '.join(e['anchors'][:5])}")
         return
 
     genes = args.genes
@@ -217,13 +249,15 @@ def main() -> None:
 
     res = register(
         args.name, genes, args.anchors, args.task, args.measurement,
-        batch_size=args.batch, expected_hit_rate=args.expected_hit_rate,
+        batch_size=args.batch, expected_hit_rate=args.expected_hit_rate, tier=args.tier,
     )
     if args.json:
         print(json.dumps(res))
         return
     print(f"Registered phenotype '{res['name']}'")
     print(f"  gene pool:  {res['n_genes']} ({res['n_genes_with_known_features']} with known intrinsic features)")
+    print(f"  tier:       {res['tier']} ({res['n_core_essential_removed']} core-essential genes removed, "
+          f"{res['n_core_essential_in_upload']} in the upload)")
     print(f"  anchors:    {', '.join(res['anchors'])}")
     print(f"  batch size: {res['batch_size']}")
     print(f"  features:   {res['features_csv']}")

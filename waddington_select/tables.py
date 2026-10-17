@@ -18,9 +18,15 @@ Difficulty tiers
 The paper's main results are BDA's *harder* single-gene tier (non-essential pool). The two other
 BDA tiers are run by pointing these variables at purpose-built tables:
 
-  easier   1-gene, full pool     WADDINGTON_TRAINING_CSV{,_V3}=…_tier_a_unfiltered{,_v3}.csv
-  harder   2-gene combinations   WADDINGTON_TRAINING_CSV{,_V3}=…_horlbeck_pairs{,_v3}.csv
+  easier   1-gene, full pool     WADDINGTON_TRAINING_CSV{,_V3}=lgbm_training_data_tier_a{,_v3}.csv
+                                 (built by workspace/evaluation/build_tier_a_unfiltered.py)
+  harder   2-gene combinations   WADDINGTON_TRAINING_CSV{,_V3}=…_horlbeck_pairs_mean{,_v3}.csv
                                  WADDINGTON_EXTRA_DATASETS=Horlbeck:128
+
+A registered user phenotype (phenotype.py) carries its own single-gene tier instead of reading these
+variables: ``non_essential`` (the default, the paper's headline tier: the 684 CEGv2 core-essential genes
+are removed from its pool) or ``full_pool`` (they are kept, and its prior is trained on the full-pool
+tables, the only ones whose screens include those genes). ``tier_tables`` maps a tier to its tables.
 """
 
 from __future__ import annotations
@@ -39,6 +45,31 @@ CRISPRA_VALIDATION_CSV = EVAL_DIR / "lgbm_training_data_crispra_validation.csv"
 
 TRAINING_DATA_CSV = Path(os.environ.get("WADDINGTON_TRAINING_CSV", DEFAULT_TRAINING_CSV))
 TRAINING_DATA_V3 = Path(os.environ.get("WADDINGTON_TRAINING_CSV_V3", DEFAULT_TRAINING_V3))
+
+# ── Single-gene tiers for registered phenotypes ─────────────────────────────────────────────────
+TIER_NON_ESSENTIAL = "non_essential"   # BDA's harder single-gene tier, the paper's headline
+TIER_FULL_POOL = "full_pool"           # BDA's easier single-gene tier: core-essential genes kept
+TIERS = (TIER_NON_ESSENTIAL, TIER_FULL_POOL)
+FULL_POOL_CSV = EVAL_DIR / "lgbm_training_data_tier_a.csv"
+FULL_POOL_V3 = EVAL_DIR / "lgbm_training_data_tier_a_v3.csv"
+# Hart et al. (2017) CEGv2 core-essential genes, as distributed with BioDiscoveryAgent (684 genes,
+# GENE / HGNC_ID / ENTREZ_ID); the list BDA and our benchmark tables remove from every screen's pool.
+CEG_PATH = Path(__file__).resolve().parent / "data" / "CEGv2.txt"
+
+
+def tier_tables(tier: str) -> tuple[Path, Path]:
+    """(v1, v3) training tables for a single-gene tier."""
+    if tier == TIER_NON_ESSENTIAL:
+        return TRAINING_DATA_CSV, TRAINING_DATA_V3
+    if tier == TIER_FULL_POOL:
+        return FULL_POOL_CSV, FULL_POOL_V3
+    raise ValueError(f"unknown tier {tier!r}; expected one of {TIERS}")
+
+
+def core_essential_genes() -> set[str]:
+    """The CEGv2 core-essential gene symbols (upper-case)."""
+    df = pd.read_csv(CEG_PATH, sep="\t", usecols=["GENE"])
+    return set(df["GENE"].astype(str).str.strip().str.upper())
 
 # ── Combinatorial (2-gene) screens ──────────────────────────────────────────────────────────────
 # A pair candidate is ONE opaque token "GENEA|GENEB" with the two symbols sorted alphabetically, so

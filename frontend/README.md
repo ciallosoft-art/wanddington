@@ -17,6 +17,11 @@ The Web UI listens on `127.0.0.1` only. Its page supplies a per-launch access to
 requests, and the server rejects cross-origin requests. Reload an open page after restarting the
 server. Use file uploads in the Web UI; server-side file paths remain available in the CLI.
 
+Onboarding your own screen asks for a name, the phenotype, the library file (every gene in it becomes a
+candidate), the single-gene tier — remove the 684 CEGv2 core-essential genes (default, the paper's main
+tier) or keep the full pool — and the anchor genes. The Web UI's "upload & run" asks the tier with an
+OK/Cancel dialog.
+
 Feedback is saved separately for each phenotype. Uploads preserve CSV/TSV/MAGeCK format; missing
 genes or measurements must be supplied before a campaign advances. If the next recommendation
 fails, the confirmed results stay saved and `commit` retries selection without counting them again.

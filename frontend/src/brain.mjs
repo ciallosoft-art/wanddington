@@ -48,7 +48,7 @@ export async function getDatasets() {
  * Onboard a new phenotype: build its ML features from the scientist's screen/library file.
  * Accepts a `genesFile` path (CLI) or raw `genesContent` (+ `genesName` for the extension hint, Web upload).
  */
-export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate }) {
+export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate, tier }) {
   let poolFile = genesFile;
   if (!poolFile) {
     if (genesContent == null) throw new Error("registerPhenotype: need a gene-pool file path or content");
@@ -64,6 +64,10 @@ export async function registerPhenotype({ name, genesFile, genesContent, genesNa
   ];
   if (batchSize) args.push("--batch", String(batchSize));
   if (expectedHitRate) args.push("--expected-hit-rate", String(expectedHitRate));
+  if (tier) {
+    if (!["non_essential", "full_pool"].includes(tier)) throw new Error(`registerPhenotype: unknown tier ${tier}`);
+    args.push("--tier", tier);
+  }
   const { stdout } = await run(args, { timeoutMs: 900_000 });
   const s = stdout.indexOf("{");
   const e = stdout.lastIndexOf("}");

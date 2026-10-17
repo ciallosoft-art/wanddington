@@ -27,3 +27,7 @@ packages = [
     "waddington_select.arms",
     "waddington_select.arms.archive",
 ]
+
+[tool.setuptools.package-data]
+# the CEGv2 core-essential gene list used by the single-gene tiers (tables.core_essential_genes)
+waddington_select = ["data/*.txt"]

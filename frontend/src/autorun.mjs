@@ -146,7 +146,7 @@ export async function autoRun({ dataset, readoutFile, rounds = 5, batchSize, top
  * @param {string[]} [o.anchors]      seed genes; if omitted, the LLM proposes them from the task
  * @param {string} [o.task] [o.measurement] phenotype description (LLM narration + anchor proposal)
  */
-export async function autoRunUpload({ name, readoutFile, readoutContent, readoutName, anchors, task, measurement, batchSize, rounds = 5, topRatio = 0.05, modelSpec, onStep = () => {} }) {
+export async function autoRunUpload({ name, readoutFile, readoutContent, readoutName, anchors, task, measurement, batchSize, rounds = 5, topRatio = 0.05, tier = "non_essential", modelSpec, onStep = () => {} }) {
   const emit = (e) => { try { onStep({ t: Date.now(), ...e }); } catch { /* dead stream */ } };
   if (!name || /[^A-Za-z0-9_]/.test(name)) throw new Error("upload run: a simple phenotype name (letters/digits/underscore only) is required");
   const content = readoutContent != null ? readoutContent : (readoutFile ? readFileSync(readoutFile, "utf8") : null);
@@ -175,8 +175,9 @@ export async function autoRunUpload({ name, readoutFile, readoutContent, readout
     if (!anch.length) throw new Error("upload run: no anchor genes — pass anchors, or give a task the model can seed anchors from");
     emit({ type: "anchors", anchors: anch });
     emit({ type: "registering", name });
-    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize });
-    emit({ type: "registered", name, nGenes: reg.n_genes, nWithFeatures: reg.n_genes_with_known_features, anchors: anch });
+    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize, tier });
+    emit({ type: "registered", name, nGenes: reg.n_genes, nWithFeatures: reg.n_genes_with_known_features, anchors: anch,
+           tier: reg.tier, nCoreEssentialRemoved: reg.n_core_essential_removed });
   } else {
     emit({ type: "already-registered", name });
   }

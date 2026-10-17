@@ -103,8 +103,24 @@ conda run -n waddington-bio python3 -m waddington_select.simulate --dataset IFNG
 ```
 
 Supported phenotypes (`--dataset`): `IFNG`, `IL2`, `Sanchez21`, `Sanchez21_down`, `Carnevale22`,
-`Scharenberg22`, `Steinhart`, `Replogle_K562_essential`, `Replogle_K562_gwps`. A brand-new phenotype
-needs its ML features precomputed first, so it is not yet selectable.
+`Scharenberg22`, `Steinhart`, `Replogle_K562_essential`, `Replogle_K562_gwps`, plus any phenotype you
+register (the chat's onboarding does this for you):
+
+```bash
+conda run -n waddington-bio python3 -m waddington_select.phenotype register --name MyScreen \
+    --genes-file my_library.csv --anchors STAT1 JAK1 IFNGR1 \
+    --task "genes that regulate IL-2 secretion" --measurement "IL-2 FACS" [--tier non_essential|full_pool]
+```
+
+**Single-gene tier.** `non_essential` (default) is BDA's harder tier and the paper's headline: the 684
+CEGv2 core-essential genes (`waddington_select/data/CEGv2.txt`) are removed from the candidate pool, so
+the budget goes to phenotype-specific genes rather than generic essentials. `full_pool` is BDA's easier
+tier: they stay in the pool, and the prior is trained on the full-pool tables, the only ones that contain
+those genes. The two-gene (combinatorial) tier is not offered: on it the reported system loses to
+BioDiscoveryAgent (paper, combinatorial tier).
+
+A recommendation reads the cross-experiment memory of the reported run for its tier (the headline run's,
+or the full-pool run's) unless `WADDINGTON_MEMORY_PATH` is set.
 
 ---
 
@@ -162,7 +178,7 @@ Environment variables (all optional; sensible defaults):
 | `WADDINGTON_LLM_BACKEND` | `pi` | C-arm backend: `pi` (GPT/Codex default) / `anthropic` (legacy reproduction) / `mock` |
 | `WADDINGTON_PI_MODEL` | `openai-codex/gpt-5.6-luna` | Provider/model used by the C-arm |
 | `WADDINGTON_PI_REASONING` | `none` | Codex reasoning effort |
-| `WADDINGTON_MEMORY_PATH` | `workspace/results/gpt/gpt_5_6_luna_none/experience_memory.json` | Active GPT-calibrated episodic memory |
+| `WADDINGTON_MEMORY_PATH` | benchmark runs: `workspace/results/gpt/gpt_5_6_luna_none/experience_memory.json` (also where `memory_builder` writes); `suggest` / the frontend: the reported run's memory for the phenotype's tier | Cross-experiment episodic memory |
 | `WADDINGTON_LEGACY_ROUTER` | `0` | `1` enables the legacy target-aware router (reads the realized hit rate; not the reported system) |
 | `WADDINGTON_LEGACY_TASK_PROMPTS` | `0` | `1` restores the historical Replogle fitness wording for frozen reproduction; active prompts describe the actual Perturb-seq transcriptomic readouts |
 | `WADDINGTON_LLM_NAMED_ONLY` | `1` | Fusion bonus only to model-named genes; frozen Claude scripts pin `0` to reproduce the historical padded vote |

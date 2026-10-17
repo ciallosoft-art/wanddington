@@ -372,7 +372,7 @@
           b.appendChild(chips(r.proposed));
           b.appendChild(el("meta", esc(r.text)));
         } else if (r.stage === "done") {
-          b.appendChild(el(null, `<b>Phenotype registered · ${esc(r.name)}</b> — pool ${r.n_genes} genes (${r.n_genes_with_known_features} with known features)`));
+          b.appendChild(el(null, `<b>Phenotype registered · ${esc(r.name)}</b> — pool ${r.n_genes} genes (${r.n_genes_with_known_features} with known features)${tierNote(r.tier, r.n_core_essential_removed)}`));
           b.appendChild(chips(r.anchors));
           b.appendChild(el("meta", `now rankable — try “run a real experiment on ${esc(r.name)} with my own results”`));
         } else {
@@ -578,7 +578,7 @@
         else if (e.type === "anchor-proposing") tl.appendChild(el("run-head", "🧬 Proposing anchor genes from the phenotype…"));
         else if (e.type === "anchors") tl.appendChild(el("run-head", `anchor genes: <span translate="no">${e.anchors.map(esc).join(", ")}</span>`));
         else if (e.type === "registering") tl.appendChild(el("run-head", `⚙ Building ML features for <b>${esc(e.name)}</b>…`));
-        else if (e.type === "registered") tl.appendChild(el("run-head", `✅ Registered <b>${esc(e.name)}</b> — ${e.nGenes} genes (${e.nWithFeatures} with known features). Rankable now.`));
+        else if (e.type === "registered") tl.appendChild(el("run-head", `✅ Registered <b>${esc(e.name)}</b> — ${e.nGenes} genes (${e.nWithFeatures} with known features)${tierNote(e.tier, e.nCoreEssentialRemoved)}. Rankable now.`));
         else if (e.type === "already-registered") tl.appendChild(el("run-head", `<b>${esc(e.name)}</b> is already registered.`));
         else if (e.type === "intent") tl.appendChild(el("run-head", `🧠 ${esc(e.text)}<div class="rh-readout">reveal source: ${esc(e.readout)}</div>`));
         else if (e.type === "round-open") {
@@ -636,7 +636,14 @@
 
     // Real production path: register a brand-new screen from the scientist's uploaded readout, then run
     // it — streamed over POST (the file body won't fit in a GET) and read from the fetch response stream.
-    async function runUpload({ name, content, fileName, task, rounds }, chat = current) {
+    // "· tier: non-essential (n core-essential genes removed)" for a registered phenotype, else ""
+    function tierNote(tier, removed) {
+      if (tier === "full_pool") return " · tier: full pool (core-essential genes kept)";
+      if (tier === "non_essential") return ` · tier: non-essential (${Number(removed) || 0} core-essential genes removed)`;
+      return "";
+    }
+
+    async function runUpload({ name, content, fileName, task, rounds, tier = "non_essential" }, chat = current) {
       if (!chat || !chats.includes(chat) || pendingChats.has(chat.id)) return;
       const label = `📤 Upload & run "${name}" — register from my screen, then rank (${rounds} rounds)`;
       if (chat === current) {
@@ -656,7 +663,7 @@
       try {
         const res = await fetch("/api/run-upload", {
           method: "POST", headers: apiHeaders(),
-          body: JSON.stringify({ name, readoutContent: content, readoutName: fileName, task, rounds }),
+          body: JSON.stringify({ name, readoutContent: content, readoutName: fileName, task, rounds, tier }),
         });
         if (!res.ok) throw new Error((await res.json()).text || `Request failed (${res.status})`);
         const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = "";
@@ -689,7 +696,10 @@
           if (name == null) return;
           name = name.replace(/[^A-Za-z0-9_]/g, "_") || base;
           const task = prompt("One line — what phenotype does this screen measure?", "") || "";
-          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5 }, chat);
+          const tier = confirm("Remove the 684 common core-essential genes (CEGv2) from the candidates?\n\n"
+            + "OK = remove them (default; the paper's main tier: phenotype-specific hits)\n"
+            + "Cancel = keep the full pool, essentials included") ? "non_essential" : "full_pool";
+          runUpload({ name, content: String(reader.result), fileName: f.name, task, rounds: 5, tier }, chat);
         };
         reader.readAsText(f);
       };

@@ -147,6 +147,7 @@ export function createWebHandler({ modelSpec, token = randomBytes(32).toString("
             : (body.anchors ? String(body.anchors).split(/[,\s]+/).filter(Boolean) : undefined),
           rounds: Math.max(1, Math.min(8, parseInt(body.rounds || "5", 10) || 5)),
           batchSize: body.batchSize ? parseInt(body.batchSize, 10) : undefined,
+          tier: body.tier === "full_pool" ? "full_pool" : "non_essential",
           modelSpec, onStep,
         }));
         return;

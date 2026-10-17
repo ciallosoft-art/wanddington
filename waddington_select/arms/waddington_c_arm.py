@@ -42,14 +42,14 @@ from .waddington_arm import _load_memory, _rank_memory_by_relevance, _load_task
 from ..skills import SkillLibrary, SKILL_LIBRARY_PATH
 from ..config import ACTIVE_MEMORY_PATH
 from ..features import load_training_frame
-from ..phenotype import load_registry
+from ..phenotype import load_registry, phenotype_tier
 
 REPO_ROOT         = Path(__file__).resolve().parents[2]
 # Both tiers are resolved centrally (tables.py). WADDINGTON_TRAINING_CSV overrides the v1 (no-DepMap)
 # table and WADDINGTON_TRAINING_CSV_V3 the v3 (with-DepMap) one, so an isolated superset table — the
 # CRISPRa validation, or either BDA difficulty tier — is picked up on BOTH feature routes. v3 used to
 # be hardcoded, which pinned most screens to the frozen benchmark pool whatever the override said.
-from ..tables import TRAINING_DATA_CSV as TRAINING_DATA_V1, TRAINING_DATA_V3
+from ..tables import TIER_FULL_POOL, TRAINING_DATA_CSV as TRAINING_DATA_V1, TRAINING_DATA_V3, tier_tables
 MEMORY_PATH       = ACTIVE_MEMORY_PATH
 
 DEPMAP_PAN_FEATS   = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm"]
@@ -128,6 +128,17 @@ def _metadata_hit_rate(dataset_name: str) -> float:
 
 
 def _get_feature_config(dataset_name: str) -> tuple[Path, list[str]]:
+    """(training table, DepMap columns) for a screen. A registered phenotype in the full-pool tier reads
+    the full-pool tables (tables.tier_tables), which are the only ones whose screens contain the
+    core-essential genes its pool keeps; the DepMap policy is unchanged."""
+    csv, extra = _feature_config_by_policy(dataset_name)
+    if phenotype_tier(dataset_name) == TIER_FULL_POOL:
+        v1, v3 = tier_tables(TIER_FULL_POOL)
+        csv = v1 if csv == TRAINING_DATA_V1 else v3
+    return csv, extra
+
+
+def _feature_config_by_policy(dataset_name: str) -> tuple[Path, list[str]]:
     # Reported default: derive the DepMap feature policy from pre-experiment metadata only
     # (modality / curated-flag / cell line), never from the target's realized labels. See router_protocol.
     if _feature_policy() == "metadata":
