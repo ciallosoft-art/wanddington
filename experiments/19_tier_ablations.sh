@@ -32,6 +32,9 @@ OUT_DIR="workspace/results/tier_ablations/$TIER"
 OUT_NAME="${OUT_NAME:-ablations}"
 # Part 丁 of docs/tier_extension_plan.md reuses this harness: ARMS (the ladder's A0.5 / A1, or waddington_c__rf),
 # OUT_NAME (a separate result file), EXCLUDE_STUDY=1 (the leave-one-study-out prior), SCREENS (a subset).
+# Part 戊 (why the ladder reversed) adds KEEP_ANCHORS=1 (the C-arm keeps the anchor features, in the ML branch
+# and in the LLM's feature view) and OLD_MEMORY=1 (the first GPT run's memory and the uncorrected task prompts,
+# the conditions of the earlier ladder; headline only).
 
 unset WADDINGTON_LLM_MODEL WADDINGTON_PI_CMD WADDINGTON_LEGACY_ROUTER
 unset WADDINGTON_AUTH_PATH WADDINGTON_REUSE_FEYNMAN
@@ -80,6 +83,12 @@ export MKL_NUM_THREADS=1
 export WADDINGTON_GPT_RESULT_DIR="$OUT_DIR"
 export WADDINGTON_MEMORY_PATH="$MEMORY_PATH"
 [ "${EXCLUDE_STUDY:-0}" = 1 ] && export WADDINGTON_EXCLUDE_STUDY=1
+[ "${KEEP_ANCHORS:-0}" = 1 ] && export WADDINGTON_DROP_ANCHOR_FEATS=0
+if [ "${OLD_MEMORY:-0}" = 1 ]; then
+  [ "$TIER" = headline ] || { echo "OLD_MEMORY applies to the headline tier only" >&2; exit 2; }
+  MEMORY_PATH="$PWD/workspace/results/gpt/gpt_5_6_luna_none_20rep/experience_memory.json"
+  export WADDINGTON_MEMORY_PATH="$MEMORY_PATH" WADDINGTON_LEGACY_TASK_PROMPTS=1
+fi
 [ -n "${SCREENS:-}" ] && DATASETS=(--datasets $SCREENS)
 
 [ -s "$MEMORY_PATH" ] || { echo "ERROR: memory $MEMORY_PATH missing" >&2; exit 1; }
