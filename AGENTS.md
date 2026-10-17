@@ -48,9 +48,30 @@ feedback, it gives the adapted next round. Relay the genes and briefly explain t
 context. This is a *forward* recommendation (no ground-truth oracle involved).
 
 **Supported phenotypes** (`--dataset` values): `IFNG`, `IL2`, `Sanchez21`, `Sanchez21_down`,
-`Carnevale22`, `Scharenberg22`, `Steinhart`, `Replogle_K562_essential`, `Replogle_K562_gwps`.
-A brand-new phenotype is not yet supported (its ML features must be precomputed first) — say so
-rather than guessing.
+`Carnevale22`, `Scharenberg22`, `Steinhart`, `Replogle_K562_essential`, `Replogle_K562_gwps`, plus any
+phenotype registered from the scientist's own library (next section). Never map new biology onto a
+lookalike benchmark. Single-gene screens only: a two-gene (combinatorial) screen is refused, because the
+reported system does not beat BioDiscoveryAgent on that tier.
+
+## A scientist's own screen — register, suggest, ingest
+
+`skills/waddington-gene-selection/SKILL.md` is the step-by-step contract for driving a real campaign:
+register the library once (phenotype, readout, perturbation, cells, hit rule, tier), then alternate
+`suggest` and `ingest` round by round, carrying the cumulative hits/misses forward (`suggest` is
+stateless). Follow it rather than improvising the loop.
+
+```bash
+conda run -n waddington-bio python3 -m waddington_select.phenotype register --name <NAME> \
+    --genes-file <LIBRARY.csv> --task "…" --measurement "…" \
+    --modality KO|CRISPRi|CRISPRa|unknown [--cell-line "…"] [--curated-essential] \
+    [--tier non_essential|full_pool] --hit-rule label|threshold|fdr|top_fraction [...] --json
+conda run -n waddington-bio python3 -m waddington_select.ingest --dataset <NAME> \
+    --file <ROUND_READOUT> --genes <THE TESTED BATCH> --json      # readout -> hits / misses
+```
+
+The registered hit rule and tier are fixed for the campaign, and the design metadata (modality / cells /
+curated panel) selects the DepMap features by the benchmarks' own rule. Ask the scientist for each; do not
+guess them.
 
 ## Show how a whole sequential experiment would go — `simulate`
 

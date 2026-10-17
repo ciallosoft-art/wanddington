@@ -60,7 +60,7 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVAL_DIR = REPO_ROOT / "workspace" / "evaluation"
-from .tables import TIER_NON_ESSENTIAL, TIERS, core_essential_genes, tier_tables  # noqa: E402
+from .tables import PAIR_SEP, TIER_NON_ESSENTIAL, TIERS, core_essential_genes, tier_tables  # noqa: E402
 from .ingest import DIRECTIONS, HIT_RULE_TYPES, describe_hit_rule, make_hit_rule  # noqa: E402
 USER_DIR = REPO_ROOT / "workspace" / "data" / "user_phenotypes"
 REGISTRY_PATH = USER_DIR / "registry.json"
@@ -207,6 +207,8 @@ def register(
     anchors = [a.strip().upper() for a in (anchors or []) if str(a).strip()]
     if not genes:
         raise SystemExit("empty gene pool")
+    if any(PAIR_SEP in g for g in genes):
+        raise SystemExit("two-gene candidates (GENEA|GENEB) are not supported: register a single-gene library")
     ceg = core_essential_genes()
     n_core_essential = len(set(genes) & ceg)
     if tier == TIER_NON_ESSENTIAL:

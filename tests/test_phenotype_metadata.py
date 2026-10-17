@@ -114,6 +114,13 @@ class MetadataTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.register("IFNG")
 
+    def test_two_gene_screens_are_refused(self):
+        from waddington_select.suggest import suggest
+        with self.assertRaisesRegex(SystemExit, "two-gene"):
+            P.register("Pairs", ["STAT1|JAK1", "IRF1|STAT1"], [], "t", "m")
+        with self.assertRaisesRegex(SystemExit, "single-gene only"):
+            suggest("Horlbeck")
+
     def test_cli_registers_without_anchors(self):
         code = (
             "import sys; from pathlib import Path; import waddington_select.phenotype as P; "

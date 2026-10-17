@@ -145,6 +145,13 @@ tier: they stay in the pool, and the prior is trained on the full-pool tables, t
 those genes. The two-gene (combinatorial) tier is not offered: on it the reported system loses to
 BioDiscoveryAgent (paper, combinatorial tier).
 
+**Driving this from another agent.** `skills/waddington-gene-selection/SKILL.md` is the contract for an
+agent running a real campaign: setup and auth, what to ask the scientist at registration, the stateless
+`suggest` call (every round passes all results so far), reading `ingest`'s output, and the limits to state
+plainly instead of working around — single-gene only, no ground truth outside the scientist's readout, and
+no promised hit rate for a new screen. `skills/gene-selection-agent/` is the benchmark-only free agent and
+loses to the pipeline; it is not the deployment path.
+
 A recommendation reads the cross-experiment memory of the reported run for its tier (the headline run's,
 or the full-pool run's) unless `WADDINGTON_MEMORY_PATH` is set.
 

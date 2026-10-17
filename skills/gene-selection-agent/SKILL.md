@@ -7,6 +7,9 @@
 > record and for `agent_benchmark.py`. **For real gene selection, use the conversational entry**
 > (`node frontend/bin/waddington.js`) or `python -m waddington_select.suggest` — both drive the
 > C-arm pipeline, which is tool-less and stronger. See repo `AGENTS.md`.
+>
+> Another agent driving a real campaign should follow `skills/waddington-gene-selection/SKILL.md`
+> (register → suggest → ingest), not this file.
 
 You are running a **sequential CRISPR perturbation screen** for a target phenotype. Your goal is to
 find as many **hit genes** as possible within a fixed number of rounds, choosing a batch of genes

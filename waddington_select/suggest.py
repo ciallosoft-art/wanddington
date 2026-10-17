@@ -23,7 +23,8 @@ Usage:
 --dataset is one of the nine benchmark phenotypes or a phenotype registered with
 `python -m waddington_select.phenotype register` (which builds its features). A registered phenotype's
 single-gene tier (non_essential by default, or full_pool) decides the training tables and which reported
-run's cross-experiment memory is read (deployment_memory_path).
+run's cross-experiment memory is read (deployment_memory_path). Single-gene only: a two-gene (pair) screen
+is refused (the reported system loses to BioDiscoveryAgent on that tier).
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ import os
 from pathlib import Path
 
 from .oracle import ALL_DATASETS, BATCH_SIZES
+from .tables import is_pair_dataset
 from .arms.waddington_c_arm import WaddingtonCArm, WaddingtonCSkillsArm
 
 
@@ -79,6 +81,10 @@ def suggest(
     Returns (recommended_genes, info) where info reports how feedback was incorporated and which
     supplied gene symbols were not recognised in this phenotype's pool.
     """
+    if is_pair_dataset(dataset):
+        raise SystemExit(f"'{dataset}' is a two-gene (combinatorial) screen; recommendations are single-gene only. "
+                         "On the two-gene tier the reported system loses to BioDiscoveryAgent, so that tier is a "
+                         "benchmark (experiments/), not offered for deployment.")
     if dataset not in ALL_DATASETS:
         raise SystemExit(f"Unknown dataset '{dataset}'. Available: {', '.join(ALL_DATASETS)}")
 
