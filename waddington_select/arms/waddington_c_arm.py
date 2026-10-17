@@ -209,10 +209,10 @@ class WaddingtonCArm(BaseArm):
         self._trace = trace  # optional analysis.trace.TraceRecorder; off by default
 
         # Opt-in mode: the LLM reasons over anonymized structural features instead of gene names.
-        # Off by default (real names). On loss-of-function screens it matches names at equal accuracy
-        # while removing the memorisation dependence; on gain-of-function (CRISPRa) screens it is worse
-        # (see the reason-vs-recall ablation), so this is a deliberate robustness/performance trade the
-        # caller makes, not a default. Env var lets any entry point (CLI, web, subprocess) flip it.
+        # Off by default (real names). In the reported configuration it reaches only the ML engine's own
+        # level, 0.020 below real names (docs/results_tables.tex, reasoning-vs-recall ladder, re-run
+        # 2026-10-16): it removes the dependence on recognising gene names at that cost, a trade the caller
+        # makes, not a default. Env var lets any entry point (CLI, web, subprocess) flip it.
         if reason_from_structure is None:
             reason_from_structure = os.environ.get("WADDINGTON_REASON_FROM_STRUCTURE", "0") == "1"
         self._reason_from_structure = reason_from_structure

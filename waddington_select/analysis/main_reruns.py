@@ -24,6 +24,12 @@ main_reruns.py — main-text analyses re-run on the reported system (docs/tier_e
            the ML prior trained with the anchor features kept and dropped: which reproduces the recorded batch
            (--old-anchor; screens on a weighted route; saved to main_reruns_old_anchor.json and merged)
 
+  crispra  the gain-of-function probe on the reported system (part 己): A2 - A1 on Schmidt et al.'s two CRISPRa
+           screens (experiment 19, CRISPRA=1) against their CRISPRi twins and Steinhart from the ladder, difference
+           of means +- replicate standard error
+  jurkat   random forest vs LightGBM as the ML engine alone on the held-out Jurkat map (part 己, experiment 15,
+           TIER=jurkat_pairs / jurkat_pairs_interaction), at 640 and 160 picks, Welch
+
 Single-gene comparisons: paired over the nine screens, screen-clustered bootstrap (final_system_stats._paired).
 
     python -m waddington_select.analysis.main_reruns [--mechanism] [--old-anchor]
@@ -249,8 +255,45 @@ def old_anchor() -> dict:
     return out
 
 
+def crispra() -> dict:
+    f = HEAD / "crispra_probe_20rep.json"
+    if not f.exists():
+        return {}
+    new = _arms(f)
+    a = _arms(HEAD / "ablations_20rep.json")
+    lad = _arms(HEAD / "ladder_20rep.json")
+    runs = {"A1": {**lad["waddington_c_anon_features"], **new["waddington_c_anon_features"]},
+            "A2": {**a["waddington_c"], **new["waddington_c"]}}
+    screens = ("IL2_crispra", "IFNG_crispra", "IL2", "IFNG", "Steinhart")
+    per = {ds: {"A1": float(_last(runs["A1"][ds]).mean()), "A2": float(_last(runs["A2"][ds]).mean()),
+                "name": _diff_se(runs["A2"][ds], runs["A1"][ds])} for ds in screens}
+    twin = {}
+    for ca, ci in (("IL2_crispra", "IL2"), ("IFNG_crispra", "IFNG")):
+        d = per[ca]["name"]["delta"] - per[ci]["name"]["delta"]
+        twin[ca] = {"delta": d, "se": float(np.hypot(per[ca]["name"]["se"], per[ci]["name"]["se"]))}
+    return {"per_screen": per, "crispra_minus_crispri_twin": twin}
+
+
+def jurkat() -> dict:
+    from scipy import stats
+    out = {}
+    for t in ("jurkat_pairs", "jurkat_pairs_interaction"):
+        for b, picks in ((128, 640), (32, 160)):
+            d = RES / "ml_engines" / f"{t}_b{b}"
+            if not d.exists():
+                continue
+            arms = _arms(d)
+            lg = _hits(arms["ml_engine_lightgbm"]["Horlbeck_Jurkat"])
+            rf = _hits(arms["ml_engine_rf"]["Horlbeck_Jurkat"])
+            p = None if lg.std() > 0 else float(stats.ttest_1samp(rf, lg.mean()).pvalue)
+            out[f"{t}@{picks}"] = {"lightgbm": _summ(lg), "lightgbm_deterministic": bool(lg.std() == 0),
+                                   "rf": _summ(rf), "rf_minus_lightgbm": float(rf.mean() - lg.mean()), "p": p}
+    return out
+
+
 def run() -> dict:
-    res = {"ladder": ladder(), "loso": loso(), "router": router(), "rf_pairs": rf_pairs()}
+    res = {"ladder": ladder(), "loso": loso(), "router": router(), "rf_pairs": rf_pairs(),
+           "crispra": crispra(), "jurkat": jurkat()}
     if MECH.exists():
         res["mechanism"] = json.loads(MECH.read_text())
     if OLD_ANCHOR.exists():
@@ -296,4 +339,12 @@ if __name__ == "__main__":
         print(f"[rf pairs] C+RF {x['c_rf']['mean']:.1f}+-{x['c_rf']['sd']:.1f} vs C {x['c_lightgbm']['mean']:.1f}: "
               f"{_fmt(x['rf_minus_lightgbm'])}; vs RF alone {x['rf_engine_alone']['mean']:.1f}: "
               f"{_fmt(x['c_rf_minus_rf_engine'])}; vs BDA@640 {x['bda_640']['mean']:.1f}: {_fmt(x['c_rf_minus_bda'])}")
+    if r["crispra"]:
+        for ds, v in r["crispra"]["per_screen"].items():
+            print(f"[crispra] {ds:14s} A1 {v['A1']:.4f}  A2 {v['A2']:.4f}  name {v['name']['delta']:+.4f} +- {v['name']['se']:.4f}")
+        for ds, v in r["crispra"]["crispra_minus_crispri_twin"].items():
+            print(f"[crispra] {ds} name value minus its CRISPRi twin's: {v['delta']:+.4f} +- {v['se']:.4f}")
+    for k, v in r["jurkat"].items():
+        print(f"[jurkat] {k:32s} LightGBM {v['lightgbm']['mean']:.1f} (deterministic {v['lightgbm_deterministic']}), "
+              f"RF {v['rf']['mean']:.1f} +- {v['rf']['sd']:.1f}: {v['rf_minus_lightgbm']:+.1f} (p={v['p']})")
     print(f"saved -> {OUT}")

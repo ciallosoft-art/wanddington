@@ -135,8 +135,9 @@ def main() -> None:
                         help="record WHY each gene was chosen (attribution + SHAP) into info.trace")
     parser.add_argument("--reason-from-structure", action="store_true", default=None,
                         help="LLM reasons over anonymized structural features instead of gene names "
-                             "(opt-in; removes memorisation dependence, best for loss-of-function "
-                             "screens and novel genes). Defaults to $WADDINGTON_REASON_FROM_STRUCTURE.")
+                             "(opt-in; removes the dependence on recognising gene names, at a cost: in the "
+                             "reported configuration it is no better than the ML engine alone). Defaults to "
+                             "$WADDINGTON_REASON_FROM_STRUCTURE.")
     parser.add_argument("--json", action="store_true",
                         help="Emit a single JSON object {dataset, genes, info} instead of human text "
                              "(machine contract for the conversational frontend)")
