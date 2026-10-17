@@ -1,0 +1,58 @@
+{
+ "IFNG": {
+  "route": "ml_heavy",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "IL2": {
+  "route": "ml_heavy",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "Sanchez21": {
+  "route": "ml_heavy",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "Sanchez21_down": {
+  "route": "ml_heavy",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "Carnevale22": {
+  "route": "ml_heavy",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "Scharenberg22": {
+  "route": "baseline",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "3/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "Steinhart": {
+  "route": "baseline",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "1/3",
+  "waddington_c|anchors_dropped": "3/3"
+ },
+ "Replogle_K562_essential": {
+  "route": "baseline",
+  "waddington_c_feature_reasoning|anchors_kept": "3/3",
+  "waddington_c|anchors_kept": "0/3",
+  "waddington_c_feature_reasoning|anchors_dropped": "3/3",
+  "waddington_c|anchors_dropped": "3/3"
+ }
+}

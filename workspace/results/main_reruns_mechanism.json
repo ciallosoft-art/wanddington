@@ -1,0 +1,470 @@
+{
+ "A0": {
+  "per_screen": {
+   "IFNG": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 7822,
+    "named_in_ml_top": 142,
+    "swapped": 847,
+    "gained": 160,
+    "lost": 170,
+    "total_hits": 802,
+    "replicates": 20
+   },
+   "IL2": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 7735,
+    "named_in_ml_top": 140,
+    "swapped": 781,
+    "gained": 100,
+    "lost": 146,
+    "total_hits": 481,
+    "replicates": 20
+   },
+   "Sanchez21": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 9038,
+    "named_in_ml_top": 51,
+    "swapped": 800,
+    "gained": 74,
+    "lost": 63,
+    "total_hits": 859,
+    "replicates": 20
+   },
+   "Sanchez21_down": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 9387,
+    "named_in_ml_top": 46,
+    "swapped": 721,
+    "gained": 91,
+    "lost": 96,
+    "total_hits": 871,
+    "replicates": 20
+   },
+   "Carnevale22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 10136,
+    "named_in_ml_top": 52,
+    "swapped": 370,
+    "gained": 32,
+    "lost": 77,
+    "total_hits": 868,
+    "replicates": 20
+   },
+   "Scharenberg22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 2692,
+    "named_in_ml_top": 22,
+    "swapped": 422,
+    "gained": 24,
+    "lost": 40,
+    "total_hits": 49,
+    "replicates": 20
+   },
+   "Steinhart": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12106,
+    "named_in_ml_top": 36,
+    "swapped": 1189,
+    "gained": 14,
+    "lost": 4,
+    "total_hits": 145,
+    "replicates": 20
+   },
+   "Replogle_K562_essential": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 2411,
+    "named_in_ml_top": 181,
+    "swapped": 998,
+    "gained": 100,
+    "lost": 172,
+    "total_hits": 63,
+    "replicates": 20
+   },
+   "Replogle_K562_gwps": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 9182,
+    "named_in_ml_top": 78,
+    "swapped": 1169,
+    "gained": 325,
+    "lost": 568,
+    "total_hits": 924,
+    "replicates": 20
+   }
+  },
+  "total": {
+   "rounds": 900,
+   "verified": 900,
+   "named": 70509,
+   "named_in_ml_top": 748,
+   "swapped": 7297,
+   "gained": 920,
+   "lost": 1336
+  },
+  "named_already_in_ml_top": 0.010608574791870542,
+  "swapped_per_round": 8.107777777777779,
+  "precision_swapped_in": 0.12607921063450733,
+  "precision_displaced": 0.18308894066054543,
+  "net_hit_ratio": -0.010090502403444356
+ },
+ "A0.5": {
+  "per_screen": {
+   "IFNG": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12713,
+    "named_in_ml_top": 2249,
+    "swapped": 9837,
+    "gained": 1242,
+    "lost": 3126,
+    "total_hits": 802,
+    "replicates": 20
+   },
+   "IL2": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12717,
+    "named_in_ml_top": 2427,
+    "swapped": 9802,
+    "gained": 1385,
+    "lost": 3763,
+    "total_hits": 481,
+    "replicates": 20
+   },
+   "Sanchez21": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12729,
+    "named_in_ml_top": 2316,
+    "swapped": 9960,
+    "gained": 1098,
+    "lost": 1212,
+    "total_hits": 859,
+    "replicates": 20
+   },
+   "Sanchez21_down": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12742,
+    "named_in_ml_top": 2340,
+    "swapped": 9836,
+    "gained": 1196,
+    "lost": 1110,
+    "total_hits": 871,
+    "replicates": 20
+   },
+   "Carnevale22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12724,
+    "named_in_ml_top": 2211,
+    "swapped": 10000,
+    "gained": 778,
+    "lost": 1573,
+    "total_hits": 868,
+    "replicates": 20
+   },
+   "Scharenberg22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 3200,
+    "named_in_ml_top": 193,
+    "swapped": 1641,
+    "gained": 227,
+    "lost": 299,
+    "total_hits": 49,
+    "replicates": 20
+   },
+   "Steinhart": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12703,
+    "named_in_ml_top": 1973,
+    "swapped": 9798,
+    "gained": 131,
+    "lost": 203,
+    "total_hits": 145,
+    "replicates": 20
+   },
+   "Replogle_K562_essential": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 3200,
+    "named_in_ml_top": 101,
+    "swapped": 3008,
+    "gained": 290,
+    "lost": 1157,
+    "total_hits": 63,
+    "replicates": 20
+   },
+   "Replogle_K562_gwps": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12732,
+    "named_in_ml_top": 1996,
+    "swapped": 8924,
+    "gained": 3095,
+    "lost": 5458,
+    "total_hits": 924,
+    "replicates": 20
+   }
+  },
+  "total": {
+   "rounds": 900,
+   "verified": 900,
+   "named": 95460,
+   "named_in_ml_top": 15806,
+   "swapped": 72806,
+   "gained": 9442,
+   "lost": 17901
+  },
+  "named_already_in_ml_top": 0.16557720511208884,
+  "swapped_per_round": 80.89555555555556,
+  "precision_swapped_in": 0.12968711369942038,
+  "precision_displaced": 0.24587259291816607,
+  "net_hit_ratio": -0.14737817591366817
+ },
+ "A1": {
+  "per_screen": {
+   "IFNG": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 11983,
+    "named_in_ml_top": 4598,
+    "swapped": 7158,
+    "gained": 1012,
+    "lost": 1515,
+    "total_hits": 802,
+    "replicates": 20
+   },
+   "IL2": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12532,
+    "named_in_ml_top": 5149,
+    "swapped": 7103,
+    "gained": 1062,
+    "lost": 1682,
+    "total_hits": 481,
+    "replicates": 20
+   },
+   "Sanchez21": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12227,
+    "named_in_ml_top": 3625,
+    "swapped": 8412,
+    "gained": 895,
+    "lost": 1057,
+    "total_hits": 859,
+    "replicates": 20
+   },
+   "Sanchez21_down": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12136,
+    "named_in_ml_top": 3687,
+    "swapped": 8226,
+    "gained": 1233,
+    "lost": 704,
+    "total_hits": 871,
+    "replicates": 20
+   },
+   "Carnevale22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12064,
+    "named_in_ml_top": 3937,
+    "swapped": 8015,
+    "gained": 565,
+    "lost": 672,
+    "total_hits": 868,
+    "replicates": 20
+   },
+   "Scharenberg22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 3196,
+    "named_in_ml_top": 1356,
+    "swapped": 1487,
+    "gained": 192,
+    "lost": 266,
+    "total_hits": 49,
+    "replicates": 20
+   },
+   "Steinhart": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12388,
+    "named_in_ml_top": 3563,
+    "swapped": 8505,
+    "gained": 144,
+    "lost": 27,
+    "total_hits": 145,
+    "replicates": 20
+   },
+   "Replogle_K562_essential": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 3197,
+    "named_in_ml_top": 1104,
+    "swapped": 2073,
+    "gained": 313,
+    "lost": 284,
+    "total_hits": 63,
+    "replicates": 20
+   },
+   "Replogle_K562_gwps": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 12000,
+    "named_in_ml_top": 4969,
+    "swapped": 6317,
+    "gained": 2728,
+    "lost": 2446,
+    "total_hits": 924,
+    "replicates": 20
+   }
+  },
+  "total": {
+   "rounds": 900,
+   "verified": 900,
+   "named": 91723,
+   "named_in_ml_top": 31988,
+   "swapped": 57296,
+   "gained": 8144,
+   "lost": 8653
+  },
+  "named_already_in_ml_top": 0.34874567992760813,
+  "swapped_per_round": 63.66222222222222,
+  "precision_swapped_in": 0.14213906729963696,
+  "precision_displaced": 0.1510227590058643,
+  "net_hit_ratio": -0.00865818887218572
+ },
+ "A2": {
+  "per_screen": {
+   "IFNG": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 10871,
+    "named_in_ml_top": 127,
+    "swapped": 1757,
+    "gained": 675,
+    "lost": 348,
+    "total_hits": 802,
+    "replicates": 20
+   },
+   "IL2": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 10365,
+    "named_in_ml_top": 130,
+    "swapped": 2342,
+    "gained": 675,
+    "lost": 693,
+    "total_hits": 481,
+    "replicates": 20
+   },
+   "Sanchez21": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 10264,
+    "named_in_ml_top": 137,
+    "swapped": 2036,
+    "gained": 230,
+    "lost": 204,
+    "total_hits": 859,
+    "replicates": 20
+   },
+   "Sanchez21_down": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 11080,
+    "named_in_ml_top": 149,
+    "swapped": 2076,
+    "gained": 280,
+    "lost": 224,
+    "total_hits": 871,
+    "replicates": 20
+   },
+   "Carnevale22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 11739,
+    "named_in_ml_top": 175,
+    "swapped": 2288,
+    "gained": 217,
+    "lost": 275,
+    "total_hits": 868,
+    "replicates": 20
+   },
+   "Scharenberg22": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 1263,
+    "named_in_ml_top": 87,
+    "swapped": 304,
+    "gained": 52,
+    "lost": 31,
+    "total_hits": 49,
+    "replicates": 20
+   },
+   "Steinhart": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 11895,
+    "named_in_ml_top": 256,
+    "swapped": 3648,
+    "gained": 195,
+    "lost": 28,
+    "total_hits": 145,
+    "replicates": 20
+   },
+   "Replogle_K562_essential": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 622,
+    "named_in_ml_top": 95,
+    "swapped": 506,
+    "gained": 168,
+    "lost": 78,
+    "total_hits": 63,
+    "replicates": 20
+   },
+   "Replogle_K562_gwps": {
+    "rounds": 100,
+    "verified": 100,
+    "named": 4651,
+    "named_in_ml_top": 747,
+    "swapped": 2126,
+    "gained": 1096,
+    "lost": 865,
+    "total_hits": 924,
+    "replicates": 20
+   }
+  },
+  "total": {
+   "rounds": 900,
+   "verified": 900,
+   "named": 72750,
+   "named_in_ml_top": 1903,
+   "swapped": 17083,
+   "gained": 3588,
+   "lost": 2746
+  },
+  "named_already_in_ml_top": 0.02615807560137457,
+  "swapped_per_round": 18.98111111111111,
+  "precision_swapped_in": 0.2100333665047123,
+  "precision_displaced": 0.16074459989463208,
+  "net_hit_ratio": 0.020316205681735817
+ }
+}

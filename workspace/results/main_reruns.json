@@ -1,0 +1,1285 @@
+{
+  "ladder": {
+    "means": {
+      "A0": 0.23527222222222222,
+      "A0.5": 0.1937888888888889,
+      "A1": 0.24082555555555554,
+      "A2": 0.2611016666666667,
+      "GBM": 0.24502222222222222
+    },
+    "per_screen": {
+      "A0": {
+        "IFNG": 0.164025,
+        "IL2": 0.29490500000000003,
+        "Sanchez21": 0.089165,
+        "Sanchez21_down": 0.09527500000000001,
+        "Carnevale22": 0.06516,
+        "Scharenberg22": 0.46226,
+        "Steinhart": 0.069345,
+        "Replogle_K562_essential": 0.5420849999999999,
+        "Replogle_K562_gwps": 0.33523
+      },
+      "A0.5": {
+        "IFNG": 0.12479500000000003,
+        "IL2": 0.25832999999999995,
+        "Sanchez21": 0.08590500000000001,
+        "Sanchez21_down": 0.08939000000000001,
+        "Carnevale22": 0.06445999999999999,
+        "Scharenberg22": 0.47348000000000007,
+        "Steinhart": 0.059340000000000004,
+        "Replogle_K562_essential": 0.28888500000000006,
+        "Replogle_K562_gwps": 0.29951500000000003
+      },
+      "A1": {
+        "IFNG": 0.151185,
+        "IL2": 0.28971,
+        "Sanchez21": 0.08648000000000002,
+        "Sanchez21_down": 0.10201,
+        "Carnevale22": 0.065215,
+        "Scharenberg22": 0.5071399999999999,
+        "Steinhart": 0.074175,
+        "Replogle_K562_essential": 0.544445,
+        "Replogle_K562_gwps": 0.34707000000000005
+      },
+      "A2": {
+        "IFNG": 0.1834,
+        "IL2": 0.33535,
+        "Sanchez21": 0.086835,
+        "Sanchez21_down": 0.092415,
+        "Carnevale22": 0.06585000000000002,
+        "Scharenberg22": 0.51428,
+        "Steinhart": 0.11065500000000002,
+        "Replogle_K562_essential": 0.6142749999999999,
+        "Replogle_K562_gwps": 0.346855
+      },
+      "GBM": {
+        "IFNG": 0.1596,
+        "IL2": 0.3056,
+        "Sanchez21": 0.0838,
+        "Sanchez21_down": 0.0964,
+        "Carnevale22": 0.0622,
+        "Scharenberg22": 0.4694,
+        "Steinhart": 0.0759,
+        "Replogle_K562_essential": 0.619,
+        "Replogle_K562_gwps": 0.3333
+      }
+    },
+    "per_screen_steps": {
+      "pool (A0.5-A0)": {
+        "IFNG": {
+          "delta": -0.03922999999999997,
+          "se": 0.0009356773510474433
+        },
+        "IL2": {
+          "delta": -0.03657500000000008,
+          "se": 0.0014573872620477204
+        },
+        "Sanchez21": {
+          "delta": -0.003259999999999985,
+          "se": 0.000807098441788139
+        },
+        "Sanchez21_down": {
+          "delta": -0.005885000000000001,
+          "se": 0.0006991639744422577
+        },
+        "Carnevale22": {
+          "delta": -0.0007000000000000062,
+          "se": 0.0009055036400287207
+        },
+        "Scharenberg22": {
+          "delta": 0.011220000000000063,
+          "se": 0.005310396952156559
+        },
+        "Steinhart": {
+          "delta": -0.010005,
+          "se": 0.0017961636749941304
+        },
+        "Replogle_K562_essential": {
+          "delta": -0.25319999999999987,
+          "se": 0.010033115038133523
+        },
+        "Replogle_K562_gwps": {
+          "delta": -0.03571499999999994,
+          "se": 0.0011943369664687135
+        }
+      },
+      "features (A1-A0.5)": {
+        "IFNG": {
+          "delta": 0.026389999999999983,
+          "se": 0.0011491587311915114
+        },
+        "IL2": {
+          "delta": 0.031380000000000075,
+          "se": 0.0015765885889944058
+        },
+        "Sanchez21": {
+          "delta": 0.0005750000000000061,
+          "se": 0.0007811285695103357
+        },
+        "Sanchez21_down": {
+          "delta": 0.012619999999999992,
+          "se": 0.0004136996113378064
+        },
+        "Carnevale22": {
+          "delta": 0.0007550000000000057,
+          "se": 0.0006276386405869974
+        },
+        "Scharenberg22": {
+          "delta": 0.03365999999999986,
+          "se": 0.0058967163029854785
+        },
+        "Steinhart": {
+          "delta": 0.014835000000000001,
+          "se": 0.0017538120135713996
+        },
+        "Replogle_K562_essential": {
+          "delta": 0.2555599999999999,
+          "se": 0.01059998944885274
+        },
+        "Replogle_K562_gwps": {
+          "delta": 0.047555000000000014,
+          "se": 0.0016245221969616325
+        }
+      },
+      "name (A2-A1)": {
+        "IFNG": {
+          "delta": 0.032214999999999994,
+          "se": 0.0012859826265504027
+        },
+        "IL2": {
+          "delta": 0.04563999999999996,
+          "se": 0.0018440858525510535
+        },
+        "Sanchez21": {
+          "delta": 0.00035499999999998033,
+          "se": 0.0013157322355971499
+        },
+        "Sanchez21_down": {
+          "delta": -0.009595000000000006,
+          "se": 0.0009262594555238657
+        },
+        "Carnevale22": {
+          "delta": 0.0006350000000000244,
+          "se": 0.0008963896885195691
+        },
+        "Scharenberg22": {
+          "delta": 0.007140000000000035,
+          "se": 0.0058967163029854785
+        },
+        "Steinhart": {
+          "delta": 0.03648000000000001,
+          "se": 0.0025174062466209765
+        },
+        "Replogle_K562_essential": {
+          "delta": 0.06982999999999995,
+          "se": 0.006430938173351823
+        },
+        "Replogle_K562_gwps": {
+          "delta": -0.00021500000000002073,
+          "se": 0.0023899303557349027
+        }
+      }
+    },
+    "A1-GBM": {
+      "delta": -0.004196666666666661,
+      "ci95": [
+        -0.02449272222222223,
+        0.01217649999999999
+      ],
+      "wins": 5,
+      "ties": 0,
+      "losses": 4
+    },
+    "A2-GBM": {
+      "delta": 0.01607944444444444,
+      "ci95": [
+        0.005325875000000001,
+        0.02737563888888888
+      ],
+      "wins": 7,
+      "ties": 0,
+      "losses": 2
+    },
+    "pool (A0.5-A0)": {
+      "delta": -0.04148333333333331,
+      "ci95": [
+        -0.09741102777777773,
+        -0.006205638888888874
+      ],
+      "wins": 1,
+      "ties": 0,
+      "losses": 8
+    },
+    "features (A1-A0.5)": {
+      "delta": 0.04703666666666664,
+      "ci95": [
+        0.013460347222222217,
+        0.10157551388888886
+      ],
+      "wins": 9,
+      "ties": 0,
+      "losses": 0
+    },
+    "name (A2-A1)": {
+      "delta": 0.020276111111111102,
+      "ci95": [
+        0.004591027777777777,
+        0.0374395833333333
+      ],
+      "wins": 7,
+      "ties": 0,
+      "losses": 2
+    },
+    "linear": {
+      "mean": 0.24972222222222223,
+      "per_screen": {
+        "IFNG": 0.1683,
+        "IL2": 0.289,
+        "Sanchez21": 0.0861,
+        "Sanchez21_down": 0.0953,
+        "Carnevale22": 0.0622,
+        "Scharenberg22": 0.551,
+        "Steinhart": 0.0552,
+        "Replogle_K562_essential": 0.619,
+        "Replogle_K562_gwps": 0.3214
+      },
+      "deterministic": true,
+      "A1-linear": {
+        "delta": -0.00889666666666667,
+        "ci95": [
+          -0.02948091666666669,
+          0.008431888888888904
+        ],
+        "wins": 6,
+        "ties": 0,
+        "losses": 3
+      },
+      "linear-GBM": {
+        "delta": 0.0047000000000000115,
+        "ci95": [
+          -0.009600277777777775,
+          0.02584500000000002
+        ],
+        "wins": 3,
+        "ties": 2,
+        "losses": 4
+      }
+    }
+  },
+  "loso": {
+    "screens_rerun": [
+      "IFNG",
+      "IL2",
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps",
+      "Sanchez21",
+      "Sanchez21_down"
+    ],
+    "mean": 0.24212388888888892,
+    "per_screen": {
+      "IFNG": 0.15336500000000003,
+      "IL2": 0.27827,
+      "Sanchez21": 0.07754,
+      "Sanchez21_down": 0.079565,
+      "Carnevale22": 0.06585000000000002,
+      "Scharenberg22": 0.51428,
+      "Steinhart": 0.11065500000000002,
+      "Replogle_K562_essential": 0.5468400000000002,
+      "Replogle_K562_gwps": 0.35275
+    },
+    "matched_loo_siblings_excluded": 0.21138881157789577,
+    "matched_loo": 0.23058903352842808,
+    "full_system": 0.2611016666666667,
+    "vs_matched_loo_siblings_excluded": {
+      "delta": 0.030735077310993158,
+      "ci95": [
+        0.01114688461582806,
+        0.053037879130033806
+      ],
+      "wins": 8,
+      "ties": 0,
+      "losses": 1
+    },
+    "vs_matched_loo": {
+      "delta": 0.011534855360460844,
+      "ci95": [
+        -0.004836311578556912,
+        0.029199971242860393
+      ],
+      "wins": 4,
+      "ties": 0,
+      "losses": 5
+    },
+    "vs_full_system": {
+      "delta": -0.01897777777777774,
+      "ci95": [
+        -0.036527861111111004,
+        -0.0040927777777777785
+      ],
+      "wins": 1,
+      "ties": 3,
+      "losses": 5
+    }
+  },
+  "router": {
+    "candidates": [
+      0.2,
+      0.3,
+      0.4
+    ],
+    "reference_c": 0.26034944444444447,
+    "matched_loo": 0.23058903352842808,
+    "variants": {
+      "global_fixed": {
+        "mean": 0.2581961111111111,
+        "per_screen": {
+          "IFNG": 0.184155,
+          "IL2": 0.336395,
+          "Sanchez21": 0.088235,
+          "Sanchez21_down": 0.09361000000000001,
+          "Carnevale22": 0.06515000000000001,
+          "Scharenberg22": 0.48572,
+          "Steinhart": 0.11548499999999999,
+          "Replogle_K562_essential": 0.60713,
+          "Replogle_K562_gwps": 0.34788500000000006
+        },
+        "config_per_fold": {
+          "IFNG": {
+            "w_llm": 0.2
+          },
+          "IL2": {
+            "w_llm": 0.2
+          },
+          "Sanchez21": {
+            "w_llm": 0.2
+          },
+          "Sanchez21_down": {
+            "w_llm": 0.2
+          },
+          "Carnevale22": {
+            "w_llm": 0.2
+          },
+          "Scharenberg22": {
+            "w_llm": 0.3
+          },
+          "Steinhart": {
+            "w_llm": 0.2
+          },
+          "Replogle_K562_essential": {
+            "w_llm": 0.2
+          },
+          "Replogle_K562_gwps": {
+            "w_llm": 0.2
+          }
+        },
+        "vs_matched_loo": {
+          "delta": 0.027607077582683034,
+          "ci95": [
+            0.012195966365055332,
+            0.042600132013187055
+          ],
+          "wins": 7,
+          "ties": 0,
+          "losses": 2
+        },
+        "vs_reported_c": {
+          "delta": -0.0021533333333333344,
+          "ci95": [
+            -0.006460000000000003,
+            0.0
+          ],
+          "wins": 0,
+          "ties": 8,
+          "losses": 1
+        }
+      },
+      "nested_router": {
+        "mean": 0.2602333333333333,
+        "per_screen": {
+          "IFNG": 0.184155,
+          "IL2": 0.33598,
+          "Sanchez21": 0.088235,
+          "Sanchez21_down": 0.09361000000000001,
+          "Carnevale22": 0.06452,
+          "Scharenberg22": 0.5051,
+          "Steinhart": 0.11548499999999999,
+          "Replogle_K562_essential": 0.60713,
+          "Replogle_K562_gwps": 0.34788500000000006
+        },
+        "config_per_fold": {
+          "IFNG": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "IL2": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.3
+          },
+          "Sanchez21": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "Sanchez21_down": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "Carnevale22": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.3
+          },
+          "Scharenberg22": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "Steinhart": {
+            "T": 826.0,
+            "low": 0.2,
+            "high": 0.3,
+            "w_llm": 0.2
+          },
+          "Replogle_K562_essential": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "Replogle_K562_gwps": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          }
+        },
+        "vs_matched_loo": {
+          "delta": 0.029644299804905256,
+          "ci95": [
+            0.015587953066348557,
+            0.043187412188486776
+          ],
+          "wins": 8,
+          "ties": 0,
+          "losses": 1
+        },
+        "vs_reported_c": {
+          "delta": -0.00011611111111111312,
+          "ci95": [
+            -0.00027833333333333724,
+            0.0
+          ],
+          "wins": 0,
+          "ties": 7,
+          "losses": 2
+        }
+      },
+      "global_fixed_study_out": {
+        "mean": 0.2562888888888889,
+        "per_screen": {
+          "IFNG": 0.184155,
+          "IL2": 0.336395,
+          "Sanchez21": 0.0829,
+          "Sanchez21_down": 0.08177999999999999,
+          "Carnevale22": 0.06515000000000001,
+          "Scharenberg22": 0.48572,
+          "Steinhart": 0.11548499999999999,
+          "Replogle_K562_essential": 0.60713,
+          "Replogle_K562_gwps": 0.34788500000000006
+        },
+        "config_per_fold": {
+          "IFNG": {
+            "w_llm": 0.2
+          },
+          "IL2": {
+            "w_llm": 0.2
+          },
+          "Sanchez21": {
+            "w_llm": 0.3
+          },
+          "Sanchez21_down": {
+            "w_llm": 0.3
+          },
+          "Carnevale22": {
+            "w_llm": 0.2
+          },
+          "Scharenberg22": {
+            "w_llm": 0.3
+          },
+          "Steinhart": {
+            "w_llm": 0.2
+          },
+          "Replogle_K562_essential": {
+            "w_llm": 0.2
+          },
+          "Replogle_K562_gwps": {
+            "w_llm": 0.2
+          }
+        },
+        "vs_matched_loo": {
+          "delta": 0.025699855360460815,
+          "ci95": [
+            0.009380791292514085,
+            0.041710499703833025
+          ],
+          "wins": 7,
+          "ties": 0,
+          "losses": 2
+        },
+        "vs_reported_c": {
+          "delta": -0.004060555555555558,
+          "ci95": [
+            -0.008842777777777786,
+            0.0
+          ],
+          "wins": 0,
+          "ties": 6,
+          "losses": 3
+        }
+      },
+      "nested_router_study_out": {
+        "mean": 0.2583261111111111,
+        "per_screen": {
+          "IFNG": 0.184155,
+          "IL2": 0.33598,
+          "Sanchez21": 0.0829,
+          "Sanchez21_down": 0.08177999999999999,
+          "Carnevale22": 0.06452,
+          "Scharenberg22": 0.5051,
+          "Steinhart": 0.11548499999999999,
+          "Replogle_K562_essential": 0.60713,
+          "Replogle_K562_gwps": 0.34788500000000006
+        },
+        "config_per_fold": {
+          "IFNG": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "IL2": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.3
+          },
+          "Sanchez21": {
+            "T": 13489.0,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.3
+          },
+          "Sanchez21_down": {
+            "T": 13489.0,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.3
+          },
+          "Carnevale22": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.3
+          },
+          "Scharenberg22": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "Steinhart": {
+            "T": 826.0,
+            "low": 0.2,
+            "high": 0.3,
+            "w_llm": 0.2
+          },
+          "Replogle_K562_essential": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          },
+          "Replogle_K562_gwps": {
+            "T": 17975.5,
+            "low": 0.3,
+            "high": 0.2,
+            "w_llm": 0.2
+          }
+        },
+        "vs_matched_loo": {
+          "delta": 0.027737077582683036,
+          "ci95": [
+            0.012269753873777876,
+            0.042354523660346574
+          ],
+          "wins": 8,
+          "ties": 0,
+          "losses": 1
+        },
+        "vs_reported_c": {
+          "delta": -0.002023333333333337,
+          "ci95": [
+            -0.004676111111111121,
+            -7.000000000000216e-05
+          ],
+          "wins": 0,
+          "ties": 5,
+          "losses": 4
+        }
+      }
+    },
+    "older_runs": {
+      "global_fixed": {
+        "mean": 0.24339999999999998,
+        "vs_reported_c": {
+          "delta": -0.016949444444444444,
+          "ci95": [
+            -0.04695631944444445,
+            0.005994999999999994
+          ],
+          "wins": 2,
+          "ties": 0,
+          "losses": 7
+        }
+      },
+      "nested_router": {
+        "mean": 0.25294814814814814,
+        "vs_reported_c": {
+          "delta": -0.007401296296296304,
+          "ci95": [
+            -0.04109604629629628,
+            0.020306509259259246
+          ],
+          "wins": 5,
+          "ties": 0,
+          "losses": 4
+        }
+      },
+      "global_fixed_study_out": {
+        "mean": 0.24404074074074072,
+        "vs_reported_c": {
+          "delta": -0.01630870370370371,
+          "ci95": [
+            -0.0463179074074074,
+            0.006401069444444433
+          ],
+          "wins": 2,
+          "ties": 0,
+          "losses": 7
+        }
+      },
+      "nested_router_study_out": {
+        "mean": 0.24947407407407407,
+        "vs_reported_c": {
+          "delta": -0.01087537037037038,
+          "ci95": [
+            -0.04382241666666666,
+            0.017172662037036983
+          ],
+          "wins": 3,
+          "ties": 0,
+          "losses": 6
+        }
+      },
+      "legacy_routed_c": {
+        "mean": 0.2528727777777778,
+        "vs_reported_c": {
+          "delta": -0.007476666666666667,
+          "ci95": [
+            -0.030335638888888898,
+            0.007450486111111116
+          ],
+          "wins": 5,
+          "ties": 0,
+          "losses": 4
+        }
+      }
+    }
+  },
+  "rf_pairs": {
+    "c_rf": {
+      "n": 20,
+      "mean": 157.5,
+      "sd": 25.541503891756875
+    },
+    "c_lightgbm": {
+      "n": 20,
+      "mean": 105.0,
+      "sd": 13.341664064126334
+    },
+    "rf_engine_alone": {
+      "n": 5,
+      "mean": 117.8,
+      "sd": 15.498387012847498
+    },
+    "bda_640": {
+      "n": 20,
+      "mean": 160.0,
+      "sd": 15.748015748023622
+    },
+    "rf_minus_lightgbm": {
+      "delta": 52.5,
+      "p": 6.0481538883392225e-09,
+      "ci95": [
+        39.870781246815405,
+        65.12921875318459
+      ],
+      "test": "welch"
+    },
+    "c_rf_minus_rf_engine": {
+      "delta": 39.7,
+      "p": 0.0012101682325267916,
+      "ci95": [
+        22.097233447102997,
+        57.30276655289701
+      ],
+      "test": "welch"
+    },
+    "c_rf_minus_bda": {
+      "delta": -2.5,
+      "p": 0.7119306811258088,
+      "ci95": [
+        -15.650770559772894,
+        10.650770559772894
+      ],
+      "test": "welch"
+    }
+  },
+  "mechanism": {
+    "A0": {
+      "per_screen": {
+        "IFNG": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 7822,
+          "named_in_ml_top": 142,
+          "swapped": 847,
+          "gained": 160,
+          "lost": 170,
+          "total_hits": 802,
+          "replicates": 20
+        },
+        "IL2": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 7735,
+          "named_in_ml_top": 140,
+          "swapped": 781,
+          "gained": 100,
+          "lost": 146,
+          "total_hits": 481,
+          "replicates": 20
+        },
+        "Sanchez21": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 9038,
+          "named_in_ml_top": 51,
+          "swapped": 800,
+          "gained": 74,
+          "lost": 63,
+          "total_hits": 859,
+          "replicates": 20
+        },
+        "Sanchez21_down": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 9387,
+          "named_in_ml_top": 46,
+          "swapped": 721,
+          "gained": 91,
+          "lost": 96,
+          "total_hits": 871,
+          "replicates": 20
+        },
+        "Carnevale22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 10136,
+          "named_in_ml_top": 52,
+          "swapped": 370,
+          "gained": 32,
+          "lost": 77,
+          "total_hits": 868,
+          "replicates": 20
+        },
+        "Scharenberg22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 2692,
+          "named_in_ml_top": 22,
+          "swapped": 422,
+          "gained": 24,
+          "lost": 40,
+          "total_hits": 49,
+          "replicates": 20
+        },
+        "Steinhart": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12106,
+          "named_in_ml_top": 36,
+          "swapped": 1189,
+          "gained": 14,
+          "lost": 4,
+          "total_hits": 145,
+          "replicates": 20
+        },
+        "Replogle_K562_essential": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 2411,
+          "named_in_ml_top": 181,
+          "swapped": 998,
+          "gained": 100,
+          "lost": 172,
+          "total_hits": 63,
+          "replicates": 20
+        },
+        "Replogle_K562_gwps": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 9182,
+          "named_in_ml_top": 78,
+          "swapped": 1169,
+          "gained": 325,
+          "lost": 568,
+          "total_hits": 924,
+          "replicates": 20
+        }
+      },
+      "total": {
+        "rounds": 900,
+        "verified": 900,
+        "named": 70509,
+        "named_in_ml_top": 748,
+        "swapped": 7297,
+        "gained": 920,
+        "lost": 1336
+      },
+      "named_already_in_ml_top": 0.010608574791870542,
+      "swapped_per_round": 8.107777777777779,
+      "precision_swapped_in": 0.12607921063450733,
+      "precision_displaced": 0.18308894066054543,
+      "net_hit_ratio": -0.010090502403444356
+    },
+    "A0.5": {
+      "per_screen": {
+        "IFNG": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12713,
+          "named_in_ml_top": 2249,
+          "swapped": 9837,
+          "gained": 1242,
+          "lost": 3126,
+          "total_hits": 802,
+          "replicates": 20
+        },
+        "IL2": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12717,
+          "named_in_ml_top": 2427,
+          "swapped": 9802,
+          "gained": 1385,
+          "lost": 3763,
+          "total_hits": 481,
+          "replicates": 20
+        },
+        "Sanchez21": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12729,
+          "named_in_ml_top": 2316,
+          "swapped": 9960,
+          "gained": 1098,
+          "lost": 1212,
+          "total_hits": 859,
+          "replicates": 20
+        },
+        "Sanchez21_down": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12742,
+          "named_in_ml_top": 2340,
+          "swapped": 9836,
+          "gained": 1196,
+          "lost": 1110,
+          "total_hits": 871,
+          "replicates": 20
+        },
+        "Carnevale22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12724,
+          "named_in_ml_top": 2211,
+          "swapped": 10000,
+          "gained": 778,
+          "lost": 1573,
+          "total_hits": 868,
+          "replicates": 20
+        },
+        "Scharenberg22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 3200,
+          "named_in_ml_top": 193,
+          "swapped": 1641,
+          "gained": 227,
+          "lost": 299,
+          "total_hits": 49,
+          "replicates": 20
+        },
+        "Steinhart": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12703,
+          "named_in_ml_top": 1973,
+          "swapped": 9798,
+          "gained": 131,
+          "lost": 203,
+          "total_hits": 145,
+          "replicates": 20
+        },
+        "Replogle_K562_essential": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 3200,
+          "named_in_ml_top": 101,
+          "swapped": 3008,
+          "gained": 290,
+          "lost": 1157,
+          "total_hits": 63,
+          "replicates": 20
+        },
+        "Replogle_K562_gwps": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12732,
+          "named_in_ml_top": 1996,
+          "swapped": 8924,
+          "gained": 3095,
+          "lost": 5458,
+          "total_hits": 924,
+          "replicates": 20
+        }
+      },
+      "total": {
+        "rounds": 900,
+        "verified": 900,
+        "named": 95460,
+        "named_in_ml_top": 15806,
+        "swapped": 72806,
+        "gained": 9442,
+        "lost": 17901
+      },
+      "named_already_in_ml_top": 0.16557720511208884,
+      "swapped_per_round": 80.89555555555556,
+      "precision_swapped_in": 0.12968711369942038,
+      "precision_displaced": 0.24587259291816607,
+      "net_hit_ratio": -0.14737817591366817
+    },
+    "A1": {
+      "per_screen": {
+        "IFNG": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 11983,
+          "named_in_ml_top": 4598,
+          "swapped": 7158,
+          "gained": 1012,
+          "lost": 1515,
+          "total_hits": 802,
+          "replicates": 20
+        },
+        "IL2": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12532,
+          "named_in_ml_top": 5149,
+          "swapped": 7103,
+          "gained": 1062,
+          "lost": 1682,
+          "total_hits": 481,
+          "replicates": 20
+        },
+        "Sanchez21": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12227,
+          "named_in_ml_top": 3625,
+          "swapped": 8412,
+          "gained": 895,
+          "lost": 1057,
+          "total_hits": 859,
+          "replicates": 20
+        },
+        "Sanchez21_down": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12136,
+          "named_in_ml_top": 3687,
+          "swapped": 8226,
+          "gained": 1233,
+          "lost": 704,
+          "total_hits": 871,
+          "replicates": 20
+        },
+        "Carnevale22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12064,
+          "named_in_ml_top": 3937,
+          "swapped": 8015,
+          "gained": 565,
+          "lost": 672,
+          "total_hits": 868,
+          "replicates": 20
+        },
+        "Scharenberg22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 3196,
+          "named_in_ml_top": 1356,
+          "swapped": 1487,
+          "gained": 192,
+          "lost": 266,
+          "total_hits": 49,
+          "replicates": 20
+        },
+        "Steinhart": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12388,
+          "named_in_ml_top": 3563,
+          "swapped": 8505,
+          "gained": 144,
+          "lost": 27,
+          "total_hits": 145,
+          "replicates": 20
+        },
+        "Replogle_K562_essential": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 3197,
+          "named_in_ml_top": 1104,
+          "swapped": 2073,
+          "gained": 313,
+          "lost": 284,
+          "total_hits": 63,
+          "replicates": 20
+        },
+        "Replogle_K562_gwps": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 12000,
+          "named_in_ml_top": 4969,
+          "swapped": 6317,
+          "gained": 2728,
+          "lost": 2446,
+          "total_hits": 924,
+          "replicates": 20
+        }
+      },
+      "total": {
+        "rounds": 900,
+        "verified": 900,
+        "named": 91723,
+        "named_in_ml_top": 31988,
+        "swapped": 57296,
+        "gained": 8144,
+        "lost": 8653
+      },
+      "named_already_in_ml_top": 0.34874567992760813,
+      "swapped_per_round": 63.66222222222222,
+      "precision_swapped_in": 0.14213906729963696,
+      "precision_displaced": 0.1510227590058643,
+      "net_hit_ratio": -0.00865818887218572
+    },
+    "A2": {
+      "per_screen": {
+        "IFNG": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 10871,
+          "named_in_ml_top": 127,
+          "swapped": 1757,
+          "gained": 675,
+          "lost": 348,
+          "total_hits": 802,
+          "replicates": 20
+        },
+        "IL2": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 10365,
+          "named_in_ml_top": 130,
+          "swapped": 2342,
+          "gained": 675,
+          "lost": 693,
+          "total_hits": 481,
+          "replicates": 20
+        },
+        "Sanchez21": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 10264,
+          "named_in_ml_top": 137,
+          "swapped": 2036,
+          "gained": 230,
+          "lost": 204,
+          "total_hits": 859,
+          "replicates": 20
+        },
+        "Sanchez21_down": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 11080,
+          "named_in_ml_top": 149,
+          "swapped": 2076,
+          "gained": 280,
+          "lost": 224,
+          "total_hits": 871,
+          "replicates": 20
+        },
+        "Carnevale22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 11739,
+          "named_in_ml_top": 175,
+          "swapped": 2288,
+          "gained": 217,
+          "lost": 275,
+          "total_hits": 868,
+          "replicates": 20
+        },
+        "Scharenberg22": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 1263,
+          "named_in_ml_top": 87,
+          "swapped": 304,
+          "gained": 52,
+          "lost": 31,
+          "total_hits": 49,
+          "replicates": 20
+        },
+        "Steinhart": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 11895,
+          "named_in_ml_top": 256,
+          "swapped": 3648,
+          "gained": 195,
+          "lost": 28,
+          "total_hits": 145,
+          "replicates": 20
+        },
+        "Replogle_K562_essential": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 622,
+          "named_in_ml_top": 95,
+          "swapped": 506,
+          "gained": 168,
+          "lost": 78,
+          "total_hits": 63,
+          "replicates": 20
+        },
+        "Replogle_K562_gwps": {
+          "rounds": 100,
+          "verified": 100,
+          "named": 4651,
+          "named_in_ml_top": 747,
+          "swapped": 2126,
+          "gained": 1096,
+          "lost": 865,
+          "total_hits": 924,
+          "replicates": 20
+        }
+      },
+      "total": {
+        "rounds": 900,
+        "verified": 900,
+        "named": 72750,
+        "named_in_ml_top": 1903,
+        "swapped": 17083,
+        "gained": 3588,
+        "lost": 2746
+      },
+      "named_already_in_ml_top": 0.02615807560137457,
+      "swapped_per_round": 18.98111111111111,
+      "precision_swapped_in": 0.2100333665047123,
+      "precision_displaced": 0.16074459989463208,
+      "net_hit_ratio": 0.020316205681735817
+    }
+  },
+  "old_anchor": {
+    "IFNG": {
+      "route": "ml_heavy",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "IL2": {
+      "route": "ml_heavy",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "Sanchez21": {
+      "route": "ml_heavy",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "Sanchez21_down": {
+      "route": "ml_heavy",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "Carnevale22": {
+      "route": "ml_heavy",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "0/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "Scharenberg22": {
+      "route": "baseline",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "3/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "Steinhart": {
+      "route": "baseline",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "1/3",
+      "waddington_c|anchors_dropped": "3/3"
+    },
+    "Replogle_K562_essential": {
+      "route": "baseline",
+      "waddington_c_feature_reasoning|anchors_kept": "3/3",
+      "waddington_c|anchors_kept": "0/3",
+      "waddington_c_feature_reasoning|anchors_dropped": "3/3",
+      "waddington_c|anchors_dropped": "3/3"
+    }
+  }
+}
