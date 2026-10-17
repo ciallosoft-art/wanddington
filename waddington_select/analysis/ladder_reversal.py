@@ -9,7 +9,9 @@ replicates) A2 leads by 0.020 (A1 0.241, A2 0.261). Between the two runs:
                        on K562-GWPS; 0.2 elsewhere)  ->  0.2 everywhere
       anchor features  kept, in the ML branch and in the LLM's feature view (main_reruns --old-anchor)  ->  dropped
       memory / prompts the first GPT run's memory, uncorrected Replogle task prompts  ->  the reported ones
-  A2  memory / prompts only (same fixed weight, anchors dropped in both)
+  A2  memory / prompts only (same fixed weight, anchors dropped in both); and the session: the same A2
+      configuration scored 0.2595 over 20 replicates in the first GPT run three days before the 3-replicate
+      ladder run (0.2544), and 0.2609 today (sessions())
   both                 3 replicates  ->  20
 
 What can be separated without calling the LLM:
@@ -262,11 +264,29 @@ def gpt_cells(replay_res: dict | None = None) -> dict:
     return out
 
 
+def sessions() -> dict:
+    """The real-name arm in the same configuration (final config, the first GPT run's memory, the uncorrected
+    task prompts) run in three separate sessions: the first GPT run (2026-08-23, 20 replicates), the earlier
+    ladder (2026-08-26, 3) and D0 (2026-10-17, 10). Differences between sessions are variation the
+    within-run replicate error does not capture."""
+    ps = lambda f, arm: {s: float(np.mean([r["hit_ratio_per_round"][-1] for r in json.loads(Path(f).read_text())[s][arm]]))
+                         for s in BENCH}
+    aug23 = ps(REPO / "workspace/results/gpt/gpt_5_6_luna_none_20rep/waddington_c_20rep.json", "waddington_c")
+    aug26 = ps(GPT_ROUTER / "reasoning_noanchor.json", "waddington_c")
+    d0 = ps(HEAD / "reversal_d0_10rep.json", "waddington_c")
+    m = lambda x: float(np.mean(list(x.values())))
+    return {"means": {"aug23_20rep": m(aug23), "aug26_3rep": m(aug26), "d0_oct17_10rep": m(d0)},
+            "aug26_minus_aug23": _paired(aug26, aug23), "d0_minus_aug23": _paired(d0, aug23),
+            "d0_minus_aug26": _paired(d0, aug26)}
+
+
 def run(with_replay: bool = True) -> dict:
     prev = json.loads(OUT.read_text()) if OUT.exists() else {}
     rep = replay() if with_replay or "replay" not in prev else prev["replay"]
     res = {"noise": noise(), "llm_side": llm_side(), "replay": rep}
     res["gpt_cells"] = gpt_cells(rep)
+    if res["gpt_cells"]:
+        res["sessions"] = sessions()
     OUT.write_text(json.dumps(res, indent=1))
     return res
 
@@ -297,4 +317,7 @@ if __name__ == "__main__":
               f"memory/prompts {fmt(a['memory_prompts']) if a['memory_prompts'] else 'pending (D2 ' + str(len(a['d2_screens_done'])) + '/9)'}; "
               f"weights (replay) {a['weights_replay']:+.4f}; remainder {a['remainder']}")
         print(f"[gpt] A2: memory/prompts {fmt(g['a2']['memory_prompts'])}")
+        ss = r["sessions"]
+        print(f"[sessions] real-name arm, same configuration: {ss['means']}; Aug26 - Aug23 {fmt(ss['aug26_minus_aug23'])}; "
+              f"Oct17 - Aug23 {fmt(ss['d0_minus_aug23'])}")
     print(f"saved -> {OUT}")
