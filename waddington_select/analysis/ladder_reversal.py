@@ -224,14 +224,56 @@ def llm_side() -> dict:
     return out
 
 
-def run() -> dict:
-    res = {"noise": noise(), "llm_side": llm_side(), "replay": replay()}
+def _cell(name: str, arm: str) -> dict[str, float]:
+    return {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in runs]))
+            for ds, runs in _arms(HEAD / f"{name}_10rep.json")[arm].items()}
+
+
+def gpt_cells(replay_res: dict | None = None) -> dict:
+    """Part 戊 (docs/tier_extension_plan.md): the GPT cells D0-D2 against the four runs, paired over screens."""
+    if not (HEAD / "reversal_d1_10rep.json").exists():
+        return {}
+    ps = lambda run: {ds: float(np.mean([r["hit_ratio_per_round"][-1] for r in rs])) for ds, rs in _load(run).items()}
+    a1_old, a2_old, a1_new, a2_new = ps("A1_old"), ps("A2_old"), ps("A1_new"), ps("A2_new")
+    d0_a1, d0_a2 = _cell("reversal_d0", "waddington_c_feature_reasoning"), _cell("reversal_d0", "waddington_c")
+    d1 = _cell("reversal_d1", "waddington_c_anon_features")
+    d2 = _cell("reversal_d2", "waddington_c_anon_features") if (HEAD / "reversal_d2_10rep.json").exists() else {}
+    d2_done = set(BENCH) <= set(d2)
+    m = lambda x: float(np.mean([x[s] for s in BENCH]))
+    weights = None
+    if replay_res:
+        # A1 at the legacy weights minus A1 at 0.2: minus the old A1's fixed-weight replay effect
+        weights = -replay_res["A1_old"]["effects_vs_own"]["fixed_weights"]["mean"]
+    a1_total = _paired(d0_a1, a1_new)
+    anchors = _paired(d1, a1_new)
+    memory = _paired(d2, a1_new) if d2_done else None
+    out = {
+        "means": {"d0_old_a1": m(d0_a1), "d0_a2": m(d0_a2), "d1_a1_anchors": m(d1), "d2_a1_old_memory": m(d2) if d2_done else None,
+                  "a1_old_aug": m(a1_old), "a2_old_aug": m(a2_old), "a1_new": m(a1_new), "a2_new": m(a2_new)},
+        "per_screen": {"d0_old_a1": d0_a1, "d0_a2": d0_a2, "d1": d1, "d2": d2},
+        "drift": {"old_a1_now_minus_aug": _paired(d0_a1, a1_old), "a2_old_memory_now_minus_aug": _paired(d0_a2, a2_old)},
+        "name_value": {"aug": m(a2_old) - m(a1_old), "d0_now": _paired(d0_a2, d0_a1), "new": _paired(a2_new, a1_new)},
+        "a1": {"total_old_condition_minus_new": a1_total, "anchors": anchors, "memory_prompts": memory,
+               "weights_replay": weights,
+               "remainder": (a1_total["delta"] - anchors["delta"] - memory["delta"] - (weights or 0.0)) if memory else None,
+               "d2_screens_done": sorted(d2)},
+        "a2": {"memory_prompts": _paired(d0_a2, a2_new)},
+    }
+    return out
+
+
+def run(with_replay: bool = True) -> dict:
+    prev = json.loads(OUT.read_text()) if OUT.exists() else {}
+    rep = replay() if with_replay or "replay" not in prev else prev["replay"]
+    res = {"noise": noise(), "llm_side": llm_side(), "replay": rep}
+    res["gpt_cells"] = gpt_cells(rep)
     OUT.write_text(json.dumps(res, indent=1))
     return res
 
 
 if __name__ == "__main__":
-    r = run()
+    import sys
+    r = run(with_replay="--no-replay" not in sys.argv)
     n = r["noise"]
     print(f"[noise] name value old {n['name_value_old']:+.4f} -> new {n['name_value_new']:+.4f} "
           f"(change {n['change_in_name_value']:+.4f}, s.e. {n['se_change_in_name_value']:.4f}); "
@@ -242,4 +284,17 @@ if __name__ == "__main__":
     for run_, v in r["replay"].items():
         print(f"[replay] {run_}: verified {v['verified']}; named in ML top {v['named_in_ml_top']:.2f}; "
               + "; ".join(f"{k} {e['mean']:+.4f} (round 1 {e['round1_mean']:+.4f})" for k, e in v["effects_vs_own"].items()))
+    g = r["gpt_cells"]
+    if g:
+        fmt = lambda v: f"{v['delta']:+.4f} [{v['ci95'][0]:+.4f}, {v['ci95'][1]:+.4f}] {v['wins']}/{v['ties']}/{v['losses']}"
+        print("[gpt] means:", {k: (round(v, 4) if v is not None else None) for k, v in g["means"].items()})
+        print(f"[gpt] drift: old A1 now - Aug {fmt(g['drift']['old_a1_now_minus_aug'])}; "
+              f"A2 (old memory) now - Aug {fmt(g['drift']['a2_old_memory_now_minus_aug'])}")
+        print(f"[gpt] name value: Aug {g['name_value']['aug']:+.4f}; D0 now {fmt(g['name_value']['d0_now'])}; "
+              f"reported {fmt(g['name_value']['new'])}")
+        a = g["a1"]
+        print(f"[gpt] A1: old condition - new {fmt(a['total_old_condition_minus_new'])}; anchors {fmt(a['anchors'])}; "
+              f"memory/prompts {fmt(a['memory_prompts']) if a['memory_prompts'] else 'pending (D2 ' + str(len(a['d2_screens_done'])) + '/9)'}; "
+              f"weights (replay) {a['weights_replay']:+.4f}; remainder {a['remainder']}")
+        print(f"[gpt] A2: memory/prompts {fmt(g['a2']['memory_prompts'])}")
     print(f"saved -> {OUT}")
