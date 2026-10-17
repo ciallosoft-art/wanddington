@@ -6,6 +6,14 @@ import { stdin, stdout } from "node:process";
 import { DEFAULT_CHAT_MODEL } from "./intent.mjs";
 import { respond, getDatasets } from "./converse.mjs";
 
+const pct = (x) => `${(100 * (x || 0)).toFixed(1)}%`;
+/** "12/802 hits (1.5%)" when the screen-wide hit count is known, else hits per tested gene. */
+export function progressText(r) {
+  if (r.total != null && r.ratio != null) return `${r.cumulative}/${r.total} hits (${pct(r.ratio)})`;
+  return `${r.cumulative} hits in ${r.testedSoFar ?? "?"} tested genes (${pct(r.hitRate)} of tested; screen-wide total unknown)`;
+}
+const roundText = (h) => (h.ratio != null ? pct(h.ratio) : `${pct(h.hitRate)} of ${h.testedSoFar} tested`);
+
 const banner = (datasets) => `Waddington — conversational gene selection (tool-less, C-arm pipeline).
 Tell me a phenotype and I'll recommend genes to perturb; report results and I'll adapt.
 Supported phenotypes: ${datasets.join(", ")}.
@@ -30,6 +38,7 @@ function render(result) {
         console.log(`  tier:      ${result.tier === "full_pool" ? "full pool (core-essential genes kept)"
           : `non-essential (${result.n_core_essential_removed} core-essential genes removed)`}`);
       }
+      if (result.hit_rule_text) console.log(`  hit rule:  ${result.hit_rule_text}`);
       console.log(`  anchors:   ${result.anchors.join(", ")}`);
       console.log(`\nIt's now rankable. Say e.g. "run a real experiment on ${result.name} with my own results".\n`);
       return;
@@ -53,7 +62,9 @@ function render(result) {
     }
     if (result.stage === "revealed") {
       console.log(`\n[Round ${result.round} results] ${result.roundHits.length} hits: ${result.roundHits.join(", ") || "(none)"}`);
-      console.log(`  cumulative ${result.cumulative}/${result.total} hits (${(result.ratio * 100).toFixed(1)}%)`);
+      console.log(`  cumulative ${progressText(result)}`);
+      if (result.hitRule) console.log(`  hits called by: ${result.hitRule}`);
+      if (result.overridesIgnored?.length) console.log(`  note: the registered hit rule applies (ignored: ${result.overridesIgnored.join(", ")})`);
       console.log(`\n[Round ${result.nextRound}] proposed batch (${result.next.length} genes):`);
       console.log("  " + result.next.join(", "));
       console.log("\n→ `commit` to continue, or `stop` to end.\n");
@@ -62,9 +73,9 @@ function render(result) {
     if (result.stage === "done") {
       console.log(`\n[Experiment complete · ${result.dataset}]`);
       if (result.roundHits?.length) console.log(`  final-round hits: ${result.roundHits.join(", ")}`);
-      console.log(`  cumulative ${result.cumulative}/${result.total} hits (${(result.ratio * 100).toFixed(1)}%) over ${result.history.length} rounds`);
+      console.log(`  cumulative ${progressText(result)} over ${result.history.length} rounds`);
       for (const h of result.history) {
-        console.log(`    round ${h.round}: +${h.hits.length} → ${h.cumulative} (${(h.ratio * 100).toFixed(1)}%)`);
+        console.log(`    round ${h.round}: +${h.hits.length} → ${h.cumulative} (${roundText(h)})`);
       }
       if (result.tracePath) console.log(`  trace saved: ${result.tracePath}`);
       console.log();

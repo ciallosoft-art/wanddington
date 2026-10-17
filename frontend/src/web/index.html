@@ -372,7 +372,8 @@
           b.appendChild(chips(r.proposed));
           b.appendChild(el("meta", esc(r.text)));
         } else if (r.stage === "done") {
-          b.appendChild(el(null, `<b>Phenotype registered · ${esc(r.name)}</b> — pool ${r.n_genes} genes (${r.n_genes_with_known_features} with known features)${tierNote(r.tier, r.n_core_essential_removed)}`));
+          b.appendChild(el(null, `<b>Phenotype registered · ${esc(r.name)}</b> — pool ${r.n_genes} genes (${r.n_genes_with_known_features} with known features)${tierNote(r.tier, r.n_core_essential_removed)}`
+            + (r.hit_rule_text ? ` · hit rule: ${esc(r.hit_rule_text)}` : "")));
           b.appendChild(chips(r.anchors));
           b.appendChild(el("meta", `now rankable — try “run a real experiment on ${esc(r.name)} with my own results”`));
         } else {
@@ -400,14 +401,15 @@
             : "type “commit” to test this batch (reveal phenotype), or “stop” to end"));
         } else if (r.stage === "revealed") {
           b.appendChild(el(null, `<b>Round ${r.round} results:</b> ${r.roundHits.length} hits — <span translate="no">${esc(r.roundHits.join(", ") || "(none)")}</span>`));
-          b.appendChild(el("meta", `cumulative ${r.cumulative}/${r.total} (${(r.ratio * 100).toFixed(1)}%)`));
+          b.appendChild(el("meta", `cumulative ${progressText(r)}${r.hitRule ? ` · hits called by ${esc(r.hitRule)}` : ""}`
+            + (r.overridesIgnored?.length ? ` · the registered hit rule applies (ignored: ${esc(r.overridesIgnored.join(", "))})` : "")));
           b.appendChild(el(null, `<b>Round ${r.nextRound}</b> proposed batch (${r.next.length}):`));
           b.appendChild(chips(r.next));
           b.appendChild(el("meta", "“commit” to continue, or “stop” to end"));
         } else if (r.stage === "done") {
-          b.appendChild(el(null, `<b>Experiment complete · ${esc(r.dataset)}</b> — cumulative ${r.cumulative}/${r.total} (${(r.ratio * 100).toFixed(1)}%) over ${r.history.length} rounds`));
+          b.appendChild(el(null, `<b>Experiment complete · ${esc(r.dataset)}</b> — cumulative ${progressText(r)} over ${r.history.length} rounds`));
           const pre = document.createElement("pre");
-          pre.textContent = r.history.map(h => `round ${h.round}: +${h.hits.length} → ${h.cumulative} (${(h.ratio * 100).toFixed(1)}%)`).join("\n");
+          pre.textContent = r.history.map(h => `round ${h.round}: +${h.hits.length} → ${h.cumulative} (${h.ratio != null ? pct(h.ratio) : `${pct(h.hitRate)} of ${h.testedSoFar} tested`})`).join("\n");
           b.appendChild(pre);
           if (r.tracePath) b.appendChild(el("meta", "trace saved: " + esc(r.tracePath)));
         }
@@ -636,6 +638,13 @@
 
     // Real production path: register a brand-new screen from the scientist's uploaded readout, then run
     // it — streamed over POST (the file body won't fit in a GET) and read from the fetch response stream.
+    const pct = (x) => `${(100 * (x || 0)).toFixed(1)}%`;
+    // "12/802 (1.5%)" when the screen-wide hit count is known, else hits per tested gene
+    function progressText(r) {
+      if (r.total != null && r.ratio != null) return `${r.cumulative}/${r.total} (${pct(r.ratio)})`;
+      return `${r.cumulative} hits in ${r.testedSoFar ?? "?"} tested genes (${pct(r.hitRate)} of tested; screen-wide total unknown)`;
+    }
+
     // "· tier: non-essential (n core-essential genes removed)" for a registered phenotype, else ""
     function tierNote(tier, removed) {
       if (tier === "full_pool") return " · tier: full pool (core-essential genes kept)";

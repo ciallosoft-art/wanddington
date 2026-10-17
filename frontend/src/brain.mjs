@@ -48,7 +48,7 @@ export async function getDatasets() {
  * Onboard a new phenotype: build its ML features from the scientist's screen/library file.
  * Accepts a `genesFile` path (CLI) or raw `genesContent` (+ `genesName` for the extension hint, Web upload).
  */
-export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate, tier }) {
+export async function registerPhenotype({ name, genesFile, genesContent, genesName, anchors, task, measurement, batchSize, expectedHitRate, tier, hitRule }) {
   let poolFile = genesFile;
   if (!poolFile) {
     if (genesContent == null) throw new Error("registerPhenotype: need a gene-pool file path or content");
@@ -68,6 +68,7 @@ export async function registerPhenotype({ name, genesFile, genesContent, genesNa
     if (!["non_essential", "full_pool"].includes(tier)) throw new Error(`registerPhenotype: unknown tier ${tier}`);
     args.push("--tier", tier);
   }
+  if (hitRule) args.push(...hitRuleArgs(hitRule));
   const { stdout } = await run(args, { timeoutMs: 900_000 });
   const s = stdout.indexOf("{");
   const e = stdout.lastIndexOf("}");
@@ -134,7 +135,20 @@ export async function revealBatch({ dataset, genes }) {
  * readout (MAGeCK gene_summary / Gene,Score CSV / labelled table). Pass either a file `path` or raw
  * `content` (+ `name` for the extension hint). Returns { hits, misses, totalHits }.
  */
-export async function ingestResults({ genes, path, content, name, scoreCol, topRatio }) {
+/** CLI arguments for a hit rule {type, threshold, maxFdr, fraction, direction, scoreCol, fdrCol} (ingest.py). */
+export function hitRuleArgs(rule) {
+  if (!["label", "threshold", "fdr", "top_fraction"].includes(rule?.type)) throw new Error(`unknown hit rule ${rule?.type}`);
+  const a = ["--hit-rule", rule.type];
+  if (rule.threshold != null) a.push("--threshold", String(rule.threshold));
+  if (rule.maxFdr != null) a.push("--max-fdr", String(rule.maxFdr));
+  if (rule.fraction != null) a.push("--top-fraction", String(rule.fraction));
+  if (rule.direction) a.push("--direction", rule.direction);
+  if (rule.scoreCol) a.push("--score-col", rule.scoreCol);
+  if (rule.fdrCol) a.push("--fdr-col", rule.fdrCol);
+  return a;
+}
+
+export async function ingestResults({ genes, path, content, name, scoreCol, topRatio, dataset }) {
   if (!genes?.length) throw new Error("ingestResults: empty batch");
   let filePath = path;
   if (!filePath) {
@@ -145,6 +159,8 @@ export async function ingestResults({ genes, path, content, name, scoreCol, topR
     writeFileSync(filePath, content);
   }
   const args = ["-m", "waddington_select.ingest", "--file", filePath, "--genes", ...genes, "--json"];
+  // the phenotype's registered hit rule, candidate pool and tier (ingest refuses a top-x% call on one batch)
+  if (dataset) args.push("--dataset", dataset);
   if (scoreCol) args.push("--score-col", scoreCol);
   if (topRatio != null) args.push("--top-ratio", String(topRatio));
   const { stdout } = await run(args);
@@ -152,7 +168,10 @@ export async function ingestResults({ genes, path, content, name, scoreCol, topR
   const e = stdout.lastIndexOf("}");
   if (s === -1 || e === -1) throw new Error(`ingest failed: ${stdout.slice(0, 200)}`);
   const r = JSON.parse(stdout.slice(s, e + 1));
-  return { hits: r.hits || [], misses: r.misses || [], totalHits: r.total_hits, unknown: r.unknown_genes || [], method: r.method };
+  return {
+    hits: r.hits || [], misses: r.misses || [], totalHits: r.total_hits ?? null, unknown: r.unknown_genes || [],
+    method: r.method, rule: r.rule, scope: r.scope ?? null, overridesIgnored: r.overrides_ignored || [],
+  };
 }
 
 /**

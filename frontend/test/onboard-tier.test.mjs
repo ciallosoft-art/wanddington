@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { parseTier, startOnboarding, handleOnboarding } from "../src/onboard.mjs";
+import { parseTier, parseHitRule, startOnboarding, handleOnboarding } from "../src/onboard.mjs";
 
 test("tier replies", async (t) => {
   await t.test("keeping the full pool", () => {
@@ -36,7 +36,32 @@ test("onboarding asks for the tier after the gene pool", async () => {
   state.onboarding.proposed = ["STAT1"];      // skip the LLM anchor proposal
   r = await handleOnboarding(state, "keep", {}, null);
   assert.equal(state.onboarding.tier, "full_pool");
+  assert.equal(r.stage, "hits");               // then the hit rule, before any result is seen
+
+  r = await handleOnboarding(state, "top 5%", {}, null);
+  assert.equal(r.stage, "hits");               // a top-x% call needs the whole screen: refused
+  assert.match(r.text, /whole screen/);
+  assert.equal(state.onboarding.hitRule, null);
+
+  r = await handleOnboarding(state, "fdr < 0.05 up", {}, null);
+  assert.deepEqual(state.onboarding.hitRule, { type: "fdr", maxFdr: 0.05, direction: "up" });
   assert.equal(r.stage, "anchors");
+});
+
+test("hit rule replies", () => {
+  const cases = [
+    ["label", { type: "label" }],
+    ["my results have a hit column", { type: "label" }],
+    ["|score| >= 1.5", { type: "threshold", threshold: 1.5, direction: "both" }],
+    ["|lfc| ≥ 1", { type: "threshold", threshold: 1, direction: "both" }],
+    ["score >= 2", { type: "threshold", threshold: 2, direction: "up" }],
+    ["score <= -1.5", { type: "threshold", threshold: 1.5, direction: "down" }],
+    ["fdr < 0.05", { type: "fdr", maxFdr: 0.05, direction: "both" }],
+    ["FDR<0.1 下调", { type: "fdr", maxFdr: 0.1, direction: "down" }],
+    ["top 5%", { type: "top_fraction", fraction: 0.05, direction: "both" }],
+  ];
+  for (const [m, want] of cases) assert.deepEqual(parseHitRule(m), want, m);
+  for (const m of ["", "whatever", "fdr < 2", "|score| >= 0", "top 0%"]) assert.equal(parseHitRule(m), null, m);
 });
 
 test("a bare yes accepts the default tier", async () => {

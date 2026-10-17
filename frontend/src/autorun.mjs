@@ -108,9 +108,12 @@ export async function autoRun({ dataset, readoutFile, rounds = 5, batchSize, top
     emit({ type: "proposed", round, genes: sug.genes, counts: tr.counts || null, shap: tr.shap || null, w_ml: tr.w_ml, w_llm: tr.w_llm, sources, transfer });
 
     // Reveal outcomes from the uploaded readout (the real production reveal — not a hidden oracle).
-    const ing = await ingestResults({ genes: sug.genes, path: readout, topRatio });
+    const ing = await ingestResults({ genes: sug.genes, path: readout, topRatio, dataset });
     if (ing.unknown?.length) {
       throw new Error(`Readout is missing genes or measurements for: ${ing.unknown.join(", ")}. Supply complete results before continuing.`);
+    }
+    if (ing.totalHits == null) {
+      throw new Error("The uploaded readout does not cover the whole screen, so hit@R5 has no denominator. A replay needs the completed screen's full readout.");
     }
     total = ing.totalHits;
     const nHits = ing.hits.length;
@@ -175,7 +178,10 @@ export async function autoRunUpload({ name, readoutFile, readoutContent, readout
     if (!anch.length) throw new Error("upload run: no anchor genes — pass anchors, or give a task the model can seed anchors from");
     emit({ type: "anchors", anchors: anch });
     emit({ type: "registering", name });
-    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize, tier });
+    // A replay of a completed screen: the top `topRatio` of the whole screen by |score| are its hits (BDA's
+    // convention), registered as the phenotype's fixed hit rule.
+    const hitRule = { type: "top_fraction", fraction: topRatio, direction: "both" };
+    const reg = await registerPhenotype({ name, genesContent: content, genesName: filename, anchors: anch, task: t, measurement: m, batchSize, tier, hitRule });
     emit({ type: "registered", name, nGenes: reg.n_genes, nWithFeatures: reg.n_genes_with_known_features, anchors: anch,
            tier: reg.tier, nCoreEssentialRemoved: reg.n_core_essential_removed });
   } else {

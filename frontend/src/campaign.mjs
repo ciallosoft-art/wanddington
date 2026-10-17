@@ -81,12 +81,15 @@ export async function commitRound(state) {
 export async function submitResults(state, { path, content, name, scoreCol, topRatio } = {}) {
   const c = state.campaign;
   if (c.stage === "recommendation_pending") return retryRecommendation(state);
-  const r = await ingestResults({ genes: c.pending, path, content, name, scoreCol, topRatio });
+  const r = await ingestResults({ genes: c.pending, path, content, name, scoreCol, topRatio, dataset: c.dataset });
   if (r.unknown?.length) {
     throw new Error(`Results are missing tested genes: ${r.unknown.join(", ")}. Provide a complete readout before committing this round.`);
   }
   const res = await advance(state, r.hits, r.totalHits);
   res.ingestMethod = r.method;
+  res.hitRule = r.rule;
+  res.scope = r.scope;
+  res.overridesIgnored = r.overridesIgnored;
   res.unknown = r.unknown;
   return res;
 }
@@ -101,9 +104,13 @@ async function advance(state, revealedHits, total) {
   c.testedHits.push(...roundHits);
   c.testedMisses.push(...roundMisses);
   const cumulative = c.testedHits.length;
-  c.totalHits = total; // stash so a later `stop` can still report cumulative/total
-  const ratio = total ? cumulative / total : 0;
-  c.history.push({ round: c.round, tested: c.pending.length, hits: roundHits, cumulative, ratio });
+  // The screen-wide hit count is known only when the whole screen's readout was uploaded (or the oracle
+  // plays the wet lab). For one batch per round it is unknown: report hits per tested gene instead.
+  c.totalHits = total ?? null; // stash so a later `stop` can still report cumulative/total
+  const ratio = total ? cumulative / total : null;
+  const testedSoFar = c.testedHits.length + c.testedMisses.length;
+  const hitRate = testedSoFar ? cumulative / testedSoFar : 0;
+  c.history.push({ round: c.round, tested: c.pending.length, hits: roundHits, cumulative, ratio, testedSoFar, hitRate });
 
   const revealedRound = c.round;
   attachOutcome(c, revealedRound, roundHits);
@@ -112,10 +119,10 @@ async function advance(state, revealedHits, total) {
     // The outcome is durable before the next API call. A retry must only rank again,
     // never reveal/upload the same batch twice or increment the round prematurely.
     c.stage = "recommendation_pending";
-    c.pendingOutcome = { revealedRound, roundHits, cumulative, total, ratio };
+    c.pendingOutcome = { revealedRound, roundHits, cumulative, total: c.totalHits, ratio, testedSoFar, hitRate };
     return retryRecommendation(state);
   }
-  return finish(state, { revealedRound, roundHits, cumulative, total, ratio });
+  return finish(state, { revealedRound, roundHits, cumulative, total: c.totalHits, ratio, testedSoFar, hitRate });
 }
 
 /** Retry selection after a saved outcome, without replaying that round's results. */
@@ -138,6 +145,7 @@ export async function retryRecommendation(state) {
       kind: "campaign", stage: "await", mode: c.mode, dataset: c.dataset,
       round: c.round, roundHits: outcome.roundHits,
       cumulative: outcome.cumulative, total: outcome.total, ratio: outcome.ratio,
+      testedSoFar: outcome.testedSoFar, hitRate: outcome.hitRate,
       text: `Round ${c.round}'s results are saved (${outcome.roundHits.length} hits; cumulative ${outcome.cumulative}). The next recommendation failed: ${error.message || error}. Type \`commit\` to retry, or \`stop\` to finish with the saved results.`,
     };
   }
@@ -151,6 +159,7 @@ export async function retryRecommendation(state) {
     dataset: c.dataset, round: outcome.revealedRound,
     roundHits: outcome.roundHits, cumulative: outcome.cumulative,
     total: outcome.total, ratio: outcome.ratio,
+    testedSoFar: outcome.testedSoFar, hitRate: outcome.hitRate,
     nextRound: c.round, next: next.genes,
   };
 }
@@ -161,7 +170,9 @@ export function finish(state, last = null) {
   const lastRound = c.history.length ? c.history[c.history.length - 1] : null;
   const cumulative = lastRound ? lastRound.cumulative : c.testedHits.length;
   const totalHits = last?.total ?? c.totalHits ?? null;
-  const ratio = totalHits ? cumulative / totalHits : lastRound?.ratio ?? 0;
+  const ratio = totalHits ? cumulative / totalHits : null;
+  const testedSoFar = c.testedHits.length + c.testedMisses.length;
+  const hitRate = testedSoFar ? cumulative / testedSoFar : 0;
 
   const trace = {
     dataset: c.dataset,
@@ -172,7 +183,9 @@ export function finish(state, last = null) {
     history: c.history,
     cumulative_hits: cumulative,
     total_hits: totalHits,
-    hit_ratio: Number(ratio.toFixed(4)),
+    hit_ratio: ratio == null ? null : Number(ratio.toFixed(4)),   // null: screen-wide hit count unknown
+    tested_genes: testedSoFar,
+    hits_per_tested: Number(hitRate.toFixed(4)),
     // decisions + outcomes → feed straight to:
     //   python -m waddington_select.analysis report --campaign <this file>
     trace: { rounds: (c.decisions || []).filter((d) => d.genes?.some((g) => "hit" in g)) },
@@ -194,7 +207,7 @@ export function finish(state, last = null) {
     kind: "campaign", stage: "done", done: true,
     dataset: c.dataset,
     roundHits: last?.roundHits ?? [],
-    cumulative, total: totalHits, ratio,
+    cumulative, total: totalHits, ratio, testedSoFar, hitRate,
     history: c.history, tracePath,
   };
   state.campaign = null; // end

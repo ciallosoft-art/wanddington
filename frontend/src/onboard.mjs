@@ -84,6 +84,45 @@ export function parseTier(message) {
   return null;
 }
 
+/**
+ * The hit rule a reply describes (ingest.py): {type:"label"} | {type:"threshold", threshold, direction} |
+ * {type:"fdr", maxFdr, direction} | {type:"top_fraction", fraction, direction}, else null. Directions:
+ * "both" (|score|), "up" or "down". The caller refuses top_fraction for a campaign uploaded batch by batch.
+ */
+export function parseHitRule(message) {
+  const m = String(message || "").trim().toLowerCase().replace(/≥/g, ">=").replace(/≤/g, "<=");
+  const dir = /\b(up|pos|positive|increase[sd]?)\b|上调|升高|增加/.test(m) ? "up"
+    : /\b(down|neg|negative|decrease[sd]?)\b|下调|降低|减少/.test(m) ? "down" : "both";
+  const num = (s) => Number(s);
+  let x;
+  if ((x = m.match(/\b(?:fdr|padj|q-?value|q)\s*(?:<=|<|小于)\s*(\d*\.?\d+)/))) {
+    const q = num(x[1]);
+    return q > 0 && q <= 1 ? { type: "fdr", maxFdr: q, direction: dir } : null;
+  }
+  if ((x = m.match(/(?:\btop|前)\s*(\d*\.?\d+)\s*%/))) {
+    const f = num(x[1]) / 100;
+    return f > 0 && f <= 1 ? { type: "top_fraction", fraction: f, direction: dir } : null;
+  }
+  const pos = (v, d) => (v > 0 ? { type: "threshold", threshold: v, direction: d } : null);
+  if ((x = m.match(/\|\s*[a-z_ -]*\s*\|\s*(?:>=|>)\s*(\d*\.?\d+)/))) return pos(num(x[1]), "both");
+  if ((x = m.match(/\babs(?:olute)?\b[^0-9]*?(\d*\.?\d+)/))) return pos(num(x[1]), "both");
+  if ((x = m.match(/\b(?:score|lfc|logfc|z)\s*(?:<=|<)\s*-\s*(\d*\.?\d+)/))) return pos(num(x[1]), "down");
+  if ((x = m.match(/\b(?:score|lfc|logfc|z)\s*(?:>=|>)\s*(\d*\.?\d+)/))) return pos(num(x[1]), "up");
+  if (/\b(label|labels|labell?ed|hit column)\b|标签|自己标|hit ?列/.test(m)) return { type: "label" };
+  return null;
+}
+
+const HITS_TEXT =
+  "How should a tested gene count as a hit? This stays fixed for the whole campaign, so decide it before you see " +
+  "any results. Reply with one of: `label` — your result files will carry a hit column (1/0, yes/no); " +
+  "`|score| >= 1.5` — an absolute cutoff on the score (or `score >= 1.5` / `score <= -1.5` for one direction); " +
+  "`fdr < 0.05` — an FDR cutoff, e.g. MAGeCK's (add `up` or `down` for one direction).";
+
+const TOP_FRACTION_REFUSED =
+  "A `top 5%` rule ranks each gene against the whole screen, but you will upload one round's batch at a time, so it " +
+  "would call ~5% of every batch a hit whatever the effects. Choose `label`, a score cutoff (`|score| >= 1.5`) or an " +
+  "FDR cutoff (`fdr < 0.05`). (To replay a completed screen, use upload-and-run instead, which can rank the whole screen.)";
+
 const TIER_TEXT =
   "Should the 684 common core-essential genes (CEGv2) be removed from the candidates? Reply `yes` to remove them " +
   "(the default, and the paper's main tier: you are after phenotype-specific hits, not generic essentials), or " +
@@ -135,6 +174,7 @@ export async function startOnboarding(state, fields, modelSpec) {
     proposed: null,
     anchors: null,
     tier: null,
+    hitRule: null,
   };
   return advance(state, modelSpec);
 }
@@ -170,6 +210,11 @@ async function advance(state, modelSpec) {
     return { kind: "onboard", stage: "tier", name: o.name, text: TIER_TEXT };
   }
 
+  if (!o.hitRule) {
+    o.stage = "hits";
+    return { kind: "onboard", stage: "hits", name: o.name, text: HITS_TEXT };
+  }
+
   if (!o.anchors) {
     o.stage = "anchors";
     if (!o.proposed) o.proposed = await proposeAnchors(o.task, o.measurement, modelSpec);
@@ -190,6 +235,7 @@ async function advance(state, modelSpec) {
     measurement: o.measurement,
     batchSize: o.batchSize || undefined,
     tier: o.tier,
+    hitRule: o.hitRule,
   });
   state.onboarding = null;
   state.dataset = res.name;
@@ -228,6 +274,14 @@ export async function handleOnboarding(state, message, opts, modelSpec) {
   if (o.stage === "tier") {
     o.tier = parseTier(message) || (cmd === "confirm" ? "non_essential" : null);
     if (!o.tier) return { kind: "onboard", stage: "tier", name: o.name, text: TIER_TEXT };
+    return advance(state, modelSpec);
+  }
+
+  if (o.stage === "hits") {
+    const rule = parseHitRule(message);
+    if (rule?.type === "top_fraction") return { kind: "onboard", stage: "hits", name: o.name, text: TOP_FRACTION_REFUSED };
+    if (!rule) return { kind: "onboard", stage: "hits", name: o.name, text: HITS_TEXT };
+    o.hitRule = rule;
     return advance(state, modelSpec);
   }
 

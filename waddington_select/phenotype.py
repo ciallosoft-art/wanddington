@@ -22,10 +22,18 @@ prior is then trained on the full-pool tables -- the only tables whose screens c
 also the only place their gene-intrinsic features can be looked up (the non-essential tables have none
 of them, and a gene missing from the lookup gets all-zero features).
 
+Hit rule (ingest.py): how a tested gene is called a hit from the scientist's readout, fixed at
+registration so every round is called the same way and the rule is chosen before any result is seen:
+``label`` (the readouts carry a hit column), ``threshold`` (|score| >= X, or one direction), ``fdr``
+(fdr < q) or ``top_fraction`` (the top x% of the whole screen -- only for replaying a completed screen;
+ingest refuses it on one round's batch). Without one, ingest falls back to its legacy options.
+
 Usage:
     python -m waddington_select.phenotype register --name MyScreen \
         --genes-file screen.csv --anchors STAT1 JAK1 IFNGR1 \
         --task "..." --measurement "..." [--tier non_essential|full_pool] \
+        [--hit-rule label|threshold|fdr|top_fraction [--threshold X] [--max-fdr Q] [--top-fraction F]
+         [--direction both|up|down] [--score-col C] [--fdr-col C]] \
         [--batch 32] [--expected-hit-rate 0.05] [--json]
     python -m waddington_select.phenotype list [--json]
 """
@@ -42,6 +50,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVAL_DIR = REPO_ROOT / "workspace" / "evaluation"
 from .tables import TIER_NON_ESSENTIAL, TIERS, core_essential_genes, tier_tables  # noqa: E402
+from .ingest import DIRECTIONS, HIT_RULE_TYPES, describe_hit_rule, make_hit_rule  # noqa: E402
 USER_DIR = REPO_ROOT / "workspace" / "data" / "user_phenotypes"
 REGISTRY_PATH = USER_DIR / "registry.json"
 
@@ -128,6 +137,7 @@ def register(
     batch_size: int = 32,
     expected_hit_rate: float | None = None,
     tier: str = TIER_NON_ESSENTIAL,
+    hit_rule: dict | None = None,
 ) -> dict:
     """Build features for a new phenotype's gene pool and register it."""
     if not name or "/" in name:
@@ -176,6 +186,7 @@ def register(
         "batch_size": int(batch_size),
         "anchors": anchors,
         "tier": tier,
+        "hit_rule": hit_rule,   # ingest.make_hit_rule; None = ingest's legacy options
         # core-essential genes in the uploaded pool: removed under non_essential, kept under full_pool
         "n_core_essential_in_upload": n_core_essential,
         "n_core_essential_removed": n_core_essential if tier == TIER_NON_ESSENTIAL else 0,
@@ -188,7 +199,8 @@ def register(
     reg[name] = entry
     REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
     REGISTRY_PATH.write_text(json.dumps(reg, indent=2))
-    return {"name": name, **entry, "features_csv": str(out_dir / "features.csv")}
+    return {"name": name, **entry, "hit_rule_text": describe_hit_rule(hit_rule),
+            "features_csv": str(out_dir / "features.csv")}
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
@@ -209,6 +221,17 @@ def main() -> None:
     r.add_argument("--tier", choices=TIERS, default=TIER_NON_ESSENTIAL,
                    help="non_essential (default, the paper's headline tier) removes the 684 CEGv2 core-essential "
                         "genes from the pool; full_pool keeps them and trains the prior on the full-pool tables")
+    r.add_argument("--hit-rule", choices=HIT_RULE_TYPES, default=None,
+                   help="how a tested gene is called a hit from your readouts (fixed for the campaign): label = "
+                        "they carry a hit column; threshold = |score| >= X; fdr = fdr < q; top_fraction = top "
+                        "share of the WHOLE screen (replaying a completed screen only)")
+    r.add_argument("--threshold", type=float, default=None, help="threshold rule: the cutoff X (> 0)")
+    r.add_argument("--max-fdr", type=float, default=None, help="fdr rule: the cutoff q")
+    r.add_argument("--top-fraction", type=float, default=None, help="top_fraction rule: the share, e.g. 0.05")
+    r.add_argument("--direction", choices=DIRECTIONS, default="both",
+                   help="both (|score|), up (score >= X / MAGeCK pos) or down (score <= -X / MAGeCK neg)")
+    r.add_argument("--score-col", default=None, help="score column (else auto-detected)")
+    r.add_argument("--fdr-col", default=None, help="FDR column (else auto: MAGeCK pos|fdr / neg|fdr, fdr, padj …)")
     r.add_argument("--json", action="store_true")
 
     ls = sub.add_parser("list")
@@ -242,14 +265,22 @@ def main() -> None:
 
     genes = args.genes
     if args.genes_file:
-        from .ingest import read_gene_pool
+        from .ingest import read_gene_pool  # noqa: F811
         genes = read_gene_pool(args.genes_file)
     if not genes:
         raise SystemExit("provide --genes-file or --genes")
 
+    hit_rule = None
+    if args.hit_rule:
+        try:
+            hit_rule = make_hit_rule(args.hit_rule, threshold=args.threshold, direction=args.direction,
+                                     score_col=args.score_col, fdr_col=args.fdr_col, max_fdr=args.max_fdr,
+                                     fraction=args.top_fraction)
+        except ValueError as exc:
+            p.error(str(exc))
     res = register(
         args.name, genes, args.anchors, args.task, args.measurement,
-        batch_size=args.batch, expected_hit_rate=args.expected_hit_rate, tier=args.tier,
+        batch_size=args.batch, expected_hit_rate=args.expected_hit_rate, tier=args.tier, hit_rule=hit_rule,
     )
     if args.json:
         print(json.dumps(res))
@@ -258,6 +289,7 @@ def main() -> None:
     print(f"  gene pool:  {res['n_genes']} ({res['n_genes_with_known_features']} with known intrinsic features)")
     print(f"  tier:       {res['tier']} ({res['n_core_essential_removed']} core-essential genes removed, "
           f"{res['n_core_essential_in_upload']} in the upload)")
+    print(f"  hit rule:   {describe_hit_rule(res['hit_rule'])}")
     print(f"  anchors:    {', '.join(res['anchors'])}")
     print(f"  batch size: {res['batch_size']}")
     print(f"  features:   {res['features_csv']}")

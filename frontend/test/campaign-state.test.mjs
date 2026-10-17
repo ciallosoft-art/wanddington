@@ -197,3 +197,20 @@ test("a failed trace write does not advertise a nonexistent saved artifact", asy
   const h = await harness({ failWrite: true });
   assert.equal(h.campaign.finish(campaignState()).tracePath, null);
 });
+
+test("an uploaded batch passes the phenotype to ingest and, with no screen-wide total, reports hits per tested gene", async () => {
+  const h = await harness({ ingest: async () => ({
+    hits: ["STAT1"], misses: ["ACTB"], unknown: [], totalHits: null, method: "|score| >= 1.5",
+    rule: "|score| >= 1.5", scope: "batch", overridesIgnored: ["top_ratio"],
+  }) });
+  const state = campaignState("upload");
+  const r = await h.respond("", state, "offline/model", { file: { name: "round1.csv", content: "Gene,Score\nSTAT1,2\nACTB,0" } });
+  assert.equal(h.calls.ingest[0].dataset, "IFNG");
+  assert.equal(r.stage, "revealed");
+  assert.equal(r.total, null);
+  assert.equal(r.ratio, null);          // never a made-up hit@R5
+  assert.equal(r.testedSoFar, 2);
+  assert.equal(r.hitRate, 0.5);
+  assert.equal(r.hitRule, "|score| >= 1.5");
+  assert.deepEqual(r.overridesIgnored, ["top_ratio"]);
+});
