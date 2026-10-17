@@ -1220,7 +1220,7 @@
    "d0_old_a1": 0.25835,
    "d0_a2": 0.26090222222222226,
    "d1_a1_anchors": 0.25656666666666667,
-   "d2_a1_old_memory": null,
+   "d2_a1_old_memory": 0.2422011111111111,
    "a1_old_aug": 0.25985185185185183,
    "a2_old_aug": 0.2544296296296296,
    "a1_new": 0.24082555555555554,
@@ -1266,7 +1266,10 @@
     "Sanchez21": 0.08578,
     "Sanchez21_down": 0.10022,
     "Carnevale22": 0.06475,
-    "Scharenberg22": 0.49795999999999996
+    "Scharenberg22": 0.49795999999999996,
+    "Steinhart": 0.07176,
+    "Replogle_K562_essential": 0.5698300000000001,
+    "Replogle_K562_gwps": 0.34741000000000005
    }
   },
   "drift": {
@@ -1335,16 +1338,28 @@
     "ties": 0,
     "losses": 3
    },
-   "memory_prompts": null,
+   "memory_prompts": {
+    "delta": 0.001375555555555565,
+    "ci95": [
+     -0.003290138888888884,
+     0.008016180555555584
+    ],
+    "wins": 3,
+    "ties": 0,
+    "losses": 6
+   },
    "weights_replay": -0.003413352647069132,
-   "remainder": null,
+   "remainder": 0.0038211304248469084,
    "d2_screens_done": [
     "Carnevale22",
     "IFNG",
     "IL2",
+    "Replogle_K562_essential",
+    "Replogle_K562_gwps",
     "Sanchez21",
     "Sanchez21_down",
-    "Scharenberg22"
+    "Scharenberg22",
+    "Steinhart"
    ]
   },
   "a2": {
