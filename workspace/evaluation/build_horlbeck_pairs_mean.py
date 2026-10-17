@@ -11,18 +11,26 @@ Check (2026-10-16): on the rebuilt tables the deterministic arms of experiment 0
 ranker, online ML, coreset) select the same pairs as the September run in every round (58 / 93 / 72 hits).
 The bytes differ from the September files (CSV float formatting), the content the arms read does not.
 
-    python3 workspace/evaluation/build_horlbeck_pairs_mean.py
+    python3 workspace/evaluation/build_horlbeck_pairs_mean.py [--screen Horlbeck_Jurkat]
+
+--screen Horlbeck_Jurkat does the same for the held-out Jurkat map's tables (2026-10-17, docs/tier_extension_plan.md
+part 己), whose builder adds the interaction columns directly.
 """
 
+import argparse
 from pathlib import Path
 
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
+ap = argparse.ArgumentParser()
+ap.add_argument("--screen", default="Horlbeck", choices=["Horlbeck", "Horlbeck_Jurkat"])
+stem = {"Horlbeck": "lgbm_training_data_horlbeck_pairs",
+        "Horlbeck_Jurkat": "lgbm_training_data_horlbeck_jurkat_pairs"}[ap.parse_args().screen]
 
 for v in ("", "_v3"):
-    src = HERE / f"lgbm_training_data_horlbeck_pairs{v}.csv"
-    out = HERE / f"lgbm_training_data_horlbeck_pairs_mean{v}.csv"
+    src = HERE / f"{stem}{v}.csv"
+    out = HERE / f"{stem}_mean{v}.csv"
     df = pd.read_csv(src)
     cols = [c for c in df.columns if c.startswith("pair_")]
     df.drop(columns=cols).to_csv(out, index=False)

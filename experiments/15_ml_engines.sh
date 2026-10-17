@@ -74,7 +74,19 @@ case "$TIER" in
     export WADDINGTON_EXTRA_DATASETS="Horlbeck:128"
     DATASETS=(--datasets Horlbeck)
     OUT="workspace/results/ml_engines/$TIER" ;;
-  *) echo "TIER must be headline, full_pool, pairs or pairs_interaction" >&2; exit 2 ;;
+  jurkat_pairs|jurkat_pairs_interaction)
+    # The held-out Jurkat map (docs/tier_extension_plan.md, part 己): its pair-mean table
+    # (build_horlbeck_pairs_mean.py --screen Horlbeck_Jurkat) and the table with the interaction features that
+    # experiment 18 reads; training rows are the nine single-gene screens only. JBATCH=128 (640 picks) or 32.
+    [ "$GROUP" = tabular ] || { echo "TIER=$TIER supports: tabular" >&2; exit 2; }
+    PT="lgbm_training_data_horlbeck_jurkat_pairs_mean"; [ "$TIER" = jurkat_pairs_interaction ] && PT="lgbm_training_data_horlbeck_jurkat_pairs"
+    export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/${PT}.csv"
+    export WADDINGTON_TRAINING_CSV_V3="$PWD/workspace/evaluation/${PT}_v3.csv"
+    export WADDINGTON_PAIR_DATASETS=Horlbeck_Jurkat
+    export WADDINGTON_EXTRA_DATASETS="Horlbeck_Jurkat:${JBATCH:-128}"
+    DATASETS=(--datasets Horlbeck_Jurkat)
+    OUT="workspace/results/ml_engines/${TIER}_b${JBATCH:-128}" ;;
+  *) echo "TIER must be headline, full_pool, pairs, pairs_interaction, jurkat_pairs or jurkat_pairs_interaction" >&2; exit 2 ;;
 esac
 mkdir -p "$OUT"
 case "$GROUP" in
@@ -101,6 +113,8 @@ esac
 if [ "$GROUP" = beyond ] && [ "$TIER" = full_pool ]; then EXTRA_SEEDED=""; fi
 case "$TIER" in pairs|pairs_interaction)
   [ "$GROUP" = beyond ] && { DET=""; SEEDED="svgp"; EXTRA_SEEDED=""; } ;;
+jurkat_pairs|jurkat_pairs_interaction)
+  DET="lightgbm"; SEEDED="rf" ;;  # the K562 pair-mean result to test: random forest vs LightGBM
 esac
 
 arms() { for m in $1; do printf 'ml_engine_%s ml_static_%s ' "$m" "$m"; done; }

@@ -34,7 +34,9 @@ OUT_NAME="${OUT_NAME:-ablations}"
 # OUT_NAME (a separate result file), EXCLUDE_STUDY=1 (the leave-one-study-out prior), SCREENS (a subset).
 # Part 戊 (why the ladder reversed) adds KEEP_ANCHORS=1 (the C-arm keeps the anchor features, in the ML branch
 # and in the LLM's feature view) and OLD_MEMORY=1 (the first GPT run's memory and the uncorrected task prompts,
-# the conditions of the earlier ladder; headline only).
+# the conditions of the earlier ladder; headline only). Part 己 adds CRISPRA=1: the CRISPRa validation table (the
+# nine screens plus Schmidt et al.'s IL2_crispra / IFNG_crispra; workspace/evaluation/build_crispra_validation.py),
+# for the modality probe on the reported system (headline only; SCREENS="IL2_crispra IFNG_crispra").
 
 unset WADDINGTON_LLM_MODEL WADDINGTON_PI_CMD WADDINGTON_LEGACY_ROUTER
 unset WADDINGTON_AUTH_PATH WADDINGTON_REUSE_FEYNMAN
@@ -88,6 +90,10 @@ if [ "${OLD_MEMORY:-0}" = 1 ]; then
   [ "$TIER" = headline ] || { echo "OLD_MEMORY applies to the headline tier only" >&2; exit 2; }
   MEMORY_PATH="$PWD/workspace/results/gpt/gpt_5_6_luna_none_20rep/experience_memory.json"
   export WADDINGTON_MEMORY_PATH="$MEMORY_PATH" WADDINGTON_LEGACY_TASK_PROMPTS=1
+fi
+if [ "${CRISPRA:-0}" = 1 ]; then
+  [ "$TIER" = headline ] || { echo "CRISPRA applies to the headline tier only" >&2; exit 2; }
+  export WADDINGTON_TRAINING_CSV="$PWD/workspace/evaluation/lgbm_training_data_crispra_validation.csv"
 fi
 [ -n "${SCREENS:-}" ] && DATASETS=(--datasets $SCREENS)
 
