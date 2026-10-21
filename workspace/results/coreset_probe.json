@@ -1,0 +1,1940 @@
+{
+ "summary": {
+  "coreset": 0.13374444444444444,
+  "coreset_row_shuffled": 0.13374444444444444,
+  "coreset_no_anchor": 0.13326666666666667,
+  "top_degree": 0.16350759813710136,
+  "top_outlying_intrinsic": 0.15364236412860993,
+  "picks_in_most_outlying_budget": 0.4357638888888889,
+  "anchor_signal_share_pool": 0.2650671119030763,
+  "anchor_signal_share_picks": 0.8659722222222223,
+  "top_degree_minus_coreset": 0.029763153692656915,
+  "top_degree_wtl_vs_coreset": "6/0/3",
+  "top_outlying_intrinsic_minus_coreset": 0.019897919684165488,
+  "top_outlying_intrinsic_wtl_vs_coreset": "7/0/2",
+  "coreset_no_anchor_minus_coreset": -0.0004777777777777791,
+  "coreset_no_anchor_wtl_vs_coreset": "4/0/5",
+  "paired_vs_coreset": {
+   "top_degree": {
+    "delta": 0.02976315369265691,
+    "ci95": [
+     -0.014753646825644678,
+     0.08180135529775473
+    ],
+    "wins": 6,
+    "ties": 0,
+    "losses": 3
+   },
+   "top_outlying_intrinsic": {
+    "delta": 0.019897919684165488,
+    "ci95": [
+     -5.430822893707445e-05,
+     0.04535879892381306
+    ],
+    "wins": 7,
+    "ties": 0,
+    "losses": 2
+   },
+   "coreset_no_anchor": {
+    "delta": -0.00047777777777777836,
+    "ci95": [
+     -0.02754472222222222,
+     0.03491138888888888
+    ],
+    "wins": 4,
+    "ties": 0,
+    "losses": 5
+   },
+   "single_feature:depmap_frac_ess": {
+    "mean": 0.231555081578743,
+    "delta": 0.09781063713429854,
+    "ci95": [
+     0.030434938937312212,
+     0.1733606885847133
+    ],
+    "wins": 7,
+    "ties": 0,
+    "losses": 2
+   },
+   "single_feature:depmap_mean_norm": {
+    "mean": 0.2217158536691256,
+    "delta": 0.08797140922468116,
+    "ci95": [
+     0.028791144368487617,
+     0.15229681637619227
+    ],
+    "wins": 7,
+    "ties": 0,
+    "losses": 2
+   },
+   "single_feature:depmap_min_norm": {
+    "mean": 0.19834185361252712,
+    "delta": 0.0645974091680827,
+    "ci95": [
+     0.013148969197562305,
+     0.12291312153942009
+    ],
+    "wins": 8,
+    "ties": 0,
+    "losses": 1
+   },
+   "single_feature:hub_score_norm": {
+    "mean": 0.18033002597236317,
+    "delta": 0.0465855815279187,
+    "ci95": [
+     0.007124824732667542,
+     0.09565553015205727
+    ],
+    "wins": 7,
+    "ties": 0,
+    "losses": 2
+   },
+   "single_feature:ppi_score_sum": {
+    "mean": 0.17877290347864047,
+    "delta": 0.04502845903419604,
+    "ci95": [
+     0.004821494280904665,
+     0.0962228982029584
+    ],
+    "wins": 6,
+    "ties": 0,
+    "losses": 3
+   },
+   "single_feature:string_degree_norm": {
+    "mean": 0.16321238951485562,
+    "delta": 0.02946794507041116,
+    "ci95": [
+     -0.015213203065209461,
+     0.08158426439549528
+    ],
+    "wins": 6,
+    "ties": 0,
+    "losses": 3
+   },
+   "single_feature:reactome_pathway_count_norm": {
+    "mean": 0.157381609756044,
+    "delta": 0.023637165311599595,
+    "ci95": [
+     -0.015524148134947223,
+     0.08810648409562295
+    ],
+    "wins": 4,
+    "ties": 0,
+    "losses": 5
+   },
+   "single_feature:pli_score": {
+    "mean": 0.12416975257781303,
+    "delta": -0.009574691866631417,
+    "ci95": [
+     -0.040175967819061985,
+     0.019954944316656627
+    ],
+    "wins": 4,
+    "ties": 0,
+    "losses": 5
+   }
+  },
+  "row_order_max_range": 0.0,
+  "pick_feature_percentile": {
+   "g1_ppi_score": 0.693521155206182,
+   "hub_score_norm": 0.828044266101676,
+   "archs4_coexpr": 0.6077424605474965,
+   "ppi_score_sum": 0.8301022675165619,
+   "kegg_overlap": 0.7469091329520401,
+   "pli_score": 0.691875900058137,
+   "string_degree_norm": 0.8237820816654606,
+   "kegg_pathway_count_norm": 0.7913439898098288,
+   "reactome_pathway_count_norm": 0.7873991634086562
+  },
+  "picks_per_outlying_decile": [
+   0.03611111111111111,
+   0.009895833333333333,
+   0.0020833333333333333,
+   0.010069444444444445,
+   0.014930555555555555,
+   0.027256944444444445,
+   0.06597222222222222,
+   0.2111111111111111,
+   0.14982638888888888,
+   0.47274305555555557
+  ],
+  "hit_rate_per_outlying_decile_over_pool_rate": [
+   0.7304244828040934,
+   0.8558538776209674,
+   0.5943504191525419,
+   0.6253028558470065,
+   0.52968238191354,
+   0.7850107363479275,
+   0.9644672664017891,
+   1.2565007640976473,
+   1.4648099472227996,
+   2.210497402617793
+  ],
+  "pick_outlying_percentile_by_round": [
+   0.8903531595593074,
+   0.8389560091607102,
+   0.8019308057611515,
+   0.7940154319415899,
+   0.7671451178672147
+  ],
+  "picks_hit_rate_inside_over_pool": 2.886754695372284,
+  "picks_hit_rate_outside_over_pool": 1.509604626420487
+ },
+ "per_screen": {
+  "IFNG": {
+   "n_pool": 17785,
+   "budget": 640,
+   "pool_hit_rate": 0.045094180489176273,
+   "coreset": 0.0998,
+   "coreset_row_shuffled": 0.0998,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.086,
+   "top_degree": 0.10099750623441396,
+   "top_outlying_intrinsic": 0.11346633416458853,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.7726417539359011,
+    "hub_score_norm": 0.874454947989879,
+    "archs4_coexpr": 0.6407762861962328,
+    "ppi_score_sum": 0.8777760841298848,
+    "kegg_overlap": 0.8257715420298005,
+    "pli_score": 0.7062610697216756,
+    "string_degree_norm": 0.8722574764548778,
+    "kegg_pathway_count_norm": 0.8364654202980037,
+    "reactome_pathway_count_norm": 0.8332342036828788
+   },
+   "pick_outlying_percentile_by_round": [
+    0.9390389988051729,
+    0.9045904202980038,
+    0.8902410739387123,
+    0.8491267219567051,
+    0.8331450309249367
+   ],
+   "picks_per_outlying_decile": [
+    0.0171875,
+    0.0046875,
+    0.0,
+    0.0,
+    0.0,
+    0.0015625,
+    0.0265625,
+    0.2203125,
+    0.1171875,
+    0.6125
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.03712035995500562,
+    0.031496062992125984,
+    0.03653738055087127,
+    0.02759009009009009,
+    0.028026905829596414,
+    0.030252100840336135,
+    0.05792163543441227,
+    0.05061867266591676,
+    0.05283867341202923,
+    0.10792580101180438
+   ],
+   "picks_in_most_outlying_budget": 0.475,
+   "hit_rate_picks_inside_most_outlying": 0.19736842105263158,
+   "hit_rate_picks_outside_most_outlying": 0.05952380952380952,
+   "hit_rate_most_outlying_not_picked": 0.125,
+   "anchor_signal_share_pool": 0.21653078436885015,
+   "anchor_signal_share_picks": 0.928125,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0632,
+     "0.99": 0.2,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.0062,
+     "0.9": 0.0575,
+     "0.99": 0.2034959999999999,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0003,
+     "0.9": 0.9876,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0104,
+     "0.9": 0.0731,
+     "0.99": 0.2585,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0357,
+     "0.99": 0.2054,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0058,
+     "0.9": 0.0331,
+     "0.99": 0.1654,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "AKT1",
+     "hit": false,
+     "string_degree_norm": 0.5679,
+     "hub_score_norm": 0.6947,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.2451
+    },
+    {
+     "gene": "AADACL2",
+     "hit": false,
+     "string_degree_norm": 0.0,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "UBC",
+     "hit": false,
+     "string_degree_norm": 0.5196,
+     "hub_score_norm": 0.5053,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.9339
+    },
+    {
+     "gene": "MAP4K1",
+     "hit": true,
+     "string_degree_norm": 0.0157,
+     "hub_score_norm": 0.0421,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "MAP2K1",
+     "hit": false,
+     "string_degree_norm": 0.107,
+     "hub_score_norm": 0.1579,
+     "kegg_pathway_count_norm": 0.7589,
+     "reactome_pathway_count_norm": 0.1187
+    },
+    {
+     "gene": "PIK3R3",
+     "hit": false,
+     "string_degree_norm": 0.1841,
+     "hub_score_norm": 0.1895,
+     "kegg_pathway_count_norm": 0.875,
+     "reactome_pathway_count_norm": 0.107
+    },
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "RPS9",
+     "hit": false,
+     "string_degree_norm": 0.5183,
+     "hub_score_norm": 0.3053,
+     "kegg_pathway_count_norm": 0.0179,
+     "reactome_pathway_count_norm": 0.1128
+    },
+    {
+     "gene": "PLCB2",
+     "hit": false,
+     "string_degree_norm": 0.1201,
+     "hub_score_norm": 0.0316,
+     "kegg_pathway_count_norm": 0.5357,
+     "reactome_pathway_count_norm": 0.0837
+    },
+    {
+     "gene": "PLCG2",
+     "hit": false,
+     "string_degree_norm": 0.1854,
+     "hub_score_norm": 0.1474,
+     "kegg_pathway_count_norm": 0.3393,
+     "reactome_pathway_count_norm": 0.0973
+    },
+    {
+     "gene": "TNFSF8",
+     "hit": false,
+     "string_degree_norm": 0.0157,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.0078
+    },
+    {
+     "gene": "UBE2B",
+     "hit": false,
+     "string_degree_norm": 0.0418,
+     "hub_score_norm": 0.0842,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.0233
+    }
+   ]
+  },
+  "IL2": {
+   "n_pool": 18273,
+   "budget": 640,
+   "pool_hit_rate": 0.026322990204126307,
+   "coreset": 0.1393,
+   "coreset_row_shuffled": 0.1393,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.1497,
+   "top_degree": 0.20135135135135135,
+   "top_outlying_intrinsic": 0.158004158004158,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.7526424745526187,
+    "hub_score_norm": 0.8727678388195699,
+    "archs4_coexpr": 0.6142789224538937,
+    "ppi_score_sum": 0.8764752383981831,
+    "kegg_overlap": 0.8428840964127401,
+    "pli_score": 0.7060757760767252,
+    "string_degree_norm": 0.8683303234280085,
+    "kegg_pathway_count_norm": 0.8439183238247688,
+    "reactome_pathway_count_norm": 0.8306784172686477
+   },
+   "pick_outlying_percentile_by_round": [
+    0.9338911064138347,
+    0.9166117273436217,
+    0.8698357036337766,
+    0.8339280461610026,
+    0.8250377093252339
+   ],
+   "picks_per_outlying_decile": [
+    0.0234375,
+    0.0109375,
+    0.003125,
+    0.0,
+    0.0,
+    0.0015625,
+    0.01875,
+    0.215625,
+    0.1078125,
+    0.61875
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.015873015873015872,
+    0.020251778872468526,
+    0.010393873085339168,
+    0.009852216748768473,
+    0.00935093509350935,
+    0.013556618819776715,
+    0.022406639004149378,
+    0.04597701149425287,
+    0.030103995621237,
+    0.0826039387308534
+   ],
+   "picks_in_most_outlying_budget": 0.4875,
+   "hit_rate_picks_inside_most_outlying": 0.1346153846153846,
+   "hit_rate_picks_outside_most_outlying": 0.07621951219512195,
+   "hit_rate_most_outlying_not_picked": 0.09146341463414634,
+   "anchor_signal_share_pool": 0.19777814261478685,
+   "anchor_signal_share_picks": 0.9125,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0632,
+     "0.99": 0.1895,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.006,
+     "0.9": 0.056,
+     "0.99": 0.19765599999999978,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0006,
+     "0.9": 0.9884,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0091,
+     "0.9": 0.0705,
+     "0.99": 0.23926399999999848,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0357,
+     "0.99": 0.2054,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0058,
+     "0.9": 0.0311,
+     "0.99": 0.1342,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "AKT1",
+     "hit": false,
+     "string_degree_norm": 0.5679,
+     "hub_score_norm": 0.6947,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.2451
+    },
+    {
+     "gene": "DENND1C",
+     "hit": false,
+     "string_degree_norm": 0.0039,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0078
+    },
+    {
+     "gene": "UBB",
+     "hit": false,
+     "string_degree_norm": 0.3956,
+     "hub_score_norm": 0.4526,
+     "kegg_pathway_count_norm": 0.0536,
+     "reactome_pathway_count_norm": 0.9339
+    },
+    {
+     "gene": "ITPKB",
+     "hit": false,
+     "string_degree_norm": 0.0222,
+     "hub_score_norm": 0.0105,
+     "kegg_pathway_count_norm": 0.0268,
+     "reactome_pathway_count_norm": 0.0058
+    },
+    {
+     "gene": "EP300",
+     "hit": false,
+     "string_degree_norm": 0.5091,
+     "hub_score_norm": 0.5684,
+     "kegg_pathway_count_norm": 0.2321,
+     "reactome_pathway_count_norm": 0.3833
+    },
+    {
+     "gene": "MAPK9",
+     "hit": false,
+     "string_degree_norm": 0.1932,
+     "hub_score_norm": 0.1789,
+     "kegg_pathway_count_norm": 0.625,
+     "reactome_pathway_count_norm": 0.0681
+    },
+    {
+     "gene": "IL4",
+     "hit": false,
+     "string_degree_norm": 0.2285,
+     "hub_score_norm": 0.1474,
+     "kegg_pathway_count_norm": 0.1429,
+     "reactome_pathway_count_norm": 0.0175
+    },
+    {
+     "gene": "MAPK3",
+     "hit": true,
+     "string_degree_norm": 0.3446,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4183
+    },
+    {
+     "gene": "PRKCB",
+     "hit": false,
+     "string_degree_norm": 0.1488,
+     "hub_score_norm": 0.1053,
+     "kegg_pathway_count_norm": 0.6161,
+     "reactome_pathway_count_norm": 0.0837
+    },
+    {
+     "gene": "IRF1",
+     "hit": false,
+     "string_degree_norm": 0.1123,
+     "hub_score_norm": 0.1053,
+     "kegg_pathway_count_norm": 0.0446,
+     "reactome_pathway_count_norm": 0.0292
+    },
+    {
+     "gene": "RPS27A",
+     "hit": true,
+     "string_degree_norm": 0.7689,
+     "hub_score_norm": 0.6211,
+     "kegg_pathway_count_norm": 0.0714,
+     "reactome_pathway_count_norm": 1.0
+    },
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    }
+   ]
+  },
+  "Sanchez21": {
+   "n_pool": 17807,
+   "budget": 640,
+   "pool_hit_rate": 0.0482394563935531,
+   "coreset": 0.0314,
+   "coreset_row_shuffled": 0.0314,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.0338,
+   "top_degree": 0.04359720605355064,
+   "top_outlying_intrinsic": 0.05587892898719441,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.6792813658252372,
+    "hub_score_norm": 0.8639120588111417,
+    "archs4_coexpr": 0.6131282202925815,
+    "ppi_score_sum": 0.8658086531981806,
+    "kegg_overlap": 0.721652913882181,
+    "pli_score": 0.7186966501937441,
+    "string_degree_norm": 0.8548526825826922,
+    "kegg_pathway_count_norm": 0.8120379275004211,
+    "reactome_pathway_count_norm": 0.8180278471949233
+   },
+   "pick_outlying_percentile_by_round": [
+    0.9151492390632897,
+    0.8601098760318975,
+    0.8399242573145392,
+    0.8171966256247543,
+    0.798738733363284
+   ],
+   "picks_per_outlying_decile": [
+    0.028125,
+    0.009375,
+    0.003125,
+    0.0,
+    0.0015625,
+    0.0,
+    0.0375,
+    0.2609375,
+    0.18125,
+    0.478125
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.048314606741573035,
+    0.04660303200449186,
+    0.043234138124649074,
+    0.042134831460674156,
+    0.032073310423825885,
+    0.046328240512567766,
+    0.03446075303126994,
+    0.05053340819764177,
+    0.06400898371701291,
+    0.072992700729927
+   ],
+   "picks_in_most_outlying_budget": 0.403125,
+   "hit_rate_picks_inside_most_outlying": 0.05426356589147287,
+   "hit_rate_picks_outside_most_outlying": 0.034031413612565446,
+   "hit_rate_most_outlying_not_picked": 0.08900523560209424,
+   "anchor_signal_share_pool": 0.14747009602965125,
+   "anchor_signal_share_picks": 0.8015625,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0632,
+     "0.99": 0.1895,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.0062,
+     "0.9": 0.0565,
+     "0.99": 0.19908799999999974,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0009,
+     "0.9": 0.99064,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0104,
+     "0.9": 0.0718,
+     "0.99": 0.2389,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0357,
+     "0.99": 0.2143,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0058,
+     "0.9": 0.0331,
+     "0.99": 0.1342,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "TP53",
+     "hit": true,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "CHAT",
+     "hit": false,
+     "string_degree_norm": 0.0366,
+     "hub_score_norm": 0.0211,
+     "kegg_pathway_count_norm": 0.0179,
+     "reactome_pathway_count_norm": 0.0175
+    },
+    {
+     "gene": "AKT3",
+     "hit": false,
+     "string_degree_norm": 0.1253,
+     "hub_score_norm": 0.0737,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.1751
+    },
+    {
+     "gene": "SP2",
+     "hit": false,
+     "string_degree_norm": 0.0013,
+     "hub_score_norm": 0.0105,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "UBC",
+     "hit": false,
+     "string_degree_norm": 0.5196,
+     "hub_score_norm": 0.5053,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.9339
+    },
+    {
+     "gene": "CALML5",
+     "hit": false,
+     "string_degree_norm": 0.3146,
+     "hub_score_norm": 0.1158,
+     "kegg_pathway_count_norm": 0.3839,
+     "reactome_pathway_count_norm": 0.0136
+    },
+    {
+     "gene": "RAB7A",
+     "hit": false,
+     "string_degree_norm": 0.0614,
+     "hub_score_norm": 0.1368,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.0681
+    },
+    {
+     "gene": "CHM",
+     "hit": false,
+     "string_degree_norm": 0.0326,
+     "hub_score_norm": 0.0316,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0253
+    },
+    {
+     "gene": "GRB2",
+     "hit": false,
+     "string_degree_norm": 0.3564,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 0.4107,
+     "reactome_pathway_count_norm": 0.463
+    },
+    {
+     "gene": "MAPK3",
+     "hit": false,
+     "string_degree_norm": 0.3446,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4183
+    },
+    {
+     "gene": "AKT1",
+     "hit": false,
+     "string_degree_norm": 0.5679,
+     "hub_score_norm": 0.6947,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.2451
+    },
+    {
+     "gene": "RHOA",
+     "hit": true,
+     "string_degree_norm": 0.3642,
+     "hub_score_norm": 0.2947,
+     "kegg_pathway_count_norm": 0.3661,
+     "reactome_pathway_count_norm": 0.1576
+    }
+   ]
+  },
+  "Sanchez21_down": {
+   "n_pool": 17807,
+   "budget": 640,
+   "pool_hit_rate": 0.048913348683102154,
+   "coreset": 0.0781,
+   "coreset_row_shuffled": 0.0781,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.0631,
+   "top_degree": 0.063203214695752,
+   "top_outlying_intrinsic": 0.10332950631458095,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.6792813658252372,
+    "hub_score_norm": 0.8639120588111417,
+    "archs4_coexpr": 0.6131282202925815,
+    "ppi_score_sum": 0.8658086531981806,
+    "kegg_overlap": 0.721652913882181,
+    "pli_score": 0.7186966501937441,
+    "string_degree_norm": 0.8548526825826922,
+    "kegg_pathway_count_norm": 0.8120379275004211,
+    "reactome_pathway_count_norm": 0.8180278471949233
+   },
+   "pick_outlying_percentile_by_round": [
+    0.9151492390632897,
+    0.8601098760318975,
+    0.8399242573145392,
+    0.8171966256247543,
+    0.798738733363284
+   ],
+   "picks_per_outlying_decile": [
+    0.028125,
+    0.009375,
+    0.003125,
+    0.0,
+    0.0015625,
+    0.0,
+    0.0375,
+    0.2609375,
+    0.18125,
+    0.478125
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.034269662921348316,
+    0.035934868051656375,
+    0.041549691184727684,
+    0.03651685393258427,
+    0.03493699885452463,
+    0.02661409561360276,
+    0.048500319081046586,
+    0.04997192588433464,
+    0.0746771476698484,
+    0.10892756878158338
+   ],
+   "picks_in_most_outlying_budget": 0.403125,
+   "hit_rate_picks_inside_most_outlying": 0.13565891472868216,
+   "hit_rate_picks_outside_most_outlying": 0.08638743455497382,
+   "hit_rate_most_outlying_not_picked": 0.10732984293193717,
+   "anchor_signal_share_pool": 0.14747009602965125,
+   "anchor_signal_share_picks": 0.8015625,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0632,
+     "0.99": 0.1895,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.0062,
+     "0.9": 0.0565,
+     "0.99": 0.19908799999999974,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0009,
+     "0.9": 0.99064,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0104,
+     "0.9": 0.0718,
+     "0.99": 0.2389,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0357,
+     "0.99": 0.2143,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0058,
+     "0.9": 0.0331,
+     "0.99": 0.1342,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "CHAT",
+     "hit": false,
+     "string_degree_norm": 0.0366,
+     "hub_score_norm": 0.0211,
+     "kegg_pathway_count_norm": 0.0179,
+     "reactome_pathway_count_norm": 0.0175
+    },
+    {
+     "gene": "AKT3",
+     "hit": false,
+     "string_degree_norm": 0.1253,
+     "hub_score_norm": 0.0737,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.1751
+    },
+    {
+     "gene": "SP2",
+     "hit": false,
+     "string_degree_norm": 0.0013,
+     "hub_score_norm": 0.0105,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "UBC",
+     "hit": false,
+     "string_degree_norm": 0.5196,
+     "hub_score_norm": 0.5053,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.9339
+    },
+    {
+     "gene": "CALML5",
+     "hit": false,
+     "string_degree_norm": 0.3146,
+     "hub_score_norm": 0.1158,
+     "kegg_pathway_count_norm": 0.3839,
+     "reactome_pathway_count_norm": 0.0136
+    },
+    {
+     "gene": "RAB7A",
+     "hit": false,
+     "string_degree_norm": 0.0614,
+     "hub_score_norm": 0.1368,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.0681
+    },
+    {
+     "gene": "CHM",
+     "hit": false,
+     "string_degree_norm": 0.0326,
+     "hub_score_norm": 0.0316,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0253
+    },
+    {
+     "gene": "GRB2",
+     "hit": true,
+     "string_degree_norm": 0.3564,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 0.4107,
+     "reactome_pathway_count_norm": 0.463
+    },
+    {
+     "gene": "MAPK3",
+     "hit": false,
+     "string_degree_norm": 0.3446,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4183
+    },
+    {
+     "gene": "AKT1",
+     "hit": false,
+     "string_degree_norm": 0.5679,
+     "hub_score_norm": 0.6947,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.2451
+    },
+    {
+     "gene": "RHOA",
+     "hit": true,
+     "string_degree_norm": 0.3642,
+     "hub_score_norm": 0.2947,
+     "kegg_pathway_count_norm": 0.3661,
+     "reactome_pathway_count_norm": 0.1576
+    }
+   ]
+  },
+  "Carnevale22": {
+   "n_pool": 18224,
+   "budget": 640,
+   "pool_hit_rate": 0.04762949956101844,
+   "coreset": 0.0541,
+   "coreset_row_shuffled": 0.0541,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.0576,
+   "top_degree": 0.05725806451612903,
+   "top_outlying_intrinsic": 0.056451612903225805,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.6835283314585162,
+    "hub_score_norm": 0.863880219765145,
+    "archs4_coexpr": 0.6112735523897059,
+    "ppi_score_sum": 0.8681153201135864,
+    "kegg_overlap": 0.7974325580278754,
+    "pli_score": 0.7183773801031608,
+    "string_degree_norm": 0.8702811196773486,
+    "kegg_pathway_count_norm": 0.8411786569221906,
+    "reactome_pathway_count_norm": 0.826328390789618
+   },
+   "pick_outlying_percentile_by_round": [
+    0.9238632778204565,
+    0.8596716555092185,
+    0.8702123573309921,
+    0.8168928164782704,
+    0.8229356720533363
+   ],
+   "picks_per_outlying_decile": [
+    0.0203125,
+    0.009375,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.03125,
+    0.2671875,
+    0.1828125,
+    0.4890625
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.04884742041712404,
+    0.04939626783754116,
+    0.03455842018650576,
+    0.04654983570646221,
+    0.04630152456239413,
+    0.038030424339471576,
+    0.04522613065326633,
+    0.05375754251234229,
+    0.04939626783754116,
+    0.06692265496434449
+   ],
+   "picks_in_most_outlying_budget": 0.4,
+   "hit_rate_picks_inside_most_outlying": 0.08984375,
+   "hit_rate_picks_outside_most_outlying": 0.0625,
+   "hit_rate_most_outlying_not_picked": 0.07291666666666667,
+   "anchor_signal_share_pool": 0.24209833187006147,
+   "anchor_signal_share_picks": 0.8796875,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0632,
+     "0.99": 0.1895,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.006,
+     "0.9": 0.056470000000000076,
+     "0.99": 0.20037700000000003,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0002,
+     "0.9": 0.9853700000000001,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0091,
+     "0.9": 0.0718,
+     "0.99": 0.25690100000000055,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0357,
+     "0.99": 0.2054,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0058,
+     "0.9": 0.0311,
+     "0.99": 0.16686300000000084,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "FGD2",
+     "hit": false,
+     "string_degree_norm": 0.0,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0233
+    },
+    {
+     "gene": "ADCY5",
+     "hit": false,
+     "string_degree_norm": 0.1227,
+     "hub_score_norm": 0.0632,
+     "kegg_pathway_count_norm": 0.4643,
+     "reactome_pathway_count_norm": 0.1401
+    },
+    {
+     "gene": "UBB",
+     "hit": false,
+     "string_degree_norm": 0.3956,
+     "hub_score_norm": 0.4526,
+     "kegg_pathway_count_norm": 0.0536,
+     "reactome_pathway_count_norm": 0.9339
+    },
+    {
+     "gene": "MAPK3",
+     "hit": false,
+     "string_degree_norm": 0.3446,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4183
+    },
+    {
+     "gene": "BRD4",
+     "hit": false,
+     "string_degree_norm": 0.171,
+     "hub_score_norm": 0.3789,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0214
+    },
+    {
+     "gene": "NT5E",
+     "hit": false,
+     "string_degree_norm": 0.1593,
+     "hub_score_norm": 0.0842,
+     "kegg_pathway_count_norm": 0.0268,
+     "reactome_pathway_count_norm": 0.0272
+    },
+    {
+     "gene": "PIK3R3",
+     "hit": false,
+     "string_degree_norm": 0.1841,
+     "hub_score_norm": 0.1895,
+     "kegg_pathway_count_norm": 0.875,
+     "reactome_pathway_count_norm": 0.107
+    },
+    {
+     "gene": "PIK3CD",
+     "hit": false,
+     "string_degree_norm": 0.1762,
+     "hub_score_norm": 0.2,
+     "kegg_pathway_count_norm": 0.8929,
+     "reactome_pathway_count_norm": 0.0973
+    },
+    {
+     "gene": "CTNNB1",
+     "hit": false,
+     "string_degree_norm": 0.607,
+     "hub_score_norm": 0.5263,
+     "kegg_pathway_count_norm": 0.2679,
+     "reactome_pathway_count_norm": 0.2296
+    },
+    {
+     "gene": "RPS27A",
+     "hit": true,
+     "string_degree_norm": 0.7689,
+     "hub_score_norm": 0.6211,
+     "kegg_pathway_count_norm": 0.0714,
+     "reactome_pathway_count_norm": 1.0
+    },
+    {
+     "gene": "GSK3A",
+     "hit": false,
+     "string_degree_norm": 0.0366,
+     "hub_score_norm": 0.0737,
+     "kegg_pathway_count_norm": 0.0357,
+     "reactome_pathway_count_norm": 0.0525
+    }
+   ]
+  },
+  "Scharenberg22": {
+   "n_pool": 1029,
+   "budget": 160,
+   "pool_hit_rate": 0.047619047619047616,
+   "coreset": 0.2857,
+   "coreset_row_shuffled": 0.2857,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.2245,
+   "top_degree": 0.22448979591836735,
+   "top_outlying_intrinsic": 0.30612244897959184,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.721325315840622,
+    "hub_score_norm": 0.783591472303207,
+    "archs4_coexpr": 0.5732902089407191,
+    "ppi_score_sum": 0.7853164480077746,
+    "kegg_overlap": 0.7600917152575316,
+    "pli_score": 0.6590196793002916,
+    "string_degree_norm": 0.7689382896015549,
+    "kegg_pathway_count_norm": 0.7627186588921283,
+    "reactome_pathway_count_norm": 0.7244442419825073
+   },
+   "pick_outlying_percentile_by_round": [
+    0.8498845966958213,
+    0.8114978134110786,
+    0.7623603012633625,
+    0.764030612244898,
+    0.7116891399416909
+   ],
+   "picks_per_outlying_decile": [
+    0.025,
+    0.0,
+    0.00625,
+    0.00625,
+    0.0375,
+    0.11875,
+    0.1125,
+    0.11875,
+    0.175,
+    0.4
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.00980392156862745,
+    0.04854368932038835,
+    0.009708737864077669,
+    0.0,
+    0.0,
+    0.06796116504854369,
+    0.038834951456310676,
+    0.07766990291262135,
+    0.10679611650485436,
+    0.11650485436893204
+   ],
+   "picks_in_most_outlying_budget": 0.54375,
+   "hit_rate_picks_inside_most_outlying": 0.09195402298850575,
+   "hit_rate_picks_outside_most_outlying": 0.0821917808219178,
+   "hit_rate_most_outlying_not_picked": 0.136986301369863,
+   "anchor_signal_share_pool": 0.5063168124392614,
+   "anchor_signal_share_picks": 0.925,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0211,
+     "0.9": 0.1053,
+     "0.99": 0.33386000000000027,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.0172,
+     "0.9": 0.10140000000000002,
+     "0.99": 0.31386800000000004,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0039,
+     "0.9": 0.99644,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0248,
+     "0.9": 0.11646000000000005,
+     "0.99": 0.314236,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0089,
+     "0.9": 0.09108000000000041,
+     "0.99": 0.43500800000000023,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0097,
+     "0.9": 0.0642,
+     "0.99": 0.1693,
+     "max": 0.4319
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "TMEM8A",
+     "hit": false,
+     "string_degree_norm": 0.0,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "MAPK1",
+     "hit": false,
+     "string_degree_norm": 0.3003,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4319
+    },
+    {
+     "gene": "AMBRA1",
+     "hit": false,
+     "string_degree_norm": 0.0849,
+     "hub_score_norm": 0.0632,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.0039
+    },
+    {
+     "gene": "CASP8",
+     "hit": false,
+     "string_degree_norm": 0.1488,
+     "hub_score_norm": 0.1895,
+     "kegg_pathway_count_norm": 0.3036,
+     "reactome_pathway_count_norm": 0.1148
+    },
+    {
+     "gene": "RPS3A",
+     "hit": false,
+     "string_degree_norm": 0.4321,
+     "hub_score_norm": 0.2105,
+     "kegg_pathway_count_norm": 0.0179,
+     "reactome_pathway_count_norm": 0.1051
+    },
+    {
+     "gene": "MAPK9",
+     "hit": false,
+     "string_degree_norm": 0.1932,
+     "hub_score_norm": 0.1789,
+     "kegg_pathway_count_norm": 0.625,
+     "reactome_pathway_count_norm": 0.0681
+    },
+    {
+     "gene": "MAPK8",
+     "hit": false,
+     "string_degree_norm": 0.2559,
+     "hub_score_norm": 0.2421,
+     "kegg_pathway_count_norm": 0.625,
+     "reactome_pathway_count_norm": 0.1226
+    },
+    {
+     "gene": "CCNB1",
+     "hit": false,
+     "string_degree_norm": 0.2689,
+     "hub_score_norm": 0.3263,
+     "kegg_pathway_count_norm": 0.0625,
+     "reactome_pathway_count_norm": 0.1206
+    },
+    {
+     "gene": "MAPK3",
+     "hit": false,
+     "string_degree_norm": 0.3446,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4183
+    },
+    {
+     "gene": "ETS1",
+     "hit": true,
+     "string_degree_norm": 0.0457,
+     "hub_score_norm": 0.1368,
+     "kegg_pathway_count_norm": 0.0446,
+     "reactome_pathway_count_norm": 0.0136
+    },
+    {
+     "gene": "EGFR",
+     "hit": false,
+     "string_degree_norm": 0.6606,
+     "hub_score_norm": 0.6316,
+     "kegg_pathway_count_norm": 0.3929,
+     "reactome_pathway_count_norm": 0.1595
+    }
+   ]
+  },
+  "Steinhart": {
+   "n_pool": 18144,
+   "budget": 640,
+   "pool_hit_rate": 0.007991622574955908,
+   "coreset": 0.0897,
+   "coreset_row_shuffled": 0.0897,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.0483,
+   "top_degree": 0.04827586206896552,
+   "top_outlying_intrinsic": 0.06896551724137931,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.6752483603395062,
+    "hub_score_norm": 0.8523405206266533,
+    "archs4_coexpr": 0.6088846519510581,
+    "ppi_score_sum": 0.8550110832093253,
+    "kegg_overlap": 0.7769827060598544,
+    "pli_score": 0.7174929556602734,
+    "string_degree_norm": 0.8577008497988317,
+    "kegg_pathway_count_norm": 0.8433427114335318,
+    "reactome_pathway_count_norm": 0.8246317653218694
+   },
+   "pick_outlying_percentile_by_round": [
+    0.932166797563933,
+    0.8690562307098766,
+    0.8485721002810845,
+    0.8164333767361112,
+    0.790011505180776
+   ],
+   "picks_per_outlying_decile": [
+    0.021875,
+    0.0109375,
+    0.0015625,
+    0.0015625,
+    0.0,
+    0.0,
+    0.0375,
+    0.2625,
+    0.1859375,
+    0.478125
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.008269018743109152,
+    0.006615214994487321,
+    0.005509641873278237,
+    0.007166482910694598,
+    0.0051933064050779,
+    0.007006071929005138,
+    0.007010834926704908,
+    0.011019283746556474,
+    0.010474090407938258,
+    0.011570247933884297
+   ],
+   "picks_in_most_outlying_budget": 0.4109375,
+   "hit_rate_picks_inside_most_outlying": 0.034220532319391636,
+   "hit_rate_picks_outside_most_outlying": 0.010610079575596816,
+   "hit_rate_most_outlying_not_picked": 0.007957559681697613,
+   "anchor_signal_share_pool": 0.15503747795414463,
+   "anchor_signal_share_picks": 0.8578125,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0632,
+     "0.99": 0.1895,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.006,
+     "0.9": 0.0559,
+     "0.99": 0.19705699999999998,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.0006,
+     "0.9": 0.9887,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0091,
+     "0.9": 0.0705,
+     "0.99": 0.2389,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0357,
+     "0.99": 0.2054,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0058,
+     "0.9": 0.0311,
+     "0.99": 0.1342,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "TMC8",
+     "hit": false,
+     "string_degree_norm": 0.0078,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "APC2",
+     "hit": false,
+     "string_degree_norm": 0.0352,
+     "hub_score_norm": 0.0211,
+     "kegg_pathway_count_norm": 0.1429,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "UBB",
+     "hit": false,
+     "string_degree_norm": 0.3956,
+     "hub_score_norm": 0.4526,
+     "kegg_pathway_count_norm": 0.0536,
+     "reactome_pathway_count_norm": 0.9339
+    },
+    {
+     "gene": "MAPK1",
+     "hit": false,
+     "string_degree_norm": 0.3003,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4319
+    },
+    {
+     "gene": "MED1",
+     "hit": false,
+     "string_degree_norm": 0.5157,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.107
+    },
+    {
+     "gene": "B4GALNT1",
+     "hit": false,
+     "string_degree_norm": 0.0248,
+     "hub_score_norm": 0.0421,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.0097
+    },
+    {
+     "gene": "MAPK9",
+     "hit": false,
+     "string_degree_norm": 0.1932,
+     "hub_score_norm": 0.1789,
+     "kegg_pathway_count_norm": 0.625,
+     "reactome_pathway_count_norm": 0.0681
+    },
+    {
+     "gene": "TNF",
+     "hit": false,
+     "string_degree_norm": 0.5104,
+     "hub_score_norm": 0.4,
+     "kegg_pathway_count_norm": 0.5804,
+     "reactome_pathway_count_norm": 0.037
+    },
+    {
+     "gene": "IRF4",
+     "hit": true,
+     "string_degree_norm": 0.0574,
+     "hub_score_norm": 0.1053,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.037
+    },
+    {
+     "gene": "RPS27A",
+     "hit": false,
+     "string_degree_norm": 0.7689,
+     "hub_score_norm": 0.6211,
+     "kegg_pathway_count_norm": 0.0714,
+     "reactome_pathway_count_norm": 1.0
+    },
+    {
+     "gene": "ARHGAP30",
+     "hit": false,
+     "string_degree_norm": 0.0026,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0156
+    }
+   ]
+  },
+  "Replogle_K562_essential": {
+   "n_pool": 623,
+   "budget": 160,
+   "pool_hit_rate": 0.10112359550561797,
+   "coreset": 0.2698,
+   "coreset_row_shuffled": 0.2698,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.3968,
+   "top_degree": 0.4603174603174603,
+   "top_outlying_intrinsic": 0.38095238095238093,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.6063553370786516,
+    "hub_score_norm": 0.6374548555377207,
+    "archs4_coexpr": 0.574779293739968,
+    "ppi_score_sum": 0.6344402086677368,
+    "kegg_overlap": 0.5901534911717495,
+    "pli_score": 0.5979785313001604,
+    "string_degree_norm": 0.6350220706260032,
+    "kegg_pathway_count_norm": 0.6255969101123595,
+    "reactome_pathway_count_norm": 0.6200692215088283
+   },
+   "pick_outlying_percentile_by_round": [
+    0.7064857544141252,
+    0.6416031300160514,
+    0.497642455858748,
+    0.6594101123595506,
+    0.5506621187800962
+   ],
+   "picks_per_outlying_decile": [
+    0.125,
+    0.01875,
+    0.0,
+    0.08125,
+    0.09375,
+    0.08125,
+    0.1375,
+    0.1625,
+    0.125,
+    0.175
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.06451612903225806,
+    0.0967741935483871,
+    0.0,
+    0.06349206349206349,
+    0.03225806451612903,
+    0.03225806451612903,
+    0.09523809523809523,
+    0.11290322580645161,
+    0.22580645161290322,
+    0.2857142857142857
+   ],
+   "picks_in_most_outlying_budget": 0.38125,
+   "hit_rate_picks_inside_most_outlying": 0.21311475409836064,
+   "hit_rate_picks_outside_most_outlying": 0.04040404040404041,
+   "hit_rate_most_outlying_not_picked": 0.24242424242424243,
+   "anchor_signal_share_pool": 0.5441412520064205,
+   "anchor_signal_share_picks": 0.84375,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0632,
+     "0.9": 0.1684,
+     "0.99": 0.2713899999999997,
+     "max": 0.6211
+    },
+    "ppi_score_sum": {
+     "0.5": 0.0604,
+     "0.9": 0.18092000000000008,
+     "0.99": 0.29170199999999985,
+     "max": 0.6523
+    },
+    "pli_score": {
+     "0.5": 0.1126,
+     "0.9": 0.99998,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0744,
+     "0.9": 0.26084000000000007,
+     "0.99": 0.4402899999999997,
+     "max": 0.7689
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0089,
+     "0.9": 0.0268,
+     "0.99": 0.10514199999999976,
+     "max": 0.4286
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0175,
+     "0.9": 0.0895,
+     "0.99": 0.3911,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "RPS27A",
+     "hit": true,
+     "string_degree_norm": 0.7689,
+     "hub_score_norm": 0.6211,
+     "kegg_pathway_count_norm": 0.0714,
+     "reactome_pathway_count_norm": 1.0
+    },
+    {
+     "gene": "RARS",
+     "hit": false,
+     "string_degree_norm": 0.0,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "HSPA8",
+     "hit": false,
+     "string_degree_norm": 0.265,
+     "hub_score_norm": 0.2632,
+     "kegg_pathway_count_norm": 0.1071,
+     "reactome_pathway_count_norm": 0.107
+    },
+    {
+     "gene": "POLR2F",
+     "hit": false,
+     "string_degree_norm": 0.3225,
+     "hub_score_norm": 0.2842,
+     "kegg_pathway_count_norm": 0.0268,
+     "reactome_pathway_count_norm": 0.2374
+    },
+    {
+     "gene": "GRB2",
+     "hit": false,
+     "string_degree_norm": 0.3564,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 0.4107,
+     "reactome_pathway_count_norm": 0.463
+    },
+    {
+     "gene": "ATF4",
+     "hit": false,
+     "string_degree_norm": 0.0927,
+     "hub_score_norm": 0.1158,
+     "kegg_pathway_count_norm": 0.3482,
+     "reactome_pathway_count_norm": 0.0486
+    },
+    {
+     "gene": "SMC3",
+     "hit": true,
+     "string_degree_norm": 0.0979,
+     "hub_score_norm": 0.0316,
+     "kegg_pathway_count_norm": 0.0179,
+     "reactome_pathway_count_norm": 0.0486
+    },
+    {
+     "gene": "MED1",
+     "hit": true,
+     "string_degree_norm": 0.5157,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.107
+    },
+    {
+     "gene": "UBA3",
+     "hit": false,
+     "string_degree_norm": 0.0731,
+     "hub_score_norm": 0.1158,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.037
+    },
+    {
+     "gene": "PSMC4",
+     "hit": true,
+     "string_degree_norm": 0.107,
+     "hub_score_norm": 0.0947,
+     "kegg_pathway_count_norm": 0.0804,
+     "reactome_pathway_count_norm": 0.3891
+    },
+    {
+     "gene": "MTOR",
+     "hit": false,
+     "string_degree_norm": 0.2298,
+     "hub_score_norm": 0.2737,
+     "kegg_pathway_count_norm": 0.4286,
+     "reactome_pathway_count_norm": 0.0875
+    },
+    {
+     "gene": "ICE1",
+     "hit": false,
+     "string_degree_norm": 0.047,
+     "hub_score_norm": 0.0211,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0117
+    }
+   ]
+  },
+  "Replogle_K562_gwps": {
+   "n_pool": 9193,
+   "budget": 640,
+   "pool_hit_rate": 0.10051125856630044,
+   "coreset": 0.1558,
+   "coreset_row_shuffled": 0.1558,
+   "coreset_row_shuffled_range": 0.0,
+   "coreset_no_anchor": 0.1396,
+   "top_degree": 0.2720779220779221,
+   "top_outlying_intrinsic": 0.1396103896103896,
+   "pick_feature_percentile": {
+    "g1_ppi_score": 0.6713860919993472,
+    "hub_score_norm": 0.8400844222506254,
+    "archs4_coexpr": 0.6201427886707276,
+    "ppi_score_sum": 0.8421687187262048,
+    "kegg_overlap": 0.6855602598444468,
+    "pli_score": 0.684284407973458,
+    "string_degree_norm": 0.8318032402371369,
+    "kegg_pathway_count_norm": 0.744799371804634,
+    "reactome_pathway_count_norm": 0.7911505357337104
+   },
+   "pick_outlying_percentile_by_round": [
+    0.8975494261938433,
+    0.827353353094746,
+    0.7986647449146089,
+    0.7719239502882628,
+    0.7733474178722941
+   ],
+   "picks_per_outlying_decile": [
+    0.0359375,
+    0.015625,
+    0.0015625,
+    0.0015625,
+    0.0,
+    0.0421875,
+    0.1546875,
+    0.13125,
+    0.0921875,
+    0.525
+   ],
+   "hit_rate_per_outlying_decile": [
+    0.0544069640914037,
+    0.06964091403699674,
+    0.07834602829162132,
+    0.05223068552774755,
+    0.04726890756302521,
+    0.09582863585118377,
+    0.12608695652173912,
+    0.11207834602829161,
+    0.11969532100108814,
+    0.2510869565217391
+   ],
+   "picks_in_most_outlying_budget": 0.4171875,
+   "hit_rate_picks_inside_most_outlying": 0.2397003745318352,
+   "hit_rate_picks_outside_most_outlying": 0.21447721179624665,
+   "hit_rate_most_outlying_not_picked": 0.29222520107238603,
+   "anchor_signal_share_pool": 0.22876101381485914,
+   "anchor_signal_share_picks": 0.84375,
+   "feature_quantiles": {
+    "hub_score_norm": {
+     "0.5": 0.0105,
+     "0.9": 0.0842,
+     "0.99": 0.2316,
+     "max": 1.0
+    },
+    "ppi_score_sum": {
+     "0.5": 0.0122,
+     "0.9": 0.0802,
+     "0.99": 0.23715599999999995,
+     "max": 1.0
+    },
+    "pli_score": {
+     "0.5": 0.008,
+     "0.9": 0.9984800000000001,
+     "0.99": 1.0,
+     "max": 1.0
+    },
+    "string_degree_norm": {
+     "0.5": 0.0157,
+     "0.9": 0.094,
+     "0.99": 0.2872,
+     "max": 1.0
+    },
+    "kegg_pathway_count_norm": {
+     "0.5": 0.0,
+     "0.9": 0.0268,
+     "0.99": 0.23281999999999933,
+     "max": 1.0
+    },
+    "reactome_pathway_count_norm": {
+     "0.5": 0.0078,
+     "0.9": 0.0409,
+     "0.99": 0.1693,
+     "max": 1.0
+    }
+   },
+   "first_picks": [
+    {
+     "gene": "TP53",
+     "hit": false,
+     "string_degree_norm": 1.0,
+     "hub_score_norm": 1.0,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.2529
+    },
+    {
+     "gene": "CCDC86",
+     "hit": true,
+     "string_degree_norm": 0.0026,
+     "hub_score_norm": 0.0,
+     "kegg_pathway_count_norm": 0.0,
+     "reactome_pathway_count_norm": 0.0
+    },
+    {
+     "gene": "RPS27A",
+     "hit": true,
+     "string_degree_norm": 0.7689,
+     "hub_score_norm": 0.6211,
+     "kegg_pathway_count_norm": 0.0714,
+     "reactome_pathway_count_norm": 1.0
+    },
+    {
+     "gene": "MAX",
+     "hit": true,
+     "string_degree_norm": 0.0679,
+     "hub_score_norm": 0.0526,
+     "kegg_pathway_count_norm": 0.0357,
+     "reactome_pathway_count_norm": 0.0253
+    },
+    {
+     "gene": "MAPK3",
+     "hit": false,
+     "string_degree_norm": 0.3446,
+     "hub_score_norm": 0.3368,
+     "kegg_pathway_count_norm": 1.0,
+     "reactome_pathway_count_norm": 0.4183
+    },
+    {
+     "gene": "BRCA1",
+     "hit": false,
+     "string_degree_norm": 0.4869,
+     "hub_score_norm": 0.4947,
+     "kegg_pathway_count_norm": 0.0536,
+     "reactome_pathway_count_norm": 0.1167
+    },
+    {
+     "gene": "ITPR1",
+     "hit": false,
+     "string_degree_norm": 0.1279,
+     "hub_score_norm": 0.1053,
+     "kegg_pathway_count_norm": 0.4375,
+     "reactome_pathway_count_norm": 0.1245
+    },
+    {
+     "gene": "AKT1",
+     "hit": false,
+     "string_degree_norm": 0.5679,
+     "hub_score_norm": 0.6947,
+     "kegg_pathway_count_norm": 0.8393,
+     "reactome_pathway_count_norm": 0.2451
+    },
+    {
+     "gene": "WDR5",
+     "hit": true,
+     "string_degree_norm": 0.2807,
+     "hub_score_norm": 0.2421,
+     "kegg_pathway_count_norm": 0.0089,
+     "reactome_pathway_count_norm": 0.0973
+    },
+    {
+     "gene": "GADD45A",
+     "hit": false,
+     "string_degree_norm": 0.0366,
+     "hub_score_norm": 0.0421,
+     "kegg_pathway_count_norm": 0.2054,
+     "reactome_pathway_count_norm": 0.0214
+    },
+    {
+     "gene": "CTNNB1",
+     "hit": false,
+     "string_degree_norm": 0.607,
+     "hub_score_norm": 0.5263,
+     "kegg_pathway_count_norm": 0.2679,
+     "reactome_pathway_count_norm": 0.2296
+    },
+    {
+     "gene": "UBB",
+     "hit": false,
+     "string_degree_norm": 0.3956,
+     "hub_score_norm": 0.4526,
+     "kegg_pathway_count_norm": 0.0536,
+     "reactome_pathway_count_norm": 0.9339
+    }
+   ]
+  }
+ }
+}
