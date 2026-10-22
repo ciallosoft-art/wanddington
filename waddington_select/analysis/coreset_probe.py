@@ -11,6 +11,9 @@ is largest. It reads no labels. This module measures:
                    stored order, which lists three screens' hits first)
   no anchors       the same k-center on the six gene-intrinsic features (the three anchor-relative features
                    are privileged: 51% of anchors are own-screen hits)
+  clean four       the same k-center on the four features built with no anchor and no label (degree, pLI,
+                   KEGG and Reactome counts): hub_score_norm and ppi_score_sum, two of the "intrinsic" six,
+                   are built from a STRING query set holding the screens' anchors and hits (analysis/hub_leak.py)
   label-free controls at the same budget (5 x batch), no diversity: the top genes by STRING degree, and the
                    top genes by distance from the centroid of the six intrinsic features (ties broken in
                    twenty random orders); and, paired against the arm, the single-feature rankings already
@@ -45,6 +48,7 @@ ML_ENGINES_SUMMARY = REPO / "workspace" / "results" / "ml_engines" / "summary.js
 FULL = list(CA.FEATURE_COLS)
 ANCHOR = ["g1_ppi_score", "archs4_coexpr", "kegg_overlap"]
 INTRINSIC = [c for c in FULL if c not in ANCHOR]
+CLEAN4 = ["pli_score", "string_degree_norm", "kegg_pathway_count_norm", "reactome_pathway_count_norm"]
 N_ORDERS = 5          # row orders for the row-order check
 N_TIES = 20           # tie-break orders for the ranking controls
 
@@ -119,6 +123,7 @@ def probe_screen(ds: str, table: pd.DataFrame) -> dict:
         "coreset": rep.hit_ratio_per_round[-1],
         "coreset_row_shuffled": st.mean(shuffled), "coreset_row_shuffled_range": max(shuffled) - min(shuffled),
         "coreset_no_anchor": _coreset(ds, INTRINSIC).hit_ratio_per_round[-1],
+        "coreset_clean4": _coreset(ds, CLEAN4).hit_ratio_per_round[-1],
         "top_degree": _top_k(ds, genes, sub["string_degree_norm"].fillna(0.0).to_numpy(dtype=float)),
         "top_outlying_intrinsic": _top_k(ds, genes, _outlyingness(X6)),
         "pick_feature_percentile": {c: float(sub[c].rank(pct=True)[pick_mask].mean()) for c in FULL},
@@ -156,7 +161,7 @@ def main() -> None:
               f"no-anchor {r['coreset_no_anchor']:.3f}  top-degree {r['top_degree']:.3f}  "
               f"top-outlying {r['top_outlying_intrinsic']:.3f}", flush=True)
     mean = lambda k: st.mean(per[d][k] for d in BENCH)
-    summary = {k: mean(k) for k in ("coreset", "coreset_row_shuffled", "coreset_no_anchor", "top_degree",
+    summary = {k: mean(k) for k in ("coreset", "coreset_row_shuffled", "coreset_no_anchor", "coreset_clean4", "top_degree",
                                      "top_outlying_intrinsic", "picks_in_most_outlying_budget",
                                      "anchor_signal_share_pool", "anchor_signal_share_picks")}
     for k in ("top_degree", "top_outlying_intrinsic", "coreset_no_anchor"):
@@ -165,10 +170,13 @@ def main() -> None:
         summary[f"{k}_wtl_vs_coreset"] = _wtl(d)
     coreset = {ds: per[ds]["coreset"] for ds in BENCH}
     paired = {k: _paired({ds: per[ds][k] for ds in BENCH}, coreset)
-              for k in ("top_degree", "top_outlying_intrinsic", "coreset_no_anchor")}
+              for k in ("top_degree", "top_outlying_intrinsic", "coreset_no_anchor", "coreset_clean4")}
+    clean4 = {ds: per[ds]["coreset_clean4"] for ds in BENCH}
     single = json.loads(ML_ENGINES_SUMMARY.read_text())["label_free_post_hoc"]
     for f, v in single.items():
         paired[f"single_feature:{f}"] = {"mean": v["mean"], **_paired(v["per_screen"], coreset)}
+    paired["single_feature:string_degree_norm_vs_clean4"] = {
+        "mean": single["string_degree_norm"]["mean"], **_paired(single["string_degree_norm"]["per_screen"], clean4)}
     summary["paired_vs_coreset"] = paired
     summary["row_order_max_range"] = max(per[d]["coreset_row_shuffled_range"] for d in BENCH)
     summary["pick_feature_percentile"] = {c: st.mean(per[d]["pick_feature_percentile"][c] for d in BENCH) for c in FULL}

@@ -1,0 +1,281 @@
+{
+ "variants": {
+  "reported": {
+   "matched_prior": {
+    "IFNG": 0.14588528678304238,
+    "IL2": 0.30145530145530147,
+    "Sanchez21": 0.08032596041909197,
+    "Sanchez21_down": 0.08036739380022963,
+    "Carnevale22": 0.06912442396313365,
+    "Scharenberg22": 0.4897959183673469,
+    "Steinhart": 0.05517241379310345,
+    "Replogle_K562_essential": 0.5555555555555556,
+    "Replogle_K562_gwps": 0.2976190476190476
+   },
+   "online_ml": {
+    "IFNG": 0.1596,
+    "IL2": 0.3056,
+    "Sanchez21": 0.0838,
+    "Sanchez21_down": 0.0964,
+    "Carnevale22": 0.0622,
+    "Scharenberg22": 0.4694,
+    "Steinhart": 0.0759,
+    "Replogle_K562_essential": 0.619,
+    "Replogle_K562_gwps": 0.3333
+   }
+  },
+  "dropped": {
+   "matched_prior": {
+    "IFNG": 0.14962593516209477,
+    "IL2": 0.3076923076923077,
+    "Sanchez21": 0.08032596041909197,
+    "Sanchez21_down": 0.08266360505166476,
+    "Carnevale22": 0.07027649769585254,
+    "Scharenberg22": 0.5102040816326531,
+    "Steinhart": 0.05517241379310345,
+    "Replogle_K562_essential": 0.5873015873015873,
+    "Replogle_K562_gwps": 0.31493506493506496
+   },
+   "online_ml": {
+    "IFNG": 0.1696,
+    "IL2": 0.3035,
+    "Sanchez21": 0.0896,
+    "Sanchez21_down": 0.0953,
+    "Carnevale22": 0.0622,
+    "Scharenberg22": 0.4898,
+    "Steinhart": 0.0759,
+    "Replogle_K562_essential": 0.6349,
+    "Replogle_K562_gwps": 0.3485
+   }
+  },
+  "own_out": {
+   "matched_prior": {
+    "IFNG": 0.13341645885286782,
+    "IL2": 0.2785862785862786,
+    "Sanchez21": 0.08149010477299184,
+    "Sanchez21_down": 0.1010332950631458,
+    "Carnevale22": 0.06105990783410138,
+    "Scharenberg22": 0.5306122448979592,
+    "Steinhart": 0.07586206896551724,
+    "Replogle_K562_essential": 0.5238095238095238,
+    "Replogle_K562_gwps": 0.30194805194805197
+   },
+   "online_ml": {
+    "IFNG": 0.1484,
+    "IL2": 0.2931,
+    "Sanchez21": 0.0873,
+    "Sanchez21_down": 0.0976,
+    "Carnevale22": 0.0565,
+    "Scharenberg22": 0.5306,
+    "Steinhart": 0.0897,
+    "Replogle_K562_essential": 0.5873,
+    "Replogle_K562_gwps": 0.3658
+   }
+  },
+  "genome": {
+   "matched_prior": {
+    "IFNG": 0.15087281795511223,
+    "IL2": 0.3097713097713098,
+    "Sanchez21": 0.07450523864959255,
+    "Sanchez21_down": 0.08266360505166476,
+    "Carnevale22": 0.06566820276497695,
+    "Scharenberg22": 0.5102040816326531,
+    "Steinhart": 0.041379310344827586,
+    "Replogle_K562_essential": 0.5873015873015873,
+    "Replogle_K562_gwps": 0.30303030303030304
+   },
+   "online_ml": {
+    "IFNG": 0.1621,
+    "IL2": 0.3035,
+    "Sanchez21": 0.0838,
+    "Sanchez21_down": 0.0873,
+    "Carnevale22": 0.0588,
+    "Scharenberg22": 0.5102,
+    "Steinhart": 0.0345,
+    "Replogle_K562_essential": 0.6667,
+    "Replogle_K562_gwps": 0.3442
+   }
+  }
+ },
+ "provenance": {
+  "n_query_genes": 315,
+  "n_anchor_queries": 64,
+  "own_queries_removed": {
+   "IFNG": 45,
+   "IL2": 42,
+   "Sanchez21": 29,
+   "Sanchez21_down": 39,
+   "Carnevale22": 24,
+   "Scharenberg22": 14,
+   "Steinhart": 15,
+   "Replogle_K562_essential": 18,
+   "Replogle_K562_gwps": 79
+  },
+  "n_tracked": 64,
+  "tracked_are_exactly_the_anchors": true
+ },
+ "paired_vs_reported": {
+  "dropped": {
+   "matched_prior": {
+    "mean": 0.23979971707593561,
+    "delta": 0.009210683547507542,
+    "ci95": [
+     0.00288315003543063,
+     0.01657710399314552
+    ],
+    "wins": 7,
+    "ties": 2,
+    "losses": 0
+   },
+   "online_ml": {
+    "mean": 0.25214444444444445,
+    "delta": 0.007122222222222229,
+    "ci95": [
+     0.002088888888888895,
+     0.01251111111111112
+    ],
+    "wins": 5,
+    "ties": 2,
+    "losses": 2
+   }
+  },
+  "own_out": {
+   "matched_prior": {
+    "mean": 0.2319797705256042,
+    "delta": 0.0013907369971761152,
+    "ci95": [
+     -0.012633078220531353,
+     0.015710729100668487
+    ],
+    "wins": 5,
+    "ties": 0,
+    "losses": 4
+   },
+   "online_ml": {
+    "mean": 0.2507,
+    "delta": 0.005677777777777792,
+    "ci95": [
+     -0.009777777777777757,
+     0.023933888888888883
+    ],
+    "wins": 5,
+    "ties": 0,
+    "losses": 4
+   }
+  },
+  "genome": {
+   "matched_prior": {
+    "mean": 0.2361551618335586,
+    "delta": 0.005566128305130514,
+    "ci95": [
+     -0.0022157073475819367,
+     0.014372147899608717
+    ],
+    "wins": 6,
+    "ties": 0,
+    "losses": 3
+   },
+   "online_ml": {
+    "mean": 0.25012222222222225,
+    "delta": 0.005100000000000001,
+    "ci95": [
+     -0.010366944444444446,
+     0.021267499999999977
+    ],
+    "wins": 4,
+    "ties": 1,
+    "losses": 4
+   }
+  }
+ },
+ "single_feature": {
+  "reported": {
+   "hub_score_norm": {
+    "mean": 0.18033002597236314,
+    "per_screen": {
+     "IFNG": 0.09850374064837905,
+     "IL2": 0.1787941787941788,
+     "Sanchez21": 0.047729918509895226,
+     "Sanchez21_down": 0.08151549942594719,
+     "Carnevale22": 0.06221198156682028,
+     "Scharenberg22": 0.40816326530612246,
+     "Steinhart": 0.06206896551724138,
+     "Replogle_K562_essential": 0.47619047619047616,
+     "Replogle_K562_gwps": 0.2077922077922078
+    }
+   },
+   "ppi_score_sum": {
+    "mean": 0.1787729034786405,
+    "per_screen": {
+     "IFNG": 0.09600997506234414,
+     "IL2": 0.1787941787941788,
+     "Sanchez21": 0.050058207217694994,
+     "Sanchez21_down": 0.07807118254879448,
+     "Carnevale22": 0.0587557603686636,
+     "Scharenberg22": 0.3673469387755102,
+     "Steinhart": 0.05517241379310345,
+     "Replogle_K562_essential": 0.49206349206349204,
+     "Replogle_K562_gwps": 0.2326839826839827
+    }
+   },
+   "string_degree_norm": {
+    "mean": 0.16321238951485562,
+    "per_screen": {
+     "IFNG": 0.10099750623441396,
+     "IL2": 0.20166320166320167,
+     "Sanchez21": 0.04307334109429569,
+     "Sanchez21_down": 0.06199770378874857,
+     "Carnevale22": 0.056451612903225805,
+     "Scharenberg22": 0.22448979591836735,
+     "Steinhart": 0.04827586206896552,
+     "Replogle_K562_essential": 0.4603174603174603,
+     "Replogle_K562_gwps": 0.27164502164502163
+    }
+   }
+  },
+  "own_out": {
+   "hub_score_norm": {
+    "mean": 0.1631072893221077,
+    "per_screen": {
+     "IFNG": 0.08229426433915212,
+     "IL2": 0.15592515592515593,
+     "Sanchez21": 0.04540162980209546,
+     "Sanchez21_down": 0.08266360505166476,
+     "Carnevale22": 0.059907834101382486,
+     "Scharenberg22": 0.3877551020408163,
+     "Steinhart": 0.05517241379310345,
+     "Replogle_K562_essential": 0.4603174603174603,
+     "Replogle_K562_gwps": 0.13852813852813853
+    }
+   },
+   "ppi_score_sum": {
+    "mean": 0.16629104442335157,
+    "per_screen": {
+     "IFNG": 0.08603491271820449,
+     "IL2": 0.1600831600831601,
+     "Sanchez21": 0.048894062863795114,
+     "Sanchez21_down": 0.07692307692307693,
+     "Carnevale22": 0.06105990783410138,
+     "Scharenberg22": 0.40816326530612246,
+     "Steinhart": 0.05517241379310345,
+     "Replogle_K562_essential": 0.4444444444444444,
+     "Replogle_K562_gwps": 0.15584415584415584
+    }
+   },
+   "string_degree_norm": {
+    "mean": 0.16321238951485562,
+    "per_screen": {
+     "IFNG": 0.10099750623441396,
+     "IL2": 0.20166320166320167,
+     "Sanchez21": 0.04307334109429569,
+     "Sanchez21_down": 0.06199770378874857,
+     "Carnevale22": 0.056451612903225805,
+     "Scharenberg22": 0.22448979591836735,
+     "Steinhart": 0.04827586206896552,
+     "Replogle_K562_essential": 0.4603174603174603,
+     "Replogle_K562_gwps": 0.27164502164502163
+    }
+   }
+  }
+ }
+}
