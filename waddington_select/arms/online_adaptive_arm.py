@@ -33,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # Resolved centrally (tables.py) so WADDINGTON_TRAINING_CSV moves the arm and the oracle
 # together. Hardcoding it here used to leave the arm selecting from the frozen pool while the
 # oracle scored an overridden one — silently wrong numbers, no error.
-from ..tables import ABSDIFF_SUFFIX, TRAINING_DATA_CSV, with_pair_spread
+from ..tables import ABSDIFF_SUFFIX, TRAINING_DATA_CSV, excluded_feature_cols, with_pair_spread
 
 FEATURE_COLS = [
     "g1_ppi_score",
@@ -102,6 +102,10 @@ class OnlineAdaptiveArm(BaseArm):
             _ANCHOR_FEATS = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
             _ANCHOR_FEATS |= {f + ABSDIFF_SUFFIX for f in _ANCHOR_FEATS}  # pair tables: drop the spread too
             self._available_feats = [c for c in self._available_feats if c not in _ANCHOR_FEATS]
+        # Explicitly excluded columns ($WADDINGTON_EXCLUDE_FEATS; none by default).
+        _excluded = excluded_feature_cols()
+        if _excluded:
+            self._available_feats = [c for c in self._available_feats if c not in _excluded]
 
         # Recurrence-baseline probe: replace the whole feature set with a single cross-screen hit-frequency
         # feature (how often the gene is a hit in the OTHER benchmark screens). Lets us build

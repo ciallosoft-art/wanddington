@@ -111,6 +111,18 @@ ABSDIFF_SUFFIX = "_absdiff"
 INTERACTION_PREFIX = "pair_"
 
 
+EXCLUDE_FEATS_ENV = "WADDINGTON_EXCLUDE_FEATS"
+
+
+def excluded_feature_cols() -> set[str]:
+    """Feature columns removed from the C-arm's prior, online model and padding ranker, from
+    $WADDINGTON_EXCLUDE_FEATS ("a,b"; empty = none, the default), with their pair-table spreads.
+    Used to re-run the system without hub_score_norm / ppi_score_sum, which are counted over a STRING
+    query set holding the screens' anchors and hits (analysis/hub_leak.py)."""
+    names = {c.strip() for c in os.environ.get(EXCLUDE_FEATS_ENV, "").split(",") if c.strip()}
+    return names | {f"{c}{ABSDIFF_SUFFIX}" for c in names}
+
+
 def with_pair_features(feats: list[str], df: pd.DataFrame) -> list[str]:
     """Extend a single-gene feature list with everything a pair table additionally provides.
 

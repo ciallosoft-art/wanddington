@@ -37,7 +37,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # Resolved centrally (tables.py) so WADDINGTON_TRAINING_CSV moves the arm and the oracle
 # together. Hardcoding it here used to leave the arm selecting from the frozen pool while the
 # oracle scored an overridden one — silently wrong numbers, no error.
-from ..tables import (ABSDIFF_SUFFIX, PAIR_SEP, TRAINING_DATA_CSV, is_pair_dataset,
+from ..tables import (ABSDIFF_SUFFIX, PAIR_SEP, TRAINING_DATA_CSV, excluded_feature_cols, is_pair_dataset,
                       pair_token, split_pair, with_pair_spread)
 TASK_PROMPTS_DIR = REPO_ROOT / "workspace" / "data" / "bda_benchmark" / "task_prompts"
 
@@ -216,6 +216,10 @@ class LLMReasoningArm(BaseArm):
             _anchor = {"g1_ppi_score", "archs4_coexpr", "kegg_overlap"}
             _anchor |= {f + ABSDIFF_SUFFIX for f in _anchor}  # pair tables: drop the spread too
             self._all_feats = [c for c in self._all_feats if c not in _anchor]
+        # Explicitly excluded columns ($WADDINGTON_EXCLUDE_FEATS; none by default), as in online_adaptive_arm.
+        _excluded = excluded_feature_cols()
+        if _excluded:
+            self._all_feats = [c for c in self._all_feats if c not in _excluded]
         # Recurrence-baseline probe (see online_adaptive_arm): the static padding ranker also uses only
         # the cross-screen hit-frequency feature.
         if os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1":

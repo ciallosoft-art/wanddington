@@ -53,7 +53,7 @@ from .oracle import BENCHMARK_DATASETS, BATCH_SIZES, TRAINING_DATA_CSV, DatasetO
 from .sequential_runner import RunResult, SequentialRunner
 from .config import task_prompt_protocol
 from .skills import SKILL_LIBRARY_PATH
-from .tables import PAIR_DATASETS
+from .tables import PAIR_DATASETS, excluded_feature_cols
 
 # ── Paper arms ──────────────────────────────────────────────────────────────
 from .arms.random_arm import RandomArm
@@ -394,6 +394,7 @@ def _protocol_manifest(
         "feature_policy": _feature_policy(),
         "drop_anchor_features": _drop_anchor_default(),
         "hit_frequency_only": os.environ.get("WADDINGTON_HITFREQ_ONLY") == "1",
+        "exclude_feature_cols": sorted(excluded_feature_cols()) or None,
         "exclude_study": os.environ.get("WADDINGTON_EXCLUDE_STUDY") == "1",
         "training_csv_override": os.environ.get("WADDINGTON_TRAINING_CSV"),
         # v3 (with-DepMap) is overridable too, and most screens route through it, so record it
