@@ -21,6 +21,10 @@ GENEDISCO_ARM = "gdfb_achilles_bnn_coreset"
 # three_arm.json waddington_c stays the reference for the component-ablation figure.
 from .sources import REPORTED_RUN as FINAL_WADD  # noqa: E402
 GPT_RESULTS = REPO_ROOT / "workspace" / "results" / "gpt"
+# The three ML baselines in C's own feature configuration (analysis/matched_baselines.py), which the main
+# table and figures 1-3 report in place of the benchmark-configuration runs.
+MATCHED = REPO_ROOT / "workspace" / "results" / "matched_baselines.json"
+MATCHED_ARMS = {"static_ranker": "static_prior", "online_adaptive": "online_ml", "coreset": "coreset"}
 
 # Which file each method's runs live in (baselines + the three-arm comparison).
 METHOD_FILES = {
@@ -69,7 +73,9 @@ def load_methods(final: bool = False) -> pd.DataFrame:
     """All six methods, tidy. (Coreset appears in two files; keep the baselines copy.)
 
     final=True swaps every arm present in the 20-seed run (FINAL_WADD) for the principal figures, so the
-    figures match the 20-seed main table; arms absent from that file fall back to their 5-seed runs.
+    figures match the 20-seed main table; arms absent from that file fall back to their 5-seed runs. It also
+    swaps the three ML baselines for their versions in C's feature configuration (MATCHED, deterministic: one
+    run per screen).
     """
     frames = []
     for path in sorted({f for f in METHOD_FILES.values()}):
@@ -89,6 +95,13 @@ def load_methods(final: bool = False) -> pd.DataFrame:
         fw = _runs(FINAL_WADD)
         arms20 = set(fw["arm"].unique())
         result = pd.concat([result[~result["arm"].isin(arms20)], fw], ignore_index=True)
+    if final and MATCHED.exists():
+        matched = json.loads(MATCHED.read_text())["headline"]["matched"]
+        rows = [{"dataset": d, "arm": arm, "seed": 0, "round": i + 1, "hit_ratio": hr,
+                 "cumulative_hits": round(hr * m["total_hits"]), "total_hits": m["total_hits"]}
+                for d, m in matched.items() for arm, key in MATCHED_ARMS.items()
+                for i, hr in enumerate(m[key])]
+        result = pd.concat([result[~result["arm"].isin(MATCHED_ARMS)], pd.DataFrame(rows)], ignore_index=True)
     return result
 
 

@@ -33,7 +33,7 @@ METHOD_LABEL = {
     "waddington_c": "Waddington C (ours)",
     "llm_reasoning": "LLM + LOO padding",
     "online_adaptive": "Online ML",
-    "static_ranker": "Static LOO-LGBM",
+    "static_ranker": "Static prior",
     "coreset": "Coreset",
     "random": "Random",
 }
