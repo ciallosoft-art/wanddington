@@ -135,3 +135,6 @@ workspace/results/**/*.tmp
 # pair tables be rebuilt offline -- is the derived pair_interaction_features.csv, which IS committed.
 workspace/evaluation/_reactome_id_cache/
 workspace/evaluation/_string_pair_cache/
+
+# Paper sources, plans and review notes stay local: not published in the remote repository (2026-10-23)
+docs/

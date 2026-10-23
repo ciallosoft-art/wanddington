@@ -25,7 +25,7 @@ Round 1 is the ML prior alone (no in-experiment data yet); from round 2 the ML r
 revealed `(gene, label)` pairs and re-ranks the pool. Any batch shortfall from the LLM is padded
 from the static ranker (padding gets no vote). A legacy per-phenotype router that reads the target
 screen's *realized* hit rate exists only behind `WADDINGTON_LEGACY_ROUTER=1` — it is **not** the
-reported system. Details and results: [`docs/results_tables.tex`](docs/results_tables.tex).
+reported system. Details and results: the paper (`docs/results_tables.tex`, kept local and not in the public repository).
 
 ---
 
@@ -52,7 +52,7 @@ workspace/
 ├── data/bda_benchmark/   # task prompts + benchmark labels
 └── results/              # frozen paper runs (sequential/, router/) + GPT experiments (gpt/)
 
-docs/                     # results_tables.tex (paper) + research iteration history
+docs/                     # paper + research notes (local only; ignored, not in the public repository)
 experiments/              # reproduction scripts 00–03 (frozen) + active GPT experiment 04
 ```
 
