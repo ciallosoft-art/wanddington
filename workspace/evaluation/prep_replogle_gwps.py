@@ -37,7 +37,7 @@ import pandas as pd
 REPO_ROOT      = Path(__file__).resolve().parents[2]
 H5AD_PATH      = REPO_ROOT / "workspace/data/raw_h5ad/replogle_k562_gwps/K562_gwps_normalized_bulk_01.h5ad"
 BDA_DIR        = REPO_ROOT / "workspace/data/bda_benchmark"
-CEG_PATH       = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
+CEG_PATH       = Path(__file__).resolve().parents[2] / "waddington_select" / "data" / "CEGv2.txt"  # BDA's list, shipped with the package
 OUT_NAME       = "Replogle_K562_gwps"
 HIT_PERCENTILE = 90  # top 10% by AD counts = hit
 

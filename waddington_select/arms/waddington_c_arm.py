@@ -33,7 +33,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import pandas as pd
 
 from .base import BaseArm
 from .online_adaptive_arm import OnlineAdaptiveArm

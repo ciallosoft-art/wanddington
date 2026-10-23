@@ -246,7 +246,7 @@ if __name__ == "__main__":
         print(f"  {t['tertile']:6s}         |  {t['endorsed_hit_rate']*100:4.1f}% ({t['endorsed_n']:4d})    |  "
               f"{t['not_endorsed_hit_rate']*100:4.1f}% ({t['not_endorsed_n']:4d})        | {t['ratio']:.2f}x")
     lg = r["logit"]
-    print(f"\nlogistic (hit ~ ml_rank + endorsed + screen FE):")
+    print("\nlogistic (hit ~ ml_rank + endorsed + screen FE):")
     print(f"  endorsed OR = {lg['endorsed_odds_ratio']:.2f}  "
           f"95% CI [{lg['or_ci95'][0]:.2f}, {lg['or_ci95'][1]:.2f}]  "
           f"(screen-clustered bootstrap, {lg['n_genes']} genes / {lg['n_screens']} screens)")

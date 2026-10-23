@@ -36,7 +36,7 @@ from sklearn.model_selection import StratifiedKFold
 
 REPO_ROOT      = Path(__file__).resolve().parents[2]
 BDA_DIR        = REPO_ROOT / "workspace" / "data" / "bda_benchmark"
-BDA_CEG        = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
+BDA_CEG        = Path(__file__).resolve().parents[2] / "waddington_select" / "data" / "CEGv2.txt"  # BDA's list, shipped with the package
 CACHE_DIR      = Path(__file__).parent / "_ppi_cache"
 MODEL_DIR      = REPO_ROOT / "workspace" / "models"
 DATA_DIR       = REPO_ROOT / "workspace" / "evaluation"

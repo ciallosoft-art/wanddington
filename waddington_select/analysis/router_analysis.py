@@ -122,7 +122,6 @@ def _paired(varper: dict, ref: dict, rng) -> dict:
 def run() -> dict:
     W = _weight_means()
     LOO, C = _refs()
-    rng = np.random.default_rng(SEED)
 
     variants = {
         "global_fixed": global_fixed(W, study_out=False),

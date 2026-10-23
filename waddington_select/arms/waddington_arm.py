@@ -15,7 +15,6 @@ Expected: avg hit@R5 > max(OnlineAdaptive=0.224, LLMReasoning=0.220)
 from __future__ import annotations
 
 import json
-import os
 import re
 import warnings
 from pathlib import Path
@@ -242,8 +241,6 @@ Example: ["JAK1", "STAT1", "IRF1", ...]"""
         Match LLM suggestions to actual gene pool.
         Fill remaining slots from ML candidates in order.
         """
-        # Build gene pool from oracle (all unselected)
-        candidate_genes = {g for g, _ in candidates}
         # Also allow LLM to pick from full gene pool (if it suggests valid genes)
         # We'll validate against the online arm's gene list
         all_genes_set = set(self._online._genes)

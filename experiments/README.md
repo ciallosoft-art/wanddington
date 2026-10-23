@@ -98,6 +98,7 @@ Feature and label builders these depend on:
 ```bash
 conda run -n waddington-bio python3 workspace/evaluation/build_pair_interaction_features.py   # 8 interaction features
 conda run -n waddington-bio python3 workspace/evaluation/build_norman_gi.py                   # second GI screen
+#   (reads GEARS' Norman perturb_processed.h5ad: set WADDINGTON_NORMAN_H5AD or pass --h5ad)
 conda run -n waddington-bio python3 workspace/evaluation/build_horlbeck_jurkat.py             # Jurkat map: labels, prompt, STRING seed
 conda run -n waddington-bio python3 workspace/evaluation/build_horlbeck_pairs.py --screen Horlbeck_Jurkat
 conda run -n waddington-bio python3 workspace/evaluation/run_bda_controlled.py --help         # the BDA harness

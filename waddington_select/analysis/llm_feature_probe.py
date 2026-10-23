@@ -82,7 +82,6 @@ def run() -> dict:
     table = _pooled_table(df, _named_counts(run_json))
     ml = _shap_share(table, "label")
     llm = _shap_share(table, "llm_named")
-    fam = lambda f: "depmap" if f in DEPMAP else "connectivity_constraint"
     res = {
         "feature_set": "intrinsic+depmap (no anchor)",
         "ml_hit_share": ml,

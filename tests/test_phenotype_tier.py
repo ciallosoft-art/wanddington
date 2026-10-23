@@ -11,7 +11,6 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import pandas as pd
 
 import waddington_select.phenotype as P
 from waddington_select.arms import waddington_c_arm as C

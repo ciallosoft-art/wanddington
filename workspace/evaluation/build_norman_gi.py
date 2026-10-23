@@ -41,13 +41,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_H5AD = Path("/home/duanyu/Python/Myproject/GEARS (副本)/data/norman/perturb_processed.h5ad")
+# GEARS' processed Norman Perturb-seq file (not shipped): $WADDINGTON_NORMAN_H5AD, else the author's local copy.
+DEFAULT_H5AD = Path(os.environ.get("WADDINGTON_NORMAN_H5AD",
+                                   "/home/duanyu/Python/Myproject/GEARS (副本)/data/norman/perturb_processed.h5ad"))
 OUT_DIR = REPO_ROOT / "workspace" / "data" / "norman_gi"
 TAIL_FRACTION = 0.05     # per tail, as BDA does on Horlbeck
 

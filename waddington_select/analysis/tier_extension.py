@@ -218,7 +218,6 @@ def _pair_or(replay: dict, n_boot: int = 2000, seed: int = 0) -> dict:
     for r in replay["pooled"]["rounds"]:
         if not r.get("verified", True):
             continue
-        scores = [g["ml_score"] for g in r["genes"]]
         for g in r["genes"]:
             rows.append((r["repeat"], float(g["ml_score"]), g["source"] in ("both", "llm_only"), bool(g["hit"])))
     rep = np.array([x[0] for x in rows])
@@ -241,7 +240,6 @@ def _pair_or(replay: dict, n_boot: int = 2000, seed: int = 0) -> dict:
 
 def attribution() -> dict:
     from .conditional_attribution import run as cond_run
-    from .trace import hit_rate_by_source
     res = {}
     for tier in ("full_pool", "pairs"):
         f = RES / "tier_offline" / tier / "attribution_replay.json"

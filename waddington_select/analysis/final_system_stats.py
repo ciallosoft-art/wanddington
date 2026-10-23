@@ -239,7 +239,7 @@ if __name__ == "__main__":
     ml = r["matched_loo"]
     print(f"\n[#7] matched no-anchor-metadata LOO = {ml['mean']:.3f}  (unmatched paper LOO = 0.217)")
     print(f"     final vs matched-LOO: {_fmt(ml['final_vs_matched_loo'])}")
-    print(f"\n[#4] final Waddington paired vs baselines:")
+    print("\n[#4] final Waddington paired vs baselines:")
     for k, v in r["final_paired"].items():
         if k != "means":
             print(f"     {k:16s} {_fmt(v)}")

@@ -14,7 +14,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import lightgbm as lgb
-import numpy as np
 import pandas as pd
 
 from .base import BaseArm

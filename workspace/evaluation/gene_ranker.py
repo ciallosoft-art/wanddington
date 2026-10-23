@@ -29,8 +29,7 @@ ARCHS4_CACHE_DIR = Path(__file__).parent / "_archs4_cache"
 KEGG_CACHE_DIR   = Path(__file__).parent / "_kegg_cache"
 REVEAL_CACHE_DIR = Path(__file__).parent / "_reveal_ppi_cache"  # confirmed hits (sequential sim)
 MODEL_DIR        = Path(__file__).resolve().parents[2] / "workspace" / "models"
-CEG_PATH   = Path(__file__).resolve().parents[2] / "workspace" / "benchmarks" / "CEGv2.txt"
-BDA_CEG    = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
+CEG_PATH   = Path(__file__).resolve().parents[2] / "waddington_select" / "data" / "CEGv2.txt"  # BDA's CEGv2 list, shipped with the package
 UNIV_FEAT_CSV     = Path(__file__).resolve().parents[2] / "workspace" / "data" / "universal_features.csv"
 PATHWAY_FEAT_CSV  = Path(__file__).resolve().parents[2] / "workspace" / "data" / "pathway_features.csv"
 
@@ -266,7 +265,7 @@ def build_archs4_scores(anchor_genes: list[str], verbose: bool = False) -> dict[
 # ---------------------------------------------------------------------------
 
 def _load_essential_genes() -> set[str]:
-    ceg = CEG_PATH if CEG_PATH.exists() else BDA_CEG
+    ceg = CEG_PATH
     if not ceg.exists():
         return set()
     try:

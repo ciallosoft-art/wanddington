@@ -38,7 +38,7 @@ import pandas as pd
 REPO_ROOT    = Path(__file__).resolve().parents[2]
 DEPMAP_DIR         = REPO_ROOT / "workspace" / "data" / "depmap"
 OUT_DIR            = DEPMAP_DIR / "processed"
-CEG_PATH           = Path("/home/duanyu/Python/keypaper/code/BioDiscoveryAgent/CEGv2.txt")
+CEG_PATH           = Path(__file__).resolve().parents[2] / "waddington_select" / "data" / "CEGv2.txt"  # BDA's list, shipped with the package
 DEPMAP_CSV         = DEPMAP_DIR / "CRISPRGeneEffect.csv"
 SUPER_ESSENTIAL_TXT = DEPMAP_DIR / "super_essentials.txt"   # essential in >80% of cell lines
 

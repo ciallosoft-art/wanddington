@@ -1,6 +1,5 @@
 """Pool a traced campaign over all 9 benchmark screens → the attribution result for the paper."""
 import json
-import sys
 from pathlib import Path
 
 from waddington_select.oracle import BENCHMARK_DATASETS

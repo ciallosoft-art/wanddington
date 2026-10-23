@@ -71,7 +71,6 @@ def _summarize(result: dict) -> str:
 
 def _build_prompt(dataset: str, batch_size: int, round_idx: int, n_rounds: int,
                   hits: list[str], misses: list[str], action_log: list[dict]) -> str:
-    task = DatasetOracle(dataset)
     hit_str = ", ".join(hits[:40]) + ("…" if len(hits) > 40 else "") if hits else "none yet"
     log_str = "\n".join(f"  - {a['action']}: {a['summary']}" for a in action_log) or "  (none yet)"
     return f"""You are running a sequential CRISPR screen for the phenotype '{dataset}'.
