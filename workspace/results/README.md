@@ -29,3 +29,10 @@ The formal GPT directory is complete only when `main_table_5rep.json` and its ma
 with `status: complete`. Its LLM conditions are five repeated API invocations (`provider_seed: null`),
 because the Codex OAuth endpoint does not expose a sampling seed; independence between API calls is
 not assumed. In the formal six-arm set, only Random consumes the local replicate-index seed.
+
+## Commit SHAs before 2026-10-23
+
+On 2026-10-23 the history was rewritten to remove `docs/` (paper sources and notes, now kept local) from
+every commit. Content outside `docs/` and all commit metadata are unchanged, but every commit SHA changed.
+Run manifests written before that date record the old SHAs in `git_commit`; translate them with
+`git_commit_map_2026-10-23.tsv` (old_commit → new_commit, one row per commit, 416 rows).
