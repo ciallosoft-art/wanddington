@@ -165,26 +165,28 @@ def forest(ax, rows, xlabel, fmt="{:+.3f}", colors=None, filled=None):
     return y
 
 
-def heat(ax, matrix, row_labels):
+def heat(ax, matrix, row_labels, col_labels=None, avg=True, fmt="{:.3f}"):
     """Per-screen grid: colour = value / best value on that screen (who wins where); the cell shows the value."""
     m = np.asarray(matrix, float)
-    m = np.column_stack([m, m.mean(axis=1)])
+    if avg:
+        m = np.column_stack([m, m.mean(axis=1)])
     rel = m / m.max(axis=0, keepdims=True)
     cmap = S.cmap_sequential()
     nr, nc = m.shape
     for i in range(nr):
         for j in range(nc):
-            x = j + (0.35 if j == nc - 1 else 0)
+            x = j + (0.35 if avg and j == nc - 1 else 0)
             ax.add_patch(Rectangle((x, nr - 1 - i), 0.94, 0.9, color=cmap(rel[i, j] ** 2), lw=0))
             best = m[i, j] == m[:, j].max()
-            ax.text(x + 0.47, nr - 1 - i + 0.45, f"{m[i, j]:.3f}", ha="center", va="center", fontsize=7.4,
+            ax.text(x + 0.47, nr - 1 - i + 0.45, fmt.format(m[i, j]), ha="center", va="center", fontsize=7.4,
                     color="white" if rel[i, j] ** 2 > 0.55 else S.INK, fontweight="bold" if best else "normal")
             if best:
                 ax.add_patch(Rectangle((x + 0.03, nr - 1 - i + 0.03), 0.88, 0.84, fill=False, ec=S.INK, lw=1.1))
-    ax.set_xlim(0, nc + 0.35)
+    ax.set_xlim(0, nc + (0.35 if avg else 0))
     ax.set_ylim(0, nr)
-    ax.set_xticks([j + 0.47 + (0.35 if j == nc - 1 else 0) for j in range(nc)], SCREEN_LABEL + [L("平均", "Mean")],
-                  rotation=35, ha="right", fontsize=8)
+    cols = (col_labels or SCREEN_LABEL) + ([L("平均", "Mean")] if avg else [])
+    ax.set_xticks([j + 0.47 + (0.35 if avg and j == nc - 1 else 0) for j in range(nc)], cols,
+                  rotation=35 if col_labels is None else 0, ha="right" if col_labels is None else "center", fontsize=8)
     ax.set_yticks([nr - 1 - i + 0.45 for i in range(nr)], row_labels, fontsize=8.5)
     ax.tick_params(length=0)
     ax.grid(False)
@@ -194,7 +196,8 @@ def heat(ax, matrix, row_labels):
 
 def legend(ax, handles, **kw):
     kw.setdefault("loc", "lower right")
-    ax.legend(handles=handles, fontsize=7.8, labelcolor=S.INK_2, handlelength=1.4, **kw)
+    kw.setdefault("fontsize", 7.8)
+    ax.legend(handles=handles, labelcolor=S.INK_2, handlelength=1.4, **kw)
 
 
 def dot_handle(color, label, filled=True):
@@ -320,27 +323,6 @@ def fig_per_screen(tier: str, key: str, gd, bda, ttl: str):
     save(fig, key)
 
 
-def fig_ladder():
-    """Explainer 4.1.2: the information ladder, top to bottom as in the text."""
-    mb = load("matched_baselines.json")["headline"]["means"]
-    paper(0.146, 0.171)
-    rows = [("Random\n什么都不用", mb["benchmark_random"], C["random"]),
-            ("Coreset\n不用标签，偏向高连接基因", mb["matched_coreset"], C["coreset"]),
-            ("BDA（前人）\n只用本屏信息", 0.146, C["bda"]),
-            ("GeneDisco（前人）\n只用本屏信息", 0.171, C["genedisco"]),
-            ("静态先验\n+ 其它屏的标签", mb["matched_static_prior"], C["static_ranker"]),
-            ("Online ML\n+ 本屏在线重训", mb["matched_online_ml"], C["online_adaptive"]),
-            ("Waddington C\n+ LLM 点名（0.2 权重）", mb["C"], C["waddington_c"])]
-    fig, ax = plt.subplots(figsize=(6.6, 3.5))
-    y = hbars(ax, [r[0] for r in rows], [r[1] for r in rows], [r[2] for r in rows], xmax=0.33)
-    ax.tick_params(axis="y", labelsize=8)
-    jump = rows[4][1] - rows[3][1]
-    ax.annotate("", xy=(rows[4][1], y[4] + 0.32), xytext=(rows[3][1], y[4] + 0.32),
-                arrowprops=dict(arrowstyle="-|>", color=S.INK, lw=1.1))
-    ax.text(rows[4][1] + 0.004, y[4] + 0.55, f"最大一跳 +{jump:.3f}", fontsize=8, color=S.INK, va="center")
-    ax.set_xlabel("9 屏平均 hit@R5（主档）")
-    title(ax, "提升从哪来：每一级只多一种信息", "灰色 = 前人方法；三个 ML 基线与 C 同一特征配置")
-    save(fig, "ladder")
 
 
 def fig_paired():
@@ -456,33 +438,10 @@ def fig_reasoning():
     """Paper: reasoning vs recall on the reported system (paper Table 8)."""
     fig, a = plt.subplots(figsize=(4.6, 2.5))
     _ladder_panel(a)
-    title(a, "Reasoning or recall: information given to the LLM, step by step")
+    title(a, L("推理还是记忆：逐级给 LLM 信息", "Reasoning or recall: information given to the LLM, step by step"))
     save(fig, "reasoning")
 
 
-def fig_llm_role():
-    """Explainer 4.1.6: reasoning vs recall (paper Table 8) and hit rate by attribution source (paper Table 9)."""
-    fig, (a, b) = plt.subplots(1, 2, figsize=(6.6, 2.6), gridspec_kw=dict(width_ratios=[1.25, 1], wspace=0.95))
-    _ladder_panel(a)
-    title(a, "推理还是记忆：逐级给 LLM 信息")
-    src = ["ML 与 LLM 都选\n（1,900 个）", "只有 ML 选\n（77,020 个）", "只有 LLM 选\n（17,080 个）"]
-    allv, nogw = [42.1, 18.3, 21.0], [21.6, 13.8, 17.0]
-    paper(*allv, *nogw, nd=1)
-    yy = np.arange(3)[::-1]
-    b.barh(yy + 0.17, allv, height=0.32, color=BLUE, edgecolor=S.SURFACE, zorder=3)
-    b.barh(yy - 0.17, nogw, height=0.32, color=PURPLE, edgecolor=S.SURFACE, zorder=3)
-    for yi, v1, v2 in zip(yy, allv, nogw):
-        b.text(v1 + 0.8, yi + 0.17, f"{v1:.1f}%", fontsize=7.6, va="center")
-        b.text(v2 + 0.8, yi - 0.17, f"{v2:.1f}%", fontsize=7.6, va="center")
-    b.set_yticks(yy, src, fontsize=8)
-    b.tick_params(axis="y", length=0)
-    b.grid(axis="y", visible=False)
-    b.set_xlim(0, 72)
-    b.set_xlabel("被选基因的 hit 率")
-    legend(b, [Patch(color=BLUE, label="9 屏合并"), Patch(color=PURPLE, label="去掉 K562-GWPS")], loc="upper center",
-           bbox_to_anchor=(0.45, -0.24), ncol=2)
-    title(b, "按来源分的命中率")
-    save(fig, "llm_role")
 
 
 ENGINE_ROUND1 = [("gnn", "GraphSAGE（STRING 图神经网络）", "GraphSAGE on STRING"), ("mlp", "MLP（2×64）", "MLP (2×64)"),
@@ -800,6 +759,525 @@ def fig_benchmark_config():
     save(fig, "benchmark_config")
 
 
+# ═════════════════════════════════════════════════════════════════════════════════════════════════════════
+# Explainer: the same nine charts for each of BDA's three tiers (headline, full pool, two-gene), in the same order,
+# so a reader can lay the tiers side by side. Single-gene tiers are hit@R5, paired over the nine screens; the
+# two-gene tier is cumulative hits at 640 picks on Horlbeck K562 (Welch over replicates), with the held-out Jurkat
+# map in the place of a second screen.
+TIERS = ("headline", "full_pool", "pairs")
+TIER_ZH = {"headline": "主档", "full_pool": "全池档", "pairs": "双扰动档"}
+GPT = RES / "gpt"
+PAIR_RUNS = {   # map -> (dataset, matched-baseline key, {method: (run file under gpt/, arm)})
+    "K562": ("Horlbeck", "pairs", {"Random": ("tier_b_pairs_20rep/calibration_20rep.json", "random"),
+                                   "B": ("tier_b_pairs_20rep/calibration_20rep.json", "llm_reasoning"),
+                                   "C": ("tier_b_pairs_20rep/waddington_c_20rep.json", "waddington_c"),
+                                   "BDA": ("tier_b_pairs_20rep/bda_controlled_real.json", "bda")}),
+    "Jurkat": ("Horlbeck_Jurkat", "jurkat_b128", {"Random": ("jurkat_b128_20rep/random_20rep.json", "random"),
+                                                  "B": ("jurkat_b128_20rep/llm_reasoning_20rep.json", "llm_reasoning"),
+                                                  "C": ("jurkat_b128_20rep/waddington_c_20rep.json", "waddington_c"),
+                                                  "BDA": ("jurkat_b128_20rep/bda_20rep.json", "bda")}),
+}
+GD_PAIR_PROBE = 77.7     # the best of GeneDisco's acquisition rules run on pairs as a mechanism probe (paper text)
+
+
+def _tcolor(name):
+    return {"Waddington C": C["waddington_c"], "Online ML": C["online_adaptive"], name_static(): C["static_ranker"],
+            name_b(): C["llm_reasoning"], "GeneDisco": C["genedisco"], "Coreset": C["coreset"], "BDA": C["bda"],
+            "Random": C["random"]}[name]
+
+
+def _gd_curves(folder: Path, arm: str = "gdfb_achilles_bnn_coreset") -> dict:
+    """GeneDisco's best equal-information rule: per screen, mean hit ratio per round over its seeds."""
+    out = {}
+    for p in sorted(folder.glob("gdfb_seeded_*.json")):
+        if p.name.endswith(".manifest.json"):
+            continue
+        for ds, arms in json.loads(p.read_text()).items():
+            if isinstance(arms, dict) and arm in arms:
+                out[ds] = np.mean([r["hit_ratio_per_round"] for r in arms[arm]], axis=0).tolist()
+    return out
+
+
+def _single_tier(tier: str) -> dict:
+    """Single-gene tier: method -> screen -> hit ratio per round (C, B, Random: replicate means)."""
+    mb = load("matched_baselines.json")[tier]
+    rep, mat = mb["reported"], mb["matched"]
+    m = {"Waddington C": {s: rep[s]["waddington_c"] for s in SCREENS},
+         "Online ML": {s: mat[s]["online_ml"] for s in SCREENS},
+         name_static(): {s: mat[s]["static_prior"] for s in SCREENS},
+         name_b(): {s: rep[s]["llm_reasoning"] for s in SCREENS},
+         "Coreset": {s: mat[s]["coreset"] for s in SCREENS},
+         "Random": {s: rep[s]["random"] for s in SCREENS}}
+    if tier == "headline":
+        bda = load("bda_controlled/bda_gpt.json")["results"]
+        m["BDA"] = {s: bda[s]["hit_ratio_per_round"] for s in SCREENS}
+        m["GeneDisco"] = _gd_curves(RES / "ml_engines")
+    else:
+        bda = json.loads((GPT / "tier_a_full_pool_20rep" / "bda_controlled.json").read_text())
+        m["BDA"] = {s: bda[s]["bda"][0]["hit_ratio_per_round"] for s in SCREENS}
+        m["GeneDisco"] = _gd_curves(RES / "ml_engines" / "tier_a")
+    return m
+
+
+def _pair_map(mp: str) -> dict:
+    """Two-gene tier, one map: method -> array (replicates x rounds) of cumulative hits; the matched ML baselines
+    are deterministic (one row; the runner stores 4-decimal ratios, so hits are the nearest integer)."""
+    ds, key, runs = PAIR_RUNS[mp]
+    names = {"Random": "Random", "B": name_b(), "C": "Waddington C", "BDA": "BDA"}
+    out = {}
+    for short, (path, arm) in runs.items():
+        reps = json.loads((GPT / path).read_text())[ds][arm]
+        out[names[short]] = np.array([r["cumulative_hits"] for r in reps], float)
+    mat = load("matched_baselines.json")[key]["matched"][ds]
+    tot = mat["total_hits"]
+    for name, k in (("Online ML", "online_ml"), (name_static(), "static_prior"), ("Coreset", "coreset")):
+        out[name] = np.array([[round(v * tot) for v in mat[k]]], float)
+    return out
+
+
+def _tier_means(tier: str) -> dict:
+    if tier == "pairs":
+        out = {n: float(a[:, -1].mean()) for n, a in _pair_map("K562").items()}
+        paper(GD_PAIR_PROBE, nd=1)
+        out["GeneDisco"] = GD_PAIR_PROBE
+        return out
+    return {n: float(np.mean([v[s][-1] for s in SCREENS])) for n, v in _single_tier(tier).items()}
+
+
+def _unit(tier, short=False):
+    if tier == "pairs":
+        return "累计命中数" if short else "640 次挑选的累计命中数（Horlbeck K562）"
+    return "hit@R5" if short else "9 屏平均 hit@R5"
+
+
+def fig_tier_overall(tier: str):
+    """① every method, in the order of the information it uses; the padded LLM baseline B is set apart."""
+    m = _tier_means(tier)
+    gd_label = "GeneDisco 规则（机制探针）\n前人：只在本屏内主动学习" if tier == "pairs" else "GeneDisco\n前人：只在本屏内主动学习"
+    rows = [("Random\n什么都不用", "Random"), ("Coreset\n不用标签", "Coreset"), ("BDA\n前人：LLM agent，只用本屏", "BDA"),
+            (gd_label, "GeneDisco"), (f"{name_static()}\n+ 其它屏的标签", name_static()),
+            ("Online ML\n+ 本屏在线重训", "Online ML"), ("Waddington C\n+ LLM 点名（0.2 权重）", "Waddington C"),
+            ("", None), (f"{name_b()}\n对照：LLM 主导 + 静态排序补位", name_b())]
+    fmt = "{:.1f}" if tier == "pairs" else "{:.3f}"
+    fig, ax = plt.subplots(figsize=(6.6, 3.8))
+    y = hbars(ax, [r[0] for r in rows], [m[r[1]] if r[1] else None for r in rows],
+              [_tcolor(r[1]) if r[1] else S.SURFACE for r in rows], fmt=fmt, xmax=205 if tier == "pairs" else 0.33)
+    ax.tick_params(axis="y", labelsize=7.8)
+    prev = max(m["BDA"], m["GeneDisco"])
+    step = m[name_static()] - prev
+    ax.text(m[name_static()] + (40 if tier == "pairs" else 0.045), y[4],
+            f"跨实验先验这一步：{fmt.format(step) if step < 0 else '+' + fmt.format(step)}\n（相对前人最好的方法）",
+            fontsize=7.6, color=S.INK, va="center")
+    ax.set_xlabel(_unit(tier))
+    title(ax, f"{TIER_ZH[tier]}：各方法的总体成绩", "按所用信息由少到多排列；灰色 = 前人方法")
+    save(fig, f"tier_overall_{tier}")
+
+
+def fig_tier_screens(tier: str):
+    """② per screen (single-gene tiers) or per map (two-gene tier: K562 and the held-out Jurkat map)."""
+    if tier == "pairs":
+        k, j = _pair_map("K562"), _pair_map("Jurkat")
+        order = ["Waddington C", "Online ML", name_static(), name_b(), "Coreset", "BDA", "Random"]
+        mat = [[k[n][:, -1].mean(), j[n][:, -1].mean()] for n in order]
+        fig, ax = plt.subplots(figsize=(4.2, 3.2))
+        heat(ax, mat, order, col_labels=["K562", "Jurkat（留出）"], avg=False, fmt="{:.1f}")
+        title(ax, f"{TIER_ZH[tier]}：逐图谱命中数（640 次挑选）",
+              "颜色 = 该图谱内相对最高分的比例；加粗加框 = 该图谱最高")
+    else:
+        m = _single_tier(tier)
+        order = ["Waddington C", "Online ML", name_static(), name_b(), "GeneDisco", "Coreset", "BDA", "Random"]
+        fig, ax = plt.subplots(figsize=(6.6, 3.35))
+        heat(ax, [[m[n][s][-1] for s in SCREENS] for n in order], order)
+        title(ax, f"{TIER_ZH[tier]}：逐屏 hit@R5", "颜色 = 该屏内相对最高分的比例；加粗加框 = 该屏最高")
+    save(fig, f"tier_screens_{tier}")
+
+
+def fig_tier_curves(tier: str):
+    """③ cumulative discovery per round."""
+    if tier == "pairs":
+        curves = {n: a.mean(axis=0) for n, a in _pair_map("K562").items()}
+    else:
+        curves = {n: np.mean([v[s] for s in SCREENS], axis=0) for n, v in _single_tier(tier).items()}
+    order = ["Waddington C", name_b(), "Online ML", name_static(), "Coreset", "Random", "GeneDisco", "BDA"]
+    fig, ax = plt.subplots(figsize=(6.0, 3.4))
+    for n in order:
+        if n not in curves:
+            continue
+        ext = n in ("GeneDisco", "BDA")
+        hero = n == "Waddington C"
+        cv = curves[n]
+        ax.plot(range(1, len(cv) + 1), cv, color=_tcolor(n), lw=2.4 if hero else 1.7, ls="--" if ext else "-",
+                marker="s" if ext else "o", ms=4.5 if hero else 3.5, mec=S.SURFACE, mew=0.6, label=n,
+                zorder=4 if hero else (2 if ext else 3))
+        if n in ("Waddington C", "Random", "BDA"):
+            ax.annotate(("{:.1f}" if tier == "pairs" else "{:.3f}").format(cv[-1]), (len(cv), cv[-1]),
+                        xytext=(6, 0), textcoords="offset points", va="center", fontsize=7.8, color=S.INK_2)
+    ax.set_xticks(range(1, 6))
+    ax.set_xlim(0.85, 5.6)
+    ax.set_ylim(0, None)
+    ax.grid(axis="x", visible=False)
+    ax.set_xlabel("轮次")
+    ax.set_ylabel("累计命中数" if tier == "pairs" else "累计 hit 率（9 屏平均）")
+    ax.legend(fontsize=7.4, labelcolor=S.INK_2, loc="upper left", ncol=2)
+    title(ax, f"{TIER_ZH[tier]}：逐轮累计发现", "虚线 = 前人方法" + ("（双扰动档没有 GeneDisco 的组合实验）" if tier == "pairs" else ""))
+    save(fig, f"tier_curves_{tier}")
+
+
+def _welch(a, b):
+    from scipy import stats
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    d = a.mean() - b.mean()
+    if len(b) == 1 or b.std(ddof=1) == 0:        # a deterministic comparator: one-sample interval on a
+        se, dof = a.std(ddof=1) / np.sqrt(len(a)), len(a) - 1
+        p = stats.ttest_1samp(a, b.mean()).pvalue
+    else:
+        va, vb = a.var(ddof=1) / len(a), b.var(ddof=1) / len(b)
+        se = np.sqrt(va + vb)
+        dof = (va + vb) ** 2 / (va ** 2 / (len(a) - 1) + vb ** 2 / (len(b) - 1))
+        p = stats.ttest_ind(a, b, equal_var=False).pvalue
+    t = stats.t.ppf(0.975, dof)
+    return d, d - t * se, d + t * se, p
+
+
+def _welch_stats(a: dict, b: dict):
+    """a minus b from {n, mean, sd}: Welch t interval and p; a constant b gives the one-sample interval of a."""
+    from scipy import stats
+    d = a["mean"] - b["mean"]
+    va = a["sd"] ** 2 / a["n"] if a["n"] > 1 else 0.0
+    vb = b["sd"] ** 2 / b["n"] if b["n"] > 1 else 0.0
+    se = np.sqrt(va + vb)
+    if se == 0:
+        return d, None, None, None
+    parts = [(v, n) for v, n in ((va, a["n"]), (vb, b["n"])) if v > 0]
+    dof = (va + vb) ** 2 / sum(v ** 2 / (n - 1) for v, n in parts)
+    t = stats.t.ppf(0.975, dof)
+    return d, d - t * se, d + t * se, float(2 * stats.t.sf(abs(d) / se, dof))
+
+
+def _pfmt(p):
+    return "p < 1e-6" if p < 1e-6 else f"p = {p:.2g}"
+
+
+def fig_tier_paired(tier: str):
+    """④ C minus each baseline: paired over screens (single-gene) or Welch / one-sample over replicates (pairs)."""
+    names = [name_static(), "Online ML", name_b(), "Coreset", "BDA"]
+    rows = []
+    if tier == "pairs":
+        k = _pair_map("K562")
+        c = k["Waddington C"][:, -1]
+        for n in names:
+            d, lo, hi, p = _welch(c, k[n][:, -1])
+            rows.append((f"{n}（{k[n][:, -1].mean():.1f}）", d, lo, hi, _pfmt(p)))
+        fmt, xl = "{:+.1f}", "C − 基线（命中数），95% CI：Welch（B、BDA）或单样本（确定性基线）"
+    else:
+        from .final_system_stats import _paired
+        m = _single_tier(tier)
+        cfin = {s: m["Waddington C"][s][-1] for s in SCREENS}
+        if tier == "headline":      # the paper's paired block (Table 5), as printed there
+            given = {name_static(): (0.030, 0.016, 0.044, "8/0/1"), "Online ML": (0.015, 0.004, 0.026, "7/0/2"),
+                     name_b(): (0.049, 0.019, 0.080, "8/0/1"), "Coreset": (0.107, 0.060, 0.155, "9/0/0")}
+            for v in given.values():
+                paper(*v[:3])
+        else:
+            pc = load("matched_baselines.json")["full_pool"]["paired_C_vs"]
+            src = {name_static(): "matched_static_prior", "Online ML": "matched_online_ml",
+                   name_b(): "benchmark_llm_reasoning", "Coreset": "matched_coreset"}
+            given = {n: (pc[k]["delta"], *pc[k]["ci95"], f"{pc[k]['wins']}/{pc[k]['ties']}/{pc[k]['losses']}")
+                     for n, k in src.items()}
+        bda = _paired(cfin, {s: m["BDA"][s][-1] for s in SCREENS})
+        given["BDA"] = (bda["delta"], *bda["ci95"], f"{bda['wins']}/{bda['ties']}/{bda['losses']}")
+        means = {n: np.mean([m[n][s][-1] for s in SCREENS]) for n in names}
+        rows = [(f"{n}（{means[n]:.3f}）", *given[n]) for n in names]
+        fmt, xl = "{:+.3f}", "C − 基线（hit@R5），95% CI 按屏聚类"
+    fig, ax = plt.subplots(figsize=(4.4, 2.2))
+    filled = [lo > 0 or hi < 0 for _, _, lo, hi, _ in rows]
+    cols = [BLUE if d > 0 else RED for _, d, *_ in rows]
+    y = np.arange(len(rows))[::-1]
+    for yi, (lab, d, lo, hi, note), col, f in zip(y, rows, cols, filled):
+        ax.plot([lo, hi], [yi, yi], color=col, lw=2, solid_capstyle="round")
+        ax.plot(d, yi, "o", ms=7, mfc=col if f else S.SURFACE, mec=col, mew=1.6)
+        ax.text(1.02, yi, f"{fmt.format(d)}  [{fmt.format(lo)}, {fmt.format(hi)}]  {note}",
+                transform=ax.get_yaxis_transform(), fontsize=7.8, va="center")
+    ax.axvline(0, color=S.INK_2, lw=0.9)
+    ax.set_yticks(y, [r[0] for r in rows])
+    ax.tick_params(axis="y", length=0)
+    ax.grid(axis="y", visible=False)
+    ax.set_xlabel(xl, fontsize=8)
+    ax.text(1.02, 1.04, "差值  [95% CI]  " + ("p" if tier == "pairs" else "胜/平/负"), transform=ax.transAxes,
+            fontsize=7.6, color=S.INK_2)
+    title(ax, f"{TIER_ZH[tier]}：C 相对各基线的差")
+    save(fig, f"tier_paired_{tier}")
+
+
+ABL = [("waddington_c_nomem", "去掉跨实验记忆"), ("waddington_c_static_ml", "去掉在线重训"),
+       ("waddington_c_anon_names", "匿名基因名"), ("no_llm", "去掉 LLM")]
+
+
+def fig_tier_ablation(tier: str):
+    """⑤ component ablation of the reported system, paired with a re-run of the full system (paper Table 19)."""
+    a = load("tier_extension_summary.json")["ablations"][tier]
+    ref = a["waddington_c"]["mean"]
+    rows = []
+    for key, lab in ABL:
+        if tier == "pairs":
+            d, lo, hi, pv = _welch_stats(a[key], a["waddington_c"])
+            rows.append((lab, d, lo, hi, _pfmt(pv)))
+        else:
+            v = a[key]["vs_c"]
+            rows.append((lab, v["delta"], *v["ci95"], f"{v['wins']}/{v['ties']}/{v['losses']}"))
+    fmt = "{:+.1f}" if tier == "pairs" else "{:+.3f}"
+    fig, ax = plt.subplots(figsize=(4.4, 1.9))
+    y = np.arange(len(rows))[::-1]
+    for yi, (lab, d, lo, hi, note) in zip(y, rows):
+        sig = hi < 0 or lo > 0
+        col = RED if d < 0 else BLUE
+        ax.plot([lo, hi], [yi, yi], color=col, lw=2, solid_capstyle="round")
+        ax.plot(d, yi, "o", ms=7, mfc=col if sig else S.SURFACE, mec=col, mew=1.6)
+        ax.text(1.02, yi, f"{fmt.format(d)}  [{fmt.format(lo)}, {fmt.format(hi)}]  {note}",
+                transform=ax.get_yaxis_transform(), fontsize=7.8, va="center")
+    ax.axvline(0, color=S.INK_2, lw=0.9)
+    ax.set_yticks(y, [r[0] for r in rows])
+    ax.tick_params(axis="y", length=0)
+    ax.grid(axis="y", visible=False)
+    ax.set_xlabel(f"变体 − 完整系统（{_unit(tier, True)}），95% CI；空心 = 区间含 0", fontsize=8)
+    ax.text(1.02, 1.04, "差值  [95% CI]  " + ("p" if tier == "pairs" else "胜/平/负"), transform=ax.transAxes,
+            fontsize=7.6, color=S.INK_2)
+    title(ax, f"{TIER_ZH[tier]}：组件消融（完整系统同批重跑 {('{:.1f}' if tier == 'pairs' else '{:.3f}').format(ref)}）")
+    save(fig, f"tier_ablation_{tier}")
+
+
+def fig_tier_fusion(tier: str):
+    """⑥ the full GPT system at six fusion weights; the reported 0.2 is the twenty-replicate run (paper Tables 18
+    and 20)."""
+    if tier == "headline":      # paper Table 18
+        pts = [(0.0, 0.245, -0.015, -0.026, -0.004), (0.1, 0.256, -0.005, -0.010, 0.001), (0.2, 0.260, 0, 0, 0),
+               (0.3, 0.259, -0.002, -0.008, 0.005), (0.4, 0.247, -0.014, -0.024, -0.004),
+               (0.5, 0.249, -0.011, -0.025, 0.003)]
+        for p in pts:
+            paper(*p[1:])
+    else:
+        f = load("tier_extension_summary.json")["fusion"][tier]
+        pts = []
+        for w in ("0.0", "0.1", "0.2", "0.3", "0.4", "0.5"):
+            v = f[w].get("vs_0.2")
+            if not v:
+                pts.append((float(w), f[w]["mean"], 0, 0, 0))
+            elif tier == "pairs":
+                d, lo, hi, _ = _welch_stats(f[w], f["0.2"])
+                pts.append((float(w), f[w]["mean"], d, lo, hi))
+            else:
+                pts.append((float(w), f[w]["mean"], v["delta"], *v["ci95"]))
+    fig, ax = plt.subplots(figsize=(4.4, 2.3))
+    ws = [p[0] for p in pts]
+    ax.plot(ws, [p[1] for p in pts], color=DEEMPH, lw=2, zorder=2)
+    for w, lvl, d, lo, hi in pts:
+        if w == 0.2:
+            col, fill, mk = BLUE, True, "*"
+        elif hi < 0:
+            col, fill, mk = RED, True, "o"
+        elif lo > 0:
+            col, fill, mk = BLUE, True, "o"
+        else:
+            col, fill, mk = S.MUTED, False, "o"
+        ax.plot(w, lvl, mk, ms=12 if mk == "*" else 7, mfc=col if fill else S.SURFACE, mec=col, mew=1.5, zorder=3)
+        ax.annotate(("{:.1f}" if tier == "pairs" else "{:.3f}").format(lvl), (w, lvl), xytext=(0, 8),
+                    textcoords="offset points", ha="center", fontsize=7.6, color=S.INK)
+    ax.set_xticks(ws, ["0\n（只用 ML）", "0.1", "0.2\n（报告）", "0.3", "0.4", "0.5"], fontsize=8)
+    lv = [p[1] for p in pts]
+    pad = (max(lv) - min(lv)) * 0.35
+    ax.set_ylim(min(lv) - pad, max(lv) + pad)
+    ax.grid(axis="x", visible=False)
+    ax.set_ylabel(_unit(tier, True))
+    legend(ax, [Line2D([], [], marker="*", ls="", ms=10, color=BLUE, label="报告的 0.2"),
+                dot_handle(RED, "显著差于 0.2"), dot_handle(BLUE, "显著好于 0.2"),
+                dot_handle(S.MUTED, "与 0.2 无显著差异", filled=False)],
+           loc="upper center", bbox_to_anchor=(0.5, -0.32), ncol=2, fontsize=7.4)
+    title(ax, f"{TIER_ZH[tier]}：融合权重 w_LLM")
+    save(fig, f"tier_fusion_{tier}")
+
+
+def fig_tier_attribution(tier: str):
+    """⑦ the hit rate of the picked genes by source, and the endorsement odds ratio adjusted for the ML score and the
+    screen (paper Table 9 and the tier follow-up text)."""
+    if tier == "headline":      # paper Table 9 and the conditional attribution
+        src = {"both": (42.1, 1900), "ml_only": (18.3, 77020), "llm_only": (21.0, 17080)}
+        orv = (2.51, 1.82, 3.43)
+        paper(42.1, 18.3, 21.0, nd=1)
+        paper(*orv, nd=2)
+    else:
+        a = load("tier_extension_summary.json")["attribution"][tier]
+        src = {k: (100 * v["hit_rate"], v["picked"]) for k, v in a["by_source"].items()}
+        c = a["conditional"]
+        c = c.get("logit", c)
+        orv = (c["endorsed_odds_ratio"], *c["or_ci95"])
+    rows = [("ML 与 LLM 都选", "both"), ("只有 ML 选", "ml_only"), ("只有 LLM 选", "llm_only")]
+    fig, ax = plt.subplots(figsize=(4.4, 1.8))
+    hbars(ax, [f"{lab}\n（{src[k][1]:,} 个）" for lab, k in rows], [src[k][0] for _, k in rows],
+          [BLUE, DEEMPH, C["llm_reasoning"]], fmt="{:.1f}%", xmax=60)
+    ax.set_xlabel("被选基因的 hit 率（%）")
+    title(ax, f"{TIER_ZH[tier]}：LLM 的作用（按来源的命中率）",
+          f"调整 ML 分数与屏后，LLM 点名的 OR = {orv[0]:.2f} [{orv[1]:.2f}, {orv[2]:.2f}]")
+    save(fig, f"tier_attribution_{tier}")
+
+
+PAIR_ENGINES = [("rf", "随机森林"), ("logreg", "逻辑回归"), ("svm_linear", "线性 SVM"), ("svgp", "稀疏变分高斯过程"),
+                ("bnn", "贝叶斯 MLP（GeneDisco 的模型）"), ("mlp", "MLP（2×64）"), ("lambdarank", "LambdaMART（排序学习）")]
+
+
+def fig_tier_engines(tier: str):
+    """⑧ the ML engine swapped, ML only: online engine minus online LightGBM."""
+    if tier == "pairs":
+        pe = load("tier_extension_summary.json")["pair_engines"]["pairs"]
+        lg = pe["ml_engine_lightgbm"]["mean"]
+        data = []
+        for key, lab in PAIR_ENGINES:
+            v = pe[f"ml_engine_{key}"]
+            d, lo, hi, pv = _welch_stats(v, pe["ml_engine_lightgbm"])
+            data.append((lab, d, lo, hi, v["mean"], pv))
+        data.sort(key=lambda r: r[1])
+        labels = [r[0] for r in data]
+        heads = []
+        ypos = list(range(len(data)))
+        figsize = (4.6, 2.4)
+    else:
+        rows = load("ml_engines/summary.json" if tier == "headline" else "ml_engines/tier_a/summary.json")["rows"]
+        lg = rows["ml_engine_lightgbm"]["mean"]
+        data, labels, ypos, heads = [], [], [], []
+        yv = 0
+        for gname, items in reversed([("第一轮：换模型族", ENGINE_ROUND1), ("第二轮：换学习目标、加描述、换代理模型", ENGINE_ROUND2)]):
+            items = sorted(items, key=lambda kv: rows[f"ml_engine_{kv[0]}"]["vs_lightgbm_online"]["delta"])
+            for key, zh, _ in items:
+                r = rows[f"ml_engine_{key}"]
+                vs = r["vs_lightgbm_online"]
+                data.append((zh, vs["delta"], *vs["ci95"], r["mean"], None))
+                labels.append(zh)
+                ypos.append(yv)
+                yv += 1
+            labels.append(gname)
+            heads.append(gname)
+            ypos.append(yv)
+            yv += 1.3
+        figsize = (4.6, 6.0)
+    fig, ax = plt.subplots(figsize=figsize)
+    dy = [p for p, lab in zip(ypos, labels) if lab not in heads]
+    for yi, (lab, d, lo, hi, lvl, p) in zip(dy, data):
+        sig = lo is not None and (lo > 0 or hi < 0)
+        col = BLUE if d >= 0 else RED
+        if lo is not None:
+            ax.plot([lo, hi], [yi, yi], color=col, lw=1.8, solid_capstyle="round")
+        ax.plot(d, yi, "o" if lo is not None else "D", ms=6, mfc=col if sig or lo is None else S.SURFACE,
+                mec=col, mew=1.4)
+        tail = ("" if p is None else f"  {_pfmt(p)}") if tier == "pairs" else ""
+        ax.text(1.02, yi, (f"{lvl:.1f}" if tier == "pairs" else f"{lvl:.3f}") + tail,
+                transform=ax.get_yaxis_transform(), fontsize=7.6, va="center")
+    ax.axvline(0, color=S.INK_2, lw=0.9)
+    ax.set_yticks(ypos, labels, fontsize=8)
+    for t, lab in zip(ax.get_yticklabels(), labels):
+        if lab in heads:
+            t.set_fontweight("bold")
+            t.set_color(S.INK)
+    ax.tick_params(axis="y", length=0)
+    ax.grid(axis="y", visible=False)
+    ax.set_xlabel(f"在线引擎 − 在线 LightGBM（{_unit(tier, True)}）", fontsize=8)
+    ax.text(1.02, 1.01, "该引擎的成绩" + ("  p" if tier == "pairs" else ""), transform=ax.transAxes, fontsize=7.6,
+            color=S.INK_2)
+    sub = (f"LightGBM = {lg:.1f}；菱形 = 确定性引擎（无区间）；实心 = 区间不含 0" if tier == "pairs"
+           else f"LightGBM = {lg:.3f}；实心 = 区间不含 0；† = 事后加的变体")
+    title(ax, f"{TIER_ZH[tier]}：只换 ML 引擎（只跑 ML）", sub)
+    save(fig, f"tier_engines_{tier}")
+
+
+def fig_tier_acquisition(tier: str):
+    """⑨ acquisition rules on a five-member LightGBM ensemble and on GeneDisco's Bayesian MLP."""
+    if tier == "headline":
+        s = load("ml_engines/summary.json")
+        single = s["rows"]["ml_engine_lightgbm"]["mean"]
+        acq = s["acquisition"]
+        lg = [("贪心（现行规则）", acq["ml_acq_greedy"]["mean"], None)] + \
+             [(lab, acq[k]["mean"], acq[k]["vs_ensemble_greedy"]["ci95"]) for k, lab in
+              (("ml_acq_ucb05", "UCB，β = 0.5"), ("ml_acq_thompson", "Thompson 采样"), ("ml_acq_ucb1", "UCB，β = 1"),
+               ("ml_acq_margin", "margin（不确定性采样）"))]
+        bn = s["bnn_acquisition"]
+        bb = [("贪心", s["rows"]["ml_engine_bnn"]["mean"], None)] + \
+             [(lab, bn[k]["mean"], bn[k]["vs_bnn_greedy"]["ci95"]) for k, lab in
+              (("ml_bnnacq_ucb1", "UCB"), ("ml_bnnacq_bald", "BALD"), ("ml_bnnacq_kmeans_embedding", "k-means（嵌入）"),
+               ("ml_bnnacq_badge", "BADGE"))]
+    else:
+        t = load("tier_extension_summary.json")
+        acq, rules = t["acquisition"][tier], t["rules_on_engines"][tier]
+        single = (load("ml_engines/tier_a/summary.json")["rows"]["ml_engine_lightgbm"]["mean"] if tier == "full_pool"
+                  else t["pair_engines"]["pairs"]["ml_engine_lightgbm"]["mean"])
+        if tier == "pairs":
+            bnn_ref = t["pair_engines"]["pairs"]["ml_engine_bnn"]
+
+            def ci(x, ref):
+                return _welch_stats(x, ref)[1:3]
+        else:
+            def ci(x, ref):
+                v = x.get("vs_greedy") or x.get("vs_reference")
+                return v["ci95"]
+            bnn_ref = None
+        lg = [("贪心（现行规则）", acq["ml_acq_greedy"]["mean"], None)] + \
+             [(lab, acq[k]["mean"], ci(acq[k], acq["ml_acq_greedy"])) for k, lab in
+              (("ml_acq_ucb05", "UCB，β = 0.5"), ("ml_acq_thompson", "Thompson 采样"), ("ml_acq_ucb1", "UCB，β = 1"),
+               ("ml_acq_margin", "margin（不确定性采样）"))]
+        bb = [("贪心", rules["ml_bnnacq_bald"]["reference_mean"], None)] + \
+             [(lab, rules[k]["mean"], ci(rules[k], bnn_ref)) for k, lab in
+              (("ml_bnnacq_ucb1", "UCB"), ("ml_bnnacq_bald", "BALD"), ("ml_bnnacq_kmeans_embedding", "k-means（嵌入）"),
+               ("ml_bnnacq_badge", "BADGE"))]
+
+    def col(ci):
+        if ci is None:
+            return BLUE
+        return RED if ci[1] < 0 else (LIGHT_BLUE if ci[0] > 0 else DEEMPH)
+
+    fmt = "{:.1f}" if tier == "pairs" else "{:.3f}"
+    xmax = 150 if tier == "pairs" else 0.31
+    fig, axs = plt.subplots(1, 2, figsize=(6.6, 2.3), gridspec_kw=dict(wspace=0.85))
+    for ax, rows, t_ in ((axs[0], lg, "LightGBM（5 成员集成）"), (axs[1], bb, "贝叶斯 MLP（GeneDisco）")):
+        hbars(ax, [r[0] for r in rows], [r[1] for r in rows], [col(r[2]) for r in rows], fmt=fmt,
+              ref=single, ref_label=f"单个 LightGBM {fmt.format(single)}", xmax=xmax)
+        ax.set_xlabel(f"{_unit(tier, True)}（5 个 seed）")
+        title(ax, t_)
+    fig.suptitle(f"{TIER_ZH[tier]}：采集规则", x=0.02, ha="left", fontsize=10, fontweight="bold", color=S.INK, y=1.08)
+    fig.legend(handles=[Patch(color=BLUE, label="贪心（按命中概率取前 B）"), Patch(color=DEEMPH, label="与贪心无显著差异"),
+                        Patch(color=RED, label="显著差于贪心"), Patch(color=LIGHT_BLUE, label="显著好于贪心")],
+               loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=4, fontsize=7.6, labelcolor=S.INK_2)
+    save(fig, f"tier_acquisition_{tier}")
+
+
+def fig_pairs_repair():
+    """Two-gene tier only: the reported system, the random-forest variant, BDA and the repaired arm (640 picks)."""
+    rows = [("Waddington C（报告配置）", 112.6, 24.7, C["waddington_c"]),
+            ("C + 随机森林引擎（仅 K562）", 157.5, 25.5, LIGHT_BLUE), ("BDA（GPT-5.6 Luna）", 160.0, 15.7, C["bda"]),
+            ("交互先验单独（不用 LLM、不学习）", 196, None, REPAIR), ("修复：不用 LLM", 239, None, REPAIR),
+            ("修复：LLM 名字优先", 220.9, 10.9, REPAIR), ("修复：LLM 作 0.2 验证者", 232.6, 6.0, REPAIR)]
+    paper(*[r[1] for r in rows], nd=1)
+    fig, ax = plt.subplots(figsize=(5.4, 2.6))
+    hbars(ax, [r[0] for r in rows], [r[1] for r in rows], [r[3] for r in rows], err=[r[2] for r in rows],
+          fmt="{:g}", ref=60, ref_label="随机 60", xmax=290)
+    ax.set_xlabel("640 次挑选的累计命中数（误差线 = 20 次重复的标准差）")
+    title(ax, "双扰动档特有：诊断后的修复臂（K562）", "修复臂是单独的实验，报告配置不变")
+    save(fig, "pairs_repair")
+
+
+def fig_pair_engines_interaction():
+    """Two-gene tier only: the engines on the table with the eight interaction features (paper Table 21, right)."""
+    names = ["LightGBM（报告）", "随机森林", "逻辑回归", "线性 SVM", "稀疏高斯过程", "贝叶斯 MLP", "MLP", "LambdaMART"]
+    tab = [(158, None), (154.4, 17.5), (97, None), (98, None), (71.0, 9.0), (100.2, 57.7), (125.6, 40.7), (70, None)]
+    paper(*[v for v, _ in tab], *[e for _, e in tab if e], nd=1)
+    fig, ax = plt.subplots(figsize=(4.6, 2.5))
+    hbars(ax, names, [v for v, _ in tab], [BLUE] + [DEEMPH] * 7, err=[e for _, e in tab], fmt="{:g}", ref=60,
+          ref_label="随机 60", xmax=235)
+    ax.set_xlabel("640 次挑选的命中数（只跑 ML）")
+    title(ax, "双扰动档特有：加入 8 个交互特征后的引擎", "这时 LightGBM 最好（158）")
+    save(fig, "pair_engines_interaction")
+
+
+TIER_FIGS = (fig_tier_overall, fig_tier_screens, fig_tier_curves, fig_tier_paired, fig_tier_ablation, fig_tier_fusion,
+             fig_tier_attribution, fig_tier_engines, fig_tier_acquisition)
+
+
 # BDA and GeneDisco per screen: paper Table 4 (headline) and Table 22 (full pool)
 GD_H = [0.104, 0.168, 0.071, 0.088, 0.052, 0.433, 0.043, 0.352, 0.228]
 BDA_H = [0.110, 0.133, 0.038, 0.073, 0.050, 0.327, 0.131, 0.254, 0.199]
@@ -819,21 +1297,17 @@ def main() -> None:
     if args.lang == "zh":
         fig_overview()
         fig_feature_families()
-        fig_per_screen("headline", "per_screen_main", GD_H, BDA_H, "逐屏 hit@R5：非必需（主档）")
-        fig_ladder()
-        fig_paired()
+        for tier in TIERS:                 # the same nine charts for each tier
+            for f in TIER_FIGS:
+                f(tier)
+        fig_reasoning()                    # headline only
         fig_clean_features()
-        fig_ablation()
-        fig_llm_role()
-        fig_engines()
-        fig_acquisition()
         fig_engines_in_system()
         fig_robustness()
-        fig_tiers()
-        fig_per_screen("full_pool", "per_screen_full", GD_F, BDA_F, "逐屏 hit@R5：全池档")
-        fig_pairs()
-        fig_pair_engines()
+        fig_pairs_repair()                 # two-gene tier only
+        fig_pair_engines_interaction()
         fig_jurkat()
+        fig_tiers()                        # across the two single-gene tiers
     else:
         fig_paired()
         fig_robustness()
