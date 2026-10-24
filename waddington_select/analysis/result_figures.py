@@ -31,6 +31,7 @@ import matplotlib.font_manager as fm  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Patch, Rectangle  # noqa: E402
+from matplotlib.ticker import PercentFormatter  # noqa: E402
 
 from . import style as S  # noqa: E402
 
@@ -776,6 +777,11 @@ PAIR_RUNS = {   # map -> (dataset, matched-baseline key, {method: (run file unde
                                                   "B": ("jurkat_b128_20rep/llm_reasoning_20rep.json", "llm_reasoning"),
                                                   "C": ("jurkat_b128_20rep/waddington_c_20rep.json", "waddington_c"),
                                                   "BDA": ("jurkat_b128_20rep/bda_20rep.json", "bda")}),
+    # K562 at BDA's own protocol (32 pairs per round, 160 picks; paper Table pairs-bda)
+    "K562_b32": ("Horlbeck", "pairs_b32", {"Random": ("tier_b_pairs_b32_20rep/calibration_20rep.json", "random"),
+                                           "B": ("tier_b_pairs_b32_20rep/calibration_20rep.json", "llm_reasoning"),
+                                           "C": ("tier_b_pairs_b32_20rep/waddington_c_20rep.json", "waddington_c"),
+                                           "BDA": ("tier_b_pairs_b32_20rep/bda_controlled_real.json", "bda")}),
 }
 GD_PAIR_PROBE = 77.7     # the best of GeneDisco's acquisition rules run on pairs as a mechanism probe (paper text)
 
@@ -1274,6 +1280,124 @@ def fig_pair_engines_interaction():
     save(fig, "pair_engines_interaction")
 
 
+# BDA's published two-gene results, Roohani et al. 2025 Table 2 (10 runs, 32 pairs per round): cumulative hits per
+# round, mean and 1 SD. Only the endpoints and the Random row are quoted in our paper, so only those are checked.
+BDA_TABLE2 = {"Random": ([2.6, 5.7, 8.9, 12.8, 16.4], [1.43, 2.83, 3.67, 3.74, 3.8]),
+              "Claude 3 Haiku": ([5.1, 14.8, 23.6, 34.1, 45.1], [2.2, 2.9, 4.1, 5.8, 5.3]),
+              "Claude 3.5 Sonnet": ([8.4, 15.7, 23.1, 31.7, 40.0], [1.36, 1.1, 2.59, 2.9, 3.77])}
+
+
+def fig_bda_protocol():
+    """Two-gene tier only: BDA at its own protocol (32 pairs per round, 160 picks). Left: our runs against its
+    published Table 2, round by round; right: every method at that budget (paper Table pairs-bda)."""
+    paper(*BDA_TABLE2["Random"][0], 45.1, 40.0, nd=1)
+    k = _pair_map("K562_b32")
+    s = load("pair_tier_summary.json")
+    run, prior = s["runs"]["160"], s["prior_alone"]["8_columns"]["160"]
+    fig, (a, b) = plt.subplots(1, 2, figsize=(7.6, 3.9), gridspec_kw={"width_ratios": [1, 1.05], "wspace": 1.05})
+    x = np.arange(1, 6)
+    lines = [("Random（本文）", k["Random"].mean(0), C["random"], "-", "o", True),
+             ("Random（BDA 论文）", BDA_TABLE2["Random"][0], C["random"], ":", "o", False),
+             ("BDA·GPT-5.6（本文）", k["BDA"].mean(0), C["bda"], "--", "s", True),
+             ("BDA·Claude 3 Haiku（论文）", BDA_TABLE2["Claude 3 Haiku"][0], C["bda"], ":", "^", False),
+             ("BDA·Claude 3.5 Sonnet（论文）", BDA_TABLE2["Claude 3.5 Sonnet"][0], C["bda"], ":", "D", False)]
+    for lab, y, col, ls, mk, filled in lines:
+        a.plot(x, y, color=col, ls=ls, lw=2.0 if filled else 1.4, marker=mk, ms=4.5, mfc=col if filled else S.SURFACE,
+               mec=col, mew=1.2, label=lab, zorder=3 if filled else 2)
+    for v, dy in ((k["BDA"].mean(0)[-1], 0), (45.1, 2), (40.0, -2), (k["Random"].mean(0)[-1], 0)):
+        a.annotate(f"{v:.1f}", (5, v), xytext=(7, dy), textcoords="offset points", va="center", fontsize=7.8,
+                   color=S.INK_2)
+    a.set_xticks(x)
+    a.set_xlim(0.8, 5.7)
+    a.set_ylim(0, 90)                                # headroom so the legend sits above the curves
+    a.grid(axis="x", visible=False)
+    a.set_xlabel("轮次（每轮 32 对）")
+    a.set_ylabel("累计命中数")
+    a.legend(fontsize=7.2, labelcolor=S.INK_2, loc="upper left")
+    title(a, "与 BDA 论文表 2 逐轮对照", "实心 = 本文 20 次；空心点线 = 论文 10 次")
+
+    def m(arr):
+        return round(float(arr[:, -1].mean()), 1), round(float(arr[:, -1].std(ddof=1)), 1) if len(arr) > 1 else None
+    rows = [("Random", *m(k["Random"]), C["random"]), ("Coreset", *m(k["Coreset"]), C["coreset"]),
+            (name_static(), *m(k[name_static()]), C["static_ranker"]), ("Online ML", *m(k["Online ML"]), C["online_adaptive"]),
+            ("Waddington C（报告配置）", *m(k["Waddington C"]), C["waddington_c"]), (name_b(), *m(k[name_b()]), C["llm_reasoning"]),
+            ("", None, None, None),
+            ("BDA 论文：Claude 3.5 Sonnet", 40.0, 3.8, DEEMPH), ("BDA 论文：Claude 3 Haiku", 45.1, 5.3, DEEMPH),
+            ("BDA 本文：GPT-5.6 Luna", *m(k["BDA"]), C["bda"]),
+            ("", None, None, None),
+            ("交互先验单独（不用 LLM、不学习）", prior, None, REPAIR),
+            ("修复：不用 LLM", int(run["repair_no_llm"]["mean"]), None, REPAIR),
+            ("修复：LLM 名字优先", round(run["coldstart_prior_v8"]["mean"], 1), round(run["coldstart_prior_v8"]["sd"], 1), REPAIR),
+            ("修复：LLM 作 0.2 验证者", round(run["verifier_prior"]["mean"], 1), round(run["verifier_prior"]["sd"], 1), REPAIR)]
+    paper(*[r[1] for r in rows if r[1] is not None], *[r[2] for r in rows if r[2]], nd=1)
+    hbars(b, [r[0] for r in rows], [r[1] for r in rows], [r[3] or S.SURFACE for r in rows], err=[r[2] for r in rows],
+          fmt="{:g}", xmax=95)
+    b.tick_params(axis="y", labelsize=7.8)
+    b.set_xlabel("160 次挑选的累计命中数（误差线 = 重复间标准差）")
+    title(b, "160 次挑选下的全部方法", "论文 Notes 中的表；浅灰两行转录自 BDA 论文")
+    save(fig, "bda_protocol")
+
+
+LINKS = [("同一蛋白复合体", "pair_complex_shared"), ("STRING 中直接相连", "pair_string_edge"),
+         ("共享 KEGG 通路", "pair_kegg_shared"), ("共享 Reactome 通路", "pair_reactome_shared")]
+
+
+def _bda_pick_mix() -> dict:
+    """What BDA proposes on K562: for each kind of functional link between the two genes (the label-free pair
+    features of the repaired arm), its share of the library and of BDA's picks (all 20 replicates pooled), and the
+    hit rate inside it."""
+    import pandas as pd
+    ev = REPO / "workspace" / "evaluation"
+    lab = pd.read_csv(ev / "lgbm_training_data_horlbeck_pairs_v3.csv", usecols=["gene", "dataset", "label"])
+    f = pd.read_csv(ev / "pair_interaction_features.csv").set_index("gene")
+    f = f.join(lab[lab["dataset"] == "Horlbeck"].set_index("gene")["label"], how="inner")
+    cats = {name: f[col] > 0 for name, col in LINKS}
+    cats["以上任一"] = (f[[col for _, col in LINKS]] > 0).any(axis=1)
+    cats["都没有"] = ~cats["以上任一"]
+    sets = {"Horlbeck 库内全部 100,576 对": f.index}
+    for path, name in (("tier_b_pairs_b32_20rep", "BDA 选的对（160 次挑选）"), ("tier_b_pairs_20rep", "BDA 选的对（640 次挑选）")):
+        reps = json.loads((GPT / path / "bda_controlled_real.json").read_text())["Horlbeck"]["bda"]
+        sets[name] = pd.Index([p for r in reps for rnd in r["selected_genes_per_round"] for p in rnd])
+    out = {}
+    for name, idx in sets.items():
+        y = f["label"].reindex(idx).to_numpy()
+        out[name] = {c: (float(m.reindex(idx).mean()), float(y[m.reindex(idx).to_numpy()].mean())) for c, m in cats.items()}
+        out[name]["_all"] = float(y.mean())
+    return out
+
+
+def fig_bda_picks():
+    """Two-gene tier only: the kinds of pairs BDA proposes, against the library (share, and hit rate inside)."""
+    mix = _bda_pick_mix()
+    cats = [c for c, _ in LINKS] + ["以上任一", "都没有"]
+    groups = list(mix)
+    cols = [DEEMPH, C["bda"], S.INK_2]
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4), sharey=True, gridspec_kw={"wspace": 0.14})
+    yc = np.arange(len(cats))[::-1]
+    h = 0.26
+    for ax, j, ttl, sub in ((axes[0], 0, "这类对的占比", "库内 vs BDA 选的对"),
+                            (axes[1], 1, "这类对的 hit 率", "竖线 = 库内总 hit 率")):
+        for g, (grp, col) in enumerate(zip(groups, cols)):
+            vals = [mix[grp][c][j] for c in cats]
+            yy = yc + (1 - g) * h
+            ax.barh(yy, vals, height=h * 0.92, color=col, zorder=3, label=grp)
+            for yi, v in zip(yy, vals):
+                ax.text(v + 0.012, yi, f"{v:.1%}" if v < 0.1 else f"{v:.0%}", va="center", fontsize=6.4, color=S.INK)
+        ax.set_xlim(0, 1.0 if j == 0 else 0.62)
+        ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+        ax.grid(axis="y", visible=False)
+        ax.tick_params(axis="y", length=0)
+        title(ax, ttl, sub)
+    axes[1].axvline(mix[groups[0]]["_all"], color=S.INK_2, lw=0.9, zorder=5)
+    axes[0].set_yticks(yc, cats)
+    for ax in axes:                                  # the four links above the line, their union and its complement below
+        ax.axhline(yc[cats.index("以上任一")] + 0.5, color=S.BASELINE, lw=0.8)
+    fig.legend(handles=[Patch(color=c, label=g) for g, c in zip(groups, cols)], loc="upper center",
+               bbox_to_anchor=(0.5, -0.02), ncol=3, fontsize=7.6, labelcolor=S.INK_2)
+    save(fig, "bda_picks")
+    return mix
+
+
 TIER_FIGS = (fig_tier_overall, fig_tier_screens, fig_tier_curves, fig_tier_paired, fig_tier_ablation, fig_tier_fusion,
              fig_tier_attribution, fig_tier_engines, fig_tier_acquisition)
 
@@ -1307,6 +1431,8 @@ def main() -> None:
         fig_pairs_repair()                 # two-gene tier only
         fig_pair_engines_interaction()
         fig_jurkat()
+        fig_bda_protocol()                 # the two-gene tier's state of the art, explained
+        fig_bda_picks()
         fig_tiers()                        # across the two single-gene tiers
     else:
         fig_paired()
