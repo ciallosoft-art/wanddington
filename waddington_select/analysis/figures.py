@@ -93,7 +93,8 @@ def method_comparison(out: Path) -> Path:
                     va="center", fontsize=9, color=S.INK_2)
 
     ax.set_yticks(y, labels, fontsize=9.5)
-    ax.set_xlabel("Hit ratio @ round 5, mean over 9 screens\n(ours: 20 seeds; GeneDisco: 5; BioDiscoveryAgent: 1)")
+    ax.set_xlabel("Hit ratio @ round 5, mean over 9 screens\n(C, padded LLM, Random: 20 replicates; ML baselines: "
+                  "deterministic;\nGeneDisco: 5 seeds; BioDiscoveryAgent: 1 run)")
     ax.set_title("The hybrid pipeline beats every baseline", color=S.INK, fontsize=11.5, loc="left", pad=10)
     ax.set_xlim(0, max(means.values) * 1.16)
     ax.grid(axis="y", visible=False)

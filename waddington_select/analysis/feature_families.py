@@ -14,7 +14,8 @@ screens' anchors and hits (analysis/hub_leak.py), so they are regrouped here by 
 
 Same convention as prior_probes (a uniform LOO LightGBM, DepMap on every screen, label-free tie order), so the
 numbers sit next to its feature-family probe. Paired, screen-clustered comparisons are against global+depmap,
-the prior built only from features with no anchor and no label. Also saved: the within-screen Spearman
+the prior built only from features with no anchor and no label. Also saved: that clean prior against the
+plain cross-screen hit-frequency ranking (prior_probes.json, label-free ties), and the within-screen Spearman
 correlation of the thirteen features, averaged over the nine screens.
 
 Run:  python -m waddington_select.analysis.feature_families      -> workspace/results/feature_families.json
@@ -33,6 +34,7 @@ from .prior_probes import _load, _loo_hit_at_r5
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "workspace" / "results" / "feature_families.json"
+PRIOR_PROBES = REPO / "workspace" / "results" / "prior_probes.json"
 GLOBAL = ["string_degree_norm", "pli_score", "kegg_pathway_count_norm", "reactome_pathway_count_norm"]
 POOLED = ["hub_score_norm", "ppi_score_sum"]
 DEPMAP = ["depmap_frac_ess", "depmap_mean_norm", "depmap_min_norm", "depmap_K562_norm"]
@@ -66,7 +68,12 @@ def main() -> None:
         "paired_vs_clean": {k: _paired(v, per[CLEAN]) for k, v in per.items() if k != CLEAN},
         "correlation": correlations(df),
     }
+    hit_freq = {d: v["hit_frequency"] for d, v in json.loads(PRIOR_PROBES.read_text())["per_screen"].items()}
+    out["clean_minus_hit_frequency"] = _paired(per[CLEAN], hit_freq)
     OUT.write_text(json.dumps(out, indent=1))
+    p = out["clean_minus_hit_frequency"]
+    print(f"clean prior minus hit-frequency ranking {p['delta']:+.4f} [{p['ci95'][0]:+.3f}, {p['ci95'][1]:+.3f}] "
+          f"{p['wins']}/{p['ties']}/{p['losses']}")
     for k, v in out["means"].items():
         p = out["paired_vs_clean"].get(k)
         tail = "" if p is None else (f"  vs clean {p['delta']:+.4f} [{p['ci95'][0]:+.3f}, {p['ci95'][1]:+.3f}] "
