@@ -248,15 +248,16 @@ FEATURE_SHORT = {"string_degree_norm": "degree", "pli_score": "pLI", "kegg_pathw
 FAMILY_COLOR = {"global": "#2a78d6", "pooled": "#c23b3a", "depmap": "#008300", "anchor": "#4a3aa7"}
 
 
-def fig_feature_correlation():
+def fig_feature_correlation(deck_path: Path | None = None):
     """Within-screen Spearman correlation of the thirteen features, mean of nine screens (feature_families.json).
-    Lower triangle with the diagonal, so every feature names a row and a column; names coloured by family."""
+    Lower triangle with the diagonal, so every feature names a row and a column; names coloured by family.
+    With deck_path: the deck's slide-11b version (no title, white background, shorter to fit the slide)."""
     ff = load("feature_families.json")
     feats = ff["correlation"]["features"]
     R = np.array(ff["correlation"]["spearman_within_screen_mean"])
     fam = {f: g for g, fs in ff["groups"].items() for f in fs}
     n = len(feats)
-    fig, ax = plt.subplots(figsize=(5.6, 4.9))
+    fig, ax = plt.subplots(figsize=(5.6, 4.6) if deck_path else (5.6, 4.9))
     from matplotlib.colors import LinearSegmentedColormap
     cmap = LinearSegmentedColormap.from_list("seq0", ["#f4f8fd"] + S.SEQ_BLUE)   # near-zero reads as blank
     for i in range(n):
@@ -295,6 +296,12 @@ def fig_feature_correlation():
     cb.set_label("Spearman ρ（屏内，9 屏平均）", fontsize=7.2, color=S.INK_2, labelpad=2)
     cb.ax.tick_params(labelsize=6.6, colors=S.INK_2, length=0)
     cb.outline.set_visible(False)
+    if deck_path:
+        ax.set_facecolor("white")
+        fig.savefig(deck_path, facecolor="white")    # the slide is white; the explainer surface is off-white
+        plt.close(fig)
+        print("wrote", deck_path)
+        return
     title(ax, "13 个特征的屏内 Spearman 相关", "下三角；对角线（灰）是特征自身；数字只标 ρ ≥ 0.3")
     save(fig, "feature_correlation")
 
