@@ -24,6 +24,7 @@ Arm names
   static_ranker           LOO LightGBM static prior
   online_adaptive         PerTurboAgent-style online ML
   llm_reasoning           GPT/LLM proposals with static LOO-ML padding (B arm)
+  llm_reasoning_matched   the B arm with its padding ranker on the C-arm's features (no anchor, metadata DepMap)
   waddington_c            Waddington C (active GPT protocol; paper scripts pin legacy vote semantics)
 
 Ablation arms:
@@ -62,6 +63,7 @@ from .arms.coreset_arm import CoresetArm
 from .arms.online_adaptive_arm import OnlineAdaptiveArm
 from .arms.llm_reasoning_arm import LLMReasoningArm
 from .arms.waddington_c_arm import (
+    _get_feature_config as _c_feature_config,
     DEFAULT_HONEST_WLLM,
     MEMORY_PATH,
     TRAINING_DATA_V1,
@@ -106,7 +108,7 @@ RESULTS_DIR = REPO_ROOT / "workspace" / "results" / "sequential"
 # Arms available via --arms flag
 _PAPER_ARMS = {
     "random", "coreset", "static_ranker", "online_adaptive",
-    "llm_reasoning", "waddington_c", "waddington_c_skills", "waddington_c_memskills", "waddington_c_enrich",
+    "llm_reasoning", "llm_reasoning_matched", "waddington_c", "waddington_c_skills", "waddington_c_memskills", "waddington_c_enrich",
     "waddington_c_no_memory", "waddington_c_no_llm",
     "waddington_c_no_ml", "waddington_c_shuffled_names",
     "waddington_c_feature_reasoning", "waddington_c_pool_only", "waddington_c_ensemble", "waddington_c_linear",
@@ -141,6 +143,14 @@ def make_arms(dataset_name: str, arm_names: list[str], local_seed: int = 42) -> 
             arms.append(OnlineAdaptiveArm(dataset_name, bs))
         elif name == "llm_reasoning":
             arms.append(LLMReasoningArm(dataset_name, bs, seed=local_seed))
+        elif name == "llm_reasoning_matched":
+            # B with its static padding ranker on the C-arm's own features (no anchor, DepMap by metadata),
+            # like the matched ML baselines (analysis/matched_baselines.py); the LLM side is unchanged.
+            csv, extra = _c_feature_config(dataset_name)
+            arm = LLMReasoningArm(dataset_name, bs, seed=local_seed, training_csv=csv, extra_feature_cols=extra,
+                                  drop_anchor_feats=True)
+            arm.name = name
+            arms.append(arm)
         elif name == "waddington_c":
             arms.append(WaddingtonCArm(dataset_name, bs))
         elif name == "waddington_c_skills":
@@ -486,7 +496,7 @@ def _run_one_repeat(ds: str, arm_name: str, repeat_idx: int, oracle, n_rounds: i
                           or (arm_name.startswith("waddington_c__")
                               and _ml_is_stochastic(arm_name[len("waddington_c__"):])))
     item["local_seed"] = local_seed if consumes_local_rng else None
-    calls_llm = (arm_name == "llm_reasoning" or arm_name.startswith("waddington")) and arm_name not in _NO_LLM_ARMS
+    calls_llm = (arm_name.startswith(("llm_reasoning", "waddington"))) and arm_name not in _NO_LLM_ARMS
     item["provider_seed"] = None if calls_llm else "not_applicable"
     item["replicate_semantics"] = (
         "local_rng_seeded" if consumes_local_rng else
