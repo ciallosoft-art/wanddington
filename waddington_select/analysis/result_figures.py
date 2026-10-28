@@ -240,6 +240,65 @@ def fig_overview():
     save(fig, "overview")
 
 
+FEATURE_SHORT = {"string_degree_norm": "degree", "pli_score": "pLI", "kegg_pathway_count_norm": "KEGG count",
+                 "reactome_pathway_count_norm": "Reactome count", "hub_score_norm": "hub score",
+                 "ppi_score_sum": "PPI sum", "depmap_frac_ess": "DepMap frac", "depmap_mean_norm": "DepMap mean",
+                 "depmap_min_norm": "DepMap min", "depmap_K562_norm": "DepMap K562", "g1_ppi_score": "g1_ppi",
+                 "archs4_coexpr": "ARCHS4 coexpr", "kegg_overlap": "KEGG overlap"}
+FAMILY_COLOR = {"global": "#2a78d6", "pooled": "#c23b3a", "depmap": "#008300", "anchor": "#4a3aa7"}
+
+
+def fig_feature_correlation():
+    """Within-screen Spearman correlation of the thirteen features, mean of nine screens (feature_families.json).
+    Lower triangle with the diagonal, so every feature names a row and a column; names coloured by family."""
+    ff = load("feature_families.json")
+    feats = ff["correlation"]["features"]
+    R = np.array(ff["correlation"]["spearman_within_screen_mean"])
+    fam = {f: g for g, fs in ff["groups"].items() for f in fs}
+    n = len(feats)
+    fig, ax = plt.subplots(figsize=(5.6, 4.9))
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap = LinearSegmentedColormap.from_list("seq0", ["#f4f8fd"] + S.SEQ_BLUE)   # near-zero reads as blank
+    for i in range(n):
+        for j in range(i + 1):
+            v = R[i, j]
+            diag = i == j
+            ax.add_patch(Rectangle((j - 0.5, i - 0.5), 1, 1, lw=0,
+                                   color=S.BASELINE if diag else cmap(max(v, 0.0))))
+            if not diag and v >= 0.3:
+                ax.text(j, i, f"{v:.2f}".lstrip("0"), ha="center", va="center", fontsize=6.8,
+                        color="white" if v >= 0.6 else S.INK)
+    edges = np.cumsum([len(ff["groups"][g]) for g in ("global", "pooled", "depmap")]) - 0.5
+    for e in edges:                                  # white gaps between source families
+        ax.plot([-0.5, e], [e, e], color=S.SURFACE, lw=2.6)
+        ax.plot([e, e], [e, n - 0.5], color=S.SURFACE, lw=2.6)
+    labels = [FEATURE_SHORT[f] for f in feats]
+    ax.set_xticks(range(n), labels, rotation=55, ha="right", fontsize=7.6)
+    ax.set_yticks(range(n), labels, fontsize=7.6)
+    for tl in ax.get_xticklabels() + ax.get_yticklabels():
+        f = feats[labels.index(tl.get_text())]
+        tl.set_color(FAMILY_COLOR[fam[f]])
+        tl.set_fontweight("bold")
+    ax.set_xlim(-0.5, n - 0.5)
+    ax.set_ylim(n - 0.5, -0.5)
+    ax.set_aspect("equal")
+    ax.tick_params(length=0)
+    ax.grid(False)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    names = {"global": "全局（4）", "pooled": "hub / PPI 查询缓存（2）", "depmap": "DepMap（4）", "anchor": "anchor（3）"}
+    ax.legend(handles=[Patch(color=FAMILY_COLOR[g], label=names[g]) for g in names], loc="upper right",
+              fontsize=7.6, labelcolor=S.INK_2, title="特征族（名字颜色）", title_fontsize=7.8, frameon=False)
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(0, 1))
+    cax = ax.inset_axes([0.60, 0.64, 0.34, 0.03])
+    cb = fig.colorbar(sm, cax=cax, orientation="horizontal")
+    cb.set_label("Spearman ρ（屏内，9 屏平均）", fontsize=7.2, color=S.INK_2, labelpad=2)
+    cb.ax.tick_params(labelsize=6.6, colors=S.INK_2, length=0)
+    cb.outline.set_visible(False)
+    title(ax, "13 个特征的屏内 Spearman 相关", "下三角；对角线（灰）是特征自身；数字只标 ρ ≥ 0.3")
+    save(fig, "feature_correlation")
+
+
 def fig_feature_families():
     """The prior (no LLM) by feature family, and the hub / PPI leak in single-feature rankings."""
     ff = load("feature_families.json")
@@ -1420,6 +1479,7 @@ def main() -> None:
     paper(*GD_H, *BDA_H, *GD_F, *BDA_F)
     if args.lang == "zh":
         fig_overview()
+        fig_feature_correlation()
         fig_feature_families()
         for tier in TIERS:                 # the same nine charts for each tier
             for f in TIER_FIGS:
