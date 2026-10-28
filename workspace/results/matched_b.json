@@ -1,0 +1,418 @@
+{
+ "headline": {
+  "unit": "hit@R5, mean of nine screens",
+  "means": {
+   "matched_B": 0.22448888888888888,
+   "reported_B": 0.21183944444444439,
+   "C": 0.26034944444444447
+  },
+  "per_screen": {
+   "matched_B": {
+    "IFNG": 0.1642,
+    "IL2": 0.26995,
+    "Sanchez21": 0.05884,
+    "Sanchez21_down": 0.05906499999999999,
+    "Carnevale22": 0.06487499999999999,
+    "Scharenberg22": 0.4836800000000001,
+    "Steinhart": 0.13721000000000003,
+    "Replogle_K562_essential": 0.55796,
+    "Replogle_K562_gwps": 0.22462
+   },
+   "reported_B": {
+    "IFNG": 0.16875999999999997,
+    "IL2": 0.24023,
+    "Sanchez21": 0.05850999999999999,
+    "Sanchez21_down": 0.05580500000000001,
+    "Carnevale22": 0.058125,
+    "Scharenberg22": 0.44083999999999995,
+    "Steinhart": 0.14618000000000003,
+    "Replogle_K562_essential": 0.5277749999999999,
+    "Replogle_K562_gwps": 0.21033
+   },
+   "C": {
+    "IFNG": 0.184155,
+    "IL2": 0.336395,
+    "Sanchez21": 0.088235,
+    "Sanchez21_down": 0.09361000000000001,
+    "Carnevale22": 0.06515000000000001,
+    "Scharenberg22": 0.5051,
+    "Steinhart": 0.11548499999999999,
+    "Replogle_K562_essential": 0.60713,
+    "Replogle_K562_gwps": 0.34788500000000006
+   }
+  },
+  "C_minus_matched_B": {
+   "delta": 0.035860555555555534,
+   "ci95": [
+    0.012398333333333312,
+    0.06235397222222218
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  },
+  "C_minus_reported_B": {
+   "delta": 0.04851000000000002,
+   "ci95": [
+    0.01817700000000001,
+    0.07980768055555557
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  },
+  "matched_B_minus_reported_B": {
+   "delta": 0.01264944444444448,
+   "ci95": [
+    0.0022868055555555575,
+    0.0242303472222223
+   ],
+   "wins": 7,
+   "ties": 0,
+   "losses": 2
+  },
+  "padding_share": {
+   "matched_B": 0.43452083333333336,
+   "reported_B": 0.42101041666666666
+  },
+  "n_replicates": {
+   "IFNG": 20,
+   "IL2": 20,
+   "Sanchez21": 20,
+   "Sanchez21_down": 20,
+   "Carnevale22": 20,
+   "Scharenberg22": 20,
+   "Steinhart": 20,
+   "Replogle_K562_essential": 20,
+   "Replogle_K562_gwps": 20
+  },
+  "source_of_hits": {
+   "matched_B": {
+    "named_picks": 301.58888888888885,
+    "named_hits": 0.07002450310869826,
+    "padding_hits": 0.15446713414013735
+   },
+   "reported_B": {
+    "named_picks": 308.7944444444445,
+    "named_hits": 0.07289645416225918,
+    "padding_hits": 0.13894233272309928
+   }
+  }
+ },
+ "full_pool": {
+  "unit": "hit@R5, mean of nine screens",
+  "means": {
+   "matched_B": 0.22266999999999998,
+   "reported_B": 0.20478444444444446,
+   "C": 0.25891277777777777
+  },
+  "per_screen": {
+   "matched_B": {
+    "IFNG": 0.16565500000000002,
+    "IL2": 0.235785,
+    "Sanchez21": 0.059484999999999996,
+    "Sanchez21_down": 0.058495000000000005,
+    "Carnevale22": 0.06362500000000001,
+    "Scharenberg22": 0.44058,
+    "Steinhart": 0.129855,
+    "Replogle_K562_essential": 0.6174349999999998,
+    "Replogle_K562_gwps": 0.23311499999999996
+   },
+   "reported_B": {
+    "IFNG": 0.15820499999999998,
+    "IL2": 0.21545000000000006,
+    "Sanchez21": 0.05127999999999999,
+    "Sanchez21_down": 0.05336500000000001,
+    "Carnevale22": 0.06282499999999999,
+    "Scharenberg22": 0.416995,
+    "Steinhart": 0.12952999999999998,
+    "Replogle_K562_essential": 0.5500050000000001,
+    "Replogle_K562_gwps": 0.20540499999999998
+   },
+   "C": {
+    "IFNG": 0.194025,
+    "IL2": 0.318655,
+    "Sanchez21": 0.081275,
+    "Sanchez21_down": 0.07607499999999999,
+    "Carnevale22": 0.06626500000000002,
+    "Scharenberg22": 0.5037649999999998,
+    "Steinhart": 0.104375,
+    "Replogle_K562_essential": 0.6420600000000001,
+    "Replogle_K562_gwps": 0.34372
+   }
+  },
+  "C_minus_matched_B": {
+   "delta": 0.036242777777777783,
+   "ci95": [
+    0.011829583333333407,
+    0.062426763888888855
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  },
+  "C_minus_reported_B": {
+   "delta": 0.05412833333333332,
+   "ci95": [
+    0.021569347222222243,
+    0.08669356944444437
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  },
+  "matched_B_minus_reported_B": {
+   "delta": 0.017885555555555533,
+   "ci95": [
+    0.006851805555555579,
+    0.03204401388888877
+   ],
+   "wins": 9,
+   "ties": 0,
+   "losses": 0
+  },
+  "padding_share": {
+   "matched_B": 0.4182708333333333,
+   "reported_B": 0.4078541666666667
+  },
+  "n_replicates": {
+   "IFNG": 20,
+   "IL2": 20,
+   "Sanchez21": 20,
+   "Sanchez21_down": 20,
+   "Carnevale22": 20,
+   "Scharenberg22": 20,
+   "Steinhart": 20,
+   "Replogle_K562_essential": 20,
+   "Replogle_K562_gwps": 20
+  },
+  "source_of_hits": {
+   "matched_B": {
+    "named_picks": 310.2555555555556,
+    "named_hits": 0.0755131564125294,
+    "padding_hits": 0.1471571871142547
+   },
+   "reported_B": {
+    "named_picks": 315.81111111111113,
+    "named_hits": 0.0771603653977203,
+    "padding_hits": 0.12762381287802732
+   }
+  }
+ },
+ "pairs128": {
+  "unit": "cumulative hits, Horlbeck",
+  "means": {
+   "matched_B": 123.9,
+   "reported_B": 128.2,
+   "C": 112.6
+  },
+  "sd": {
+   "matched_B": 23.615115587490276,
+   "reported_B": 22.11120220969214,
+   "C": 24.679844749149154
+  },
+  "C_minus_matched_B": {
+   "delta": -11.300000000000011,
+   "ci95": [
+    -26.763226371129264,
+    4.163226371129241
+   ],
+   "p": 0.1472783407361051
+  },
+  "C_minus_reported_B": {
+   "delta": -15.599999999999994,
+   "ci95": [
+    -30.60555860744956,
+    -0.5944413925504293
+   ],
+   "p": 0.04200088490326273
+  },
+  "matched_B_minus_reported_B": {
+   "delta": -4.299999999999983,
+   "ci95": [
+    -18.94629093311742,
+    10.346290933117455
+   ],
+   "p": 0.5557655507967352
+  },
+  "padding_share": {
+   "matched_B": 0.37015625,
+   "reported_B": 0.377890625
+  },
+  "n_replicates": 20,
+  "source_of_hits": {
+   "matched_B": {
+    "named_picks": 403.1,
+    "named_hits": 109.35,
+    "padding_hits": 14.55
+   },
+   "reported_B": {
+    "named_picks": 398.15,
+    "named_hits": 104.8,
+    "padding_hits": 23.4
+   }
+  }
+ },
+ "pairs32": {
+  "unit": "cumulative hits, Horlbeck",
+  "means": {
+   "matched_B": 40.9,
+   "reported_B": 42.9,
+   "C": 31.85
+  },
+  "sd": {
+   "matched_B": 9.683953085823013,
+   "reported_B": 6.632456082343141,
+   "C": 8.443465240240993
+  },
+  "C_minus_matched_B": {
+   "delta": -9.049999999999997,
+   "ci95": [
+    -14.869427728678655,
+    -3.230572271321339
+   ],
+   "p": 0.003209735258099831
+  },
+  "C_minus_reported_B": {
+   "delta": -11.049999999999997,
+   "ci95": [
+    -15.91923441351739,
+    -6.180765586482605
+   ],
+   "p": 5.031612670294627e-05
+  },
+  "matched_B_minus_reported_B": {
+   "delta": -2.0,
+   "ci95": [
+    -7.3360682142203295,
+    3.3360682142203295
+   ],
+   "p": 0.4513587579552545
+  },
+  "padding_share": {
+   "matched_B": 0.335,
+   "reported_B": 0.3125
+  },
+  "n_replicates": 20,
+  "source_of_hits": {
+   "matched_B": {
+    "named_picks": 106.4,
+    "named_hits": 35.05,
+    "padding_hits": 5.85
+   },
+   "reported_B": {
+    "named_picks": 110.0,
+    "named_hits": 36.2,
+    "padding_hits": 6.7
+   }
+  }
+ },
+ "jurkat128": {
+  "unit": "cumulative hits, Horlbeck_Jurkat",
+  "means": {
+   "matched_B": 88.9,
+   "reported_B": 102.95,
+   "C": 103.95
+  },
+  "sd": {
+   "matched_B": 7.8666517989749485,
+   "reported_B": 7.294374184043625,
+   "C": 9.344150999140416
+  },
+  "C_minus_matched_B": {
+   "delta": 15.049999999999997,
+   "ci95": [
+    9.515541384208401,
+    20.584458615791593
+   ],
+   "p": 2.9090414228775026e-06
+  },
+  "C_minus_reported_B": {
+   "delta": 1.0,
+   "ci95": [
+    -4.376400934256763,
+    6.376400934256763
+   ],
+   "p": 0.708200066561044
+  },
+  "matched_B_minus_reported_B": {
+   "delta": -14.049999999999997,
+   "ci95": [
+    -18.907176716861656,
+    -9.192823283138337
+   ],
+   "p": 9.122725123657313e-07
+  },
+  "padding_share": {
+   "matched_B": 0.43671875,
+   "reported_B": 0.374609375
+  },
+  "n_replicates": 20,
+  "source_of_hits": {
+   "matched_B": {
+    "named_picks": 360.5,
+    "named_hits": 61.8,
+    "padding_hits": 27.1
+   },
+   "reported_B": {
+    "named_picks": 400.25,
+    "named_hits": 74.4,
+    "padding_hits": 28.55
+   }
+  }
+ },
+ "jurkat32": {
+  "unit": "cumulative hits, Horlbeck_Jurkat",
+  "means": {
+   "matched_B": 27.25,
+   "reported_B": 27.6,
+   "C": 28.45
+  },
+  "sd": {
+   "matched_B": 3.6544853478834383,
+   "reported_B": 3.201973075924807,
+   "C": 5.77175518319487
+  },
+  "C_minus_matched_B": {
+   "delta": 1.1999999999999993,
+   "ci95": [
+    -1.9110516053504707,
+    4.311051605350469
+   ],
+   "p": 0.4378755741608565
+  },
+  "C_minus_reported_B": {
+   "delta": 0.8499999999999979,
+   "ci95": [
+    -2.1655455892545366,
+    3.8655455892545323
+   ],
+   "p": 0.5690113679616345
+  },
+  "matched_B_minus_reported_B": {
+   "delta": -0.3500000000000014,
+   "ci95": [
+    -2.550670944153979,
+    1.8506709441539764
+   ],
+   "p": 0.7491371745087223
+  },
+  "padding_share": {
+   "matched_B": 0.4046875,
+   "reported_B": 0.3684375
+  },
+  "n_replicates": 20,
+  "source_of_hits": {
+   "matched_B": {
+    "named_picks": 95.25,
+    "named_hits": 19.4,
+    "padding_hits": 7.85
+   },
+   "reported_B": {
+    "named_picks": 101.05,
+    "named_hits": 18.45,
+    "padding_hits": 9.15
+   }
+  }
+ }
+}
