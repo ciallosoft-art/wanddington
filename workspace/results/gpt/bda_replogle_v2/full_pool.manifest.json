@@ -1,0 +1,63 @@
+{
+  "created_utc": "2026-10-29T12:55:38.765926+00:00",
+  "protocol": {
+    "agent": "BioDiscoveryAgent (no tools)",
+    "datasets": [
+      "Replogle_K562_essential",
+      "Replogle_K562_gwps"
+    ],
+    "replicates": 1,
+    "rounds": 5,
+    "combinatorial": false,
+    "pair_pool": null,
+    "llm_model": "openai-codex/gpt-5.6-luna",
+    "scored_by": "waddington_select.oracle.DatasetOracle",
+    "batch_sizes": {
+      "Replogle_K562_essential": 32,
+      "Replogle_K562_gwps": 128
+    },
+    "task_prompts": {
+      "Replogle_K562_essential": {
+        "Task": "Identify genes whose CRISPRi knockdown causes a strong transcriptomic response in K562 cells in the curated essential-gene Perturb-seq panel",
+        "Measurement": "L2 distance between the mean gene-expression vector of perturbed cells and the mean control expression vector; hits are the top 10% by this distance after excluding CEGv2 genes"
+      },
+      "Replogle_K562_gwps": {
+        "Task": "Identify genes whose CRISPRi knockdown causes a strong transcriptomic response in the K562 genome-wide Perturb-seq screen",
+        "Measurement": "anderson_darling_counts: the number of expressed genes significantly shifted by the perturbation, taking the maximum across a gene's targeted transcription start sites; hits are the top 10% by this count after excluding CEGv2 genes"
+      }
+    }
+  },
+  "scientific_inputs": {
+    "training_csv": "/home/duanyu/Python/SKILL/waddington/workspace/evaluation/lgbm_training_data_tier_a.csv",
+    "training_csv_sha256": "c0bc7071a5a6aaf3429168566504e86a0208611fc5a85001efd90dbcbc8f08b3",
+    "training_csv_v3": "/home/duanyu/Python/SKILL/waddington/workspace/evaluation/lgbm_training_data_tier_a_v3.csv",
+    "training_csv_v3_sha256": "3f7c55cb3c554e5fc09469b7fa5008035c5d4e13f4fb949d678f272ff9096b17"
+  },
+  "external_agent": {
+    "repo": "/home/duanyu/Python/keypaper/code/BioDiscoveryAgent",
+    "git_head": "19673c7371c542cfa155ffaa9047c53525f9fe2e",
+    "git_dirty": true,
+    "patched_files": {
+      "LLM.py": "ce6df9fb79b8556e79147e166dae04d302ec97d5afde90a5a87f58d9515997e4",
+      "tools.py": "1639a23460899230f6f6a4f68cf9b2ab61a4c774c3172e6a6bffd3439c29a3fe",
+      "research_assistant.py": "b7869eeb2a8ac64b577c356c2b13f54edf2243601d180870305df55b95ac9aad"
+    },
+    "patches": [
+      "LLM.py:complete_text \u2014 all completions routed through our LLMClient at a fixed model",
+      "tools.py:parse_entries \u2014 tolerate a missing 'Solution:' header on top-up re-prompts",
+      "tools.py:agent_loop \u2014 credit an unfilled round instead of discarding it",
+      "research_assistant.py \u2014 opt-in WADDINGTON_BDA_PAIR_POOL override for the pair library"
+    ],
+    "import_stubs": [
+      "Bio",
+      "__pycache__",
+      "html2text",
+      "langchain",
+      "openai",
+      "paper_scrapper",
+      "paperqa",
+      "scholarly",
+      "transformers"
+    ]
+  }
+}

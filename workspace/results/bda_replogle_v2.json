@@ -1,0 +1,138 @@
+{
+ "headline": {
+  "screens": {
+   "Replogle_K562_essential": {
+    "old": 0.254,
+    "new": 0.365079,
+    "budget": 160,
+    "picks_new": {
+     "in_pool": 128,
+     "core_essential": 0
+    },
+    "picks_old": {
+     "in_pool": 64,
+     "core_essential": 0
+    },
+    "hits_old": 16,
+    "hits_new": 23
+   },
+   "Replogle_K562_gwps": {
+    "old": 0.1991,
+    "new": 0.137446,
+    "budget": 640,
+    "picks_new": {
+     "in_pool": 640,
+     "core_essential": 0
+    },
+    "picks_old": {
+     "in_pool": 640,
+     "core_essential": 0
+    },
+    "hits_old": 184,
+    "hits_new": 127
+   }
+  },
+  "mean_old": 0.14608888888888888,
+  "mean_new": 0.15158055555555555,
+  "per_screen_new": {
+   "IFNG": 0.1097,
+   "IL2": 0.1331,
+   "Sanchez21": 0.0384,
+   "Sanchez21_down": 0.0735,
+   "Carnevale22": 0.0495,
+   "Scharenberg22": 0.3265,
+   "Steinhart": 0.131,
+   "Replogle_K562_essential": 0.365079,
+   "Replogle_K562_gwps": 0.137446
+  },
+  "C_minus_BDA_old": {
+   "delta": 0.11426055555555553,
+   "ci95": [
+    0.047161430555555564,
+    0.19193444444444444
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  },
+  "C_minus_BDA_new": {
+   "delta": 0.10876888888888889,
+   "ci95": [
+    0.04865030555555556,
+    0.17156289444444436
+   ],
+   "wins": 8,
+   "ties": 0,
+   "losses": 1
+  },
+  "written": "workspace/results/bda_controlled/bda_gpt_v2.json"
+ },
+ "full_pool": {
+  "screens": {
+   "Replogle_K562_essential": {
+    "old": 0.492063,
+    "new": 0.349206,
+    "budget": 160,
+    "picks_new": {
+     "in_pool": 143,
+     "core_essential": 0
+    },
+    "picks_old": {
+     "in_pool": 150,
+     "core_essential": 0
+    },
+    "hits_old": 31,
+    "hits_new": 22
+   },
+   "Replogle_K562_gwps": {
+    "old": 0.147186,
+    "new": 0.160173,
+    "budget": 640,
+    "picks_new": {
+     "in_pool": 640,
+     "core_essential": 0
+    },
+    "picks_old": {
+     "in_pool": 640,
+     "core_essential": 0
+    },
+    "hits_old": 136,
+    "hits_new": 148
+   }
+  },
+  "mean_old": 0.1660601111111111,
+  "mean_new": 0.1516301111111111,
+  "per_screen_new": {
+   "IFNG": 0.097826,
+   "IL2": 0.099388,
+   "Sanchez21": 0.038961,
+   "Sanchez21_down": 0.097403,
+   "Carnevale22": 0.042418,
+   "Scharenberg22": 0.358491,
+   "Steinhart": 0.120805,
+   "Replogle_K562_essential": 0.349206,
+   "Replogle_K562_gwps": 0.160173
+  },
+  "C_minus_BDA_old": {
+   "delta": 0.09285266666666665,
+   "ci95": [
+    0.03808589166666668,
+    0.14899382499999994
+   ],
+   "wins": 7,
+   "ties": 0,
+   "losses": 2
+  },
+  "C_minus_BDA_new": {
+   "delta": 0.10728266666666665,
+   "ci95": [
+    0.04272595000000001,
+    0.1766074583333333
+   ],
+   "wins": 7,
+   "ties": 0,
+   "losses": 2
+  },
+  "written": "workspace/results/gpt/tier_a_full_pool_20rep/bda_controlled_v2.json"
+ }
+}
