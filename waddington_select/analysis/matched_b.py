@@ -3,11 +3,13 @@ matched_b.py — the padded LLM baseline B with its padding on the C-arm's featu
 reported B (padding on the original benchmark configuration: six intrinsic + three anchor, no DepMap) and C.
 
 Single-gene tiers: per-screen means over twenty replicates, then paired screen-clustered bootstrap over the nine
-screens (final_system_stats._paired). Two-gene tiers (one map each): Welch t over replicates.
+screens (final_system_stats._paired, seed 4 as its vs_llm_branch, so C - reported B reproduces the paper's
++0.049 [0.019, 0.080]). Two-gene tiers (one map each): Welch t over replicates.
 
-  C - matched B       the comparison the main table should carry: only who leads, the LLM or the ML, differs
-  C - reported B      as reported
+  C - matched B       the comparison the main tables carry: only who leads, the LLM or the ML, differs
+  C - reported B      the original-configuration B (Appendix, tab:benchmark_config)
   matched B - reported B   what the padding features alone did to B (anchors out, DepMap in)
+  BDA - matched B     two-gene tiers: BioDiscoveryAgent's agent at the same budget
 
 Run:  python -m waddington_select.analysis.matched_b      -> workspace/results/matched_b.json
 """
@@ -21,10 +23,9 @@ import numpy as np
 from scipy import stats
 
 from .final_system_stats import _paired
-from .sources import GPT, REPO, REPORTED_RUN, REPORTED_TIER_A_RUN
+from .sources import GPT, MATCHED_B_ARM, REPO, REPORTED_RUN, REPORTED_TIER_A_RUN, matched_b_run
 
 OUT = REPO / "workspace" / "results" / "matched_b.json"
-NEW = GPT / "matched_b"
 SINGLE = {"headline": REPORTED_RUN, "full_pool": REPORTED_TIER_A_RUN}
 EVAL = REPO / "workspace" / "evaluation"
 LABELS = {"headline": EVAL / "lgbm_training_data.csv", "full_pool": EVAL / "lgbm_training_data_tier_a.csv",
@@ -32,16 +33,21 @@ LABELS = {"headline": EVAL / "lgbm_training_data.csv", "full_pool": EVAL / "lgbm
           "pairs32": EVAL / "lgbm_training_data_horlbeck_pairs_mean.csv",
           "jurkat128": EVAL / "lgbm_training_data_horlbeck_jurkat_pairs.csv",
           "jurkat32": EVAL / "lgbm_training_data_horlbeck_jurkat_pairs.csv"}
-PAIRS = {  # tier -> (dataset, reported B file, C file)
+PAIRS = {  # tier -> (dataset, reported B file, C file, BDA file)
     "pairs128": ("Horlbeck", GPT / "tier_b_pairs_20rep" / "calibration_20rep.json",
-                 GPT / "tier_b_pairs_20rep" / "waddington_c_20rep.json"),
+                 GPT / "tier_b_pairs_20rep" / "waddington_c_20rep.json",
+                 GPT / "tier_b_pairs_20rep" / "bda_controlled_real.json"),
     "pairs32": ("Horlbeck", GPT / "tier_b_pairs_b32_20rep" / "calibration_20rep.json",
-                GPT / "tier_b_pairs_b32_20rep" / "waddington_c_20rep.json"),
+                GPT / "tier_b_pairs_b32_20rep" / "waddington_c_20rep.json",
+                GPT / "tier_b_pairs_b32_20rep" / "bda_controlled_real.json"),
     "jurkat128": ("Horlbeck_Jurkat", GPT / "jurkat_b128_20rep" / "llm_reasoning_20rep.json",
-                  GPT / "jurkat_b128_20rep" / "waddington_c_20rep.json"),
+                  GPT / "jurkat_b128_20rep" / "waddington_c_20rep.json",
+                  GPT / "jurkat_b128_20rep" / "bda_20rep.json"),
     "jurkat32": ("Horlbeck_Jurkat", GPT / "jurkat_b32_20rep" / "llm_reasoning_20rep.json",
-                 GPT / "jurkat_b32_20rep" / "waddington_c_20rep.json"),
+                 GPT / "jurkat_b32_20rep" / "waddington_c_20rep.json",
+                 GPT / "jurkat_b32_20rep" / "bda_20rep.json"),
 }
+SEED = 4  # final_system_stats.run_gpt's seed for C vs the LLM branch
 
 
 def _reps(path: Path, ds: str, arm: str) -> list[dict]:
@@ -87,13 +93,13 @@ def _split(reps: list[dict], hits: set, total: int) -> dict:
 def main() -> None:
     out = {}
     for tier, run in SINGLE.items():
-        f = NEW / tier / "llm_reasoning_matched_20rep.json"
+        f = matched_b_run(tier)
         if not f.exists():
             continue
         new, rep = json.loads(f.read_text()), json.loads(run.read_text())
         screens = list(rep)
         mean = lambda reps: float(np.mean([r["hit_ratio_per_round"][-1] for r in reps]))
-        b_new = {s: mean(new[s]["llm_reasoning_matched"]) for s in screens}
+        b_new = {s: mean(new[s][MATCHED_B_ARM]) for s in screens}
         b_old = {s: mean(rep[s]["llm_reasoning"]) for s in screens}
         c = {s: mean(rep[s]["waddington_c"]) for s in screens}
         out[tier] = {
@@ -101,33 +107,37 @@ def main() -> None:
             "means": {"matched_B": float(np.mean(list(b_new.values()))), "reported_B": float(np.mean(list(b_old.values()))),
                       "C": float(np.mean(list(c.values())))},
             "per_screen": {"matched_B": b_new, "reported_B": b_old, "C": c},
-            "C_minus_matched_B": _paired(c, b_new), "C_minus_reported_B": _paired(c, b_old),
-            "matched_B_minus_reported_B": _paired(b_new, b_old),
-            "padding_share": {"matched_B": _padding_share([r for s in screens for r in new[s]["llm_reasoning_matched"]]),
+            "C_minus_matched_B": _paired(c, b_new, seed=SEED), "C_minus_reported_B": _paired(c, b_old, seed=SEED),
+            "matched_B_minus_reported_B": _paired(b_new, b_old, seed=SEED),
+            "padding_share": {"matched_B": _padding_share([r for s in screens for r in new[s][MATCHED_B_ARM]]),
                               "reported_B": _padding_share([r for s in screens for r in rep[s]["llm_reasoning"]])},
-            "n_replicates": {s: len(new[s]["llm_reasoning_matched"]) for s in screens},
+            "padding_share_per_screen": {
+                "matched_B": {s: _padding_share(new[s][MATCHED_B_ARM]) for s in screens},
+                "reported_B": {s: _padding_share(rep[s]["llm_reasoning"]) for s in screens}},
+            "n_replicates": {s: len(new[s][MATCHED_B_ARM]) for s in screens},
         }
         H = _hits(tier)
         out[tier]["source_of_hits"] = {
             name: {k: float(np.mean([_split(reps[s], H[s], len(H[s]))[k] for s in screens]))
                    for k in ("named_picks", "named_hits", "padding_hits")}
-            for name, reps in (("matched_B", {s: new[s]["llm_reasoning_matched"] for s in screens}),
+            for name, reps in (("matched_B", {s: new[s][MATCHED_B_ARM] for s in screens}),
                                ("reported_B", {s: rep[s]["llm_reasoning"] for s in screens}))}
-    for tier, (ds, b_file, c_file) in PAIRS.items():
-        f = NEW / tier / "llm_reasoning_matched_20rep.json"
+    for tier, (ds, b_file, c_file, bda_file) in PAIRS.items():
+        f = matched_b_run(tier)
         if not f.exists():
             continue
-        new = _reps(f, ds, "llm_reasoning_matched")
+        new = _reps(f, ds, MATCHED_B_ARM)
         old, c = _reps(b_file, ds, "llm_reasoning"), _reps(c_file, ds, "waddington_c")
         hits = lambda reps: [r["cumulative_hits"][-1] for r in reps]
-        hn, ho, hc = hits(new), hits(old), hits(c)
+        hn, ho, hc, hb = hits(new), hits(old), hits(c), hits(_reps(bda_file, ds, "bda"))
         out[tier] = {
             "unit": "cumulative hits, " + ds,
-            "means": {"matched_B": float(np.mean(hn)), "reported_B": float(np.mean(ho)), "C": float(np.mean(hc))},
+            "means": {"matched_B": float(np.mean(hn)), "reported_B": float(np.mean(ho)), "C": float(np.mean(hc)),
+                      "BDA": float(np.mean(hb))},
             "sd": {"matched_B": float(np.std(hn, ddof=1)), "reported_B": float(np.std(ho, ddof=1)),
-                   "C": float(np.std(hc, ddof=1))},
+                   "C": float(np.std(hc, ddof=1)), "BDA": float(np.std(hb, ddof=1))},
             "C_minus_matched_B": _welch(hc, hn), "C_minus_reported_B": _welch(hc, ho),
-            "matched_B_minus_reported_B": _welch(hn, ho),
+            "matched_B_minus_reported_B": _welch(hn, ho), "BDA_minus_matched_B": _welch(hb, hn),
             "padding_share": {"matched_B": _padding_share(new), "reported_B": _padding_share(old)},
             "n_replicates": len(new),
             "source_of_hits": {"matched_B": _split(new, _hits(tier)[ds], 1),
@@ -137,7 +147,9 @@ def main() -> None:
     for tier, r in out.items():
         m = r["means"]
         print(f"{tier:10s} matched B {m['matched_B']:.4g}  reported B {m['reported_B']:.4g}  C {m['C']:.4g}")
-        for k in ("C_minus_matched_B", "C_minus_reported_B", "matched_B_minus_reported_B"):
+        for k in ("C_minus_matched_B", "C_minus_reported_B", "matched_B_minus_reported_B", "BDA_minus_matched_B"):
+            if k not in r:
+                continue
             p = r[k]
             tail = f"{p['wins']}/{p['ties']}/{p['losses']}" if "wins" in p else f"p={p['p']:.2g}"
             print(f"    {k:28s} {p['delta']:+.4g} [{p['ci95'][0]:+.4g}, {p['ci95'][1]:+.4g}] {tail}")

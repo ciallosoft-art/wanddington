@@ -34,6 +34,7 @@ from matplotlib.patches import Patch, Rectangle  # noqa: E402
 from matplotlib.ticker import PercentFormatter  # noqa: E402
 
 from . import style as S  # noqa: E402
+from .sources import MATCHED_B_ARM, matched_b_run  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 RES = REPO / "workspace" / "results"
@@ -100,6 +101,13 @@ def paper(*vals, nd: int = 3) -> None:
 
 def load(name: str) -> dict:
     return json.loads((RES / name).read_text())
+
+
+def _matched_b(tier: str) -> dict:
+    """B padded from C's own features (experiment 23), the B of the main tables: screen -> hit ratio per round,
+    mean over the twenty replicates."""
+    runs = json.loads(matched_b_run(tier).read_text())
+    return {s: np.mean([r["hit_ratio_per_round"] for r in runs[s][MATCHED_B_ARM]], axis=0).tolist() for s in SCREENS}
 
 
 def save(fig, key: str) -> None:
@@ -223,9 +231,10 @@ def fig_overview():
     """Explainer section 1: the reported system against the strongest baseline on each of BDA's three tiers."""
     mb = load("matched_baselines.json")
     h, f = mb["headline"]["means"], mb["full_pool"]["means"]
-    pairs = [("Waddington C", 112.6, C["waddington_c"]), (name_b(), 128.2, C["llm_reasoning"]),
+    pb = round(load("matched_b.json")["pairs128"]["means"]["matched_B"], 1)
+    pairs = [("Waddington C", 112.6, C["waddington_c"]), (name_b(), pb, C["llm_reasoning"]),
              ("BDA", 160.0, C["bda"]), ("Random", 60.0, C["random"])]
-    paper(112.6, 128.2, 160.0, 60.0, nd=1)
+    paper(112.6, pb, 160.0, 60.0, nd=1)
     fig, axs = plt.subplots(1, 3, figsize=(6.6, 1.95), gridspec_kw=dict(wspace=0.95))
     for ax, t, m in ((axs[0], L("单扰动・非必需（主档）", "Single gene, non-essential"), h),
                      (axs[1], L("单扰动・全池", "Single gene, full pool"), f)):
@@ -372,7 +381,7 @@ def _main_rows(tier: str):
         "Waddington C": [rep[s]["waddington_c"][-1] for s in SCREENS],
         "Online ML": [mat[s]["online_ml"][-1] for s in SCREENS],
         name_static(): [mat[s]["static_prior"][-1] for s in SCREENS],
-        name_b(): [rep[s]["llm_reasoning"][-1] for s in SCREENS],
+        name_b(): [v[-1] for v in _matched_b(tier).values()],
         "Coreset": [mat[s]["coreset"][-1] for s in SCREENS],
         "Random": [rep[s]["random"][-1] for s in SCREENS],
     }
@@ -396,7 +405,7 @@ def fig_paired():
     """C minus each baseline, paired over the nine screens (paper Table 5's paired block)."""
     rows = [(L("静态先验（0.231）", "Static prior (0.231)"), 0.030, 0.016, 0.044, "8/0/1"),
             (L("Online ML（0.245，即 C 去掉 LLM）", "Online ML = C without LLM (0.245)"), 0.015, 0.004, 0.026, "7/0/2"),
-            (L("B：LLM 补位（0.212）", "Padded LLM, B (0.212)"), 0.049, 0.019, 0.080, "8/0/1"),
+            (L("B：LLM 补位（0.224）", "Padded LLM, B (0.224)"), 0.036, 0.013, 0.063, "8/0/1"),
             (L("Coreset（0.154）", "Coreset (0.154)"), 0.107, 0.060, 0.155, "9/0/0")]
     for r in rows:
         paper(*r[1:4])
@@ -684,12 +693,12 @@ def fig_robustness():
 
 def fig_tiers():
     """Every method on the two single-gene tiers."""
-    mb = load("matched_baselines.json")
+    mb, mbb = load("matched_baselines.json"), load("matched_b.json")
     h, f = mb["headline"]["means"], mb["full_pool"]["means"]
     paper(0.146, 0.166, 0.171, 0.170)
     items = [("Waddington C", h["C"], f["C"]), ("Online ML", h["matched_online_ml"], f["matched_online_ml"]),
              (name_static(), h["matched_static_prior"], f["matched_static_prior"]),
-             (name_b(), h["benchmark_llm_reasoning"], f["benchmark_llm_reasoning"]),
+             (name_b(), mbb["headline"]["means"]["matched_B"], mbb["full_pool"]["means"]["matched_B"]),
              ("GeneDisco", 0.171, 0.170), ("BDA", 0.146, 0.166), ("Coreset", h["matched_coreset"], f["matched_coreset"]),
              ("Random", h["benchmark_random"], f["benchmark_random"])]
     fig, ax = plt.subplots(figsize=(6.6, 2.7))
@@ -715,10 +724,11 @@ def fig_tiers():
 
 def fig_pairs():
     """The two-gene tier at 640 picks (paper Tables 11-12, 21 and the pair text)."""
+    pb = load("matched_b.json")["pairs128"]
     rows = [("Random", 60.0, 7.3, C["random"]), (name_static(), 40, None, C["static_ranker"]),
             ("Coreset", 77, None, C["coreset"]), ("Online ML", 83, None, C["online_adaptive"]),
             (L("Waddington C（报告配置）", "Waddington C (reported)"), 112.6, 24.7, C["waddington_c"]),
-            (name_b(), 128.2, 22.1, C["llm_reasoning"]),
+            (name_b(), round(pb["means"]["matched_B"], 1), round(pb["sd"]["matched_B"], 1), C["llm_reasoning"]),
             (L("C + 随机森林引擎（仅 K562）", "C with random-forest engine"), 157.5, 25.5, LIGHT_BLUE),
             (L("BDA（GPT-5.6 Luna）", "BDA (our run, GPT-5.6 Luna)"), 160.0, 15.7, C["bda"]),
             ("", None, None, S.SURFACE),
@@ -793,20 +803,21 @@ def fig_jurkat():
 
 
 def fig_benchmark_config():
-    """Paper appendix: the three ML baselines in the original benchmark configuration (nine features with the
+    """Paper appendix: the baselines in the original benchmark configuration (nine features with the
     anchor-relative ones, no DepMap) against the versions in C's own features, per screen (repo
-    matched_baselines.json)."""
+    matched_baselines.json; B, whose padding is the part that changes, matched_b.json)."""
     mb = load("matched_baselines.json")["headline"]
     rep, mat = mb["reported"], mb["matched"]
     arms = [("Static prior", "static_ranker", "static_prior"), ("Online ML", "online_adaptive", "online_ml"),
             ("Coreset", "coreset", "coreset")]
+    panels = [(name, [rep[s][ok][-1] for s in SCREENS], [mat[s][mk][-1] for s in SCREENS]) for name, ok, mk in arms]
+    pb = load("matched_b.json")["headline"]["per_screen"]
+    panels.append(("Padded LLM (B)", [pb["reported_B"][s] for s in SCREENS], [pb["matched_B"][s] for s in SCREENS]))
     labels = SCREEN_LABEL + ["Mean"]
-    fig, axs = plt.subplots(1, 3, figsize=(6.6, 3.0), sharey=True, gridspec_kw=dict(wspace=0.12))
+    fig, axs = plt.subplots(1, 4, figsize=(6.6, 3.0), sharey=True, gridspec_kw=dict(wspace=0.12))
     yy = np.arange(len(labels))[::-1]
     yy = np.where(yy == 0, -0.4, yy)               # a little air above the mean row
-    for ax, (name, orig_key, mat_key) in zip(axs, arms):
-        o = [rep[s][orig_key][-1] for s in SCREENS]
-        m = [mat[s][mat_key][-1] for s in SCREENS]
+    for ax, (name, o, m) in zip(axs, panels):
         o.append(float(np.mean(o)))
         m.append(float(np.mean(m)))
         for yi, a, b in zip(yy, o, m):
@@ -821,8 +832,8 @@ def fig_benchmark_config():
         title(ax, f"{name}\n{o[-1]:.3f} → {m[-1]:.3f}")
     axs[0].set_yticks(yy, labels)
     axs[0].get_yticklabels()[-1].set_fontweight("bold")
-    legend(axs[2], [dot_handle(S.MUTED, "original configuration"), dot_handle(BLUE, "C's own features (matched)")],
-           loc="upper center", bbox_to_anchor=(-0.6, -0.2), ncol=2)
+    legend(axs[1], [dot_handle(S.MUTED, "original configuration"), dot_handle(BLUE, "C's own features (matched)")],
+           loc="upper center", bbox_to_anchor=(1.06, -0.2), ncol=2)
     save(fig, "benchmark_config")
 
 
@@ -834,18 +845,18 @@ def fig_benchmark_config():
 TIERS = ("headline", "full_pool", "pairs")
 TIER_ZH = {"headline": "主档", "full_pool": "全池档", "pairs": "双扰动档"}
 GPT = RES / "gpt"
-PAIR_RUNS = {   # map -> (dataset, matched-baseline key, {method: (run file under gpt/, arm)})
+PAIR_RUNS = {   # map -> (dataset, matched-baseline key, {method: (run file under gpt/, arm)}); B padded from C's features
     "K562": ("Horlbeck", "pairs", {"Random": ("tier_b_pairs_20rep/calibration_20rep.json", "random"),
-                                   "B": ("tier_b_pairs_20rep/calibration_20rep.json", "llm_reasoning"),
+                                   "B": ("matched_b/pairs128/llm_reasoning_matched_20rep.json", MATCHED_B_ARM),
                                    "C": ("tier_b_pairs_20rep/waddington_c_20rep.json", "waddington_c"),
                                    "BDA": ("tier_b_pairs_20rep/bda_controlled_real.json", "bda")}),
     "Jurkat": ("Horlbeck_Jurkat", "jurkat_b128", {"Random": ("jurkat_b128_20rep/random_20rep.json", "random"),
-                                                  "B": ("jurkat_b128_20rep/llm_reasoning_20rep.json", "llm_reasoning"),
+                                                  "B": ("matched_b/jurkat128/llm_reasoning_matched_20rep.json", MATCHED_B_ARM),
                                                   "C": ("jurkat_b128_20rep/waddington_c_20rep.json", "waddington_c"),
                                                   "BDA": ("jurkat_b128_20rep/bda_20rep.json", "bda")}),
     # K562 at BDA's own protocol (32 pairs per round, 160 picks; paper Table pairs-bda)
     "K562_b32": ("Horlbeck", "pairs_b32", {"Random": ("tier_b_pairs_b32_20rep/calibration_20rep.json", "random"),
-                                           "B": ("tier_b_pairs_b32_20rep/calibration_20rep.json", "llm_reasoning"),
+                                           "B": ("matched_b/pairs32/llm_reasoning_matched_20rep.json", MATCHED_B_ARM),
                                            "C": ("tier_b_pairs_b32_20rep/waddington_c_20rep.json", "waddington_c"),
                                            "BDA": ("tier_b_pairs_b32_20rep/bda_controlled_real.json", "bda")}),
 }
@@ -871,13 +882,14 @@ def _gd_curves(folder: Path, arm: str = "gdfb_achilles_bnn_coreset") -> dict:
 
 
 def _single_tier(tier: str) -> dict:
-    """Single-gene tier: method -> screen -> hit ratio per round (C, B, Random: replicate means)."""
+    """Single-gene tier: method -> screen -> hit ratio per round (C, B, Random: replicate means; B padded from C's
+    features)."""
     mb = load("matched_baselines.json")[tier]
     rep, mat = mb["reported"], mb["matched"]
     m = {"Waddington C": {s: rep[s]["waddington_c"] for s in SCREENS},
          "Online ML": {s: mat[s]["online_ml"] for s in SCREENS},
          name_static(): {s: mat[s]["static_prior"] for s in SCREENS},
-         name_b(): {s: rep[s]["llm_reasoning"] for s in SCREENS},
+         name_b(): _matched_b(tier),
          "Coreset": {s: mat[s]["coreset"] for s in SCREENS},
          "Random": {s: rep[s]["random"] for s in SCREENS}}
     if tier == "headline":
@@ -1047,15 +1059,16 @@ def fig_tier_paired(tier: str):
         cfin = {s: m["Waddington C"][s][-1] for s in SCREENS}
         if tier == "headline":      # the paper's paired block (Table 5), as printed there
             given = {name_static(): (0.030, 0.016, 0.044, "8/0/1"), "Online ML": (0.015, 0.004, 0.026, "7/0/2"),
-                     name_b(): (0.049, 0.019, 0.080, "8/0/1"), "Coreset": (0.107, 0.060, 0.155, "9/0/0")}
+                     name_b(): (0.036, 0.013, 0.063, "8/0/1"), "Coreset": (0.107, 0.060, 0.155, "9/0/0")}
             for v in given.values():
                 paper(*v[:3])
         else:
             pc = load("matched_baselines.json")["full_pool"]["paired_C_vs"]
-            src = {name_static(): "matched_static_prior", "Online ML": "matched_online_ml",
-                   name_b(): "benchmark_llm_reasoning", "Coreset": "matched_coreset"}
+            src = {name_static(): "matched_static_prior", "Online ML": "matched_online_ml", "Coreset": "matched_coreset"}
             given = {n: (pc[k]["delta"], *pc[k]["ci95"], f"{pc[k]['wins']}/{pc[k]['ties']}/{pc[k]['losses']}")
                      for n, k in src.items()}
+            cb = load("matched_b.json")["full_pool"]["C_minus_matched_B"]
+            given[name_b()] = (cb["delta"], *cb["ci95"], f"{cb['wins']}/{cb['ties']}/{cb['losses']}")
         bda = _paired(cfin, {s: m["BDA"][s][-1] for s in SCREENS})
         given["BDA"] = (bda["delta"], *bda["ci95"], f"{bda['wins']}/{bda['ties']}/{bda['losses']}")
         means = {n: np.mean([m[n][s][-1] for s in SCREENS]) for n in names}

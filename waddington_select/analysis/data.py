@@ -20,6 +20,7 @@ GENEDISCO_ARM = "gdfb_achilles_bnn_coreset"
 # The reported run of all six main-table arms (figures 1-3; analysis/sources.py); the legacy
 # three_arm.json waddington_c stays the reference for the component-ablation figure.
 from .sources import REPORTED_RUN as FINAL_WADD  # noqa: E402
+from .sources import MATCHED_B_ARM, matched_b_run  # noqa: E402
 GPT_RESULTS = REPO_ROOT / "workspace" / "results" / "gpt"
 # The three ML baselines in C's own feature configuration (analysis/matched_baselines.py), which the main
 # table and figures 1-3 report in place of the benchmark-configuration runs.
@@ -75,7 +76,7 @@ def load_methods(final: bool = False) -> pd.DataFrame:
     final=True swaps every arm present in the 20-seed run (FINAL_WADD) for the principal figures, so the
     figures match the 20-seed main table; arms absent from that file fall back to their 5-seed runs. It also
     swaps the three ML baselines for their versions in C's feature configuration (MATCHED, deterministic: one
-    run per screen).
+    run per screen), and B for its version padded from C's features (experiment 23, twenty replicates).
     """
     frames = []
     for path in sorted({f for f in METHOD_FILES.values()}):
@@ -102,6 +103,9 @@ def load_methods(final: bool = False) -> pd.DataFrame:
                 for d, m in matched.items() for arm, key in MATCHED_ARMS.items()
                 for i, hr in enumerate(m[key])]
         result = pd.concat([result[~result["arm"].isin(MATCHED_ARMS)], pd.DataFrame(rows)], ignore_index=True)
+    if final and matched_b_run("headline").exists():
+        b = _runs(matched_b_run("headline")).replace({"arm": {MATCHED_B_ARM: "llm_reasoning"}})
+        result = pd.concat([result[result["arm"] != "llm_reasoning"], b], ignore_index=True)
     return result
 
 

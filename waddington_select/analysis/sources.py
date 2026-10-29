@@ -26,6 +26,16 @@ REPORTED_RUN = REPORTED_RUN_DIR / "main_table_20rep.json"
 REPORTED_RUN_5REP = GPT / "replogle_transcriptomics_v2" / "main_table_5rep.json"
 # BDA's easier tier (full pool, essentials restored), same protocol and corrected prompts (experiment 08)
 REPORTED_TIER_A_RUN = GPT / "tier_a_full_pool_v2_20rep" / "main_table_20rep.json"
+# the padded LLM baseline B with its padding ranker on the C-arm's own features (experiment 23): the B of the
+# main tables on every tier. Settings: headline, full_pool, pairs128, pairs32, jurkat128, jurkat32. The B arm
+# inside the runs above (llm_reasoning) pads from the original benchmark features and is the appendix's B.
+MATCHED_B_DIR = GPT / "matched_b"
+MATCHED_B_ARM = "llm_reasoning_matched"
+
+
+def matched_b_run(setting: str) -> Path:
+    return MATCHED_B_DIR / setting / f"{MATCHED_B_ARM}_20rep.json"
+
 
 # before the prompt correction (kept, cited as such)
 FIRST_GPT_RUN_DIR = GPT / "gpt_5_6_luna_none_20rep"
