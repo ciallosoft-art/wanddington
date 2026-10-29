@@ -50,7 +50,7 @@ BDA_DIR = Path(os.environ.get("WADDINGTON_BDA_REPO",
 from waddington_select.oracle import BATCH_SIZES, DatasetOracle  # noqa: E402
 from waddington_select.tables import TRAINING_DATA_CSV as TRAINING_CSV  # noqa: E402
 from waddington_select.tables import TRAINING_DATA_V3 as TRAINING_V3  # noqa: E402
-from waddington_select.arms.llm_reasoning_arm import HARDCODED_TASKS  # noqa: E402
+from waddington_select.arms.llm_reasoning_arm import _load_task  # noqa: E402
 
 # our dataset name -> BDA's file stem
 class QuotaExhausted(RuntimeError):
@@ -90,17 +90,35 @@ def ensure_derived_benchmark(dataset: str) -> None:
             print(f"    [benchmark] copied {src.name} into BDA's datasets/")
 
 
+# Screens BDA ships no task prompt for: we write the one our own LLM arms read (llm_reasoning_arm._load_task),
+# so BDA and Waddington see identical text. Until 2026-10-29 this file was written once and never refreshed, so
+# the BDA runs of 2026-08-30 (headline) and 2026-09-11 (full pool) read the two Replogle prompts from before the
+# 2026-09-18 correction (fitness / survival wording; docs/fix_impact_map.md). Now the file always follows
+# _load_task, legacy switch included (WADDINGTON_LEGACY_TASK_PROMPTS=1 restores the old text).
+OUR_TASK_PROMPTS = {"Replogle_K562_essential", "Replogle_K562_gwps"}
+
+
 def ensure_task_prompt(dataset: str) -> None:
     """BDA ships no task prompt for the two Replogle screens; write ours so both see identical text."""
     stem = BDA_NAME[dataset]
     path = BDA_DIR / "datasets" / "task_prompts" / f"{stem}.json"
-    if path.exists():
+    if dataset not in OUR_TASK_PROMPTS:
+        if not path.exists():
+            raise SystemExit(f"BDA ships no task prompt for {dataset}")
         return
-    task = HARDCODED_TASKS.get(dataset)
-    if task is None:
-        raise SystemExit(f"no task prompt for {dataset} in BDA or in our HARDCODED_TASKS")
-    path.write_text(json.dumps({"Task": task["Task"], "Measurement": task["Measurement"]}, indent=2))
-    print(f"    [task prompt] wrote {path.name} from our HARDCODED_TASKS")
+    task = _load_task(dataset)
+    text = json.dumps({"Task": task["Task"], "Measurement": task["Measurement"]}, indent=2)
+    if path.exists() and path.read_text() == text:
+        return
+    if path.exists():                       # keep what it replaces, once per distinct content
+        import hashlib
+        old = path.read_text()
+        bak = path.with_name(f"{stem}.replaced_{hashlib.sha256(old.encode()).hexdigest()[:8]}.json")
+        if not bak.exists():
+            bak.write_text(old)
+        print(f"    [task prompt] {path.name} differed from ours; old text kept as {bak.name}")
+    path.write_text(text)
+    print(f"    [task prompt] wrote {path.name} from llm_reasoning_arm._load_task")
 
 
 def horlbeck_pool(stem: str = "Horlbeck") -> str:
@@ -257,6 +275,8 @@ def write_manifest(out_path: Path, args, datasets: list[str]) -> None:
             "llm_model": args.model,
             "scored_by": "waddington_select.oracle.DatasetOracle",
             "batch_sizes": {ds: BATCH_SIZES[ds] for ds in datasets if ds in BATCH_SIZES},
+            "task_prompts": {ds: json.loads((BDA_DIR / "datasets" / "task_prompts" / f"{BDA_NAME[ds]}.json").read_text())
+                             for ds in datasets if ds in OUR_TASK_PROMPTS},
         },
         "scientific_inputs": {
             "training_csv": str(TRAINING_CSV),
