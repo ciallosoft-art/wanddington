@@ -12,8 +12,8 @@ features C's ML branch reads (waddington_c_arm._get_feature_config, anchors drop
   matched online ML      C's ML engine over five rounds with retraining, no LLM (= the "no LLM" ablation)
   matched Coreset        greedy k-center over C's features instead of the nine benchmark ones
 
-The padded LLM baseline (B) is not re-run: its padding ranker keeps the benchmark configuration (stated in the
-paper). Reported C (twenty replicates) and the original benchmark-configuration baselines are read from the
+The padded LLM baseline (B) is re-run separately, with its padding on the same features (experiment 23,
+analysis/matched_b.py); the B read here is the original-configuration one. Reported C (twenty replicates) and the original benchmark-configuration baselines are read from the
 reported runs for each tier, and C is paired against both versions of each baseline.
 
 Run:  python -m waddington_select.analysis.matched_baselines     -> workspace/results/matched_baselines.json
@@ -55,8 +55,19 @@ TIERS = {
                                  ("deterministic_1rep.json", "random_20rep.json", "llm_reasoning_20rep.json",
                                   "waddington_c_20rep.json")]}
        for b in (128, 32)},
+    # Jurkat from the table without the eight pair_* interaction columns, K562's reported pair encoding
+    # (experiment 24, analysis/jurkat_no_interaction.py); random is the same run as above
+    **{f"jurkat_mean_b{b}": {"env": {"WADDINGTON_TRAINING_CSV": str(EVAL / "lgbm_training_data_horlbeck_jurkat_pairs_mean.csv"),
+                                     "WADDINGTON_TRAINING_CSV_V3": str(EVAL / "lgbm_training_data_horlbeck_jurkat_pairs_mean_v3.csv"),
+                                     "WADDINGTON_PAIR_DATASETS": "Horlbeck_Jurkat",
+                                     "WADDINGTON_EXTRA_DATASETS": f"Horlbeck_Jurkat:{b}"},
+                             "runs": [GPT / f"jurkat_mean_b{b}_20rep" / "deterministic_1rep.json",
+                                      GPT / f"jurkat_b{b}_20rep" / "random_20rep.json",
+                                      GPT / f"jurkat_mean_b{b}_20rep" / "waddington_c_20rep.json"]}
+       for b in (128, 32)},
 }
-PAIR_TIERS = {"pairs": "Horlbeck", "pairs_b32": "Horlbeck", "jurkat_b128": "Horlbeck_Jurkat", "jurkat_b32": "Horlbeck_Jurkat"}
+PAIR_TIERS = {"pairs": "Horlbeck", "pairs_b32": "Horlbeck", "jurkat_b128": "Horlbeck_Jurkat", "jurkat_b32": "Horlbeck_Jurkat",
+              "jurkat_mean_b128": "Horlbeck_Jurkat", "jurkat_mean_b32": "Horlbeck_Jurkat"}
 ARMS = ("static_ranker", "online_adaptive", "coreset", "llm_reasoning", "waddington_c", "random")
 
 
