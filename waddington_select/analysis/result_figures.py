@@ -777,8 +777,9 @@ def fig_jurkat():
     names = ["Random", L("Waddington C（报告配置）", "Waddington C (reported)"), "BDA",
              L("交互先验单独", "interaction prior alone"), L("修复：不用 LLM", "repair without its LLM"),
              L("修复：LLM 名字优先", "repair, LLM names first"), L("修复：LLM 作 0.2 验证者", "repair, LLM as 0.2 verifier")]
-    b640 = {"K562": [60.0, 112.6, 160.0, 196, 239, 220.9, 232.6], "Jurkat": [63.5, 104.0, 109.2, 96, 88, 123.5, 110.8]}
-    b160 = {"K562": [16.3, 31.9, 55.9, 65, 72, 68.5, 76.2], "Jurkat": [15.6, 28.4, 33.8, 30, 22, 31.9, 29.2]}
+    # C in K562's reported pair encoding on both maps (Jurkat: experiment 24, no interaction features)
+    b640 = {"K562": [60.0, 112.6, 160.0, 196, 239, 220.9, 232.6], "Jurkat": [63.5, 94.0, 109.2, 96, 88, 123.5, 110.8]}
+    b160 = {"K562": [16.3, 31.9, 55.9, 65, 72, 68.5, 76.2], "Jurkat": [15.6, 24.1, 33.8, 30, 22, 31.9, 29.2]}
     for d in (b640, b160):
         paper(*d["K562"], *d["Jurkat"], nd=1)
     fig, axs = plt.subplots(1, 2, figsize=(6.6, 2.9), gridspec_kw=dict(wspace=0.12))
@@ -850,9 +851,11 @@ PAIR_RUNS = {   # map -> (dataset, matched-baseline key, {method: (run file unde
                                    "B": ("matched_b/pairs128/llm_reasoning_matched_20rep.json", MATCHED_B_ARM),
                                    "C": ("tier_b_pairs_20rep/waddington_c_20rep.json", "waddington_c"),
                                    "BDA": ("tier_b_pairs_20rep/bda_controlled_real.json", "bda")}),
-    "Jurkat": ("Horlbeck_Jurkat", "jurkat_b128", {"Random": ("jurkat_b128_20rep/random_20rep.json", "random"),
+    # Jurkat in K562's reported pair encoding: C and the matched baselines without the interaction features
+    # (experiment 24); B's padding ranks the same on both tables, Random and BDA read no features
+    "Jurkat": ("Horlbeck_Jurkat", "jurkat_mean_b128", {"Random": ("jurkat_b128_20rep/random_20rep.json", "random"),
                                                   "B": ("matched_b/jurkat128/llm_reasoning_matched_20rep.json", MATCHED_B_ARM),
-                                                  "C": ("jurkat_b128_20rep/waddington_c_20rep.json", "waddington_c"),
+                                                  "C": ("jurkat_mean_b128_20rep/waddington_c_20rep.json", "waddington_c"),
                                                   "BDA": ("jurkat_b128_20rep/bda_20rep.json", "bda")}),
     # K562 at BDA's own protocol (32 pairs per round, 160 picks; paper Table pairs-bda)
     "K562_b32": ("Horlbeck", "pairs_b32", {"Random": ("tier_b_pairs_b32_20rep/calibration_20rep.json", "random"),
