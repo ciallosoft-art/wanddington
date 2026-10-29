@@ -41,7 +41,8 @@ GENEDISCO_FILES = {
     "pairs": GPT / "tier_b_pairs_20rep" / "genedisco_3rep.json",
 }
 # BioDiscoveryAgent, run on our benchmark with our oracle (see workspace/results/bda_controlled/).
-BDA_FILE = REPO_ROOT / "workspace" / "results" / "bda_controlled" / "bda_gpt.json"
+# The two Replogle screens re-run under the corrected task prompts (experiment 25, analysis/bda_replogle_v2.py).
+BDA_FILE = REPO_ROOT / "workspace" / "results" / "bda_controlled" / "bda_gpt_v2.json"
 ARMS = ["random", "coreset", "static_ranker", "online_adaptive", "llm_reasoning", "waddington_c"]
 ARM_LABEL = {
     "random": "Random",

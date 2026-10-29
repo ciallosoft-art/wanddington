@@ -6,7 +6,8 @@ ties in a label-free order) sit at or above BDA's 0.146 on the headline tier. Th
 asymmetry in our favour (Method, Relationship to BioDiscoveryAgent): our arms, and these rankings, choose
 from the non-essential pool, while BDA's agent proposes from the whole genome and every core-essential (or
 out-of-pool) name it gives is a wasted slot. So each ranking is scored two ways, paired by screen against
-BDA's GPT-5.6 Luna run (bda_controlled/bda_gpt.json, one run per screen):
+BDA's GPT-5.6 Luna run (sources.BDA_HEADLINE_RUN: bda_controlled/bda_gpt.json with the two Replogle screens
+re-run under the corrected task prompts, one run per screen):
 
   ne_pool     candidates = the non-essential pool (as the paper's rankings, and our arms)
   full_pool   candidates = the full pool (core-essential genes restored, tables.tier_tables("full_pool")),
@@ -36,7 +37,7 @@ from .final_system_stats import _paired
 
 REPO = Path(__file__).resolve().parents[2]
 NE_V3 = REPO / "workspace" / "evaluation" / "lgbm_training_data_v3.csv"   # as ml_engines.label_free_baselines
-BDA = REPO / "workspace" / "results" / "bda_controlled" / "bda_gpt.json"
+from .sources import BDA_HEADLINE_RUN as BDA  # noqa: E402
 OUT = REPO / "workspace" / "results" / "label_free_vs_bda.json"
 FEATURES = ["hub_score_norm", "ppi_score_sum", "string_degree_norm", "depmap_frac_ess"]
 

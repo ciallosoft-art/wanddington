@@ -287,7 +287,8 @@ def full_pool_per_screen() -> dict:
     cols = {"random": main["random"], "coreset": main["coreset"], "static_ranker": main["static_ranker"],
             "online_ml": main["online_adaptive"], "padded_llm": main["llm_reasoning"], "waddington_c": main["waddington_c"]}
     gd = _arms(ENG / "port" / "tier_a_gdfb_coreset_seeded.json").get("gdfb_achilles_bnn_coreset")
-    bda = _arms(RES / "gpt" / "tier_a_full_pool_20rep" / "bda_controlled.json").get("bda")
+    from .sources import BDA_FULL_POOL_RUN
+    bda = _arms(BDA_FULL_POOL_RUN).get("bda")
     if gd:
         cols["genedisco"] = gd
     if bda:

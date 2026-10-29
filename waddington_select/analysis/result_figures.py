@@ -34,7 +34,7 @@ from matplotlib.patches import Patch, Rectangle  # noqa: E402
 from matplotlib.ticker import PercentFormatter  # noqa: E402
 
 from . import style as S  # noqa: E402
-from .sources import MATCHED_B_ARM, matched_b_run  # noqa: E402
+from .sources import BDA_FULL_POOL_RUN, BDA_HEADLINE_RUN, MATCHED_B_ARM, matched_b_run  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 RES = REPO / "workspace" / "results"
@@ -695,11 +695,11 @@ def fig_tiers():
     """Every method on the two single-gene tiers."""
     mb, mbb = load("matched_baselines.json"), load("matched_b.json")
     h, f = mb["headline"]["means"], mb["full_pool"]["means"]
-    paper(0.146, 0.166, 0.171, 0.170)
+    paper(0.152, 0.171, 0.170)
     items = [("Waddington C", h["C"], f["C"]), ("Online ML", h["matched_online_ml"], f["matched_online_ml"]),
              (name_static(), h["matched_static_prior"], f["matched_static_prior"]),
              (name_b(), mbb["headline"]["means"]["matched_B"], mbb["full_pool"]["means"]["matched_B"]),
-             ("GeneDisco", 0.171, 0.170), ("BDA", 0.146, 0.166), ("Coreset", h["matched_coreset"], f["matched_coreset"]),
+             ("GeneDisco", 0.171, 0.170), ("BDA", 0.152, 0.152), ("Coreset", h["matched_coreset"], f["matched_coreset"]),
              ("Random", h["benchmark_random"], f["benchmark_random"])]
     fig, ax = plt.subplots(figsize=(6.6, 2.7))
     yy = np.arange(len(items))[::-1]
@@ -717,8 +717,8 @@ def fig_tiers():
     legend(ax, [Line2D([], [], marker="o", ls="", ms=7, color=BLUE, label=L("非必需（主档）", "non-essential (headline)")),
                 Line2D([], [], marker="s", ls="", ms=7, color=PURPLE, label=L("全池", "full pool"))], loc="upper left")
     title(ax, L("两个单扰动档：排序基本不变", "The two single-gene tiers: the ordering barely moves"),
-          L("只有 BDA 在全池档明显上升（必需基因正是 LLM 容易点名的）",
-            "only BDA rises clearly on the full pool"))
+          L("每个方法在两档之间的变化都不超过 0.01",
+            "no method moves by more than 0.01 between the tiers"))
     save(fig, "tiers")
 
 
@@ -896,11 +896,11 @@ def _single_tier(tier: str) -> dict:
          "Coreset": {s: mat[s]["coreset"] for s in SCREENS},
          "Random": {s: rep[s]["random"] for s in SCREENS}}
     if tier == "headline":
-        bda = load("bda_controlled/bda_gpt.json")["results"]
+        bda = json.loads(BDA_HEADLINE_RUN.read_text())["results"]
         m["BDA"] = {s: bda[s]["hit_ratio_per_round"] for s in SCREENS}
         m["GeneDisco"] = _gd_curves(RES / "ml_engines")
     else:
-        bda = json.loads((GPT / "tier_a_full_pool_20rep" / "bda_controlled.json").read_text())
+        bda = json.loads(BDA_FULL_POOL_RUN.read_text())
         m["BDA"] = {s: bda[s]["bda"][0]["hit_ratio_per_round"] for s in SCREENS}
         m["GeneDisco"] = _gd_curves(RES / "ml_engines" / "tier_a")
     return m
@@ -1486,9 +1486,9 @@ TIER_FIGS = (fig_tier_overall, fig_tier_screens, fig_tier_curves, fig_tier_paire
 
 # BDA and GeneDisco per screen: paper Table 4 (headline) and Table 22 (full pool)
 GD_H = [0.104, 0.168, 0.071, 0.088, 0.052, 0.433, 0.043, 0.352, 0.228]
-BDA_H = [0.110, 0.133, 0.038, 0.073, 0.050, 0.327, 0.131, 0.254, 0.199]
+BDA_H = [0.110, 0.133, 0.038, 0.073, 0.050, 0.327, 0.131, 0.365, 0.137]   # Replogle pair: corrected prompts
 GD_F = [0.098, 0.174, 0.058, 0.071, 0.061, 0.449, 0.042, 0.352, 0.228]
-BDA_F = [0.098, 0.099, 0.039, 0.097, 0.042, 0.358, 0.121, 0.492, 0.147]
+BDA_F = [0.098, 0.099, 0.039, 0.097, 0.042, 0.358, 0.121, 0.349, 0.160]   # Replogle pair: corrected prompts
 
 
 def main() -> None:

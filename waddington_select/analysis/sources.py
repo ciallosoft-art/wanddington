@@ -37,6 +37,14 @@ def matched_b_run(setting: str) -> Path:
     return MATCHED_B_DIR / setting / f"{MATCHED_B_ARM}_20rep.json"
 
 
+# BioDiscoveryAgent's controlled runs on the two single-gene tiers (one run per screen), with the two Replogle
+# screens re-run under the corrected task prompts (experiment 25, analysis/bda_replogle_v2.py). The originals,
+# bda_controlled/bda_gpt.json (2026-08-30) and tier_a_full_pool_20rep/bda_controlled.json (09-11), read the
+# fitness / survival wording on those two screens.
+BDA_HEADLINE_RUN = REPO / "workspace" / "results" / "bda_controlled" / "bda_gpt_v2.json"
+BDA_FULL_POOL_RUN = GPT / "tier_a_full_pool_20rep" / "bda_controlled_v2.json"
+
+
 # before the prompt correction (kept, cited as such)
 FIRST_GPT_RUN_DIR = GPT / "gpt_5_6_luna_none_20rep"
 LEGACY_GPT_ABLATIONS = FIRST_GPT_RUN_DIR / "ablations_20rep.json"  # legacy-consistent routed C + ablations

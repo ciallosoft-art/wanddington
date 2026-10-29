@@ -159,7 +159,7 @@ def load_external() -> pd.DataFrame:
     Both carry the caveats spelled out in the external-comparison tables; they are shown in neutral grey.
     """
     rows = []
-    bda_p = REPO_ROOT / "workspace" / "results" / "bda_controlled" / "bda_gpt.json"
+    from .sources import BDA_HEADLINE_RUN as bda_p   # Replogle screens with the corrected prompts
     if bda_p.exists():
         for ds, v in json.loads(bda_p.read_text()).get("results", {}).items():
             prr = v.get("hit_ratio_per_round") or [v["hit_at_r5"]]
